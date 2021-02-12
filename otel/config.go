@@ -24,17 +24,11 @@ import (
 const (
 	serviceNameKey = "SIGNALFX_SERVICE_NAME"
 	endpointURLKey = "SIGNALFX_ENDPOINT_URL"
-	accessTokenKey = "SIGNALFX_ACCESS_TOKEN"
 	// TODO: support these
+	// accessTokenKey = "SIGNALFX_ACCESS_TOKEN"
 	// spanTagsKey               = "SIGNALFX_SPAN_TAGS"
 	// recordedValueMaxLengthKey = "SIGNALFX_RECORDED_VALUE_MAX_LENGTH"
 )
-
-var defaults = map[string]string{
-	serviceNameKey: "unnamed-go-service",
-	endpointURLKey: "http://localhost:9080/v1/trace",
-	accessTokenKey: "",
-}
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
@@ -48,7 +42,6 @@ func newConfig(opts ...Option) (*config, error) {
 	c := &config{
 		ServiceName: envOr(serviceNameKey, "unnamed-go-service"),
 		Endpoint:    envOr(endpointURLKey, "http://localhost:9080/v1/trace"),
-		AccessToken: os.Getenv(accessTokenKey),
 	}
 
 	for _, o := range opts {
