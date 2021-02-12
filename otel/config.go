@@ -14,6 +14,80 @@
 
 package otel
 
-type config struct{}
+import (
+	"fmt"
+	"net/url"
+	"os"
+)
+
+// Environment variable keys that set values of the configuration.
+const (
+	serviceNameKey = "SIGNALFX_SERVICE_NAME"
+	endpointURLKey = "SIGNALFX_ENDPOINT_URL"
+	accessTokenKey = "SIGNALFX_ACCESS_TOKEN"
+	// TODO: support these
+	// spanTagsKey               = "SIGNALFX_SPAN_TAGS"
+	// recordedValueMaxLengthKey = "SIGNALFX_RECORDED_VALUE_MAX_LENGTH"
+)
+
+var defaults = map[string]string{
+	serviceNameKey: "unnamed-go-service",
+	endpointURLKey: "http://localhost:9080/v1/trace",
+	accessTokenKey: "",
+}
+
+// config is the configuration used to create and operate an SDK.
+type config struct {
+	ServiceName string
+	AccessToken string
+	Endpoint    string
+}
+
+// newConfig returns a validated config with Splunk defaults.
+func newConfig(opts ...Option) (*config, error) {
+	c := &config{
+		ServiceName: envOr(serviceNameKey, "unnamed-go-service"),
+		Endpoint:    envOr(endpointURLKey, "http://localhost:9080/v1/trace"),
+		AccessToken: os.Getenv(accessTokenKey),
+	}
+
+	for _, o := range opts {
+		o(c)
+	}
+
+	if err := c.Validate(); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+// Validate ensures c is valid, otherwise returning an appropriate error.
+func (c config) Validate() error {
+	var errs []string
+
+	if c.ServiceName == "" {
+		errs = append(errs, "empty service name")
+	}
+
+	if _, err := url.Parse(c.Endpoint); err != nil {
+		errs = append(errs, "invalid endpoint: %s", err.Error())
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("invalid config: %v", errs)
+	}
+
+	return nil
+}
+
+// envOr returns the environment variable value associated with key if it
+// exists, otherwise it returns alt.
+func envOr(key, alt string) string {
+	v, ok := os.LookupEnv(key)
+	if ok {
+		return v
+	}
+	return alt
+}
 
 type Option func(*config)

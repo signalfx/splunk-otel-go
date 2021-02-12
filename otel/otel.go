@@ -24,15 +24,60 @@ https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-smart-agent.html
 
 package otel
 
+import (
+	"context"
+	"log"
+
+	"go.opentelemetry.io/contrib/propagators/b3"
+	global "go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/sdk/trace"
+)
+
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
-type SDK struct{}
+type SDK struct {
+	config config
+
+	shutdownFunc func(context.Context) error
+}
+
+func (s SDK) Shutdown(ctx context.Context) error {
+	return s.shutdownFunc(ctx)
+}
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
 func Run(opts ...Option) SDK {
-	conf := new(config)
-	for _, o := range opts {
-		o(conf)
+	c, err := newConfig(opts...)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return SDK{}
+	exp, err := jaeger.NewRawExporter(
+		jaeger.WithCollectorEndpoint(c.Endpoint),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	traceProvider := trace.NewTracerProvider(
+		trace.WithConfig(trace.Config{
+			DefaultSampler: trace.AlwaysSample(),
+		}),
+		// TODO: configure batching policy with configured values.
+		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
+	)
+	global.SetTracerProvider(traceProvider)
+
+	// TODO: add and honor option to set additional propagators.
+	global.SetTextMapPropagator(b3.B3{})
+
+	return SDK{
+		config: *c,
+		shutdownFunc: func(ctx context.Context) error {
+			if err := traceProvider.Shutdown(ctx); err != nil {
+				return err
+			}
+			return exp.Shutdown(ctx)
+		},
+	}
 }
