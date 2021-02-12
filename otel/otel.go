@@ -15,6 +15,24 @@
 /*
 Package otel provides functionality to quickly setup the OpenTelemetry Go
 implementation with useful Splunk defaults.
+
+The default configuration will correctly set the default OpenTelemetry SDK to
+propagate traces and export all spans to a locally running Splunk Smart Agent.
+Information about the Splunk Smart Agent can be found here
+https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-smart-agent.html
 */
 
 package otel
+
+// SDK contains all OpenTelemetry SDK state and provides access to this state.
+type SDK struct{}
+
+// Run configures the default OpenTelemetry SDK and installs it globally.
+func Run(opts ...Option) SDK {
+	conf := new(config)
+	for _, o := range opts {
+		o(conf)
+	}
+
+	return SDK{}
+}
