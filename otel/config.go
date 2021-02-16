@@ -83,4 +83,5 @@ func envOr(key, alt string) string {
 	return alt
 }
 
+// Option sets a config setting value.
 type Option func(*config)
