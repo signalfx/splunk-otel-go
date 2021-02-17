@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package otel_test
+package distro_test
 
 import (
 	"context"
 
-	"github.com/signalfx/splunk-otel-go/otel"
+	"github.com/signalfx/splunk-otel-go/distro"
 )
 
 func Example() {
@@ -25,7 +25,7 @@ func Example() {
 	// running Splunk Smart Agent at http://localhost:9080 and will configure
 	// the B3 context propagation format to be used in extracting and
 	// injecting trace context.
-	sdk, err := otel.Run()
+	sdk, err := distro.Run()
 	if err != nil {
 		panic(err)
 	}
