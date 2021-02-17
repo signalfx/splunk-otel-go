@@ -21,12 +21,10 @@ propagate traces and export all spans to a locally running Splunk Smart Agent.
 Information about the Splunk Smart Agent can be found here
 https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-smart-agent.html
 */
-
 package otel
 
 import (
 	"context"
-	"log"
 
 	"go.opentelemetry.io/contrib/propagators/b3"
 	global "go.opentelemetry.io/otel"
@@ -46,17 +44,17 @@ func (s SDK) Shutdown(ctx context.Context) error {
 }
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
-func Run(opts ...Option) SDK {
+func Run(opts ...Option) (SDK, error) {
 	c, err := newConfig(opts...)
 	if err != nil {
-		log.Fatal(err)
+		return SDK{}, err
 	}
 
 	exp, err := jaeger.NewRawExporter(
 		jaeger.WithCollectorEndpoint(c.Endpoint),
 	)
 	if err != nil {
-		log.Fatal(err)
+		return SDK{}, err
 	}
 
 	traceProvider := trace.NewTracerProvider(
@@ -79,5 +77,5 @@ func Run(opts ...Option) SDK {
 			}
 			return exp.Shutdown(ctx)
 		},
-	}
+	}, nil
 }

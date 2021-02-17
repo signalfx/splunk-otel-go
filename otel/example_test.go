@@ -25,7 +25,10 @@ func Example() {
 	// running Splunk Smart Agent at http://localhost:9080 and will configure
 	// the B3 context propagation format to be used in extracting and
 	// injecting trace context.
-	sdk := otel.Run()
+	sdk, err := otel.Run()
+	if err != nil {
+		panic(err)
+	}
 	// To ensure all spans are flushed before the application exits, make sure
 	// to shutdown.
 	defer sdk.Shutdown(context.Background())
