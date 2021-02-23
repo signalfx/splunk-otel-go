@@ -85,3 +85,18 @@ func envOr(key, alt string) string {
 
 // Option sets a config setting value.
 type Option func(*config)
+
+// WithServiceName configures the service name that collected telemetry is
+// associated with.
+func WithServiceName(name string) Option {
+	return func(c *config) {
+		c.ServiceName = name
+	}
+}
+
+// WithEndpoint configures the endpoint telemetry is sent to.
+func WithEndpoint(url string) Option {
+	return func(c *config) {
+		c.Endpoint = url
+	}
+}
