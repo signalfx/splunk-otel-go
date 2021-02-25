@@ -16,10 +16,7 @@ package tools
 
 import (
 	// Blank imports to version tools used to manage project.
-	_ "github.com/AlekSi/gocov-xml"
-	_ "github.com/axw/gocov"
 	_ "github.com/client9/misspell/cmd/misspell"
-	_ "github.com/tebeka/go2xunit"
 	_ "golang.org/x/lint/golint"
 	_ "golang.org/x/tools/cmd/goimports"
 	_ "honnef.co/go/tools/cmd/staticcheck"

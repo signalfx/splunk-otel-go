@@ -56,15 +56,6 @@ $(TOOLS)/misspell: PACKAGE=github.com/client9/misspell/cmd/misspell
 STATICCHECK = $(TOOLS)/staticcheck
 $(TOOLS)/staticcheck: PACKAGE=honnef.co/go/tools/cmd/staticcheck
 
-GOCOV = $(TOOLS)/gocov
-$(TOOLS)/gocov: PACKAGE=github.com/axw/gocov/gocov
-
-GOCOVXML = $(TOOLS)/gocov-xml
-$(TOOLS)/gocov-xml: PACKAGE=github.com/AlekSi/gocov-xml
-
-GO2XUNIT = $(TOOLS)/go2xunit
-$(TOOLS)/go2xunit: PACKAGE=github.com/tebeka/go2xunit
-
 # Tests
 
 TEST_TARGETS := test-bench test-short test-verbose test-race
@@ -79,12 +70,9 @@ test tests:
 
 COVERAGE_MODE    = atomic
 COVERAGE_PROFILE = $(COVERAGE_DIR)/profile.out
-COVERAGE_XML     = $(COVERAGE_DIR)/coverage.xml
-COVERAGE_HTML    = $(COVERAGE_DIR)/index.html
-.PHONY: test-coverage test-coverage-tools
-test-coverage-tools: | $(GOCOV) $(GOCOVXML)
+.PHONY: test-coverage
 test-coverage: COVERAGE_DIR := $(TEST_RESULTS)/coverage_$(shell date -u +"%s")
-test-coverage: test-coverage-tools
+test-coverage:
 	$Q mkdir -p $(COVERAGE_DIR)
 	$Q $(GO) test \
 		-coverpkg=$$($(GO) list -f '{{ join .Deps "\n" }}' $(TESTPKGS) | \
@@ -92,8 +80,6 @@ test-coverage: test-coverage-tools
 					tr '\n' ',' | sed 's/,$$//') \
 		-covermode=$(COVERAGE_MODE) \
 		-coverprofile="$(COVERAGE_PROFILE)" $(TESTPKGS)
-	$Q $(GO) tool cover -html=$(COVERAGE_PROFILE) -o $(COVERAGE_HTML)
-	$Q $(GOCOV) convert $(COVERAGE_PROFILE) | $(GOCOVXML) > $(COVERAGE_XML)
 
 .PHONY: lint
 lint: | $(GOLINT)
