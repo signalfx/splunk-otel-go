@@ -83,7 +83,7 @@ COVERAGE_XML     = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML    = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOV) $(GOCOVXML)
-test-coverage: COVERAGE_DIR := $(TEST_RESULTS)/coverage_$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+test-coverage: COVERAGE_DIR := $(TEST_RESULTS)/coverage_$(shell date -u +"%s")
 test-coverage: test-coverage-tools
 	$Q mkdir -p $(COVERAGE_DIR)
 	$Q $(GO) test \
