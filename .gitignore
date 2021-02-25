@@ -1,3 +1,9 @@
+# Tools binaries
+.tools/
+
+# Testing results
+test-results/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
