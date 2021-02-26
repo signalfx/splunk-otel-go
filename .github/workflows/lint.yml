@@ -44,9 +44,4 @@ jobs:
     - name: Run linters
       run: make all
     - name: Check clean repository
-      run: |
-        if ! git diff --quiet; then
-          echo 'repository contains changes (did you forget to run "make" before commiting?)'
-          git status
-          exit 1
-        fi
+      run: make diff

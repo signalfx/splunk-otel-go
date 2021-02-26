@@ -37,6 +37,8 @@ jobs:
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./go.sum') }}
     - name: Run tests with race detector
       run: make test-race
+    - name: Check clean repository
+      run: make diff
 
   test-coverage:
     runs-on: ubuntu-latest
@@ -89,3 +91,5 @@ jobs:
       env:
         GOARCH: ${{ matrix.arch }}
       run: make test-short
+    - name: Check clean repository
+      run: make diff
