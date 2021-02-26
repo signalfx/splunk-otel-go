@@ -29,7 +29,7 @@ Q = $(if $(filter 1,$V),,@)
 .DEFAULT_GOAL := all
 
 .PHONY: all
-all: imports lint staticcheck misspell license-check
+all: lint license-check
 	$Q $(GO) build $(PKGS)
 # Compile all test code.
 	$Q $(GO) test -vet=off -run xxxxxMatchNothingxxxxx $(TESTPKGS) >/dev/null
@@ -44,17 +44,8 @@ $(TOOLS)/%: | $(TOOLS)
 	$Q cd $(TOOLS_MODULE_DIR) \
 		&& $(GO) build -o $@ $(PACKAGE)
 
-GOLINT = $(TOOLS)/golint
-$(TOOLS)/golint: PACKAGE=golang.org/x/lint/golint
-
-GOIMPORTS = $(TOOLS)/goimports
-$(TOOLS)/goimports: PACKAGE=golang.org/x/tools/cmd/goimports
-
-MISSPELL = $(TOOLS)/misspell
-$(TOOLS)/misspell: PACKAGE=github.com/client9/misspell/cmd/misspell
-
-STATICCHECK = $(TOOLS)/staticcheck
-$(TOOLS)/staticcheck: PACKAGE=honnef.co/go/tools/cmd/staticcheck
+GOLANGCI_LINT = $(TOOLS)/golangci-lint
+$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # Tests
 
@@ -82,20 +73,9 @@ test-coverage:
 		-coverprofile="$(COVERAGE_PROFILE)" $(TESTPKGS)
 
 .PHONY: lint
-lint: | $(GOLINT)
-	$Q $(GOLINT) -set_exit_status $(PKGS)
-
-.PHONY: fmt imports
-fmt imports: | $(GOIMPORTS)
-	$Q $(GOIMPORTS) -w .
-
-.PHONY: misspell
-misspell: | $(MISSPELL)
-	$Q $(MISSPELL) -w $(shell find . -name '*.md' -type f | sort)
-
-.PHONY: staticcheck
-staticcheck: | $(STATICCHECK)
-	$Q $(STATICCHECK) $(PKGS)
+lint: | $(GOLANGCI_LINT)
+# Run once to fix and run again to verify resolution.
+	$Q $(GOLANGCI_LINT) run --fix && $(GOLANGCI_LINT) run
 
 .PHONY: license-check
 license-check:
