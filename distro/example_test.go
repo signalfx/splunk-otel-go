@@ -31,5 +31,9 @@ func Example() {
 	}
 	// To ensure all spans are flushed before the application exits, make sure
 	// to shutdown.
-	defer sdk.Shutdown(context.Background())
+	defer func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}()
 }

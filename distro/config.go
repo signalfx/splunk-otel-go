@@ -95,8 +95,8 @@ func WithServiceName(name string) Option {
 }
 
 // WithEndpoint configures the endpoint telemetry is sent to.
-func WithEndpoint(url string) Option {
+func WithEndpoint(endpoint string) Option {
 	return func(c *config) {
-		c.Endpoint = url
+		c.Endpoint = endpoint
 	}
 }
