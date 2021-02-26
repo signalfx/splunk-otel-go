@@ -29,7 +29,7 @@ Q = $(if $(filter 1,$V),,@)
 .DEFAULT_GOAL := all
 
 .PHONY: all
-all: lint license-check
+all: lint mod-tidy license-check
 	$Q $(GO) build $(PKGS)
 # Compile all test code.
 	$Q $(GO) test -vet=off -run xxxxxMatchNothingxxxxx $(TESTPKGS) >/dev/null
@@ -86,6 +86,11 @@ license-check:
 	           echo "license header checking failed:"; echo "$${licRes}"; \
 	           exit 1; \
 	   fi
+
+.PHONY: mod-tidy
+mod-tidy:
+	$Q $(GO) mod tidy
+	$Q (cd $(TOOLS_MODULE_DIR) && $(GO) mod tidy)
 
 .PHONY: diff
 diff:
