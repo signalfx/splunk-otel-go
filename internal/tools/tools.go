@@ -12,28 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package distro_test
+package tools
 
 import (
-	"context"
-
-	"github.com/signalfx/splunk-otel-go/distro"
+	// Blank imports to version tools used to manage project.
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 )
-
-func Example() {
-	// By default, the Run function will create a Jaeger exporter to a locally
-	// running Splunk Smart Agent at http://localhost:9080 and will configure
-	// the B3 context propagation format to be used in extracting and
-	// injecting trace context.
-	sdk, err := distro.Run()
-	if err != nil {
-		panic(err)
-	}
-	// To ensure all spans are flushed before the application exits, make sure
-	// to shutdown.
-	defer func() {
-		if err := sdk.Shutdown(context.Background()); err != nil {
-			panic(err)
-		}
-	}()
-}

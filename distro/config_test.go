@@ -40,7 +40,7 @@ type ConfigFieldTest struct {
 	OptionTests      []OptionTest
 }
 
-var ConfigurationTests = []ConfigFieldTest{
+var ConfigurationTests = []*ConfigFieldTest{
 	{
 		Name: "ServiceName",
 		ValueFunc: func(c *config) interface{} {
@@ -107,25 +107,27 @@ var ConfigurationTests = []ConfigFieldTest{
 
 func TestConfig(t *testing.T) {
 	for _, tc := range ConfigurationTests {
-		t.Run(tc.Name, func(t *testing.T) {
-			t.Run("DefaultValue", func(t *testing.T) {
-				c, err := newConfig()
-				require.NoError(t, err)
-				assert.Equal(t, tc.DefaultValue, tc.ValueFunc(c))
-			})
+		func(t *testing.T, tc *ConfigFieldTest) {
+			t.Run(tc.Name, func(t *testing.T) {
+				t.Run("DefaultValue", func(t *testing.T) {
+					c, err := newConfig()
+					require.NoError(t, err)
+					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(c))
+				})
 
-			t.Run("EnvironmentVariableOverride", func(t *testing.T) {
-				testEnvironmentOverrides(t, tc)
-			})
+				t.Run("EnvironmentVariableOverride", func(t *testing.T) {
+					testEnvironmentOverrides(t, tc)
+				})
 
-			t.Run("OptionTests", func(t *testing.T) {
-				testOptions(t, tc)
+				t.Run("OptionTests", func(t *testing.T) {
+					testOptions(t, tc)
+				})
 			})
-		})
+		}(t, tc)
 	}
 }
 
-func testEnvironmentOverrides(t *testing.T, tc ConfigFieldTest) {
+func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
 	for _, ev := range tc.EnvironmentTests {
 		func(key, val string) {
 			if v, ok := os.LookupEnv(key); ok {
@@ -150,11 +152,13 @@ func testEnvironmentOverrides(t *testing.T, tc ConfigFieldTest) {
 	}
 }
 
-func testOptions(t *testing.T, tc ConfigFieldTest) {
+func testOptions(t *testing.T, tc *ConfigFieldTest) {
 	for _, o := range tc.OptionTests {
-		t.Run(o.Name, func(t *testing.T) {
-			c, err := newConfig(o.Options...)
-			o.AssertionFunc(t, c, err)
-		})
+		func(t *testing.T, o OptionTest) {
+			t.Run(o.Name, func(t *testing.T) {
+				c, err := newConfig(o.Options...)
+				o.AssertionFunc(t, c, err)
+			})
+		}(t, o)
 	}
 }

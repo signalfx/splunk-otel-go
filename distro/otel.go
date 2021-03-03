@@ -39,6 +39,7 @@ type SDK struct {
 	shutdownFunc func(context.Context) error
 }
 
+// Shutdown stops the SDK and releases any used resources.
 func (s SDK) Shutdown(ctx context.Context) error {
 	return s.shutdownFunc(ctx)
 }
