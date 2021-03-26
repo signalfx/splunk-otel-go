@@ -56,6 +56,7 @@ gendependabot:
 	@echo "# limitations under the License.\n" >> ${DEPENDABOT_PATH}
 	@echo "version: 2" >> ${DEPENDABOT_PATH}
 	@echo "updates:" >> ${DEPENDABOT_PATH}
+	@echo "  - package-ecosystem: \"github-actions\"\n    directory: \"/\"\n    schedule:\n      interval: \"weekly\"" >> ${DEPENDABOT_PATH}
 	@echo "Add entry for \"/\""
 	@echo "  - package-ecosystem: \"gomod\"\n    directory: \"/\"\n    schedule:\n      interval: \"weekly\"" >> ${DEPENDABOT_PATH}
 	@set -e; for dir in $(ALL_MODULES); do \
