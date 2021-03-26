@@ -34,7 +34,7 @@ Documentation on how to manually instrument a Go application is available
 
 TODO
 
-# License and versioning
+## License and versioning
 
 The Splunk distribution of OpenTelemetry Go is a
 distribution of the [OpenTelemetry Go
