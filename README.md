@@ -1,5 +1,7 @@
 # Splunk distribution of OpenTelemetry Go
 
+> :construction: This project is currently in **BETA**.
+
 The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple installable packages that automatically instruments your Go
@@ -16,14 +18,33 @@ This Splunk distribution comes with the following defaults:
 - Unlimited default limits for [configuration options](#trace-configuration) to
   support full-fidelity traces.
 
-> :construction: This project is currently in **BETA**.
-
 ## Getting Started
 
 Supported libraries are listed
 [here](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
 
-TODO
+To ensure OpenTelemetry is correctly configured to participate in traces and send telemetry to Splunk, use the [`distro`](./distro) package.
+
+```golang
+func main() {
+	// By default, the Run function will create a Jaeger exporter to a locally
+	// running Splunk Smart Agent at http://localhost:9080 and will configure
+	// the B3 context propagation format to be used in extracting and
+	// injecting trace context.
+	sdk, err := distro.Run()
+	if err != nil {
+		panic(err)
+	}
+	// To ensure all spans are flushed before the application exits, make sure
+	// to shutdown.
+	defer func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}()
+
+    /* ... */
+```
 
 ## Manually instrument an application
 
