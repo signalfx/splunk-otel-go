@@ -1,7 +1,5 @@
 # Splunk distribution of OpenTelemetry Go
 
-> :construction: This project is currently in **BETA**.
-
 The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple installable packages that automatically instruments your Go
@@ -17,6 +15,8 @@ This Splunk distribution comes with the following defaults:
   (`http://localhost:9080/v1/trace`).
 - Unlimited default limits for [configuration options](#trace-configuration) to
   support full-fidelity traces.
+
+> :construction: This project is currently in **BETA**.
 
 ## Getting Started
 
