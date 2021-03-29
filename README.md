@@ -51,10 +51,6 @@ func main() {
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
-## Troubleshooting
-
-TODO
-
 ## License and versioning
 
 The Splunk distribution of OpenTelemetry Go is a
