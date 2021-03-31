@@ -42,6 +42,4 @@ jobs:
         path: ~/.tools
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./internal/tools/**') }}
     - name: Run linters
-      run: make all
-    - name: Check clean repository
-      run: make diff
+      run: make ci
