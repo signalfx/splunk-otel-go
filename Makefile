@@ -87,10 +87,10 @@ lint: | $(GOLANGCI_LINT)
 add-tag: # example usage: make add-tag tag=v1.100.1
 	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
 	@echo "Adding tag $(tag)"
-	$Q git tag -a $(tag) -m "Version $(tag)"
+	$Q git tag -a $(tag) -s -m "Version $(tag)"
 	$Q set -e; for dir in $(SUBMODULES); do \
 	  (echo Adding tag "$${dir:2}/$(tag)" && \
-	 	git tag -a "$${dir:2}/$(tag)" -m "Version ${dir:2}/$(tag)" ); \
+	 	git tag -a "$${dir:2}/$(tag)" -s -m "Version ${dir:2}/$(tag)" ); \
 	done
 
 .PHONY: delete-tag
@@ -104,14 +104,15 @@ delete-tag: # example usage: make delete-tag tag=v1.100.1
 	done
 
 .PHONY: push-tag
-push-tag: # example usage: make push-tag tag=v1.100.1 remote=origin
-	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+push-tag: # example usage: make push-tag remote=origin tag=v1.100.1 commit=<hash>
 	$Q [ "$(remote)" ] || ( echo ">> 'remote' is not set"; exit 1 )
+	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	$Q [ "$(commit)" ] || ( echo ">> 'commit' is not set"; exit 1 )
 	@echo "Pushing tag $(tag) to $(remote)"
-	$Q git push $(remote) $(tag)
+	$Q git push $(remote) $(tag) $(commit)
 	$Q set -e; for dir in $(SUBMODULES); do \
 	  (echo Pushing tag "$${dir:2}/$(tag) to $(remote)" && \
-	 	git push $(remote) "$${dir:2}/$(tag)"); \
+	 	git push $(remote) "$${dir:2}/$(tag)" $(commit)); \
 	done
 
 DEPENDABOT_PATH=./.github/dependabot.yml
