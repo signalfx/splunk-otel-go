@@ -33,10 +33,10 @@ Failure to do so will leave things in a broken state.
 It is critical you make sure the version you push upstream is correct.
 [Failure to do so will lead to minor emergencies and tough to work around](https://github.com/open-telemetry/opentelemetry-go/issues/331).
 
-1. Run on the main branch for the merged Pull Request.
+1. Run on the main branch and specify the commit for the merged Pull Request.
 
     ```sh
-    make add-tag tag=<new tag>
+    make add-tag tag=<new tag> commit=<commit>
     ```
 
 2. Push tags to the upstream remote (not your fork): `github.com/signalfx/splunk-otel-go.git`.
