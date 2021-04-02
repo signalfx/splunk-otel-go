@@ -22,8 +22,9 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+// Environmental variables used for configuration.
 const (
-	EnvVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED"
+	EnvVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
 // NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
@@ -35,47 +36,47 @@ func NewHandler(handler http.Handler, operation string, opts ...Option) http.Han
 		handler = ServerTimingMiddleware(handler)
 	}
 
-	handler = otelhttp.NewHandler(handler, "server", cfg.OtelOpts...)
+	handler = otelhttp.NewHandler(handler, operation, cfg.OTelOpts...)
 	return handler
 }
 
-// WithOtelOpts is use to pass the OpenTelemetry SDK options.
-func WithOtelOpts(opts ...otelhttp.Option) Option {
-	return OptionFunc(func(cfg *config) {
-		cfg.OtelOpts = opts
+// WithOTelOpts is use to pass the OpenTelemetry SDK options.
+func WithOTelOpts(opts ...otelhttp.Option) Option {
+	return optionFunc(func(cfg *config) {
+		cfg.OTelOpts = opts
 	})
 }
 
 // WithServerTiming enabled or disabled the ServerTimingMiddleware.
 func WithServerTiming(v bool) Option {
-	return OptionFunc(func(cfg *config) {
+	return optionFunc(func(cfg *config) {
 		cfg.ServerTimingEnabled = v
 	})
 }
 
-// Option Interface used for setting *optional* config properties
+// Option is used for setting *optional* config properties.
 type Option interface {
-	Apply(*config)
+	apply(*config)
 }
 
 // config represents the available configuration options.
 type config struct {
-	OtelOpts            []otelhttp.Option
+	OTelOpts            []otelhttp.Option
 	ServerTimingEnabled bool
 }
 
-// OptionFunc provides a convenience wrapper for simple Options
+// optionFunc provides a convenience wrapper for simple Options
 // that can be represented as functions.
-type OptionFunc func(*config)
+type optionFunc func(*config)
 
-func (o OptionFunc) Apply(c *config) {
+func (o optionFunc) apply(c *config) {
 	o(c)
 }
 
 // newConfig creates a new config struct and applies opts to it.
 func newConfig(opts ...Option) *config {
 	serverTimingEnabled := true
-	if v := os.Getenv(EnvVarServerTimingEnabled); v == "0" || strings.EqualFold(v, "false") {
+	if v := os.Getenv(EnvVarServerTimingEnabled); strings.EqualFold(v, "false") {
 		serverTimingEnabled = false
 	}
 
@@ -83,7 +84,7 @@ func newConfig(opts ...Option) *config {
 		ServerTimingEnabled: serverTimingEnabled,
 	}
 	for _, opt := range opts {
-		opt.Apply(c)
+		opt.apply(c)
 	}
 	return c
 }
