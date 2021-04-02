@@ -26,8 +26,8 @@ const (
 	EnvVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED"
 )
 
-// NewHandler wraps the passed handler, functioning like Splunk specific http middleware middleware,
-// in a span named after the operation and with any provided Options.
+// NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
+// This will also enable all the Splunk specific defaults for HTTP tracing.
 func NewHandler(handler http.Handler, operation string, opts ...Option) http.Handler {
 	cfg := newConfig(opts...)
 
