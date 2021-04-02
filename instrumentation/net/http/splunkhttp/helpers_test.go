@@ -16,17 +16,17 @@ package splunkhttp
 
 import (
 	"net/http"
-
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"net/http/httptest"
 )
 
-// NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
-// This will also enable all the Splunk specific defaults for HTTP tracing.
-func NewHandler(handler http.Handler, operation string, opts ...Option) http.Handler {
-	cfg := newConfig(opts...)
-	if cfg.ServerTimingEnabled {
-		handler = ServerTimingMiddleware(handler)
-	}
-	handler = otelhttp.NewHandler(handler, operation, cfg.OTelOpts...)
-	return handler
+func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
+	content := []byte("Any content")
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write(content) //nolint:errcheck
+	})
+	handler = wrapFn(handler)
+
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest("", "/", nil))
+	return w.Result()
 }
