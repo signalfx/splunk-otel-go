@@ -23,7 +23,7 @@ import (
 
 // Environmental variables used for configuration.
 const (
-	EnvVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED" // Adds `Server-Timing` header to HTTP responses
+	envVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
 // WithOTelOpts is use to pass the OpenTelemetry SDK options.
@@ -33,14 +33,14 @@ func WithOTelOpts(opts ...otelhttp.Option) Option {
 	})
 }
 
-// WithServerTiming enabled or disabled the ServerTimingMiddleware.
+// WithServerTiming enables or disables the ServerTimingMiddleware.
 func WithServerTiming(v bool) Option {
 	return optionFunc(func(cfg *config) {
 		cfg.ServerTimingEnabled = v
 	})
 }
 
-// Option is used for setting *optional* config properties.
+// Option is used for setting optional config properties.
 type Option interface {
 	apply(*config)
 }
@@ -62,7 +62,7 @@ func (o optionFunc) apply(c *config) {
 // newConfig creates a new config struct and applies opts to it.
 func newConfig(opts ...Option) *config {
 	serverTimingEnabled := true
-	if v := os.Getenv(EnvVarServerTimingEnabled); strings.EqualFold(v, "false") {
+	if v := os.Getenv(envVarServerTimingEnabled); strings.EqualFold(v, "false") {
 		serverTimingEnabled = false
 	}
 

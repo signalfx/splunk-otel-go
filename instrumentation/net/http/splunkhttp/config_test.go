@@ -28,7 +28,7 @@ func TestConfigs(t *testing.T) {
 		envs   map[string]string
 		assert func(t *testing.T, c *config)
 	}{
-		// Defaiult
+		// Default
 		{
 			name: "Default",
 			assert: func(t *testing.T, c *config) {
