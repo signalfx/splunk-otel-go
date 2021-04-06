@@ -34,6 +34,11 @@ func WithOTelOpts(opts ...otelhttp.Option) Option {
 }
 
 // WithServerTiming enables or disables the ServerTimingMiddleware.
+//
+// The default is to enable the ServerTimingMiddleware if this option is not passed.
+// Additionally, the SPLUNK_CONTEXT_SERVER_TIMING_ENABLED environment variable
+// can be set to TRUE or FALSE to specify this option. This option value will be
+// given precedence if both it and the environment variable are set.
 func WithServerTiming(v bool) Option {
 	return optionFunc(func(cfg *config) {
 		cfg.ServerTimingEnabled = v
