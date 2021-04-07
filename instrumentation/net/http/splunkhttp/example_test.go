@@ -30,8 +30,7 @@ func ExampleServerTimingMiddleware() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello world") //nolint:errcheck
 	})
-	handler = splunkhttp.ServerTimingMiddleware(handler)
-	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
+	handler = splunkhttp.NewHandler(handler, "server", splunkhttp.WithOTelOpts(otelhttp.WithTracerProvider(oteltest.NewTracerProvider())))
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()

@@ -15,9 +15,7 @@
 package splunkhttp
 
 import (
-	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,22 +23,12 @@ import (
 	"go.opentelemetry.io/otel/oteltest"
 )
 
-func TestServerTimingMiddleware(t *testing.T) {
-	content := []byte("Any content")
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(content) //nolint:errcheck
+func TestNewHandlerServerTimingDisabled(t *testing.T) {
+	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
+		return NewHandler(handler, "server", WithOTelOpts(otelhttp.WithTracerProvider(oteltest.NewTracerProvider())), WithServerTiming(false))
 	})
-	handler = ServerTimingMiddleware(handler)
-	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 
-	w := httptest.NewRecorder()
-	handler.ServeHTTP(w, httptest.NewRequest("", "/", nil))
-	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return the same status code")
-	assert.Equal(t, content, body, "should return the same content")
-	assert.Contains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should set Access-Control-Expose-Headers header")
-	assert.Regexp(t, "^traceparent;desc=\"00-[0-9a-f]{32}-[0-9a-f]{16}-01\"$", resp.Header.Get("Server-Timing"), "should return properly formated Server-Timing header")
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")
+	assert.NotContains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should NOT set Access-Control-Expose-Headers header")
+	assert.NotRegexp(t, "^traceparent;desc=\"00-[0-9a-f]{32}-[0-9a-f]{16}-01\"$", resp.Header.Get("Server-Timing"), "should not add traceID to Server-Timing header")
 }

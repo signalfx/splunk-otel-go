@@ -1,12 +1,6 @@
 # Splunk specific instrumentation for `net/http`
 
-## Features
-
-### Trace linkage between the APM and RUM products
-
-`ServerTimingMiddleware` wraps the passed handler, functioning like middleware.
-It adds trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header)
-as [Server-Timing header](https://www.w3.org/TR/server-timing/) to the HTTP response.
+## Example
 
 Simplified example:
 
@@ -28,9 +22,24 @@ func main() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})
-	handler = splunkhttp.ServerTimingMiddleware(handler)
-	handler = otelhttp.NewHandler(handler, "my-service")
+	handler = splunkhttp.NewHandler(handler, "my-service")
 
 	http.ListenAndServe(":9090", handler)
 }
 ```
+
+## Configuration
+
+### Splunk distribution configuration
+
+| Code                                         | Environment variable                   | Default value  | Purpose                                         |
+| -------------------------------------------- | -------------------------------------- | -------------- | ----------------------------------------------- |
+| `WithServerTiming`, `ServerTimingMiddleware` | `SPLUNK_CONTEXT_SERVER_TIMING_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses.  |
+
+## Features
+
+### Trace linkage between the APM and RUM products
+
+`ServerTimingMiddleware` wraps the passed handler, functioning like middleware.
+It adds trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header)
+as [Server-Timing header](https://www.w3.org/TR/server-timing/) to the HTTP response.
