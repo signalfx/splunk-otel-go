@@ -17,6 +17,8 @@
 # Script which helps preparing a new version for all Go Modules.
 # Based on: https://github.com/open-telemetry/opentelemetry-go/blob/main/pre_release.sh
 
+readonly DEFAULT_BRANCH=main
+
 set -e
 
 help()
@@ -68,7 +70,7 @@ if ! git diff --quiet; then \
 fi
 
 # Prepare new branch
-git checkout -b pre_release_${TAG} master
+git checkout -b pre_release_${TAG} "$DEFAULT_BRANCH"
 
 # Update version.go
 VERSION_IN_FILE=$(echo "${TAG}" | grep -o '^v[0-9]\+\.[0-9]\+\.[0-9]\+')
@@ -91,6 +93,6 @@ make mod-tidy
 
 # Add changes and commit.
 git add .
-git commit -m "Prepare for releasing $TAG"
+git commit -m "Release $TAG"
 
 printf "Now push changes and create a pull request\n"
