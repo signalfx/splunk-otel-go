@@ -19,12 +19,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func TestConfigs(t *testing.T) {
 	tests := []struct {
 		name   string
-		opts   []Option
+		opts   []otelhttp.Option
 		envs   map[string]string
 		assert func(t *testing.T, c *config)
 	}{
@@ -39,7 +40,7 @@ func TestConfigs(t *testing.T) {
 		// ServerTiming
 		{
 			name: "ServerTiming WithServerTiming(false)",
-			opts: []Option{
+			opts: []otelhttp.Option{
 				WithServerTiming(false),
 			},
 			assert: func(t *testing.T, c *config) {
@@ -60,7 +61,7 @@ func TestConfigs(t *testing.T) {
 			envs: map[string]string{
 				"SPLUNK_CONTEXT_SERVER_TIMING_ENABLED": "False",
 			},
-			opts: []Option{
+			opts: []otelhttp.Option{
 				WithServerTiming(true),
 			},
 			assert: func(t *testing.T, c *config) {

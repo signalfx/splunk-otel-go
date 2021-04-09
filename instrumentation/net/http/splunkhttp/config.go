@@ -26,27 +26,21 @@ const (
 	envVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
-// WithOTelOpts is use to pass the OpenTelemetry SDK options.
-func WithOTelOpts(opts ...otelhttp.Option) Option {
-	return optionFunc(func(cfg *config) {
-		cfg.OTelOpts = opts
-	})
-}
-
 // WithServerTiming enables or disables the ServerTimingMiddleware.
 //
 // The default is to enable the ServerTimingMiddleware if this option is not passed.
 // Additionally, the SPLUNK_CONTEXT_SERVER_TIMING_ENABLED environment variable
 // can be set to TRUE or FALSE to specify this option. This option value will be
 // given precedence if both it and the environment variable are set.
-func WithServerTiming(v bool) Option {
-	return optionFunc(func(cfg *config) {
+func WithServerTiming(v bool) otelhttp.Option {
+	return newOptionFunc(func(cfg *config) {
 		cfg.ServerTimingEnabled = v
 	})
 }
 
 // Option is used for setting optional config properties.
 type Option interface {
+	otelhttp.Option
 	apply(*config)
 }
 
@@ -56,16 +50,26 @@ type config struct {
 	ServerTimingEnabled bool
 }
 
+func newOptionFunc(fn func(cfg *config)) optionFunc {
+	return optionFunc{
+		Option: otelhttp.WithNop(),
+		fn:     fn,
+	}
+}
+
 // optionFunc provides a convenience wrapper for simple Options
 // that can be represented as functions.
-type optionFunc func(*config)
+type optionFunc struct {
+	otelhttp.Option
+	fn func(*config)
+}
 
 func (o optionFunc) apply(c *config) {
-	o(c)
+	o.fn(c)
 }
 
 // newConfig creates a new config struct and applies opts to it.
-func newConfig(opts ...Option) *config {
+func newConfig(opts ...otelhttp.Option) *config {
 	serverTimingEnabled := true
 	if v := os.Getenv(envVarServerTimingEnabled); strings.EqualFold(v, "false") {
 		serverTimingEnabled = false
@@ -75,7 +79,9 @@ func newConfig(opts ...Option) *config {
 		ServerTimingEnabled: serverTimingEnabled,
 	}
 	for _, opt := range opts {
-		opt.apply(c)
+		if splunkOpt, ok := opt.(Option); ok {
+			splunkOpt.apply(c)
+		}
 	}
 	return c
 }
