@@ -33,7 +33,6 @@ func TestConfigs(t *testing.T) {
 		{
 			name: "Default",
 			assert: func(t *testing.T, c *config) {
-				assert.Nil(t, c.OTelOpts, "should not set any additional OTel options")
 				assert.True(t, c.ServerTimingEnabled, "should enable ServerTiming")
 			},
 		},
