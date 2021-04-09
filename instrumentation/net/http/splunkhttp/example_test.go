@@ -34,7 +34,7 @@ func ExampleServerTimingMiddleware() {
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()
-	resp, _ := ts.Client().Get(ts.URL) //nolint
+	resp, _ := ts.Client().Get(ts.URL)
 
 	fmt.Println(resp.Header.Get("Access-Control-Expose-Headers"))
 	fmt.Println(resp.Header.Get("Server-Timing"))
