@@ -21,11 +21,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// ServerTimingMiddleware wraps the passed handler, functioning like middleware.
+// TraceResponseHeaderMiddleware wraps the passed handler, functioning like middleware.
 // It adds trace context in traceparent form (https://www.w3.org/TR/trace-context/#traceparent-header)
 // as Server-Timing header (https://www.w3.org/TR/server-timing/)
 // to the HTTP response.
-func ServerTimingMiddleware(handler http.Handler) http.Handler {
+func TraceResponseHeaderMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if spanCtx := trace.SpanContextFromContext(r.Context()); spanCtx.IsValid() {
 			w.Header().Add("Access-Control-Expose-Headers", "Server-Timing")

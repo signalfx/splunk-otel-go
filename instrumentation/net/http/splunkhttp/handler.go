@@ -24,8 +24,8 @@ import (
 // This will also enable all the Splunk specific defaults for HTTP tracing.
 func NewHandler(handler http.Handler, operation string, opts ...Option) http.Handler {
 	cfg := newConfig(opts...)
-	if cfg.ServerTimingEnabled {
-		handler = ServerTimingMiddleware(handler)
+	if cfg.TraceResponseHeaderEnabled {
+		handler = TraceResponseHeaderMiddleware(handler)
 	}
 	handler = otelhttp.NewHandler(handler, operation, cfg.OTelOpts...)
 	return handler

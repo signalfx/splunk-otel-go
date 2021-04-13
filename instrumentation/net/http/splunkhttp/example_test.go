@@ -26,7 +26,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
-func ExampleServerTimingMiddleware() {
+func ExampleTraceResponseHeaderMiddleware() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello world") //nolint:errcheck
 	})

@@ -23,9 +23,9 @@ import (
 	"go.opentelemetry.io/otel/oteltest"
 )
 
-func TestServerTimingMiddleware(t *testing.T) {
+func TestTraceResponseHeaderMiddleware(t *testing.T) {
 	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
-		handler = ServerTimingMiddleware(handler)
+		handler = TraceResponseHeaderMiddleware(handler)
 		return otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 	})
 

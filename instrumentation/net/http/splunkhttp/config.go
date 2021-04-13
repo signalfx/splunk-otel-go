@@ -23,7 +23,7 @@ import (
 
 // Environmental variables used for configuration.
 const (
-	envVarServerTimingEnabled = "SPLUNK_CONTEXT_SERVER_TIMING_ENABLED" // Adds `Server-Timing` header to HTTP responses
+	envVarTraceResponseHeaderEnabled = "SPLUNK_TRACE_RESPONSE_HEADER_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
 // WithOTelOpts is use to pass the OpenTelemetry SDK options.
@@ -33,15 +33,15 @@ func WithOTelOpts(opts ...otelhttp.Option) Option {
 	})
 }
 
-// WithServerTiming enables or disables the ServerTimingMiddleware.
+// WithTraceResponseHeader enables or disables the TraceResponseHeaderMiddleware.
 //
-// The default is to enable the ServerTimingMiddleware if this option is not passed.
-// Additionally, the SPLUNK_CONTEXT_SERVER_TIMING_ENABLED environment variable
+// The default is to enable the TraceResponseHeaderMiddleware if this option is not passed.
+// Additionally, the SPLUNK_TRACE_RESPONSE_HEADER_ENABLED environment variable
 // can be set to TRUE or FALSE to specify this option. This option value will be
 // given precedence if both it and the environment variable are set.
-func WithServerTiming(v bool) Option {
+func WithTraceResponseHeader(v bool) Option {
 	return optionFunc(func(cfg *config) {
-		cfg.ServerTimingEnabled = v
+		cfg.TraceResponseHeaderEnabled = v
 	})
 }
 
@@ -52,8 +52,8 @@ type Option interface {
 
 // config represents the available configuration options.
 type config struct {
-	OTelOpts            []otelhttp.Option
-	ServerTimingEnabled bool
+	OTelOpts                   []otelhttp.Option
+	TraceResponseHeaderEnabled bool
 }
 
 // optionFunc provides a convenience wrapper for simple Options
@@ -66,13 +66,13 @@ func (o optionFunc) apply(c *config) {
 
 // newConfig creates a new config struct and applies opts to it.
 func newConfig(opts ...Option) *config {
-	serverTimingEnabled := true
-	if v := os.Getenv(envVarServerTimingEnabled); strings.EqualFold(v, "false") {
-		serverTimingEnabled = false
+	traceResponseHeaderEnabled := true
+	if v := os.Getenv(envVarTraceResponseHeaderEnabled); strings.EqualFold(v, "false") {
+		traceResponseHeaderEnabled = false
 	}
 
 	c := &config{
-		ServerTimingEnabled: serverTimingEnabled,
+		TraceResponseHeaderEnabled: traceResponseHeaderEnabled,
 	}
 	for _, opt := range opts {
 		opt.apply(c)

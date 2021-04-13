@@ -33,38 +33,38 @@ func TestConfigs(t *testing.T) {
 			name: "Default",
 			assert: func(t *testing.T, c *config) {
 				assert.Nil(t, c.OTelOpts, "should not set any additional OTel options")
-				assert.True(t, c.ServerTimingEnabled, "should enable ServerTiming")
+				assert.True(t, c.TraceResponseHeaderEnabled, "should enable TraceResponseHeader")
 			},
 		},
-		// ServerTiming
+		// TraceResponseHeader
 		{
-			name: "ServerTiming WithServerTiming(false)",
+			name: "TraceResponseHeader WithTraceResponseHeader(false)",
 			opts: []Option{
-				WithServerTiming(false),
+				WithTraceResponseHeader(false),
 			},
 			assert: func(t *testing.T, c *config) {
-				assert.False(t, c.ServerTimingEnabled, "should disable ServerTiming")
+				assert.False(t, c.TraceResponseHeaderEnabled, "should disable TraceResponseHeader")
 			},
 		},
 		{
-			name: "ServerTiming SPLUNK_CONTEXT_SERVER_TIMING_ENABLED=False",
+			name: "TraceResponseHeader SPLUNK_TRACE_RESPONSE_HEADER_ENABLED=False",
 			envs: map[string]string{
-				"SPLUNK_CONTEXT_SERVER_TIMING_ENABLED": "False",
+				"SPLUNK_TRACE_RESPONSE_HEADER_ENABLED": "False",
 			},
 			assert: func(t *testing.T, c *config) {
-				assert.False(t, c.ServerTimingEnabled, "should disable ServerTiming")
+				assert.False(t, c.TraceResponseHeaderEnabled, "should disable TraceResponseHeader")
 			},
 		},
 		{
-			name: "ServerTiming WithServerTiming(true) SPLUNK_CONTEXT_SERVER_TIMING_ENABLED=True",
+			name: "TraceResponseHeader WithTraceResponseHeader(true) SPLUNK_TRACE_RESPONSE_HEADER_ENABLED=True",
 			envs: map[string]string{
-				"SPLUNK_CONTEXT_SERVER_TIMING_ENABLED": "False",
+				"SPLUNK_TRACE_RESPONSE_HEADER_ENABLED": "False",
 			},
 			opts: []Option{
-				WithServerTiming(true),
+				WithTraceResponseHeader(true),
 			},
 			assert: func(t *testing.T, c *config) {
-				assert.True(t, c.ServerTimingEnabled, "should enable ServerTiming, because option has higher priority than env var")
+				assert.True(t, c.TraceResponseHeaderEnabled, "should enable TraceResponseHeader, because option has higher priority than env var")
 			},
 		},
 	}
