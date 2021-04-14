@@ -47,15 +47,17 @@ type config struct {
 
 // Option Interface used for setting *optional* config properties
 type Option interface {
-	Apply(*config)
+	Apply(interface{})
 }
 
 // OptionFunc provides a convenience wrapper for simple Options
 // that can be represented as functions.
 type OptionFunc func(*config)
 
-func (o OptionFunc) Apply(c *config) {
-	o(c)
+func (o OptionFunc) Apply(obj interface{}) {
+	if c, ok := obj.(*config); ok {
+		o(c)
+	}
 }
 
 // newConfig creates a new config struct and applies opts to it.
@@ -79,13 +81,6 @@ func newConfig(opts ...Option) *config {
 	)
 
 	return c
-}
-
-// WithNop returns a no operation option.
-// It can be used for extensibilty.
-func WithNop() Option {
-	return OptionFunc(func(*config) {
-	})
 }
 
 // WithTracerProvider specifies a tracer provider to use for creating a tracer.

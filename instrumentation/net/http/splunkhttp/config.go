@@ -32,16 +32,10 @@ const (
 // Additionally, the SPLUNK_TRACE_RESPONSE_HEADER_ENABLED environment variable
 // can be set to TRUE or FALSE to specify this option. This option value will be
 // given precedence if both it and the environment variable are set.
-func WithTraceResponseHeader(v bool) Option {
-	return newOptionFunc(func(cfg *config) {
+func WithTraceResponseHeader(v bool) otelhttp.Option {
+	return optionFunc(func(cfg *config) {
 		cfg.TraceResponseHeaderEnabled = v
 	})
-}
-
-// Option is used for setting optional config properties.
-type Option interface {
-	otelhttp.Option
-	apply(*config)
 }
 
 // config represents the available configuration options.
@@ -49,22 +43,14 @@ type config struct {
 	TraceResponseHeaderEnabled bool
 }
 
-func newOptionFunc(fn func(cfg *config)) optionFunc {
-	return optionFunc{
-		Option: otelhttp.WithNop(),
-		fn:     fn,
-	}
-}
-
 // optionFunc provides a convenience wrapper for simple Options
 // that can be represented as functions.
-type optionFunc struct {
-	otelhttp.Option
-	fn func(*config)
-}
+type optionFunc func(*config)
 
-func (o optionFunc) apply(c *config) {
-	o.fn(c)
+func (o optionFunc) Apply(obj interface{}) {
+	if c, ok := obj.(*config); ok {
+		o(c)
+	}
 }
 
 // newConfig creates a new config struct and applies opts to it.
@@ -78,9 +64,7 @@ func newConfig(opts ...otelhttp.Option) *config {
 		TraceResponseHeaderEnabled: traceResponseHeaderEnabled,
 	}
 	for _, opt := range opts {
-		if splunkOpt, ok := opt.(Option); ok {
-			splunkOpt.apply(c)
-		}
+		opt.Apply(c)
 	}
 	return c
 }
