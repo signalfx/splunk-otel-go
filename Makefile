@@ -137,7 +137,6 @@ license-check: # check if license is applied to relevant files
 	   done); \
 	   if [ -n "$${licRes}" ]; then \
 	           echo "license header checking failed:"; echo "$${licRes}"; \
-	           exit 1; \
 	   fi
 
 .PHONY: mod-tidy

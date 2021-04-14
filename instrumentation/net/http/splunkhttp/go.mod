@@ -8,3 +8,5 @@ require (
 	go.opentelemetry.io/otel/oteltest v0.19.0
 	go.opentelemetry.io/otel/trace v0.19.0
 )
+
+replace go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => ../otelhttp

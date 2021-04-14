@@ -36,7 +36,7 @@ func TestTraceResponseHeaderMiddleware(t *testing.T) {
 
 func TestNewHandlerDefault(t *testing.T) {
 	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
-		return NewHandler(handler, "server", WithOTelOpts(otelhttp.WithTracerProvider(oteltest.NewTracerProvider())))
+		return NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 	})
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")

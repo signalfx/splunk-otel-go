@@ -30,11 +30,11 @@ func ExampleTraceResponseHeaderMiddleware() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello world") //nolint:errcheck
 	})
-	handler = splunkhttp.NewHandler(handler, "server", splunkhttp.WithOTelOpts(otelhttp.WithTracerProvider(oteltest.NewTracerProvider())))
+	handler = splunkhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()
-	resp, _ := ts.Client().Get(ts.URL) //nolint
+	resp, _ := ts.Client().Get(ts.URL)
 
 	fmt.Println(resp.Header.Get("Access-Control-Expose-Headers"))
 	fmt.Println(resp.Header.Get("Server-Timing"))

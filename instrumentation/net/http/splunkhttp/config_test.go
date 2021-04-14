@@ -19,12 +19,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func TestConfigs(t *testing.T) {
 	tests := []struct {
 		name   string
-		opts   []Option
+		opts   []otelhttp.Option
 		envs   map[string]string
 		assert func(t *testing.T, c *config)
 	}{
@@ -32,14 +33,13 @@ func TestConfigs(t *testing.T) {
 		{
 			name: "Default",
 			assert: func(t *testing.T, c *config) {
-				assert.Nil(t, c.OTelOpts, "should not set any additional OTel options")
 				assert.True(t, c.TraceResponseHeaderEnabled, "should enable TraceResponseHeader")
 			},
 		},
 		// TraceResponseHeader
 		{
 			name: "TraceResponseHeader WithTraceResponseHeader(false)",
-			opts: []Option{
+			opts: []otelhttp.Option{
 				WithTraceResponseHeader(false),
 			},
 			assert: func(t *testing.T, c *config) {
@@ -60,7 +60,7 @@ func TestConfigs(t *testing.T) {
 			envs: map[string]string{
 				"SPLUNK_TRACE_RESPONSE_HEADER_ENABLED": "False",
 			},
-			opts: []Option{
+			opts: []otelhttp.Option{
 				WithTraceResponseHeader(true),
 			},
 			assert: func(t *testing.T, c *config) {

@@ -70,7 +70,6 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - bodyclose
     - deadcode
     - depguard
     - dogsled
@@ -78,8 +77,6 @@ linters:
     - exhaustive
     - funlen
     - gochecknoinits
-    - goconst
-    - gocritic
     - gocyclo
     - gofmt
     - goimports
@@ -92,10 +89,8 @@ linters:
     - ineffassign
     - misspell
     - nakedret
-    - noctx
     - nolintlint
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
     - stylecheck

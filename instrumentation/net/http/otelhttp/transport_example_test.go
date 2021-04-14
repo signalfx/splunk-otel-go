@@ -1,4 +1,4 @@
-// Copyright Splunk Inc.
+// Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package splunkhttp
+package otelhttp
 
 import (
 	"net/http"
-
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-// NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
-// This will also enable all the Splunk specific defaults for HTTP tracing.
-func NewHandler(handler http.Handler, operation string, opts ...otelhttp.Option) http.Handler {
-	cfg := newConfig(opts...)
-	if cfg.TraceResponseHeaderEnabled {
-		handler = TraceResponseHeaderMiddleware(handler)
+func ExampleNewTransport() {
+	// Create an http.Client that uses the (ot)http.Transport
+	// wrapped around the http.DefaultTransport
+	_ = http.Client{
+		Transport: NewTransport(http.DefaultTransport),
 	}
-	handler = otelhttp.NewHandler(handler, operation, opts...)
-	return handler
 }
