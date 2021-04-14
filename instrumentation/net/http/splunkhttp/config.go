@@ -33,7 +33,7 @@ const (
 // can be set to TRUE or FALSE to specify this option. This option value will be
 // given precedence if both it and the environment variable are set.
 func WithTraceResponseHeader(v bool) Option {
-	return newOptionFunc(func(cfg *config) {
+	return optionFunc(func(cfg *config) {
 		cfg.TraceResponseHeaderEnabled = v
 	})
 }
@@ -49,22 +49,15 @@ type config struct {
 	TraceResponseHeaderEnabled bool
 }
 
-func newOptionFunc(fn func(cfg *config)) optionFunc {
-	return optionFunc{
-		Option: otelhttp.WithNop(),
-		fn:     fn,
-	}
-}
-
 // optionFunc provides a convenience wrapper for simple Options
 // that can be represented as functions.
-type optionFunc struct {
-	otelhttp.Option
-	fn func(*config)
+type optionFunc func(*config)
+
+func (o optionFunc) Apply(*otelhttp.Config) {
 }
 
 func (o optionFunc) apply(c *config) {
-	o.fn(c)
+	o(c)
 }
 
 // newConfig creates a new config struct and applies opts to it.
