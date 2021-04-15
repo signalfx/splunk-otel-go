@@ -22,11 +22,21 @@ import (
 
 // NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
 // This will also enable all the Splunk specific defaults for HTTP tracing.
-func NewHandler(handler http.Handler, operation string, opts ...Option) http.Handler {
+func NewHandler(handler http.Handler, operation string, opts ...otelhttp.Option) http.Handler {
+	// add additional Splunk specific instrumentations
 	cfg := newConfig(opts...)
 	if cfg.TraceResponseHeaderEnabled {
 		handler = TraceResponseHeaderMiddleware(handler)
 	}
-	handler = otelhttp.NewHandler(handler, operation, cfg.OTelOpts...)
+
+	// make sure only valid otelhttp.Option are passed to otelhttp.NewHandler
+	var otelOpts []otelhttp.Option
+	for _, opt := range opts {
+		if _, ok := opt.(optionWrapper); ok {
+			continue
+		}
+		otelOpts = append(otelOpts, opt)
+	}
+	handler = otelhttp.NewHandler(handler, operation, otelOpts...)
 	return handler
 }
