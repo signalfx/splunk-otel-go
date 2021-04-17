@@ -22,7 +22,7 @@ import (
 )
 
 func TestTraceResponseHeaderMiddleware(t *testing.T) {
-	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
+	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint
 		return TraceResponseHeaderMiddleware(handler)
 	})
 
