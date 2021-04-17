@@ -17,21 +17,12 @@ package splunkhttp
 import (
 	"os"
 	"strings"
-
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // Environmental variables used for configuration.
 const (
 	envVarTraceResponseHeaderEnabled = "SPLUNK_TRACE_RESPONSE_HEADER_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
-
-// WithOTelOpts is use to pass the OpenTelemetry SDK options.
-func WithOTelOpts(opts ...otelhttp.Option) Option {
-	return optionFunc(func(cfg *config) {
-		cfg.OTelOpts = opts
-	})
-}
 
 // WithTraceResponseHeader enables or disables the TraceResponseHeaderMiddleware.
 //
@@ -52,7 +43,6 @@ type Option interface {
 
 // config represents the available configuration options.
 type config struct {
-	OTelOpts                   []otelhttp.Option
 	TraceResponseHeaderEnabled bool
 }
 

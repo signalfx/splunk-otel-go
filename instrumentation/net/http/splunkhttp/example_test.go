@@ -26,20 +26,21 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
-func ExampleTraceResponseHeaderMiddleware() {
+func Example() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello world") //nolint:errcheck
 	})
-	handler = splunkhttp.NewHandler(handler, "server", splunkhttp.WithOTelOpts(otelhttp.WithTracerProvider(oteltest.NewTracerProvider())))
+	handler = splunkhttp.NewHandler(handler)
+	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()
 	resp, _ := ts.Client().Get(ts.URL) //nolint
 
-	fmt.Println(resp.Header.Get("Access-Control-Expose-Headers"))
-	fmt.Println(resp.Header.Get("Server-Timing"))
+	fmt.Println("Access-Control-Expose-Headers:", resp.Header.Get("Access-Control-Expose-Headers"))
+	fmt.Println("Server-Timing:", resp.Header.Get("Server-Timing"))
 
 	// Output:
-	// Server-Timing
-	// traceparent;desc="00-00000000000000020000000000000000-0000000000000002-01"
+	// Access-Control-Expose-Headers: Server-Timing
+	// Server-Timing: traceparent;desc="00-00000000000000020000000000000000-0000000000000002-01"
 }
