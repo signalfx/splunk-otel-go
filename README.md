@@ -1,5 +1,12 @@
 # Splunk distribution of OpenTelemetry Go
 
+[![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go)](https://github.com/signalfx/splunk-otel-go/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
+[![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/splunk-otel-go)](go.mod)
+[![LICENSE](https://img.shields.io/github/license/signalfx/splunk-otel-go)](LICENSE)
+[![Build Status](https://img.shields.io/github/workflow/status/signalfx/splunk-otel-go/test)](https://github.com/signalfx/splunk-otel-go/actions?query=branch%3Amain)
+[![Go Report Card](https://goreportcard.com/badge/github.com/signalfx/splunk-otel-go)](https://goreportcard.com/report/github.com/signalfx/splunk-otel-go)
+
 The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple installable packages that automatically instruments your Go
