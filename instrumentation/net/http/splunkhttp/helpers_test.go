@@ -17,6 +17,9 @@ package splunkhttp
 import (
 	"net/http"
 	"net/http/httptest"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/oteltest"
 )
 
 func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
@@ -25,6 +28,7 @@ func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
 		w.Write(content) //nolint:errcheck
 	})
 	handler = wrapFn(handler)
+	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
 
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, httptest.NewRequest("", "/", nil))
