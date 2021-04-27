@@ -51,9 +51,8 @@ func Run(opts ...Option) (SDK, error) {
 		return SDK{}, err
 	}
 
-	exp, err := jaeger.NewRawExporter(
-		jaeger.WithCollectorEndpoint(c.Endpoint),
-	)
+	opt := jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.Endpoint))
+	exp, err := jaeger.NewRawExporter(opt)
 	if err != nil {
 		return SDK{}, err
 	}
