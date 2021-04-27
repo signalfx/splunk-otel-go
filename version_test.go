@@ -15,19 +15,14 @@
 package splunkotel_test
 
 import (
-	"regexp"
 	"testing"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/stretchr/testify/assert"
 )
 
-// regex taken from https://github.com/Masterminds/semver/tree/v3.1.1
-var versionRegex = regexp.MustCompile(`^v?([0-9]+)(\.[0-9]+)?(\.[0-9]+)?` +
-	`(-([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?` +
-	`(\+([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?$`)
-
 func TestVersionSemver(t *testing.T) {
+	re := `^[0-9]+\.[0-9]+\.[0-9]+(-([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?(\+([0-9A-Za-z\-]+(\.[0-9A-Za-z\-]+)*))?$`
 	v := splunkotel.Version()
-	assert.NotNil(t, versionRegex.FindStringSubmatch(v), "version is not semver: %s", v)
+	assert.Regexp(t, re, v, "version is not semver: %s", v)
 }
