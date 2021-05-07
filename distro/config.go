@@ -22,17 +22,11 @@ import (
 
 // Environment variable keys that set values of the configuration.
 const (
-	serviceNameKey = "SIGNALFX_SERVICE_NAME"
-	endpointURLKey = "SIGNALFX_ENDPOINT_URL"
-	// TODO: support these
-	// accessTokenKey = "SIGNALFX_ACCESS_TOKEN"
-	// spanTagsKey               = "SIGNALFX_SPAN_TAGS"
-	// recordedValueMaxLengthKey = "SIGNALFX_RECORDED_VALUE_MAX_LENGTH"
+	accessTokenKey = "SPLUNK_ACCESS_TOKEN"
 )
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
-	ServiceName string
 	AccessToken string
 	Endpoint    string
 }
@@ -40,14 +34,12 @@ type config struct {
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) (*config, error) {
 	c := &config{
-		ServiceName: envOr(serviceNameKey, "unnamed-go-service"),
-		Endpoint:    envOr(endpointURLKey, "http://localhost:9080/v1/trace"),
+		AccessToken: envOr(accessTokenKey, ""),
 	}
 
 	for _, o := range opts {
-		o(c)
+		o.apply(c)
 	}
-
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -58,18 +50,15 @@ func newConfig(opts ...Option) (*config, error) {
 func (c config) Validate() error {
 	var errs []string
 
-	if c.ServiceName == "" {
-		errs = append(errs, "empty service name")
-	}
-
-	if _, err := url.Parse(c.Endpoint); err != nil {
-		errs = append(errs, "invalid endpoint: %s", err.Error())
+	if c.Endpoint != "" {
+		if _, err := url.Parse(c.Endpoint); err != nil {
+			errs = append(errs, "invalid endpoint: %s", err.Error())
+		}
 	}
 
 	if len(errs) > 0 {
 		return fmt.Errorf("invalid config: %v", errs)
 	}
-
 	return nil
 }
 
@@ -84,19 +73,30 @@ func envOr(key, alt string) string {
 }
 
 // Option sets a config setting value.
-type Option func(*config)
+type Option interface {
+	apply(*config)
+}
 
-// WithServiceName configures the service name that collected telemetry is
-// associated with.
-func WithServiceName(name string) Option {
-	return func(c *config) {
-		c.ServiceName = name
-	}
+// optionFunc is a functional option implementation for Option interface.
+type optionFunc func(*config)
+
+func (fn optionFunc) apply(c *config) {
+	fn(c)
 }
 
 // WithEndpoint configures the endpoint telemetry is sent to.
+// Setting empty string results in no operation.
 func WithEndpoint(endpoint string) Option {
-	return func(c *config) {
+	return optionFunc(func(c *config) {
 		c.Endpoint = endpoint
-	}
+	})
+}
+
+// WithAccessToken configures the auth token
+// allowing exporters to send data directly to a Splunk back-end.
+// Setting empty string results in no operation.
+func WithAccessToken(accessToken string) Option {
+	return optionFunc(func(c *config) {
+		c.AccessToken = accessToken
+	})
 }

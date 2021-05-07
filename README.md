@@ -58,6 +58,17 @@ func main() {
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
+## Splunk specfic configuration
+
+| Environment variable      | Option             | Default value  | Description |
+| ------------------------- | -------------------| -------------- | ---------------------------------------------------------------------- |
+| `SPLUNK_ACCESS_TOKEN`     | `WithAccessToken`  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
+
+[<a name="cfg1">1</a>]: The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
+allows exporters sending data directly to the Splunk back-end.
+To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `contrib.WithEndpoint` must be set
+with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
+
 ## Splunk specific instrumentations
 
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)

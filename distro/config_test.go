@@ -15,7 +15,6 @@
 package distro
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,32 +41,23 @@ type ConfigFieldTest struct {
 
 var ConfigurationTests = []*ConfigFieldTest{
 	{
-		Name: "ServiceName",
+		Name: "AccessToken",
 		ValueFunc: func(c *config) interface{} {
-			return c.ServiceName
+			return c.AccessToken
 		},
-		DefaultValue: "unnamed-go-service",
+		DefaultValue: "",
 		EnvironmentTests: []KeyValue{
-			{Key: serviceNameKey, Value: "service"},
+			{Key: accessTokenKey, Value: "secret"},
 		},
 		OptionTests: []OptionTest{
 			{
 				Name: "valid name",
 				Options: []Option{
-					WithServiceName("test-service"),
+					WithAccessToken("secret"),
 				},
 				AssertionFunc: func(t *testing.T, c *config, e error) {
 					assert.NoError(t, e)
-					assert.Equal(t, "test-service", c.ServiceName)
-				},
-			},
-			{
-				Name: "invalid name",
-				Options: []Option{
-					WithServiceName(""),
-				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.Error(t, e)
+					assert.Equal(t, "secret", c.AccessToken)
 				},
 			},
 		},
@@ -77,10 +67,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 		ValueFunc: func(c *config) interface{} {
 			return c.Endpoint
 		},
-		DefaultValue: "http://localhost:9080/v1/trace",
-		EnvironmentTests: []KeyValue{
-			{Key: endpointURLKey, Value: "https://localhost/"},
-		},
+		DefaultValue: "",
 		OptionTests: []OptionTest{
 			{
 				Name: "valid URL",
@@ -130,12 +117,8 @@ func TestConfig(t *testing.T) {
 func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
 	for _, ev := range tc.EnvironmentTests {
 		func(key, val string) {
-			if v, ok := os.LookupEnv(key); ok {
-				defer func() { os.Setenv(key, v) }()
-			} else {
-				defer func() { os.Unsetenv(key) }()
-			}
-			os.Setenv(key, val)
+			revert := Setenv(key, val)
+			defer revert()
 
 			c, err := newConfig()
 			if !assert.NoError(t, err) {

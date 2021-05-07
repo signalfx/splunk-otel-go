@@ -51,7 +51,15 @@ func Run(opts ...Option) (SDK, error) {
 		return SDK{}, err
 	}
 
-	opt := jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.Endpoint))
+	var jeagerOpts []jaeger.CollectorEndpointOption
+	if c.Endpoint != "" {
+		jeagerOpts = append(jeagerOpts, jaeger.WithEndpoint(c.Endpoint))
+	}
+	if c.AccessToken != "" {
+		jeagerOpts = append(jeagerOpts, jaeger.WithUsername("auth"), jaeger.WithPassword(c.AccessToken))
+	}
+
+	opt := jaeger.WithCollectorEndpoint(jeagerOpts...)
 	exp, err := jaeger.NewRawExporter(opt)
 	if err != nil {
 		return SDK{}, err

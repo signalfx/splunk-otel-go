@@ -28,37 +28,103 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
-// TestRun is a smoke test that ensures that traces are sent using thrift protocol.
+// TestRun is a collection of sanity tests that ensure that traces are sent using thrift protocol.
 func TestRun(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	testCases := []struct {
+		desc     string
+		setupFn  func(t *testing.T, url string) (distro.SDK, error)
+		assertFn func(t *testing.T, req *http.Request)
+	}{
+		{
+			desc: "WithEndpoint",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				return distro.Run(distro.WithEndpoint(url))
+			},
+			assertFn: func(t *testing.T, got *http.Request) {
+				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				clearFn := distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
+				t.Cleanup(clearFn)
+				return distro.Run()
+			},
+			assertFn: func(t *testing.T, got *http.Request) {
+				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+			},
+		},
+		{
+			desc: "WithEndpoint and WithAccessToken",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken("my-token"))
+			},
+			assertFn: func(t *testing.T, got *http.Request) {
+				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+				user, pass, ok := got.BasicAuth()
+				if !ok {
+					assert.Fail(t, "should have Basic Authentication headers")
+					return
+				}
+				assert.Equal(t, "auth", user, "should have proper username")
+				assert.Equal(t, "my-token", pass, "should use the provided token as passowrd")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT and SPLUNK_ACCESS_TOKEN",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				clearFn := distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
+				t.Cleanup(clearFn)
+				clearFn = distro.Setenv("SPLUNK_ACCESS_TOKEN", "my-token")
+				t.Cleanup(clearFn)
+				return distro.Run()
+			},
+			assertFn: func(t *testing.T, got *http.Request) {
+				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+				user, pass, ok := got.BasicAuth()
+				if !ok {
+					assert.Fail(t, "should have Basic Authentication headers")
+					return
+				}
+				assert.Equal(t, "auth", user, "should have proper username")
+				assert.Equal(t, "my-token", pass, "should use the provided token as passowrd")
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
-	// HTTP endpoint where a trace is sent
-	reqCh := make(chan *http.Request, 1)
-	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		reqCh <- r
-	}))
-	defer srv.Close()
+			// HTTP endpoint where a trace is sent
+			reqCh := make(chan *http.Request, 1)
+			srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+				reqCh <- r
+			}))
+			defer srv.Close()
 
-	// setup tracer
-	sdk, err := distro.Run(distro.WithEndpoint(srv.URL))
-	require.NoError(t, err, "should configure tracing")
+			// setup tracer
+			sdk, err := tc.setupFn(t, srv.URL)
+			require.NoError(t, err, "should configure tracing")
 
-	// create a sample span
-	_, span := otel.Tracer("distro/otel_test").Start(ctx, "TestRun")
-	span.SetAttributes(attribute.Key("ex.com/foo").String("bar"))
-	span.AddEvent("working")
-	span.End()
+			// create a sample span
+			_, span := otel.Tracer("distro/otel_test").Start(ctx, "TestRun")
+			span.SetAttributes(attribute.Key("ex.com/foo").String("bar"))
+			span.AddEvent("working")
+			span.End()
 
-	// shutdown tracer - this should send the trace
-	err = sdk.Shutdown(ctx)
-	require.NoError(t, err, "should finish tracing")
+			// shutdown tracer - this should send the trace
+			err = sdk.Shutdown(ctx)
+			require.NoError(t, err, "should finish tracing")
 
-	// assert that the span has been received
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out")
-	case got := <-reqCh:
-		assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+			// assert that the span has been received
+			select {
+			case <-ctx.Done():
+				require.Fail(t, "test timeout out")
+			case got := <-reqCh:
+				tc.assertFn(t, got)
+			}
+		})
 	}
 }
