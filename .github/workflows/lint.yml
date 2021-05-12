@@ -20,7 +20,8 @@ on:
   pull_request:
 env:
   # Default minimum version of Go to support.
-  DEFAULT_GO_VERSION: 1.14
+  # Minimum version needed for golangci-lint is 1.15
+  DEFAULT_GO_VERSION: 1.16
 jobs:
   lint:
     runs-on: ubuntu-latest
