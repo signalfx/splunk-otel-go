@@ -58,7 +58,7 @@ func main() {
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
-## Splunk specfic configuration
+## Splunk specific configuration
 
 | Environment variable      | Option             | Default value  | Description |
 | ------------------------- | -------------------| -------------- | ---------------------------------------------------------------------- |

@@ -92,7 +92,7 @@ func WithEndpoint(endpoint string) Option {
 	})
 }
 
-// WithAccessToken configures the auth token
+// WithAccessToken configures the authentication token
 // allowing exporters to send data directly to a Splunk back-end.
 // Setting empty string results in no operation.
 func WithAccessToken(accessToken string) Option {

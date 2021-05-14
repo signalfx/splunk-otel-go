@@ -11,9 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add support for setting the [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
-  using the `SPLUNK_ACCESS_TOKEN` environmental variable or `contrib.WithEndpoint` option.
+  using the `SPLUNK_ACCESS_TOKEN` environmental variable or `distro.WithAccessToken` option.
   It allows exporters sending data directly to the Splunk back-end.
-  To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `contrib.WithEndpoint` must be set
+  To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be set
   with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
 
 ### Changed
@@ -21,7 +21,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The default Jaeger exporter URL is now loaded by
   [`go.opentelemetry.io/otel/exporters/trace/jaeger`](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/trace/jaeger)
   module.
-- Applying `contrib.WithEndpoint("")` results in a no operation.
+- Applying `distro.WithEndpoint("")` results in no operation.
 
 ### Removed
 
