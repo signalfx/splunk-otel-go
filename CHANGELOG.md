@@ -8,12 +8,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add support for setting the [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
+  using the `SPLUNK_ACCESS_TOKEN` environmental variable or `distro.WithAccessToken` option.
+  It allows exporters sending data directly to the Splunk back-end.
+  To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be set
+  with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
+
+### Changed
+
+- The default Jaeger exporter URL is now loaded by
+  [`go.opentelemetry.io/otel/exporters/trace/jaeger`](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/trace/jaeger)
+  module.
+- Applying `distro.WithEndpoint("")` results in no operation.
+
+### Removed
+
+- Remove `SIGNALFX_ENDPOINT_URL` environmental variable, use `OTEL_EXPORTER_JAEGER_ENDPOINT` instead.
+
 ## [0.2.0] - 2021-04-27
 
 The primary change of this release is updating the dependency of `go.opentelemetry.io/otel*` packages from [`v0.19.0`][otel-v0.19.0] to [`v0.20.0`][otel-v0.20.0] and similarly `go.opentelemetry.io/contrib*` package from [`v0.19.0`][contrib-v0.19.0] to [`v0.20.0`][contrib-v0.20.0].
 This includes [a fix](https://github.com/open-telemetry/opentelemetry-go/pull/1830) in the Jaeger exporter.
 This fix removes the duplicate batching that the exporter implemented.
-Now the `BatchSpanProcessor` that `distro` configures by default will not experience an impedence mismatch with this duplicate batching.
+Now the `BatchSpanProcessor` that `distro` configures by default will not experience an impedance mismatch with this duplicate batching.
 
 ### Changed
 
