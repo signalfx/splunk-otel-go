@@ -8,11 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.3.0] - 2021-05-17
+
+The primary changes of this release is added support
+for sending data directly to Splunk Observability Cloud.
+
 ### Added
 
 - Add support for setting the [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
   using the `SPLUNK_ACCESS_TOKEN` environmental variable or `distro.WithAccessToken` option.
-  It allows exporters sending data directly to the Splunk back-end.
+  It allows exporters sending data directly to the Splunk Observability Cloud.
   To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be set
   with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
 
@@ -46,7 +51,8 @@ Now the `BatchSpanProcessor` that `distro` configures by default will not experi
 - Add [`distro`](./distro) package providing functionality to quickly setup the OpenTelemetry Go implementation with useful Splunk defaults.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.3.0
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
