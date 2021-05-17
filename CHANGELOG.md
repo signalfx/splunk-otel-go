@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.3.0] - 2021-05-17
+## [0.3.0] - 2021-05-18
 
 The primary changes of this release is added support
 for sending data directly to Splunk Observability Cloud.
