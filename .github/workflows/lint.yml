@@ -30,13 +30,13 @@ jobs:
       with:
         go-version: ${{ env.DEFAULT_GO_VERSION }}
     - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.5
+    - uses: actions/cache@v2.1.6
       env:
         cache-name: go-mod-cache
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./go.sum') }}
-    - uses: actions/cache@v2.1.5
+    - uses: actions/cache@v2.1.6
       env:
         cache-name: go-tools-cache
       with:
