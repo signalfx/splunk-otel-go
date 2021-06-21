@@ -1,1 +1,3 @@
-* @signalfx/gdi-go-approvers
+* @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
+
+CODEOWNERS @signalfx/gdi-go-maintainers
