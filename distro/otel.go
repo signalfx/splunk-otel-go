@@ -28,7 +28,7 @@ import (
 
 	"go.opentelemetry.io/contrib/propagators/b3"
 	global "go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -60,7 +60,7 @@ func Run(opts ...Option) (SDK, error) {
 	}
 
 	opt := jaeger.WithCollectorEndpoint(jeagerOpts...)
-	exp, err := jaeger.NewRawExporter(opt)
+	exp, err := jaeger.New(opt)
 	if err != nil {
 		return SDK{}, err
 	}
