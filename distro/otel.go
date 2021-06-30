@@ -16,10 +16,9 @@
 Package distro provides functionality to quickly setup the OpenTelemetry Go
 implementation with useful Splunk defaults.
 
-The default configuration will correctly set the default OpenTelemetry SDK to
-propagate traces and export all spans to a locally running Splunk Smart Agent.
-Information about the Splunk Smart Agent can be found here
-https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-smart-agent.html
+The default configuration sets the default OpenTelemetry SDK to propagate traces
+using B3 propagator and export all spans to a locally running
+Splunk OpenTelemetry Connector (http://localhost:14268/api/traces).
 */
 package distro
 

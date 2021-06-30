@@ -15,35 +15,36 @@ application to capture and report distributed traces to Splunk APM.
 This Splunk distribution comes with the following defaults:
 
 - [B3 context propagation](https://github.com/openzipkin/b3-propagation).
-- [Jaeger thrift
-  exporter](https://opentelemetry-python.readthedocs.io/en/stable/exporter/jaeger/jaeger.html)
-  configured to send spans to a locally running [SignalFx Smart
-  Agent](https://docs.signalfx.com/en/latest/apm/apm-getting-started/apm-smart-agent.html)
-  (`http://localhost:9080/v1/trace`).
-- Unlimited default limits for [configuration options](#trace-configuration) to
+- [Jaeger Thrift over HTTP
+  exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
+  configured to send spans to a locally running Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
+  (`http://localhost:14268/api/traces`).
+- Unlimited default limits for configuration options to
   support full-fidelity traces.
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
 ## Getting Started
 
-Supported libraries are listed
-[here](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
+### Bootstrapping
 
-To ensure OpenTelemetry is correctly configured to participate in traces and send telemetry to Splunk, use the [`distro`](./distro) package.
+Configure OpenTelemetry using the [`distro`](./distro) package:
 
-```golang
+```go
+package main
+
+import (
+	"context"
+
+	"github.com/signalfx/splunk-otel-go/distro"
+)
+
 func main() {
-	// By default, the Run function will create a Jaeger exporter to a locally
-	// running Splunk Smart Agent at http://localhost:9080 and will configure
-	// the B3 context propagation format to be used in extracting and
-	// injecting trace context.
 	sdk, err := distro.Run()
 	if err != nil {
 		panic(err)
 	}
-	// To ensure all spans are flushed before the application exits, make sure
-	// to shutdown.
+	// Ensure all spans are flushed before the application exits.
 	defer func() {
 		if err := sdk.Shutdown(context.Background()); err != nil {
 			panic(err)
@@ -53,7 +54,16 @@ func main() {
     /* ... */
 ```
 
-## Manually instrument an application
+### Library instrumentation
+
+Supported libraries are listed
+[here](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
+
+Splunk specific instrumentations:
+
+- [`splunkhttp`](./instrumentation/net/http/splunkhttp)
+
+### Manual instrumentation
 
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
@@ -66,12 +76,8 @@ Documentation on how to manually instrument a Go application is available
 
 [<a name="cfg1">1</a>]: The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
 allows exporters sending data directly to the [Splunk Observability Cloud](https://dev.splunk.com/observability/docs/apibasics/api_list/).
-To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `contrib.WithEndpoint` must be set
+To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be passed to `distro.Run`
 with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
-
-## Splunk specific instrumentations
-
-- [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 
 ## License and versioning
 

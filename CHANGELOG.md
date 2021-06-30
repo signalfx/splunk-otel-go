@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-06-30
+
+The primary change of this release is updating the dependency of `go.opentelemetry.io/otel*` packages from [`v0.20.0`][otel-v0.20.0] to [`v1.0.0-RC1`][otel-v1.0.0-RC1] and `go.opentelemetry.io/contrib*` packages from [`v0.20.0`][contrib-v0.20.0] to [`v0.21.0`][contrib-v0.21.0].
+
 ### Changed
 
 - Update `go.opentelemetry.io/otel*` dependencies from [`v0.20.0`][otel-v0.20.0] to [`v1.0.0-RC1`][otel-v1.0.0-RC1].
@@ -43,7 +47,7 @@ for sending data directly to Splunk Observability Cloud.
 
 ## [0.2.0] - 2021-04-27
 
-The primary change of this release is updating the dependency of `go.opentelemetry.io/otel*` packages from [`v0.19.0`][otel-v0.19.0] to [`v0.20.0`][otel-v0.20.0] and similarly `go.opentelemetry.io/contrib*` package from [`v0.19.0`][contrib-v0.19.0] to [`v0.20.0`][contrib-v0.20.0].
+The primary change of this release is updating the dependency of `go.opentelemetry.io/otel*` packages from [`v0.19.0`][otel-v0.19.0] to [`v0.20.0`][otel-v0.20.0] and similarly `go.opentelemetry.io/contrib*` packages from [`v0.19.0`][contrib-v0.19.0] to [`v0.20.0`][contrib-v0.20.0].
 This includes [a fix](https://github.com/open-telemetry/opentelemetry-go/pull/1830) in the Jaeger exporter.
 This fix removes the duplicate batching that the exporter implemented.
 Now the `BatchSpanProcessor` that `distro` configures by default will not experience an impedance mismatch with this duplicate batching.
@@ -60,7 +64,8 @@ Now the `BatchSpanProcessor` that `distro` configures by default will not experi
 - Add [`distro`](./distro) package providing functionality to quickly setup the OpenTelemetry Go implementation with useful Splunk defaults.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.4.0
 [0.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.3.0
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
