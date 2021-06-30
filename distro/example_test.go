@@ -21,10 +21,9 @@ import (
 )
 
 func Example() {
-	// By default, the Run function will create a Jaeger exporter to a locally
-	// running Splunk Smart Agent at http://localhost:9080 and will configure
-	// the B3 context propagation format to be used in extracting and
-	// injecting trace context.
+	// By default, the Run function creates a Jaeger Thrift over HTTP exporter
+	// to http://localhost:14268/api/traces and configures the B3 context
+	// propagation format to be used in extracting and injecting trace context.
 	sdk, err := distro.Run()
 	if err != nil {
 		panic(err)
