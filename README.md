@@ -19,7 +19,7 @@ This Splunk distribution comes with the following defaults:
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
   configured to send spans to a locally running Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
   (`http://localhost:14268/api/traces`).
-- Unlimited default limits for [configuration options](#trace-configuration) to
+- Unlimited default limits for configuration options to
   support full-fidelity traces.
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
