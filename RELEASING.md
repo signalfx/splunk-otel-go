@@ -4,23 +4,15 @@
 
 Update go.mod for submodules to depend on the new release which will happen in the next step.
 
-1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
-
-2. Run the pre-release script. It creates a branch `pre_release_<new tag>` that will contain all release changes.
+1. Run the pre-release script. It creates a branch `pre_release_<new tag>` that will contain all release changes.
 
     ```sh
     ./pre_release.sh -t <new tag>
     ```
 
-3. Verify the changes.
+2. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
-    ```sh
-    git diff
-    ```
-
-    This should have changed the version for all modules to be `<new tag>`.
-
-4. Push the changes to upstream and create a Pull Request on GitHub.
+3. Push the changes to upstream and create a Pull Request on GitHub.
 
 ## Tag
 
