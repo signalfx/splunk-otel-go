@@ -116,7 +116,7 @@ Below you will find all the configuration options supported by this distribution
 <!-- markdownlint-disable MD013 -->
 | Environment variable      | Option             | Default value  | Description |
 | ------------------------- | -------------------| -------------- | ----------- |
-| `SPLUNK_ACCESS_TOKEN`     | `WithAccessToken`  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
+| `SPLUNK_ACCESS_TOKEN`     | [`WithAccessToken`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithAccessToken)  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
 | `OTEL_RESOURCE_ATTRIBUTES` |                    |                | Comma-separated list of resource attributes added to every reported span. |
 <!-- markdownlint-enable MD013 -->
 
@@ -139,7 +139,7 @@ with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v
 <!-- markdownlint-disable MD013 -->
 | Environment variable            | Option             | Default value  | Description |
 | ------------------------------- | -------------------| -------------- | ----------- |
-| `OTEL_EXPORTER_JAEGER_ENDPOINT` | `WithEndpoint`     | `http://localhost:14268/api/traces` | Jaeger Thrift HTTP endpoint for sending spans. |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT` | [`WithEndpoint`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithEndpoint)     | `http://localhost:14268/api/traces` | Jaeger Thrift HTTP endpoint for sending spans. |
 | `OTEL_EXPORTER_JAEGER_USER`     |                    |                | Username to be used for HTTP basic authentication. |
 | `OTEL_EXPORTER_JAEGER_PASSWORD` |                    |                | Password to be used for HTTP basic authentication. |
 <!-- markdownlint-enable MD013 -->
