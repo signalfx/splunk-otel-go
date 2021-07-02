@@ -27,7 +27,7 @@ Table of Contents:
   - [Trace Configuration](#trace-configuration)
   - [Trace Exporter Configuration](#trace-exporter-configuration)
   - [Trace Propagation Configuration](#trace-propagation-configuration)
-- [License and versioning](#license-and-versioning)
+- [License](#license)
 
 ## Getting Started
 
@@ -152,7 +152,7 @@ The trace propagtor can be change after executing `distro.Run()` as follows:
 otel.SetTextMapPropagator(propagation.TraceContext{})
 ```
 
-## License and versioning
+## License
 
 The Splunk distribution of OpenTelemetry Go is a
 distribution of the [OpenTelemetry Go
