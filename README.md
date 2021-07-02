@@ -122,8 +122,8 @@ Below you will find all the configuration options supported by this distribution
 
 [<a name="cfg1">1</a>]: The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
 allows exporters sending data directly to the [Splunk Observability Cloud](https://dev.splunk.com/observability/docs/apibasics/api_list/).
-To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be
-passed to `distro.Run`
+To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` must be set
+or `distro.WithEndpoint` must be passed to `distro.Run`
 with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
 
 ### Trace Configuration
