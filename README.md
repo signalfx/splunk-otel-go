@@ -12,16 +12,6 @@ Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple packages that automatically instruments your Go
 application to capture and report distributed traces to Splunk APM.
 
-This Splunk distribution comes with the following defaults:
-
-- [B3 context propagation](https://github.com/openzipkin/b3-propagation).
-- [Jaeger Thrift over HTTP
-  exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
-  configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
-  (`http://localhost:14268/api/traces`).
-- Unlimited default limits for configuration options to
-  support full-fidelity traces.
-
 > :construction: This project is currently in **BETA**.
 > It is **officially supported** by Splunk.
 > However, breaking changes **MAY** be introduced.
@@ -40,6 +30,16 @@ Table of Contents:
 - [License and versioning](#license-and-versioning)
 
 ## Getting Started
+
+This Splunk distribution comes with the following defaults:
+
+- [B3 context propagation](https://github.com/openzipkin/b3-propagation).
+- [Jaeger Thrift over HTTP
+  exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
+  configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
+  (`http://localhost:14268/api/traces`).
+- Unlimited default limits for configuration options to
+  support full-fidelity traces.
 
 Install the distribution:
 
