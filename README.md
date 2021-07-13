@@ -1,6 +1,6 @@
 # Splunk distribution of OpenTelemetry Go
 
-[![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go)](https://github.com/signalfx/splunk-otel-go/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go?include_prereleases)](https://github.com/signalfx/splunk-otel-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
 [![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/splunk-otel-go)](go.mod)
 [![LICENSE](https://img.shields.io/github/license/signalfx/splunk-otel-go)](LICENSE)
@@ -9,24 +9,43 @@
 
 The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
-multiple installable packages that automatically instruments your Go
+multiple packages that automatically instruments your Go
 application to capture and report distributed traces to Splunk APM.
+
+> :construction: This project is currently in **BETA**.
+> It is **officially supported** by Splunk.
+> However, breaking changes **MAY** be introduced.
+
+Table of Contents:
+
+- [Getting Started](#getting-started)
+  - [Basic Configuration](#basic-configuration)
+- [Library Instrumentation](#library-instrumentation)
+- [Manual Instrumentation](#manual-instrumentation)
+- [Advanced Configuration](#advanced-configuration)
+  - [Splunk Distribution Configuration](#splunk-distribution-configuration)
+  - [Trace Configuration](#trace-configuration)
+  - [Trace Exporter Configuration](#trace-exporter-configuration)
+  - [Trace Propagation Configuration](#trace-propagation-configuration)
+- [License](#license)
+
+## Getting Started
 
 This Splunk distribution comes with the following defaults:
 
 - [B3 context propagation](https://github.com/openzipkin/b3-propagation).
 - [Jaeger Thrift over HTTP
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
-  configured to send spans to a locally running Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
+  configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
   (`http://localhost:14268/api/traces`).
 - Unlimited default limits for configuration options to
   support full-fidelity traces.
 
-> :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
+Install the distribution:
 
-## Getting Started
-
-### Bootstrapping
+```sh
+go get github.com/signalfx/splunk-otel-go/distro
+```
 
 Configure OpenTelemetry using the [`distro`](./distro) package:
 
@@ -34,7 +53,7 @@ Configure OpenTelemetry using the [`distro`](./distro) package:
 package main
 
 import (
-	"context"
+  "context"
 
 	"github.com/signalfx/splunk-otel-go/distro"
 )
@@ -51,35 +70,92 @@ func main() {
 		}
 	}()
 
-    /* ... */
+	// ...
 ```
 
-### Library instrumentation
+### Basic Configuration
+
+The `service.name` resource attribute is the only configuration option that
+needs to be specified using the `OTEL_RESOURCE_ATTRIBUTES` environment variable.
+
+The `deployment.environment` and `service.version` resource attributes are not
+strictly required, but recommended to be set if they are available.
+
+It can be done in the shell:
+
+```sh
+OTEL_RESOURCE_ATTRIBUTES="service.name=my-app,service.version=1.2.3,deployment.environment=production"
+```
+
+As well as in Go code before executing `distro.Run()`:
+
+```go
+os.Setenv("OTEL_RESOURCE_ATTRIBUTES", "service.name=my-app,service.version=1.2.3,deployment.environment=development")
+```
+
+## Library Instrumentation
 
 Supported libraries are listed
 [here](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
 
-Splunk specific instrumentations:
+Additional recommended Splunk specific instrumentations:
 
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 
-### Manual instrumentation
+## Manual Instrumentation
 
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
-## Splunk specific configuration
+## Advanced Configuration
 
+Below you will find all the configuration options supported by this distribution.
+
+### Splunk Distribution Configuration
+
+<!-- markdownlint-disable MD013 -->
 | Environment variable      | Option             | Default value  | Description |
-| ------------------------- | -------------------| -------------- | ---------------------------------------------------------------------- |
-| `SPLUNK_ACCESS_TOKEN`     | `WithAccessToken`  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
+| ------------------------- | -------------------| -------------- | ----------- |
+| `SPLUNK_ACCESS_TOKEN`     | [`WithAccessToken`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithAccessToken)  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
+| `OTEL_RESOURCE_ATTRIBUTES` |                    |                | Comma-separated list of resource attributes added to every reported span. |
+<!-- markdownlint-enable MD013 -->
 
 [<a name="cfg1">1</a>]: The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
 allows exporters sending data directly to the [Splunk Observability Cloud](https://dev.splunk.com/observability/docs/apibasics/api_list/).
-To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be passed to `distro.Run`
+To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` must be set
+or `distro.WithEndpoint` must be passed to `distro.Run`
 with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
 
-## License and versioning
+### Trace Configuration
+
+<!-- markdownlint-disable MD013 -->
+| Environment variable       | Option             | Default value  | Description |
+| -------------------------- | -------------------| -------------- | ----------- |
+| `OTEL_RESOURCE_ATTRIBUTES` |                    |                | Comma-separated list of resource attributes added to every reported span. |
+<!-- markdownlint-enable MD013 -->
+
+### Trace Exporter Configuration
+
+<!-- markdownlint-disable MD013 -->
+| Environment variable            | Option             | Default value  | Description |
+| ------------------------------- | -------------------| -------------- | ----------- |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT` | [`WithEndpoint`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithEndpoint)     | `http://localhost:14268/api/traces` | Jaeger Thrift HTTP endpoint for sending spans. |
+| `OTEL_EXPORTER_JAEGER_USER`     |                    |                | Username to be used for HTTP basic authentication. |
+| `OTEL_EXPORTER_JAEGER_PASSWORD` |                    |                | Password to be used for HTTP basic authentication. |
+<!-- markdownlint-enable MD013 -->
+
+### Trace Propagation Configuration
+
+The trace propagtor can be changed by using
+[`otel.SetTextMapPropagator`](https://pkg.go.dev/go.opentelemetry.io/otel#SetTextMapPropagator)
+after `distro.Run()` is invoked e.g.:
+
+```go
+distro.Run()
+otel.SetTextMapPropagator(propagation.TraceContext{})
+```
+
+## License
 
 The Splunk distribution of OpenTelemetry Go is a
 distribution of the [OpenTelemetry Go

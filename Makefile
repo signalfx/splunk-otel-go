@@ -37,7 +37,7 @@ SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 all: mod-tidy build lint license-check test-race
 
 .PHONY: ci
-ci: mod-tidy build lint license-check diff
+ci: mod-tidy build lint markdownlint license-check diff
 
 .PHONY: build
 build: # build whole codebase
@@ -82,6 +82,10 @@ test-coverage:
 lint: | $(GOLANGCI_LINT)
 # Run once to fix and run again to verify resolution.
 	${call for-all-modules,$(GOLANGCI_LINT) run --fix && $(GOLANGCI_LINT) run}
+
+.PHONY: markdownlint
+markdownlint:
+	docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli:0.27.1 **/*.md
 
 # Pre-release targets
 

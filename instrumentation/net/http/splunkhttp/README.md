@@ -18,9 +18,11 @@ import (
 func main() {
 	distro.Run()
 
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello"))
-	})
+	var handler http.Handler = http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Hello"))
+		}
+	)
 	handler = splunkhttp.NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "my-service")
 
@@ -32,9 +34,11 @@ func main() {
 
 ### Splunk distribution configuration
 
+<!-- markdownlint-disable MD013 -->
 | Code                                                       | Environment variable                   | Default value  | Purpose                                         |
 | ---------------------------------------------------------- | -------------------------------------- | -------------- | ----------------------------------------------- |
 | `WithTraceResponseHeader`, `TraceResponseHeaderMiddleware` | `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses. [More](#Trace-linkage-between-the-APM-and-RUM-products) |
+<!-- markdownlint-enable MD013 -->
 
 ## Features
 
@@ -49,4 +53,5 @@ Access-Control-Expose-Headers: Server-Timing
 Server-Timing: traceparent;desc="00-<serverTraceId>-<serverSpanId>-01"
 ```
 
-This information can be later consumed by the [splunk-otel-js-web](https://github.com/signalfx/splunk-otel-js-web) library.
+This information can be later consumed by the [splunk-otel-js-web](https://github.com/signalfx/splunk-otel-js-web)
+library.
