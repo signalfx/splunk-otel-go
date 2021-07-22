@@ -17,14 +17,14 @@ SHELL := /bin/bash
 GO               = go
 TIMEOUT          = 15
 PKGS             = ./...
-TOOLS_MODULE_DIR = ./internal/tools
+BUILD_DIR        = ./build
 TEST_RESULTS     = $(CURDIR)/test-results
 
 # Verbose output
 V = 0
 Q = $(if $(filter 1,$V),,@)
 
-# ALL_MODULES includes ./* dirs (excludes . and ./internal/tools dir).
+# ALL_MODULES includes ./* dirs (excludes . and ./build dir).
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 # All directories with go.mod files related to opentelemetry library. Used for building, testing and linting.
 ALL_GO_MOD_DIRS := $(filter-out $(TOOLS_MODULE_DIR), $(ALL_MODULES))
