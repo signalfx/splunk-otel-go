@@ -561,8 +561,8 @@ github.com/shirou/gopsutil/v3 v3.21.5/go.mod h1:ghfMypLDrFSWN2c9cDYFLHyynQ+QUht0
 github.com/shurcooL/go v0.0.0-20180423040247-9e1955d9fb6e/go.mod h1:TDJrrUr11Vxrven61rcy3hJMUqaf/CLWYhHNPmT14Lk=
 github.com/shurcooL/go-goon v0.0.0-20170922171312-37c2f522c041/go.mod h1:N5mDOmsrJOB+vfqUK+7DmDyjhSLIIBnXo9lvZJj3MWQ=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
-github.com/signalfx/go-pipeline v0.0.0-20210722141218-0a4dc2b825ff h1:pZO88878Q2KOFwDV5NJa+x11UtE+jCIKtAmOYOQhIfM=
-github.com/signalfx/go-pipeline v0.0.0-20210722141218-0a4dc2b825ff/go.mod h1:4IzPGRYi1Xea9Vdc40JokOZH++kfPah1AAyUWe9S3C4=
+github.com/signalfx/go-pipeline v0.0.0-20210722152538-b438c80dad54 h1:3ABYREHUR6XLU+al4bwM30eeSq6R6XIYv8nYH5v72cY=
+github.com/signalfx/go-pipeline v0.0.0-20210722152538-b438c80dad54/go.mod h1:4IzPGRYi1Xea9Vdc40JokOZH++kfPah1AAyUWe9S3C4=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sirupsen/logrus v1.6.0/go.mod h1:7uNnSEd1DgxDLC74fIahvMZmmYsHGZGEOFrfsX/uA88=

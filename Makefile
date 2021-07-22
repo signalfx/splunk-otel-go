@@ -27,14 +27,9 @@ Q = $(if $(filter 1,$V),,@)
 # ALL_MODULES includes ./* dirs (excludes . and ./build dir).
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 # All directories with go.mod files related to opentelemetry library. Used for building, testing and linting.
-ALL_GO_MOD_DIRS := $(filter-out $(TOOLS_MODULE_DIR), $(ALL_MODULES))
+ALL_GO_MOD_DIRS := $(filter-out $(BUILD_DIR), $(ALL_MODULES))
 # All directories sub-modules. Used for tagging and generating dependabot config.
 SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
-
-.DEFAULT_GOAL := all
-
-.PHONY: all
-all: mod-tidy build test-race
 
 .PHONY: build
 build: # build whole codebase
@@ -49,7 +44,7 @@ TOOLS = $(CURDIR)/.tools
 $(TOOLS):
 	@mkdir -p $@
 $(TOOLS)/%: | $(TOOLS)
-	$Q cd $(TOOLS_MODULE_DIR) \
+	$Q cd $(BUILD_DIR) \
 		&& $(GO) build -o $@ $(PACKAGE)
 
 # Tests
@@ -120,12 +115,6 @@ gendependabot: # generate dependabot.yml
 		(echo "Add entry for \"$${dir:1}\"" && \
 		  printf "  - package-ecosystem: \"gomod\"\n    directory: \"$${dir:1}\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH} ); \
 	done
-
-.PHONY: mod-tidy
-mod-tidy: # go mod tidy for all modules
-	${call for-all-modules,$(GO) mod tidy}
-	@echo "$(GO) mod tidy in $(TOOLS_MODULE_DIR)"
-	$Q (cd $(TOOLS_MODULE_DIR) && $(GO) mod tidy)
 
 .PHONY: diff
 diff:
