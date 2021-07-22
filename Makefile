@@ -34,10 +34,10 @@ SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 .DEFAULT_GOAL := all
 
 .PHONY: all
-all: mod-tidy build lint license-check test-race
+all: mod-tidy build test-race
 
 .PHONY: ci
-ci: mod-tidy build lint markdownlint license-check diff
+ci: mod-tidy build diff
 
 .PHONY: build
 build: # build whole codebase
@@ -54,9 +54,6 @@ $(TOOLS):
 $(TOOLS)/%: | $(TOOLS)
 	$Q cd $(TOOLS_MODULE_DIR) \
 		&& $(GO) build -o $@ $(PACKAGE)
-
-GOLANGCI_LINT = $(TOOLS)/golangci-lint
-$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # Tests
 
@@ -77,15 +74,6 @@ test-coverage: COVERAGE_DIR := $(TEST_RESULTS)/coverage_$(shell date -u +"%s")
 test-coverage:
 	$Q mkdir -p $(COVERAGE_DIR)
 	${call for-all-modules,$(GO) test -coverpkg=$(PKGS) -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" $(PKGS)}
-
-.PHONY: lint
-lint: | $(GOLANGCI_LINT)
-# Run once to fix and run again to verify resolution.
-	${call for-all-modules,$(GOLANGCI_LINT) run --fix && $(GOLANGCI_LINT) run}
-
-.PHONY: markdownlint
-markdownlint:
-	docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli:0.27.1 **/*.md
 
 # Pre-release targets
 
@@ -135,16 +123,6 @@ gendependabot: # generate dependabot.yml
 		(echo "Add entry for \"$${dir:1}\"" && \
 		  printf "  - package-ecosystem: \"gomod\"\n    directory: \"$${dir:1}\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH} ); \
 	done
-
-.PHONY: license-check
-license-check: # check if license is applied to relevant files
-	$Q licRes=$$(for f in $$(find . -type f \( -iname '*.go' -o -iname '*.sh' -o -iname '*.yml' \)) ; do \
-	           awk '/Copyright Splunk Inc.|generated|GENERATED/ && NR<=3 { found=1; next } END { if (!found) print FILENAME }' $$f; \
-	   done); \
-	   if [ -n "$${licRes}" ]; then \
-	           echo "license header checking failed:"; echo "$${licRes}"; \
-	           exit 1; \
-	   fi
 
 .PHONY: mod-tidy
 mod-tidy: # go mod tidy for all modules
