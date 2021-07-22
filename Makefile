@@ -36,9 +36,6 @@ SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 .PHONY: all
 all: mod-tidy build test-race
 
-.PHONY: ci
-ci: mod-tidy build diff
-
 .PHONY: build
 build: # build whole codebase
 	${call for-all-modules,$(GO) build $(PKGS)}
