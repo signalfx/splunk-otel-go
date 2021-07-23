@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-go@v2.1.3
         with:
           go-version: '1.16'
-      - run: ${{ run-script }}
+      - run: ${{ matrix.run-script }}
       - uses: codecov/codecov-action@v2.0.1
         with:
           files: ./test-results/coverage.out
