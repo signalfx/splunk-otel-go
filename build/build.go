@@ -16,8 +16,12 @@ package main
 
 import (
 	"github.com/signalfx/go-pipeline"
+
+	"github.com/goyek/goyek"
 )
 
 func main() {
-	pipeline.Flow().Main()
+	flow := &goyek.Taskflow{}
+	pipeline.Register(flow)
+	flow.Main()
 }
