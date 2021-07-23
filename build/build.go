@@ -15,9 +15,9 @@
 package main
 
 import (
-	"github.com/signalfx/go-pipeline"
-
 	"github.com/goyek/goyek"
+
+	"github.com/signalfx/go-pipeline"
 )
 
 func main() {
