@@ -31,21 +31,16 @@ ALL_GO_MOD_DIRS := $(filter-out $(BUILD_DIR), $(ALL_MODULES))
 # All directories sub-modules. Used for tagging and generating dependabot config.
 SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 
+.DEFAULT_GOAL := goyek
+.PHONY: goyek
+goyek:
+	./goyek.sh
+
 .PHONY: build
 build: # build whole codebase
 	${call for-all-modules,$(GO) build $(PKGS)}
 # Compile all test code.
 	${call for-all-modules,$(GO) test -vet=off -run xxxxxMatchNothingxxxxx $(PKGS) >/dev/null}
-
-# Tools
-
-TOOLS = $(CURDIR)/.tools
-
-$(TOOLS):
-	@mkdir -p $@
-$(TOOLS)/%: | $(TOOLS)
-	$Q cd $(BUILD_DIR) \
-		&& $(GO) build -o $@ $(PACKAGE)
 
 # Tests
 

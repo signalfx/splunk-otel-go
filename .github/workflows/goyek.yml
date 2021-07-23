@@ -1,4 +1,4 @@
-name: build
+name: goyek
 
 on:
   push:
