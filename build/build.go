@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	flow := &goyek.Taskflow{}
+	flow := &goyek.Flow{}
 	pipeline.Register(flow)
 	flow.Main()
 }
