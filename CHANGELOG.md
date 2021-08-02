@@ -8,6 +8,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-07-27
+
+The primary change of this release is updating `go.opentelemetry.io/otel*`
+dependencies to [`v1.0.0-RC2`][otel-v1.0.0-RC2] and
+`go.opentelemetry.io/contrib*` dependencies to [`v0.22.0`][contrib-v0.22.0].
+
+### Changed
+
+- Update `go.opentelemetry.io/otel*` dependencies from [`v1.0.0-RC1`][otel-v1.0.0-RC1]
+  to [`v1.0.0-RC2`][otel-v1.0.0-RC2].
+- Update `go.opentelemetry.io/contrib*` dependencies from [`v0.21.0`][contrib-v0.21.0]
+  to [`v0.22.0`][contrib-v0.22.0].
+
 ## [0.4.0] - 2021-06-30
 
 The primary change of this release is updating the dependency of `go.opentelemetry.io/otel*`
@@ -78,16 +91,19 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.5.0
 [0.4.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.4.0
 [0.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.3.0
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.0.0-RC2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC2
 [otel-v1.0.0-RC1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC1
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v0.22.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.22.0
 [contrib-v0.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.21.0
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
