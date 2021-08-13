@@ -11,6 +11,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/build"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/internal/tools"
     schedule:
       interval: "daily"
