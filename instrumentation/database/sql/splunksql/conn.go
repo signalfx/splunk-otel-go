@@ -158,20 +158,14 @@ func (c *otelConn) ResetSession(ctx context.Context) error {
 	return err
 }
 
-func handleErr(span trace.Span, err error) {
-	if span == nil {
-		return
+// copied from stdlib database/sql package: src/database/sql/ctxutil.go
+func namedValueToValue(named []driver.NamedValue) ([]driver.Value, error) {
+	vArgs := make([]driver.Value, len(named))
+	for n, param := range named {
+		if len(param.Name) > 0 {
+			return nil, errors.New("splunksql: driver does not support the use of Named Parameters")
+		}
+		vArgs[n] = param.Value
 	}
-
-	switch err {
-	case nil:
-		// Everything Okay.
-	case io.EOF:
-		// Expected at end of iteration, do not record these.
-	case driver.ErrSkip:
-		// Expected if method not implemented, do not record these.
-	default:
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
+	return vArgs, nil
 }
