@@ -27,12 +27,12 @@ func newConfig(options ...Option) config {
 	return c
 }
 
-// Return an OTel Tracer from the appropriate TracerProvider.
+// tracer returns an OTel tracer from the appropriate TracerProvider.
 //
 // If the passed context contains a span, the TracerProvider that created the
-// Tracer that created that span will be used. Otherwise, the TracerProvider
+// tracer that created that span will be used. Otherwise, the TracerProvider
 // from c is used.
-func (c config) Tracer(ctx context.Context) trace.Tracer {
+func (c config) tracer(ctx context.Context) trace.Tracer {
 	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
@@ -43,6 +43,24 @@ func (c config) Tracer(ctx context.Context) trace.Tracer {
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
+}
+
+// withClientSpan wraps the function f with a span.
+func (c config) withClientSpan(ctx context.Context, name spanName, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
+
+	var (
+		err  error
+		span trace.Span
+	)
+	ctx, span = c.tracer(ctx).Start(ctx, name.String(), opts...)
+	defer func() {
+		handleErr(span, err)
+		span.End()
+	}()
+
+	err = f(ctx)
+	return err
 }
 
 type Option interface {
