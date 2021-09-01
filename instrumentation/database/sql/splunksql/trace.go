@@ -8,22 +8,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type spanName string
-
-const (
-	querySpan    spanName = "Query"
-	pingSpan              = "Ping"
-	prepareSpan           = "Prepare"
-	execSpan              = "Exec"
-	beginSpan             = "Begin"
-	resetSpan             = "Reset"
-	closeSpan             = "Close"
-	commitSpan            = "Commit"
-	rollbackSpan          = "Rollback"
-)
-
-func (n spanName) String() string { return string(n) }
-
 func handleErr(span trace.Span, err error) {
 	if span == nil {
 		return

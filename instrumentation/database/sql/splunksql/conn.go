@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"errors"
 
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -38,7 +39,7 @@ func (c *otelConn) Ping(ctx context.Context) error {
 	if !ok {
 		return driver.ErrSkip
 	}
-	return c.config.withClientSpan(ctx, pingSpan, pinger.Ping)
+	return c.config.withClientSpan(ctx, moniker.Ping, pinger.Ping)
 }
 
 // Exec calls the wrapped Connection Exec method if implemented.
@@ -76,7 +77,7 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	}
 
-	err := c.config.withClientSpan(ctx, execSpan, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	return res, err
 }
 
@@ -115,7 +116,7 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	}
 
-	err := c.config.withClientSpan(ctx, querySpan, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +131,7 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 	}
 
 	var stmt driver.Stmt
-	err := c.config.withClientSpan(ctx, prepareSpan, func(ctx context.Context) error {
+	err := c.config.withClientSpan(ctx, moniker.Prepare, func(ctx context.Context) error {
 		var err error
 		stmt, err = preparer.PrepareContext(ctx, query)
 		return err
@@ -150,7 +151,7 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 	}
 
 	var tx driver.Tx
-	err := c.config.withClientSpan(ctx, beginSpan, func(ctx context.Context) error {
+	err := c.config.withClientSpan(ctx, moniker.Begin, func(ctx context.Context) error {
 		var err error
 		tx, err = transactor.BeginTx(ctx, opts)
 		return err
@@ -169,7 +170,7 @@ func (c *otelConn) ResetSession(ctx context.Context) error {
 		return driver.ErrSkip
 	}
 
-	return c.config.withClientSpan(ctx, resetSpan, resetter.ResetSession)
+	return c.config.withClientSpan(ctx, moniker.Reset, resetter.ResetSession)
 }
 
 // copied from stdlib database/sql package: src/database/sql/ctxutil.go

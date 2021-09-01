@@ -4,6 +4,7 @@ import (
 	"context"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -46,7 +47,7 @@ func (c config) tracer(ctx context.Context) trace.Tracer {
 }
 
 // withClientSpan wraps the function f with a span.
-func (c config) withClientSpan(ctx context.Context, name spanName, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+func (c config) withClientSpan(ctx context.Context, name moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
 	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
 
 	var (
