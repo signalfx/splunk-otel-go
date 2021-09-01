@@ -3,9 +3,8 @@ package splunksql // import "github.com/signalfx/splunk-otel-go/instrumentation/
 import (
 	"context"
 	"database/sql/driver"
-	"io"
+	"errors"
 
-	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -19,7 +18,9 @@ type otelConn struct {
 // Compile-time check otelConn implements database interfaces.
 var (
 	_ driver.Pinger             = (*otelConn)(nil)
+	_ driver.Execer             = (*otelConn)(nil)
 	_ driver.ExecerContext      = (*otelConn)(nil)
+	_ driver.Queryer            = (*otelConn)(nil)
 	_ driver.QueryerContext     = (*otelConn)(nil)
 	_ driver.Conn               = (*otelConn)(nil)
 	_ driver.ConnPrepareContext = (*otelConn)(nil)
@@ -37,64 +38,87 @@ func (c *otelConn) Ping(ctx context.Context) error {
 	if !ok {
 		return driver.ErrSkip
 	}
+	return c.config.withClientSpan(ctx, pingSpan, pinger.Ping)
+}
 
-	var (
-		err  error
-		span trace.Span
-	)
-	ctx, span = c.config.Tracer(ctx).Start(ctx, "Ping", trace.WithSpanKind(trace.SpanKindClient))
-	defer func() {
-		handleErr(span, err)
-		span.End()
-	}()
-
-	err = pinger.Ping(ctx)
-	return err
+// Exec calls the wrapped Connection Exec method if implemented.
+func (c *otelConn) Exec(query string, args []driver.Value) (driver.Result, error) {
+	if execer, ok := c.Conn.(driver.Execer); ok {
+		return execer.Exec(query, args)
+	}
+	return nil, driver.ErrSkip
 }
 
 // ExecContext traces the call to the wrapped Connection ExecContext method.
+// If the wrapped driver does not implement this method it will fallback to
+// wrapping a call to Exec.
 func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
-	execer, ok := c.Conn.(driver.ExecerContext)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f   func(context.Context) error
+		res driver.Result
+	)
+	if execer, ok := c.Conn.(driver.ExecerContext); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			res, err = execer.ExecContext(ctx, query, args)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Exec.
+		vArgs, err := namedValueToValue(args)
+		if err != nil {
+			return nil, err
+		}
+		f = func(ctx context.Context) error {
+			var err error
+			res, err = c.Exec(query, vArgs)
+			return err
+		}
 	}
 
-	var span trace.Span
-	ctx, span = c.config.Tracer(ctx).Start(
-		ctx,
-		"Exec",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.DBStatementKey.String(query)),
-	)
-	defer span.End()
-
-	res, err := execer.ExecContext(ctx, query, args)
-	handleErr(span, err)
+	err := c.config.withClientSpan(ctx, execSpan, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	return res, err
 }
 
+// Query calls the wrapped Connection Query method if implemented.
+func (c *otelConn) Query(query string, args []driver.Value) (driver.Rows, error) {
+	if queryer, ok := c.Conn.(driver.Queryer); ok {
+		return queryer.Query(query, args)
+	}
+	return nil, driver.ErrSkip
+}
+
 // QueryContext traces the call to the wrapped Connection QueryContext method.
+// If the wrapped driver does not implement this method it will fallback to
+// wrapping a call to Query.
 func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
-	queryer, ok := c.Conn.(driver.QueryerContext)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f    func(context.Context) error
+		rows driver.Rows
+	)
+	if queryer, ok := c.Conn.(driver.QueryerContext); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			rows, err = queryer.QueryContext(ctx, query, args)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Query.
+		vArgs, err := namedValueToValue(args)
+		if err != nil {
+			return nil, err
+		}
+		f = func(ctx context.Context) error {
+			var err error
+			rows, err = c.Query(query, vArgs)
+			return err
+		}
 	}
 
-	// Split the context to make the query and returned rows spans siblings.
-	qCtx, span := c.config.Tracer(ctx).Start(
-		ctx,
-		"Query",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.DBStatementKey.String(query)),
-	)
-	defer span.End()
-
-	rows, err := queryer.QueryContext(qCtx, query, args)
+	err := c.config.withClientSpan(ctx, querySpan, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
-		handleErr(span, err)
 		return nil, err
 	}
-
 	return newRows(ctx, rows, c.config), nil
 }
 
@@ -105,18 +129,14 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 		return nil, driver.ErrSkip
 	}
 
-	var span trace.Span
-	ctx, span = c.config.Tracer(ctx).Start(
-		ctx,
-		"Prepare",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.DBStatementKey.String(query)),
-	)
-	defer span.End()
+	var stmt driver.Stmt
+	err := c.config.withClientSpan(ctx, prepareSpan, func(ctx context.Context) error {
+		var err error
+		stmt, err = preparer.PrepareContext(ctx, query)
+		return err
 
-	stmt, err := preparer.PrepareContext(ctx, query)
+	}, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
-		handleErr(span, err)
 		return nil, err
 	}
 	return newStmt(stmt, c.config, query), nil
@@ -129,16 +149,16 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		return nil, driver.ErrSkip
 	}
 
-	// Split the context to make the begin and returned tx spans siblings.
-	tCtx, span := c.config.Tracer(ctx).Start(ctx, "Begin", trace.WithSpanKind(trace.SpanKindClient))
-	defer span.End()
+	var tx driver.Tx
+	err := c.config.withClientSpan(ctx, beginSpan, func(ctx context.Context) error {
+		var err error
+		tx, err = transactor.BeginTx(ctx, opts)
+		return err
 
-	tx, err := transactor.BeginTx(tCtx, opts)
+	})
 	if err != nil {
-		handleErr(span, err)
 		return nil, err
 	}
-
 	return newTx(ctx, tx, c.config), nil
 }
 
@@ -149,13 +169,7 @@ func (c *otelConn) ResetSession(ctx context.Context) error {
 		return driver.ErrSkip
 	}
 
-	var span trace.Span
-	ctx, span = c.config.Tracer(ctx).Start(ctx, "Reset", trace.WithSpanKind(trace.SpanKindClient))
-	defer span.End()
-
-	err := resetter.ResetSession(ctx)
-	handleErr(span, err)
-	return err
+	return c.config.withClientSpan(ctx, resetSpan, resetter.ResetSession)
 }
 
 // copied from stdlib database/sql package: src/database/sql/ctxutil.go

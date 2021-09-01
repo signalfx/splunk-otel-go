@@ -19,7 +19,7 @@ type otelRows struct {
 var _ driver.Rows = (*otelRows)(nil)
 
 func newRows(ctx context.Context, rows driver.Rows, c config) *otelRows {
-	_, span := c.Tracer(ctx).Start(ctx, "Rows", trace.WithSpanKind(trace.SpanKindClient))
+	_, span := c.tracer(ctx).Start(ctx, "Rows", trace.WithSpanKind(trace.SpanKindClient))
 	return &otelRows{
 		Rows:   rows,
 		span:   span,

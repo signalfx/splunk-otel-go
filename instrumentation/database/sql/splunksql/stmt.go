@@ -30,47 +30,62 @@ func newStmt(stmt driver.Stmt, c config, query string) *otelStmt {
 // ExecContext executes and traces a query that doesn't return rows, such as
 // an INSERT or UPDATE.
 func (s *otelStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
-	execer, ok := s.Stmt.(driver.StmtExecContext)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f   func(context.Context) error
+		res driver.Result
+	)
+	if execer, ok := s.Stmt.(driver.StmtExecContext); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			res, err = execer.ExecContext(ctx, args)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Exec.
+		vArgs, err := namedValueToValue(args)
+		if err != nil {
+			return nil, err
+		}
+		f = func(ctx context.Context) error {
+			var err error
+			res, err = s.Exec(vArgs)
+			return err
+		}
 	}
 
-	var span trace.Span
-	ctx, span = s.config.Tracer(ctx).Start(
-		ctx,
-		"Exec",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.DBStatementKey.String(s.query)),
-	)
-	defer span.End()
-
-	res, err := execer.ExecContext(ctx, args)
-	handleErr(span, err)
+	err := s.config.withClientSpan(ctx, execSpan, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	return res, err
 }
 
 // QueryContext executes and traces a query that may return rows, such as a
 // SELECT.
 func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
-	queryer, ok := s.Stmt.(driver.StmtQueryContext)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f    func(context.Context) error
+		rows driver.Rows
+	)
+	if queryer, ok := s.Stmt.(driver.StmtQueryContext); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			rows, err = queryer.QueryContext(ctx, args)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Query.
+		vArgs, err := namedValueToValue(args)
+		if err != nil {
+			return nil, err
+		}
+		f = func(ctx context.Context) error {
+			var err error
+			rows, err = s.Query(vArgs)
+			return err
+		}
 	}
 
-	// Split the context to make the query and returned rows spans siblings.
-	qCtx, span := s.config.Tracer(ctx).Start(
-		ctx,
-		"Query",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.DBStatementKey.String(s.query)),
-	)
-	defer span.End()
-
-	rows, err := queryer.QueryContext(qCtx, args)
+	err := s.config.withClientSpan(ctx, querySpan, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	if err != nil {
-		handleErr(span, err)
 		return nil, err
 	}
-
 	return newRows(ctx, rows, s.config), nil
 }

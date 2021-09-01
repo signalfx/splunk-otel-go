@@ -3,8 +3,6 @@ package splunksql
 import (
 	"context"
 	"database/sql/driver"
-
-	"go.opentelemetry.io/otel/trace"
 )
 
 // otelTx is a traced version of sql.Tx
@@ -22,20 +20,14 @@ func newTx(ctx context.Context, tx driver.Tx, c config) *otelTx {
 
 // Commit traces the call to the wrapped Tx.Commit method.
 func (t *otelTx) Commit() error {
-	_, span := t.config.Tracer(t.ctx).Start(t.ctx, "Commit", trace.WithSpanKind(trace.SpanKindClient))
-	defer span.End()
-
-	err := t.tx.Commit()
-	handleErr(span, err)
-	return err
+	return t.config.withClientSpan(t.ctx, commitSpan, func(ctx context.Context) error {
+		return t.tx.Commit()
+	})
 }
 
 // Rollback traces the call to the wrapped Tx.Rollback method.
 func (t *otelTx) Rollback() error {
-	_, span := t.config.Tracer(t.ctx).Start(t.ctx, "Rollback", trace.WithSpanKind(trace.SpanKindClient))
-	defer span.End()
-
-	err := t.tx.Commit()
-	handleErr(span, err)
-	return err
+	return t.config.withClientSpan(t.ctx, rollbackSpan, func(ctx context.Context) error {
+		return t.tx.Rollback()
+	})
 }
