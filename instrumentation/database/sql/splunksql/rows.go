@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql/driver"
 
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -19,7 +20,7 @@ type otelRows struct {
 var _ driver.Rows = (*otelRows)(nil)
 
 func newRows(ctx context.Context, rows driver.Rows, c config) *otelRows {
-	_, span := c.tracer(ctx).Start(ctx, "Rows", trace.WithSpanKind(trace.SpanKindClient))
+	_, span := c.tracer(ctx).Start(ctx, moniker.Rows.String(), trace.WithSpanKind(trace.SpanKindClient))
 	return &otelRows{
 		Rows:   rows,
 		span:   span,
@@ -42,7 +43,7 @@ func (r otelRows) Close() error {
 func (r otelRows) Next(dest []driver.Value) error {
 	defer func() {
 		if r.span != nil {
-			r.span.AddEvent("Next")
+			r.span.AddEvent(moniker.Next.String())
 		}
 	}()
 
