@@ -125,18 +125,26 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 
 // PrepareContext returns a prepared statement, bound to this traced connection.
 func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stmt, error) {
-	preparer, ok := c.Conn.(driver.ConnPrepareContext)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f    func(context.Context) error
+		stmt driver.Stmt
+	)
+	if preparer, ok := c.Conn.(driver.ConnPrepareContext); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			stmt, err = preparer.PrepareContext(ctx, query)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Prepare.
+		f = func(ctx context.Context) error {
+			var err error
+			stmt, err = c.Conn.Prepare(query)
+			return err
+		}
 	}
 
-	var stmt driver.Stmt
-	err := c.config.withClientSpan(ctx, moniker.Prepare, func(ctx context.Context) error {
-		var err error
-		stmt, err = preparer.PrepareContext(ctx, query)
-		return err
-
-	}, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Prepare, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
 		return nil, err
 	}
@@ -145,18 +153,26 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 
 // BeginTx starts and returns a new traced transaction.
 func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, error) {
-	transactor, ok := c.Conn.(driver.ConnBeginTx)
-	if !ok {
-		return nil, driver.ErrSkip
+	var (
+		f  func(context.Context) error
+		tx driver.Tx
+	)
+	if transactor, ok := c.Conn.(driver.ConnBeginTx); ok {
+		f = func(ctx context.Context) error {
+			var err error
+			tx, err = transactor.BeginTx(ctx, opts)
+			return err
+		}
+	} else {
+		// Fallback to explicitly wrapping Begin.
+		f = func(ctx context.Context) error {
+			var err error
+			tx, err = c.Conn.Begin()
+			return err
+		}
 	}
 
-	var tx driver.Tx
-	err := c.config.withClientSpan(ctx, moniker.Begin, func(ctx context.Context) error {
-		var err error
-		tx, err = transactor.BeginTx(ctx, opts)
-		return err
-
-	})
+	err := c.config.withClientSpan(ctx, moniker.Begin, f)
 	if err != nil {
 		return nil, err
 	}

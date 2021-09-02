@@ -2,20 +2,10 @@ package test
 
 import (
 	"database/sql/driver"
-	"sync/atomic"
 )
 
 type MockDriver struct {
-	connector *MockConnector
-
-	OpenN, OpenConnectorN uint64
-}
-
-func NewMockDriver() *MockDriver {
-	d := &MockDriver{}
-	d.connector = NewMockConnector(d)
-	d.Reset()
-	return d
+	newConnFunc func() driver.Conn
 }
 
 var (
@@ -23,19 +13,19 @@ var (
 	_ driver.DriverContext = (*MockDriver)(nil)
 )
 
-func (d *MockDriver) Open(name string) (driver.Conn, error) {
-	atomic.AddUint64(&d.OpenN, 1)
-	return d.connector.conn, nil
+func NewFullMockDriver() driver.Driver {
+	return &MockDriver{newConnFunc: NewFullMockConn}
 }
 
-func (d *MockDriver) OpenConnector(name string) (driver.Connector, error) {
-	atomic.AddUint64(&d.OpenConnectorN, 1)
-	return d.connector, nil
+func NewSimpleMockDriver() driver.Driver {
+	d := &MockDriver{newConnFunc: NewSimpleMockConn}
+	return struct{ driver.Driver }{d}
 }
 
-func (d *MockDriver) Reset() {
-	d.OpenN = 0
-	d.OpenConnectorN = 0
+func (d *MockDriver) Open(string) (driver.Conn, error) {
+	return d.newConnFunc(), nil
+}
 
-	d.connector.Reset()
+func (d *MockDriver) OpenConnector(string) (driver.Connector, error) {
+	return NewMockConnector(d), nil
 }
