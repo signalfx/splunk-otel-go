@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql/driver"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/config"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
@@ -14,7 +13,7 @@ import (
 type otelStmt struct {
 	driver.Stmt
 
-	config config.Config
+	config config
 	query  string
 }
 
@@ -25,7 +24,7 @@ var (
 	_ driver.StmtQueryContext = (*otelStmt)(nil)
 )
 
-func newStmt(stmt driver.Stmt, c config.Config, query string) *otelStmt {
+func newStmt(stmt driver.Stmt, c config, query string) *otelStmt {
 	return &otelStmt{Stmt: stmt, config: c, query: query}
 }
 
@@ -55,7 +54,7 @@ func (s *otelStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (d
 		}
 	}
 
-	err := s.config.WithSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
+	err := s.config.withClientSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	return res, err
 }
 
@@ -85,7 +84,7 @@ func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (
 		}
 	}
 
-	err := s.config.WithSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
+	err := s.config.withClientSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	if err != nil {
 		return nil, err
 	}

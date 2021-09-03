@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"errors"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/config"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
@@ -14,7 +13,7 @@ import (
 type otelConn struct {
 	driver.Conn
 
-	config config.Config
+	config config
 }
 
 // Compile-time check otelConn implements database interfaces.
@@ -30,7 +29,7 @@ var (
 	_ driver.SessionResetter    = (*otelConn)(nil)
 )
 
-func newConn(conn driver.Conn, conf config.Config) *otelConn {
+func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 
@@ -40,7 +39,7 @@ func (c *otelConn) Ping(ctx context.Context) error {
 	if !ok {
 		return driver.ErrSkip
 	}
-	return c.config.WithSpan(ctx, moniker.Ping, pinger.Ping)
+	return c.config.withClientSpan(ctx, moniker.Ping, pinger.Ping)
 }
 
 // Exec calls the wrapped Connection Exec method if implemented.
@@ -78,7 +77,7 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	}
 
-	err := c.config.WithSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	return res, err
 }
 
@@ -117,7 +116,7 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	}
 
-	err := c.config.WithSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +144,7 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 		}
 	}
 
-	err := c.config.WithSpan(ctx, moniker.Prepare, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withClientSpan(ctx, moniker.Prepare, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +172,7 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		}
 	}
 
-	err := c.config.WithSpan(ctx, moniker.Begin, f)
+	err := c.config.withClientSpan(ctx, moniker.Begin, f)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +186,7 @@ func (c *otelConn) ResetSession(ctx context.Context) error {
 		return driver.ErrSkip
 	}
 
-	return c.config.WithSpan(ctx, moniker.Reset, resetter.ResetSession)
+	return c.config.withClientSpan(ctx, moniker.Reset, resetter.ResetSession)
 }
 
 // copied from stdlib database/sql package: src/database/sql/ctxutil.go

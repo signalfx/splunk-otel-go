@@ -3,11 +3,8 @@ package splunksql
 import (
 	"context"
 	"database/sql/driver"
-	"io"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/config"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -16,14 +13,14 @@ type otelRows struct {
 	driver.Rows
 
 	span   trace.Span
-	config config.Config
+	config config
 }
 
 // Compile-time check otelRows implements driver.Rows.
 var _ driver.Rows = (*otelRows)(nil)
 
-func newRows(ctx context.Context, rows driver.Rows, c config.Config) *otelRows {
-	_, span := c.Tracer(ctx).Start(ctx, moniker.Rows.String(), trace.WithSpanKind(trace.SpanKindClient))
+func newRows(ctx context.Context, rows driver.Rows, c config) *otelRows {
+	_, span := c.tracer(ctx).Start(ctx, moniker.Rows.String(), trace.WithSpanKind(trace.SpanKindClient))
 	return &otelRows{
 		Rows:   rows,
 		span:   span,
@@ -53,20 +50,4 @@ func (r otelRows) Next(dest []driver.Value) error {
 	err := r.Rows.Next(dest)
 	handleErr(r.span, err)
 	return err
-}
-
-func handleErr(span trace.Span, err error) {
-	if span == nil {
-		return
-	}
-
-	switch err {
-	case nil:
-		// Everything Okay.
-	case io.EOF:
-		// Expected at end of iteration, do not record these.
-	default:
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
 }
