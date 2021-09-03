@@ -54,7 +54,7 @@ func (s *otelStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (d
 		}
 	}
 
-	err := s.config.withClientSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
+	err := s.config.withSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	return res, err
 }
 
@@ -84,7 +84,7 @@ func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (
 		}
 	}
 
-	err := s.config.withClientSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
+	err := s.config.withSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(s.query)))
 	if err != nil {
 		return nil, err
 	}
