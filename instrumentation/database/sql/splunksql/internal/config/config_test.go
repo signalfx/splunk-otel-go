@@ -1,4 +1,4 @@
-package splunksql
+package config
 
 import (
 	"context"
@@ -27,24 +27,24 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 }
 
 func TestConfigDefaultTracerProvider(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	assert.Equal(t, otel.GetTracerProvider(), c.TracerProvider)
 }
 
 func TestWithTracerProvider(t *testing.T) {
 	// Default is to use the global TracerProvider. This will override that.
 	tp := new(fnTracerProvider)
-	c := newConfig(WithTracerProvider(tp))
+	c := Config{TracerProvider: tp}
 	assert.Same(t, tp, c.TracerProvider)
 }
 
 func TestConfigTracerFromGlobal(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	expected := otel.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	got := c.tracer(context.Background())
+	got := c.Tracer(context.Background())
 	assert.Equal(t, expected, got)
 }
 
@@ -54,12 +54,12 @@ func TestConfigTracerFromConfig(t *testing.T) {
 			return &fnTracer{}
 		},
 	}
-	c := newConfig(WithTracerProvider(tp))
+	c := Config{TracerProvider: tp}
 	expected := tp.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	got := c.tracer(context.Background())
+	got := c.Tracer(context.Background())
 	assert.Equal(t, expected, got)
 }
 
@@ -72,10 +72,10 @@ func TestConfigTracerFromContext(t *testing.T) {
 	ctx := trace.ContextWithSpanContext(context.Background(), sc)
 	// Use the global TracerProvider in the config and override with the
 	// passed context to the tracer method.
-	c := newConfig()
-	got := c.tracer(ctx)
+	c := NewConfig()
+	got := c.Tracer(ctx)
 	expected := trace.NewNoopTracerProvider().Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
 	assert.Equal(t, expected, got)

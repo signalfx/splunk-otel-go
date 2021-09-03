@@ -2,12 +2,14 @@ package splunksql
 
 import (
 	"database/sql/driver"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/config"
 )
 
 // otelDriver wraps a SQL Driver and traces all operations it performs.
 type otelDriver struct {
 	driver driver.Driver
-	config config
+	config config.Config
 }
 
 // Compile-time check *otelDriver implements database interfaces.
@@ -16,7 +18,7 @@ var (
 	_ driver.DriverContext = (*otelDriver)(nil)
 )
 
-func newDriver(d driver.Driver, c config) driver.Driver {
+func newDriver(d driver.Driver, c config.Config) driver.Driver {
 	if _, ok := d.(driver.DriverContext); ok {
 		return &otelDriver{driver: d, config: c}
 	}
