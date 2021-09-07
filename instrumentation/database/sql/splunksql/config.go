@@ -4,8 +4,10 @@ import (
 	"context"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/dsn"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -15,12 +17,17 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 // config contains configuration options.
 type config struct {
 	TracerProvider trace.TracerProvider
+
+	DBName     string
+	Attributes []attribute.KeyValue
 }
 
 func newConfig(options ...Option) config {
 	var c config
 	for _, o := range options {
-		o.apply(&c)
+		if o != nil {
+			o.apply(&c)
+		}
 	}
 	if c.TracerProvider == nil {
 		c.TracerProvider = otel.GetTracerProvider()
@@ -69,14 +76,38 @@ type Option interface {
 	apply(*config)
 }
 
-type tracerProviderOption struct {
-	tp trace.TracerProvider
+type optionFunc func(*config)
+
+func (o optionFunc) apply(c *config) {
+	o(c)
 }
 
-func (o tracerProviderOption) apply(c *config) {
-	c.TracerProvider = o.tp
-}
-
+// WithTracerProvider returns an Option that sets the TracerProvider used with
+// this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return tracerProviderOption{tp: tp}
+	return optionFunc(func(c *config) {
+		c.TracerProvider = tp
+	})
+}
+
+// WithAttributes returns an Option that appends attr to the attributes set
+// for every span created with this instrumentation library.
+func WithAttributes(attr []attribute.KeyValue) Option {
+	return optionFunc(func(c *config) {
+		c.Attributes = append(c.Attributes, attr...)
+	})
+}
+
+// withDataSource returns an Option that sets database attributes required and
+// recommended by the OpenTelemetry semantic conventions.
+func withDataSource(driverName, dataSourceName string) Option {
+	dbname, attrs, err := dsn.Parse(driverName, dataSourceName)
+	if err != nil {
+		// TODO: log this error.
+		return nil
+	}
+	return optionFunc(func(c *config) {
+		c.DBName = dbname
+		c.Attributes = append(c.Attributes, attrs...)
+	})
 }
