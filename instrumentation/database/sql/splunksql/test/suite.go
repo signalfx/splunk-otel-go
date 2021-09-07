@@ -37,8 +37,8 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 		trace.WithSpanProcessor(s.SpanRecorder),
 	)
 
-	splunksql.Register(dName, d, splunksql.WithTracerProvider(s.TracerProvider))
-	db, err := splunksql.Open(dName, "mockDB")
+	splunksql.Register(dName, d)
+	db, err := splunksql.Open(dName, "mockDB", splunksql.WithTracerProvider(s.TracerProvider))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
