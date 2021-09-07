@@ -54,7 +54,7 @@ func (c config) tracer(ctx context.Context) trace.Tracer {
 }
 
 // withSpan wraps the function f with a span.
-func (c config) withSpan(ctx context.Context, name moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+func (c config) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
 	// From the specification: span kind MUST always be CLIENT.
 	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
 
@@ -62,7 +62,7 @@ func (c config) withSpan(ctx context.Context, name moniker.Span, f func(context.
 		err  error
 		span trace.Span
 	)
-	ctx, span = c.tracer(ctx).Start(ctx, name.String(), opts...)
+	ctx, span = c.tracer(ctx).Start(ctx, c.spanName(m), opts...)
 	defer func() {
 		handleErr(span, err)
 		span.End()
@@ -70,6 +70,35 @@ func (c config) withSpan(ctx context.Context, name moniker.Span, f func(context.
 
 	err = f(ctx)
 	return err
+}
+
+// spanName returns the OpenTelemetry compliant span name.
+func (c config) spanName(m moniker.Span) string {
+	// From the OpenTelemetry semantic conventions
+	// (https://github.com/open-telemetry/opentelemetry-specification/blob/v1.6.1/specification/trace/semantic_conventions/database.md):
+	//
+	// > The **span name** SHOULD be set to a low cardinality value representing the statement executed on the database.
+	// > It MAY be a stored procedure name (without arguments), DB statement without variable arguments, operation name, etc.
+	// > Since SQL statements may have very high cardinality even without arguments, SQL spans SHOULD be named the
+	// > following way, unless the statement is known to be of low cardinality:
+	// > `<db.operation> <db.name>.<db.sql.table>`, provided that `db.operation` and `db.sql.table` are available.
+	// > If `db.sql.table` is not available due to its semantics, the span SHOULD be named `<db.operation> <db.name>`.
+	// > It is not recommended to attempt any client-side parsing of `db.statement` just to get these properties,
+	// > they should only be used if the library being instrumented already provides them.
+	// > When it's otherwise impossible to get any meaningful span name, `db.name` or the tech-specific database name MAY be used.
+	//
+	// The database/sql package does not provide the database operation nor
+	// the SQL table the operation is being performed on during a call. It
+	// would require client-side parsing of the statement to determine these
+	// properties. Therefore, the database name is used if it is known.
+	if c.DBName != "" {
+		return c.DBName
+	}
+
+	// The database name is not known. Fallback to the known client-side
+	// operation being performed. This will comply with the low cardinality
+	// recommendation of the specification.
+	return m.String()
 }
 
 type Option interface {
