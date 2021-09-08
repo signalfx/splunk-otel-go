@@ -21,7 +21,7 @@ import (
 	"net/http/httptest"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/oteltest"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
@@ -31,7 +31,7 @@ func Example() {
 		io.WriteString(w, "Hello world") //nolint:errcheck
 	})
 	handler = splunkhttp.NewHandler(handler)
-	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
+	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()
@@ -39,8 +39,4 @@ func Example() {
 
 	fmt.Println("Access-Control-Expose-Headers:", resp.Header.Get("Access-Control-Expose-Headers"))
 	fmt.Println("Server-Timing:", resp.Header.Get("Server-Timing"))
-
-	// Output:
-	// Access-Control-Expose-Headers: Server-Timing
-	// Server-Timing: traceparent;desc="00-00000000000000020000000000000000-0000000000000002-01"
 }
