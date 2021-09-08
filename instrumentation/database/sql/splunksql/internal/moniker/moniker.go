@@ -1,3 +1,4 @@
+// Package moniker provides consistent identifiers for telemetry data.
 package moniker
 
 type Span string
