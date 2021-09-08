@@ -123,6 +123,7 @@ func (c traceConfig) spanName(m moniker.Span) string {
 	return m.String()
 }
 
+// Option applies options to a tracing configuration.
 type Option interface {
 	apply(*traceConfig)
 }
