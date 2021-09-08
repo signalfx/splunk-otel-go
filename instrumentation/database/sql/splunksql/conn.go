@@ -13,7 +13,7 @@ import (
 type otelConn struct {
 	driver.Conn
 
-	config config
+	config traceConfig
 }
 
 // Compile-time check otelConn implements database interfaces.
@@ -29,7 +29,7 @@ var (
 	_ driver.SessionResetter    = (*otelConn)(nil)
 )
 
-func newConn(conn driver.Conn, conf config) *otelConn {
+func newConn(conn driver.Conn, conf traceConfig) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 

@@ -7,7 +7,7 @@ import (
 // otelDriver wraps a SQL Driver and traces all operations it performs.
 type otelDriver struct {
 	driver driver.Driver
-	config config
+	config traceConfig
 }
 
 // Compile-time check *otelDriver implements database interfaces.
@@ -16,7 +16,7 @@ var (
 	_ driver.DriverContext = (*otelDriver)(nil)
 )
 
-func newDriver(d driver.Driver, c config) driver.Driver {
+func newDriver(d driver.Driver, c traceConfig) driver.Driver {
 	if _, ok := d.(driver.DriverContext); ok {
 		return &otelDriver{driver: d, config: c}
 	}

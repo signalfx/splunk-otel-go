@@ -2,28 +2,35 @@ package splunksql
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"net/url"
+	"strconv"
+	"strings"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/dsn"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
-// config contains configuration options.
-type config struct {
+// traceConfig contains tracing configuration options.
+type traceConfig struct {
 	TracerProvider trace.TracerProvider
 
 	DBName     string
 	Attributes []attribute.KeyValue
 }
 
-func newConfig(options ...Option) config {
-	var c config
+func newTraceConfig(options ...Option) traceConfig {
+	var c traceConfig
 	for _, o := range options {
 		if o != nil {
 			o.apply(&c)
@@ -40,7 +47,7 @@ func newConfig(options ...Option) config {
 // If the passed context contains a span, the TracerProvider that created the
 // tracer that created that span will be used. Otherwise, the TracerProvider
 // from c is used.
-func (c config) tracer(ctx context.Context) trace.Tracer {
+func (c traceConfig) tracer(ctx context.Context) trace.Tracer {
 	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
@@ -54,7 +61,7 @@ func (c config) tracer(ctx context.Context) trace.Tracer {
 }
 
 // withSpan wraps the function f with a span.
-func (c config) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+func (c traceConfig) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
 	// From the specification: span kind MUST always be CLIENT.
 	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
 
@@ -73,7 +80,7 @@ func (c config) withSpan(ctx context.Context, m moniker.Span, f func(context.Con
 }
 
 // spanName returns the OpenTelemetry compliant span name.
-func (c config) spanName(m moniker.Span) string {
+func (c traceConfig) spanName(m moniker.Span) string {
 	// From the OpenTelemetry semantic conventions
 	// (https://github.com/open-telemetry/opentelemetry-specification/blob/v1.6.1/specification/trace/semantic_conventions/database.md):
 	//
@@ -102,19 +109,19 @@ func (c config) spanName(m moniker.Span) string {
 }
 
 type Option interface {
-	apply(*config)
+	apply(*traceConfig)
 }
 
-type optionFunc func(*config)
+type optionFunc func(*traceConfig)
 
-func (o optionFunc) apply(c *config) {
+func (o optionFunc) apply(c *traceConfig) {
 	o(c)
 }
 
 // WithTracerProvider returns an Option that sets the TracerProvider used with
 // this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return optionFunc(func(c *config) {
+	return optionFunc(func(c *traceConfig) {
 		c.TracerProvider = tp
 	})
 }
@@ -122,21 +129,118 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 // WithAttributes returns an Option that appends attr to the attributes set
 // for every span created with this instrumentation library.
 func WithAttributes(attr []attribute.KeyValue) Option {
-	return optionFunc(func(c *config) {
+	return optionFunc(func(c *traceConfig) {
 		c.Attributes = append(c.Attributes, attr...)
 	})
 }
 
-// withDataSource returns an Option that sets database attributes required and
-// recommended by the OpenTelemetry semantic conventions.
-func withDataSource(driverName, dataSourceName string) Option {
-	dbname, attrs, err := dsn.Parse(driverName, dataSourceName)
-	if err != nil {
-		// TODO: log this error.
-		return nil
+// withRegistrationConfig returns an Option that sets database attributes
+// required and recommended by the OpenTelemetry semantic conventions based on
+// the information instrumentation registered.
+func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
+	var connCfg ConnectionConfig
+	if regCfg.DSNParser != nil {
+		// TODO: log error returned here when project gets a logger.
+		connCfg, _ = regCfg.DSNParser(dsn)
+	} else {
+		// Fallback. This is a best effort attempt if we do not know how to
+		// explicitly parse the DSN.
+		connCfg, _ = urlDSNParse(dsn)
 	}
-	return optionFunc(func(c *config) {
-		c.DBName = dbname
+
+	// TODO: log error returned here when project gets a logger.
+	attrs, _ := connCfg.Attributes()
+	attrs = append(attrs, regCfg.DBSystem.Attribute())
+
+	return optionFunc(func(c *traceConfig) {
+		c.DBName = connCfg.Name
 		c.Attributes = append(c.Attributes, attrs...)
 	})
+}
+
+// ConnectionConfig are the relevant settings parsed from a database
+// connection.
+type ConnectionConfig struct {
+	// Name of the database being accessed.
+	Name string
+	// ConnectionString is the sanitized connection string (all credentials
+	// have been redacted) used to connect to the database.
+	ConnectionString string
+	// User is the username used to access the database.
+	User string
+	// Host is the IP or hostname of the database.
+	Host string
+	// Port is the port the database is lisening on.
+	Port int
+	// Transport is the transport protocol used to connect to the database.
+	Transport transport.Type
+}
+
+// Attributes returns the connection settings as attributes compliant with
+// OpenTelemetry semantic coventions. If the settings do not conform to
+// OpenTelemetry requirements an error is returned with a partial list of
+// attributes that do conform.
+func (c ConnectionConfig) Attributes() ([]attribute.KeyValue, error) {
+	var attrs []attribute.KeyValue
+	var errs []string
+	if c.Name != "" {
+		attrs = append(attrs, semconv.DBNameKey.String(c.Name))
+	}
+	if c.ConnectionString != "" {
+		attrs = append(attrs, semconv.DBConnectionStringKey.String(c.ConnectionString))
+	}
+	if c.User != "" {
+		attrs = append(attrs, semconv.DBUserKey.String(c.User))
+	}
+	if c.Host != "" {
+		if ip := net.ParseIP(c.Host); ip != nil {
+			attrs = append(attrs, semconv.NetPeerIPKey.String(ip.String()))
+		} else {
+			attrs = append(attrs, semconv.NetPeerNameKey.String(c.Host))
+		}
+	} else {
+		errs = append(errs, "missing required peer IP or hostname")
+	}
+	if c.Port > 0 {
+		attrs = append(attrs, semconv.NetPeerPortKey.Int(c.Port))
+	}
+	attrs = append(attrs, c.Transport.Attribute())
+
+	var err error
+	if len(errs) > 0 {
+		err = fmt.Errorf("invalid connection config: %s", strings.Join(errs, ", "))
+	}
+	return attrs, err
+}
+
+func urlDSNParse(dataSourceName string) (ConnectionConfig, error) {
+	var connCfg ConnectionConfig
+	u, err := url.Parse(dataSourceName)
+	if err != nil {
+		return connCfg, err
+	}
+
+	connCfg.Host = u.Host
+	if p, err := strconv.Atoi(u.Port()); err != nil {
+		connCfg.Port = p
+	}
+
+	// Redact password.
+	u.User = url.User(u.User.Username())
+	connCfg.ConnectionString = u.String()
+
+	return connCfg, nil
+}
+
+// DSNParser processes a driver-specific data source name into
+// connection-level attributes conforming with the OpenTelemetry semantic
+// conventions.
+type DSNParser func(dataSourceName string) (ConnectionConfig, error)
+
+// InstrumentationConfig is the setup configuration for the instrumentation of
+// a database driver.
+type InstrumentationConfig struct {
+	// DBSystem is the database system being registered.
+	DBSystem  dbsystem.Type
+	DSNParser DSNParser
 }

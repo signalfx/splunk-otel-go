@@ -13,13 +13,13 @@ type otelRows struct {
 	driver.Rows
 
 	span   trace.Span
-	config config
+	config traceConfig
 }
 
 // Compile-time check otelRows implements driver.Rows.
 var _ driver.Rows = (*otelRows)(nil)
 
-func newRows(ctx context.Context, rows driver.Rows, c config) *otelRows {
+func newRows(ctx context.Context, rows driver.Rows, c traceConfig) *otelRows {
 	_, span := c.tracer(ctx).Start(ctx, moniker.Rows.String(), trace.WithSpanKind(trace.SpanKindClient))
 	return &otelRows{
 		Rows:   rows,

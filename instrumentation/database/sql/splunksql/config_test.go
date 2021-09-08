@@ -27,19 +27,19 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 }
 
 func TestConfigDefaultTracerProvider(t *testing.T) {
-	c := newConfig()
+	c := newTraceConfig()
 	assert.Equal(t, otel.GetTracerProvider(), c.TracerProvider)
 }
 
 func TestWithTracerProvider(t *testing.T) {
 	// Default is to use the global TracerProvider. This will override that.
 	tp := new(fnTracerProvider)
-	c := newConfig(WithTracerProvider(tp))
+	c := newTraceConfig(WithTracerProvider(tp))
 	assert.Same(t, tp, c.TracerProvider)
 }
 
 func TestConfigTracerFromGlobal(t *testing.T) {
-	c := newConfig()
+	c := newTraceConfig()
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
@@ -54,7 +54,7 @@ func TestConfigTracerFromConfig(t *testing.T) {
 			return &fnTracer{}
 		},
 	}
-	c := newConfig(WithTracerProvider(tp))
+	c := newTraceConfig(WithTracerProvider(tp))
 	expected := tp.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
@@ -72,7 +72,7 @@ func TestConfigTracerFromContext(t *testing.T) {
 	ctx := trace.ContextWithSpanContext(context.Background(), sc)
 	// Use the global TracerProvider in the config and override with the
 	// passed context to the tracer method.
-	c := newConfig()
+	c := newTraceConfig()
 	got := c.tracer(ctx)
 	expected := trace.NewNoopTracerProvider().Tracer(
 		instrumentationName,

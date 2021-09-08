@@ -8,30 +8,58 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"sync"
 )
 
-// Register makes a database driver available by the provided name. If
-// Register is called twice with the same name or if driver is nil, it panics.
-func Register(name string, driver driver.Driver) {
-	// Wrap the sql.Register function to perserve the API from
-	// signalfx-go-tracing.
-	sql.Register(name, driver)
+var (
+	registryMu sync.RWMutex
+	registry   = make(map[string]InstrumentationConfig)
+)
+
+// Register makes the InstrumentationConfig for the setup of a database
+// driverwith the provided name available. If Register is called twice for the
+// same name it panics.
+func Register(name string, c InstrumentationConfig) {
+	registryMu.Lock()
+	defer registryMu.Unlock()
+	if _, dup := registry[name]; dup {
+		panic("splunksql: Register called twice for " + name)
+	}
+	registry[name] = c
+}
+
+func retrieve(name string) InstrumentationConfig {
+	registryMu.RLock()
+	defer registryMu.RUnlock()
+	return registry[name]
 }
 
 // Open opens a database specified by its database driver name and a
 // driver-specific data source name, usually consisting of at least a database
 // name and connection information. The returned database uses a traced driver
-// for all connections. Register must first be called for this to succeed,
-// otherwise an error is returned.
+// for all connections.
 func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
+	// The instrumented driver needs to already have been registered with the
+	// database/sql package. This is something instrumentation libraries can
+	// do by importing the package containing the driver (if it correctly
+	// initializes with the registration of its driver).
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	opts = append(opts, withDataSource(driverName, dataSourceName))
-	d := newDriver(db.Driver(), newConfig(opts...))
+	// Setup any instrumentation that is registered for this driverName. If no
+	// instrumentation was registered for the driver, this will give a "best
+	// effort" to setup the driver.
+	regOpt := withRegistrationConfig(retrieve(driverName), dataSourceName)
+	// Allow users to override default instrumentation setup values by
+	// appending opts to the Option returned from withRegistrationConfig. This
+	// will allow similar instrumentation to be used with minor corrections
+	// being applied here (e.g. using `lib/pg` instead of `pgx`).
+	opts = append([]Option{regOpt}, opts...)
+	d := newDriver(db.Driver(), newTraceConfig(opts...))
 
+	// Use the instrumented driver to open a connection to the database.
 	if driverCtx, ok := d.(driver.DriverContext); ok {
 		connector, err := driverCtx.OpenConnector(dataSourceName)
 		if err != nil {
@@ -39,10 +67,10 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 		}
 		return sql.OpenDB(connector), nil
 	}
-
 	return sql.OpenDB(dsnConnector{dsn: dataSourceName, driver: d}), nil
 }
 
+// dsnConnector wraps a driver to be used as a DriverContext.
 type dsnConnector struct {
 	dsn    string
 	driver driver.Driver

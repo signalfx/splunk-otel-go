@@ -10,13 +10,13 @@ import (
 // otelTx is a traced version of sql.Tx
 type otelTx struct {
 	tx     driver.Tx
-	config config
+	config traceConfig
 	ctx    context.Context
 }
 
 var _ driver.Tx = (*otelTx)(nil)
 
-func newTx(ctx context.Context, tx driver.Tx, c config) *otelTx {
+func newTx(ctx context.Context, tx driver.Tx, c traceConfig) *otelTx {
 	return &otelTx{ctx: ctx, tx: tx, config: c}
 }
 
