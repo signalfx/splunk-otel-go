@@ -62,6 +62,7 @@ func (c traceConfig) tracer(ctx context.Context) trace.Tracer {
 
 // withSpan wraps the function f with a span.
 func (c traceConfig) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+	opts = append([]trace.SpanStartOption{trace.WithAttributes(c.Attributes...)}, opts...)
 	// From the specification: span kind MUST always be CLIENT.
 	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
 

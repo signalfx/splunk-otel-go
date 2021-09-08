@@ -7,8 +7,11 @@ import (
 	"fmt"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"github.com/stretchr/testify/suite"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -19,6 +22,7 @@ type SplunkSQLSuite struct {
 	suite.Suite
 
 	SpanRecorder   *tracetest.SpanRecorder
+	BaseAttributes []attribute.KeyValue
 	TracerProvider *trace.TracerProvider
 	DB             *sql.DB
 
@@ -37,7 +41,24 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 		trace.WithSpanProcessor(s.SpanRecorder),
 	)
 
-	splunksql.Register(dName, d)
+	dbSys := dbsystem.OtherSQL
+	connCfg := splunksql.ConnectionConfig{
+		// Do not set the Name field so monikers are used to identify
+		// spans.
+		ConnectionString: "mockDB://bob@localhost:8080/testDB",
+		User:             "bob",
+		Host:             "localhost",
+		Port:             8080,
+		Transport:        transport.Other,
+	}
+	s.BaseAttributes, _ = connCfg.Attributes()
+	s.BaseAttributes = append(s.BaseAttributes, dbSys.Attribute())
+
+	sql.Register(dName, d)
+	splunksql.Register(dName, splunksql.InstrumentationConfig{
+		DBSystem:  dbSys,
+		DSNParser: func(string) (splunksql.ConnectionConfig, error) { return connCfg, nil },
+	})
 	db, err := splunksql.Open(dName, "mockDB", splunksql.WithTracerProvider(s.TracerProvider))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
@@ -256,12 +277,20 @@ func (s *SplunkSQLSuite) assertSpan(name moniker.Span, opt ...traceapi.SpanStart
 	s.assertSpans(name, 1, c)
 }
 
-func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c *traceapi.SpanConfig) {
+func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.SpanConfig) {
+	attrs := make([]attribute.KeyValue, 0, len(c.Attributes())+len(s.BaseAttributes))
+	for _, a := range s.BaseAttributes {
+		attrs = append(attrs, a)
+	}
+	for _, a := range c.Attributes() {
+		attrs = append(attrs, a)
+	}
+
 	var n int
 	for _, roSpan := range s.SpanRecorder.Ended() {
 		if roSpan.Name() == name.String() {
 			n++
-			s.ElementsMatch(c.Attributes(), roSpan.Attributes())
+			s.ElementsMatchf(attrs, roSpan.Attributes(), "span: %s", roSpan.Name())
 			s.ElementsMatch(c.Links(), roSpan.Links())
 			if c.NewRoot() && roSpan.Parent().IsValid() {
 				s.Failf("non-root span", "span %s should not have a parent", name)
