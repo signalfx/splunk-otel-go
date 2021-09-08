@@ -39,98 +39,98 @@ func (t Type) Empty() bool {
 }
 
 var (
-	// Some other SQL database. Fallback only. See notes
+	// OtherSQL is some other SQL database. This is used as a fallback only.
 	OtherSQL = Type(semconv.DBSystemOtherSQL)
-	// Microsoft SQL Server
+	// MSSQL is a Microsoft SQL Server database system.
 	MSSQL = Type(semconv.DBSystemMSSQL)
-	// MySQL
+	// MySQL is a MySQL database system.
 	MySQL = Type(semconv.DBSystemMySQL)
-	// Oracle Database
+	// Oracle is an Oracle Database database system.
 	Oracle = Type(semconv.DBSystemOracle)
-	// IBM DB2
+	// DB2 is a IBM DB2 database system.
 	DB2 = Type(semconv.DBSystemDB2)
-	// PostgreSQL
+	// PostgreSQL is a PostgreSQL database system.
 	PostgreSQL = Type(semconv.DBSystemPostgreSQL)
-	// Amazon Redshift
+	// Redshift is an Amazon Redshift database system.
 	Redshift = Type(semconv.DBSystemRedshift)
-	// Apache Hive
+	// Hive is an Apache Hive database system.
 	Hive = Type(semconv.DBSystemHive)
-	// Cloudscape
+	// Cloudscape is a Cloudscape database system.
 	Cloudscape = Type(semconv.DBSystemCloudscape)
-	// HyperSQL DataBase
+	// HSQLDB is a HyperSQL DataBase database system.
 	HSQLDB = Type(semconv.DBSystemHSQLDB)
-	// Progress Database
+	// Progress is a Progress Database database system.
 	Progress = Type(semconv.DBSystemProgress)
-	// SAP MaxDB
+	// MaxDB is an SAP MaxDB database system.
 	MaxDB = Type(semconv.DBSystemMaxDB)
-	// SAP HANA
+	// HanaDB is an SAP HANA database system.
 	HanaDB = Type(semconv.DBSystemHanaDB)
-	// Ingres
+	// Ingres is an Ingres database system.
 	Ingres = Type(semconv.DBSystemIngres)
-	// FirstSQL
+	// FirstSQL is a FirstSQL database system.
 	FirstSQL = Type(semconv.DBSystemFirstSQL)
-	// EnterpriseDB
+	// EDB is an EnterpriseDB database system.
 	EDB = Type(semconv.DBSystemEDB)
-	// InterSystems Caché
+	// Cache is an InterSystems Caché database system.
 	Cache = Type(semconv.DBSystemCache)
-	// Adabas (Adaptable Database System)
+	// Adabas is an Adabas (Adaptable Database System) database system.
 	Adabas = Type(semconv.DBSystemAdabas)
-	// Firebird
+	// Firebird is a Firebird database system.
 	Firebird = Type(semconv.DBSystemFirebird)
-	// Apache Derby
+	// Derby is an Apache Derby database system.
 	Derby = Type(semconv.DBSystemDerby)
-	// FileMaker
+	// Filemaker is a FileMaker database system.
 	Filemaker = Type(semconv.DBSystemFilemaker)
-	// Informix
+	// Informix is an Informix database system.
 	Informix = Type(semconv.DBSystemInformix)
-	// InstantDB
+	// InstantDB is an InstantDB database system.
 	InstantDB = Type(semconv.DBSystemInstantDB)
-	// InterBase
+	// Interbase is an InterBase database system.
 	Interbase = Type(semconv.DBSystemInterbase)
-	// MariaDB
+	// MariaDB is a MariaDB database system.
 	MariaDB = Type(semconv.DBSystemMariaDB)
-	// Netezza
+	// Netezza is a Netezza database system.
 	Netezza = Type(semconv.DBSystemNetezza)
-	// Pervasive PSQL
+	// Pervasive is a Pervasive PSQL database system.
 	Pervasive = Type(semconv.DBSystemPervasive)
-	// PointBase
+	// Pointbase is a PointBase database system.
 	Pointbase = Type(semconv.DBSystemPointbase)
-	// SQLite
+	// Sqlite is a SQLite database system.
 	Sqlite = Type(semconv.DBSystemSqlite)
-	// Sybase
+	// Sybase is a Sybase database system.
 	Sybase = Type(semconv.DBSystemSybase)
-	// Teradata
+	// Teradata is a Teradata database system.
 	Teradata = Type(semconv.DBSystemTeradata)
-	// Vertica
+	// Vertica is a Vertica database system.
 	Vertica = Type(semconv.DBSystemVertica)
-	// H2
+	// H2 is a H2 database system.
 	H2 = Type(semconv.DBSystemH2)
-	// ColdFusion IMQ
+	// Coldfusion is a ColdFusion IMQ database system.
 	Coldfusion = Type(semconv.DBSystemColdfusion)
-	// Apache Cassandra
+	// Cassandra is an Apache Cassandra database system.
 	Cassandra = Type(semconv.DBSystemCassandra)
-	// Apache HBase
+	// HBase is an Apache HBase database system.
 	HBase = Type(semconv.DBSystemHBase)
-	// MongoDB
+	// MongoDB is a MongoDB database system.
 	MongoDB = Type(semconv.DBSystemMongoDB)
-	// Redis
+	// Redis is a Redis database system.
 	Redis = Type(semconv.DBSystemRedis)
-	// Couchbase
+	// Couchbase is a Couchbase database system.
 	Couchbase = Type(semconv.DBSystemCouchbase)
-	// CouchDB
+	// CouchDB is a CouchDB database system.
 	CouchDB = Type(semconv.DBSystemCouchDB)
-	// Microsoft Azure Cosmos DB
+	// CosmosDB is a Microsoft Azure Cosmos DB database system.
 	CosmosDB = Type(semconv.DBSystemCosmosDB)
-	// Amazon DynamoDB
+	// DynamoDB is an Amazon DynamoDB database system.
 	DynamoDB = Type(semconv.DBSystemDynamoDB)
-	// Neo4j
+	// Neo4j is a Neo4j database system.
 	Neo4j = Type(semconv.DBSystemNeo4j)
-	// Apache Geode
+	// Geode is an Apache Geode database system.
 	Geode = Type(semconv.DBSystemGeode)
-	// Elasticsearch
+	// Elasticsearch is an Elasticsearch database system.
 	Elasticsearch = Type(semconv.DBSystemElasticsearch)
-	// Memcached
+	// Memcached is a Memcached database system.
 	Memcached = Type(semconv.DBSystemMemcached)
-	// CockroachDB
+	// Cockroachdb is a CockroachDB database system.
 	Cockroachdb = Type(semconv.DBSystemCockroachdb)
 )
