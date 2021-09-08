@@ -32,6 +32,7 @@ import (
 	traceapi "go.opentelemetry.io/otel/trace"
 )
 
+// SplunkSQLSuite is the tracing test suite for the splunksql package.
 type SplunkSQLSuite struct {
 	suite.Suite
 
@@ -47,6 +48,7 @@ type SplunkSQLSuite struct {
 	ConnImplementsQueryerContext bool
 }
 
+// NewSplunkSQLSuite returns an initialized SplunkSQLSuite.
 func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 	s := new(SplunkSQLSuite)
 	s.SpanRecorder = tracetest.NewSpanRecorder()

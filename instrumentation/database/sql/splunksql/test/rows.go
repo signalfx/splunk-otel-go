@@ -18,14 +18,14 @@ import (
 	"database/sql/driver"
 )
 
-type MockRows struct{}
+type mockRows struct{}
 
-var _ driver.Rows = (*MockRows)(nil)
+var _ driver.Rows = (*mockRows)(nil)
 
-func NewMockRows() *MockRows {
-	return &MockRows{}
+func newMockRows() *mockRows {
+	return &mockRows{}
 }
 
-func (r *MockRows) Columns() []string              { return nil }
-func (r *MockRows) Close() error                   { return nil }
-func (r *MockRows) Next(dest []driver.Value) error { return nil }
+func (r *mockRows) Columns() []string              { return nil }
+func (r *mockRows) Close() error                   { return nil }
+func (r *mockRows) Next(dest []driver.Value) error { return nil }

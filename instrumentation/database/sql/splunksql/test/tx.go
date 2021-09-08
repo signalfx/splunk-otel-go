@@ -18,13 +18,13 @@ import (
 	"database/sql/driver"
 )
 
-type MockTx struct{}
+type mockTx struct{}
 
-var _ driver.Tx = (*MockTx)(nil)
+var _ driver.Tx = (*mockTx)(nil)
 
-func NewMockTx() *MockTx {
-	return &MockTx{}
+func newMockTx() *mockTx {
+	return &mockTx{}
 }
 
-func (t *MockTx) Commit() error   { return nil }
-func (t *MockTx) Rollback() error { return nil }
+func (t *mockTx) Commit() error   { return nil }
+func (t *mockTx) Rollback() error { return nil }

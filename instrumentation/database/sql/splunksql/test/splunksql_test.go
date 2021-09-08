@@ -22,7 +22,7 @@ import (
 
 func TestSplunkSQLFullImplementation(t *testing.T) {
 	driverName := "splunktest-full"
-	driver := NewFullMockDriver()
+	driver := newFullMockDriver()
 	s, err := NewSplunkSQLSuite(driverName, driver)
 	if err != nil {
 		t.Fatal("failed to setup test suite", err)
@@ -32,7 +32,7 @@ func TestSplunkSQLFullImplementation(t *testing.T) {
 
 func TestSplunkSQLSimpleImplementation(t *testing.T) {
 	driverName := "splunktest-simple"
-	driver := NewSimpleMockDriver()
+	driver := newSimpleMockDriver()
 	s, err := NewSplunkSQLSuite(driverName, driver)
 	if err != nil {
 		t.Fatal("failed to setup test suite", err)

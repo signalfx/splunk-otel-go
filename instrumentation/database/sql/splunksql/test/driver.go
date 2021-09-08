@@ -18,28 +18,28 @@ import (
 	"database/sql/driver"
 )
 
-type MockDriver struct {
+type mockDriver struct {
 	newConnFunc func() driver.Conn
 }
 
 var (
-	_ driver.Driver        = (*MockDriver)(nil)
-	_ driver.DriverContext = (*MockDriver)(nil)
+	_ driver.Driver        = (*mockDriver)(nil)
+	_ driver.DriverContext = (*mockDriver)(nil)
 )
 
-func NewFullMockDriver() driver.Driver {
-	return &MockDriver{newConnFunc: NewFullMockConn}
+func newFullMockDriver() driver.Driver {
+	return &mockDriver{newConnFunc: newFullMockConn}
 }
 
-func NewSimpleMockDriver() driver.Driver {
-	d := &MockDriver{newConnFunc: NewSimpleMockConn}
+func newSimpleMockDriver() driver.Driver {
+	d := &mockDriver{newConnFunc: newSimpleMockConn}
 	return struct{ driver.Driver }{d}
 }
 
-func (d *MockDriver) Open(string) (driver.Conn, error) {
+func (d *mockDriver) Open(string) (driver.Conn, error) {
 	return d.newConnFunc(), nil
 }
 
-func (d *MockDriver) OpenConnector(string) (driver.Connector, error) {
-	return NewMockConnector(d), nil
+func (d *mockDriver) OpenConnector(string) (driver.Connector, error) {
+	return newMockConnector(d), nil
 }

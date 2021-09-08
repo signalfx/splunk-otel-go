@@ -19,20 +19,20 @@ import (
 	"database/sql/driver"
 )
 
-type MockConnector struct {
-	driver *MockDriver
+type mockConnector struct {
+	driver *mockDriver
 }
 
-var _ driver.Connector = (*MockConnector)(nil)
+var _ driver.Connector = (*mockConnector)(nil)
 
-func NewMockConnector(d *MockDriver) driver.Connector {
-	return &MockConnector{driver: d}
+func newMockConnector(d *mockDriver) driver.Connector {
+	return &mockConnector{driver: d}
 }
 
-func (c *MockConnector) Connect(ctx context.Context) (driver.Conn, error) {
+func (c *mockConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	return c.driver.newConnFunc(), nil
 }
 
-func (c *MockConnector) Driver() driver.Driver {
+func (c *mockConnector) Driver() driver.Driver {
 	return c.driver
 }
