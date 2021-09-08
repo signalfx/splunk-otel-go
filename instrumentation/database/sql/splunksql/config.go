@@ -236,13 +236,19 @@ func urlDSNParse(dataSourceName string) (ConnectionConfig, error) {
 		return connCfg, err
 	}
 
-	connCfg.Host = u.Host
-	if p, err := strconv.Atoi(u.Port()); err != nil {
+	connCfg.Host = u.Hostname()
+	if p, err := strconv.Atoi(u.Port()); err == nil {
 		connCfg.Port = p
 	}
 
-	// Redact password.
-	u.User = url.User(u.User.Username())
+	if u.User != nil {
+		connCfg.User = u.User.Username()
+		if _, ok := u.User.Password(); ok {
+			// Redact password.
+			u.User = url.User(u.User.Username())
+		}
+	}
+
 	connCfg.ConnectionString = u.String()
 
 	return connCfg, nil
