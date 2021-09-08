@@ -145,7 +145,7 @@ func (s *SplunkSQLSuite) TestDBExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBQuery() {
-	_, err := s.DB.Query("test")
+	_, err := s.DB.Query("test") // nolint: gocritic
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -155,7 +155,7 @@ func (s *SplunkSQLSuite) TestDBQuery() {
 }
 
 func (s *SplunkSQLSuite) TestDBQueryContext() {
-	_, err := s.DB.QueryContext(context.Background(), "test")
+	_, err := s.DB.QueryContext(context.Background(), "test") // nolint: gocritic
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -233,15 +233,19 @@ func (s *SplunkSQLSuite) TestStmtExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestStmtQuery() {
-	_, err := s.newStmt("test query").Query()
+	r, err := s.newStmt("test query").Query()
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
+	// Avoid connection leak
+	_ = r.Close()
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryContext() {
-	_, err := s.newStmt("test query").QueryContext(context.Background())
+	r, err := s.newStmt("test query").QueryContext(context.Background())
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
+	// Avoid connection leak
+	_ = r.Close()
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryRow() {
@@ -259,7 +263,7 @@ func (s *SplunkSQLSuite) TestStmtQueryRowContext() {
 func (s *SplunkSQLSuite) TestRow() {
 	r := s.newStmt("test query").QueryRow()
 	s.Require().NoError(r.Err())
-	r.Scan()
+	s.Require().NoError(r.Scan())
 	var span trace.ReadOnlySpan
 	for _, roSpan := range s.SpanRecorder.Ended() {
 		if roSpan.Name() == moniker.Rows.String() {
