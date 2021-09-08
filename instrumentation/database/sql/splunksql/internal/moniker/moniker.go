@@ -15,27 +15,42 @@
 // Package moniker provides consistent identifiers for telemetry data.
 package moniker // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 
+// Span is the name of an OpenTelemetry Span.
 type Span string
 
 const (
-	Query    Span = "Query"
-	Ping     Span = "Ping"
-	Prepare  Span = "Prepare"
-	Exec     Span = "Exec"
-	Begin    Span = "Begin"
-	Reset    Span = "Reset"
-	Close    Span = "Close"
-	Commit   Span = "Commit"
+	// Query is the span name for a query operation.
+	Query Span = "Query"
+	// Ping is the span name for a ping operation.
+	Ping Span = "Ping"
+	// Prepare is the span name for a prepare operation.
+	Prepare Span = "Prepare"
+	// Exec is the span name for a exec operation.
+	Exec Span = "Exec"
+	// Begin is the span name for a begin operation.
+	Begin Span = "Begin"
+	// Reset is the span name for a reset operation.
+	Reset Span = "Reset"
+	// Close is the span name for a close operation.
+	Close Span = "Close"
+	// Commit is the span name for a commit operation.
+	Commit Span = "Commit"
+	// Rollback is the span name for a rollback operation.
 	Rollback Span = "Rollback"
-	Rows     Span = "Rows"
+	// Rows is the span name for a rows operation.
+	Rows Span = "Rows"
 )
 
+// String returns the Span as a string.
 func (n Span) String() string { return string(n) }
 
+// Event is the name of an OpenTelemetry Event.
 type Event string
 
 const (
+	// Next is the event name for a next operation on SQL rows.
 	Next Event = "Next"
 )
 
+// String returns the Event as a string.
 func (n Event) String() string { return string(n) }
