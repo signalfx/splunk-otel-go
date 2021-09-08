@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  goyek:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            run-script: ./goyek.sh -v -ci
+          - os: windows-2019
+            run-script: .\goyek.ps1 -v -ci -skip-docker
+          - os: macos-10.15
+            run-script: ./goyek.sh -v -ci -skip-docker
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-go@v2.1.4
+        with:
+          go-version: '1.17'
+      - run: ${{ matrix.run-script }}
+      - uses: codecov/codecov-action@v2.0.3
+        with:
+          files: ./test-results/coverage.out
+          flags: ${{ runner.os }}
+
+  compatibility-test:
+    strategy:
+      matrix:
+        go-version: [1.17, 1.16, 1.15]
+        os: [ubuntu-20.04, windows-2019, macos-10.15]
+        # GitHub Actions does not support arm* architectures on default
+        # runners. It is possible to accomplish this with a self-hosted runner
+        # if we want to add this in the future:
+        # https://docs.github.com/en/actions/hosting-your-own-runners/using-self-hosted-runners-in-a-workflow
+        arch: ["386", amd64]
+        exclude:
+        # Not a supported Go OS/architecture.
+        - os: macos-10.15
+          arch: "386"
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-go@v2.1.4
+      with:
+        go-version: ${{ matrix.go-version }}
+    - run: make test-short
+      env:
+        GOARCH: ${{ matrix.arch }}

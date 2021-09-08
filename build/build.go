@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools
+package main
 
 import (
-	// Blank imports to version tools used to manage project.
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+	"github.com/goyek/goyek"
+
+	"github.com/signalfx/go-pipeline"
 )
+
+func main() {
+	flow := &goyek.Flow{}
+	pipeline.Register(flow)
+	flow.Main()
+}

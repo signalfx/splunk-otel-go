@@ -19,7 +19,7 @@ import (
 	"net/http/httptest"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/oteltest"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
@@ -28,7 +28,7 @@ func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
 		w.Write(content) //nolint:errcheck
 	})
 	handler = wrapFn(handler)
-	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(oteltest.NewTracerProvider()))
+	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
 
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, httptest.NewRequest("", "/", nil))

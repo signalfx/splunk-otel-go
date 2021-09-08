@@ -72,7 +72,7 @@ func Run(opts ...Option) (SDK, error) {
 	global.SetTracerProvider(traceProvider)
 
 	// TODO: add and honor option to set additional propagators.
-	global.SetTextMapPropagator(b3.B3{})
+	global.SetTextMapPropagator(b3.New())
 
 	return SDK{
 		config: *c,

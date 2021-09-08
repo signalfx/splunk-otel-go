@@ -17,48 +17,33 @@ SHELL := /bin/bash
 GO               = go
 TIMEOUT          = 15
 PKGS             = ./...
-TOOLS_MODULE_DIR = ./internal/tools
+BUILD_DIR        = ./build
 TEST_RESULTS     = $(CURDIR)/test-results
 
 # Verbose output
 V = 0
 Q = $(if $(filter 1,$V),,@)
 
-# ALL_MODULES includes ./* dirs (excludes . and ./internal/tools dir).
+# ALL_MODULES includes ./* dirs (excludes . and ./build dir).
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 # All directories with go.mod files related to opentelemetry library. Used for building, testing and linting.
-ALL_GO_MOD_DIRS := $(filter-out $(TOOLS_MODULE_DIR), $(ALL_MODULES))
+ALL_GO_MOD_DIRS := $(filter-out $(BUILD_DIR), $(ALL_MODULES))
 # All directories sub-modules. Used for tagging and generating dependabot config.
 SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := goyek
+.PHONY: goyek
+goyek:
+	./goyek.sh
 
-.PHONY: all
-all: mod-tidy build lint license-check test-race
 
-.PHONY: ci
-ci: mod-tidy build lint license-check diff
+# Build and test targets
 
 .PHONY: build
 build: # build whole codebase
 	${call for-all-modules,$(GO) build $(PKGS)}
 # Compile all test code.
 	${call for-all-modules,$(GO) test -vet=off -run xxxxxMatchNothingxxxxx $(PKGS) >/dev/null}
-
-# Tools
-
-TOOLS = $(CURDIR)/.tools
-
-$(TOOLS):
-	@mkdir -p $@
-$(TOOLS)/%: | $(TOOLS)
-	$Q cd $(TOOLS_MODULE_DIR) \
-		&& $(GO) build -o $@ $(PACKAGE)
-
-GOLANGCI_LINT = $(TOOLS)/golangci-lint
-$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
-
-# Tests
 
 TEST_TARGETS := test-bench test-short test-verbose test-race
 .PHONY: $(TEST_TARGETS) test tests
@@ -69,19 +54,6 @@ test-race:    ARGS=-race
 $(TEST_TARGETS): test
 test tests:
 	${call for-all-modules,$(GO) test -timeout $(TIMEOUT)s $(ARGS) $(PKGS)}
-
-COVERAGE_MODE    = atomic
-COVERAGE_PROFILE = $(COVERAGE_DIR)/profile.out
-.PHONY: test-coverage
-test-coverage: COVERAGE_DIR := $(TEST_RESULTS)/coverage_$(shell date -u +"%s")
-test-coverage:
-	$Q mkdir -p $(COVERAGE_DIR)
-	${call for-all-modules,$(GO) test -coverpkg=$(PKGS) -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" $(PKGS)}
-
-.PHONY: lint
-lint: | $(GOLANGCI_LINT)
-# Run once to fix and run again to verify resolution.
-	${call for-all-modules,$(GOLANGCI_LINT) run --fix && $(GOLANGCI_LINT) run}
 
 # Pre-release targets
 
@@ -117,6 +89,8 @@ push-tag: # example usage: make push-tag remote=origin tag=v1.100.1
 	 	git push $(remote) "$${dir:2}/$(tag)"); \
 	done
 
+# Other targets
+
 DEPENDABOT_PATH=./.github/dependabot.yml
 .PHONY: gendependabot
 gendependabot: # generate dependabot.yml
@@ -131,27 +105,6 @@ gendependabot: # generate dependabot.yml
 		(echo "Add entry for \"$${dir:1}\"" && \
 		  printf "  - package-ecosystem: \"gomod\"\n    directory: \"$${dir:1}\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH} ); \
 	done
-
-.PHONY: license-check
-license-check: # check if license is applied to relevant files
-	$Q licRes=$$(for f in $$(find . -type f \( -iname '*.go' -o -iname '*.sh' -o -iname '*.yml' \)) ; do \
-	           awk '/Copyright Splunk Inc.|generated|GENERATED/ && NR<=3 { found=1; next } END { if (!found) print FILENAME }' $$f; \
-	   done); \
-	   if [ -n "$${licRes}" ]; then \
-	           echo "license header checking failed:"; echo "$${licRes}"; \
-	           exit 1; \
-	   fi
-
-.PHONY: mod-tidy
-mod-tidy: # go mod tidy for all modules
-	${call for-all-modules,$(GO) mod tidy}
-	@echo "$(GO) mod tidy in $(TOOLS_MODULE_DIR)"
-	$Q (cd $(TOOLS_MODULE_DIR) && $(GO) mod tidy)
-
-.PHONY: diff
-diff:
-	$Q git diff --exit-code
-	$Q RES=$$(git status --porcelain) ; if [ -n "$$RES" ]; then echo $$RES && exit 1 ; fi
 
 .PHONY: for-all
 for-all: # run a command in all modules, example: make for-all cmd="go mod tidy"
