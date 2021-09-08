@@ -33,13 +33,9 @@ var (
 	_ driver.SessionResetter    = (*mockConn)(nil)
 )
 
-func newFullMockConn() driver.Conn {
-	return &mockConn{}
-}
+func newFullMockConn() driver.Conn { return &mockConn{} }
 
-func newSimpleMockConn() driver.Conn {
-	return struct{ driver.Conn }{&mockConn{}}
-}
+func newSimpleMockConn() driver.Conn { return struct{ driver.Conn }{&mockConn{}} }
 
 func (c *mockConn) Prepare(query string) (driver.Stmt, error) {
 	return newMockStmt(query), nil
@@ -53,34 +49,34 @@ func (c *mockConn) Begin() (driver.Tx, error) {
 	return newMockTx(), nil
 }
 
-func (c *mockConn) Ping(ctx context.Context) error {
+func (c *mockConn) Ping(context.Context) error {
 	return nil
 }
 
-func (c *mockConn) Exec(query string, args []driver.Value) (driver.Result, error) {
+func (c *mockConn) Exec(string, []driver.Value) (driver.Result, error) {
 	return nil, nil
 }
 
-func (c *mockConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
+func (c *mockConn) ExecContext(context.Context, string, []driver.NamedValue) (driver.Result, error) {
 	return nil, nil
 }
 
-func (c *mockConn) Query(query string, args []driver.Value) (driver.Rows, error) {
+func (c *mockConn) Query(string, []driver.Value) (driver.Rows, error) {
 	return newMockRows(), nil
 }
 
-func (c *mockConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
+func (c *mockConn) QueryContext(context.Context, string, []driver.NamedValue) (driver.Rows, error) {
 	return newMockRows(), nil
 }
 
-func (c *mockConn) PrepareContext(ctx context.Context, query string) (driver.Stmt, error) {
+func (c *mockConn) PrepareContext(_ context.Context, query string) (driver.Stmt, error) {
 	return newMockStmt(query), nil
 }
 
-func (c *mockConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.Tx, error) {
+func (c *mockConn) BeginTx(context.Context, driver.TxOptions) (driver.Tx, error) {
 	return newMockTx(), nil
 }
 
-func (c *mockConn) ResetSession(ctx context.Context) error {
+func (c *mockConn) ResetSession(context.Context) error {
 	return nil
 }

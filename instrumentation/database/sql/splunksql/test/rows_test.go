@@ -26,6 +26,6 @@ func newMockRows() *mockRows {
 	return &mockRows{}
 }
 
-func (r *mockRows) Columns() []string              { return nil }
-func (r *mockRows) Close() error                   { return nil }
-func (r *mockRows) Next(dest []driver.Value) error { return nil }
+func (r *mockRows) Columns() []string         { return nil }
+func (r *mockRows) Close() error              { return nil }
+func (r *mockRows) Next([]driver.Value) error { return nil }

@@ -41,18 +41,18 @@ func (s *mockStmt) NumInput() int {
 	return 0
 }
 
-func (s *mockStmt) Exec(args []driver.Value) (driver.Result, error) {
+func (s *mockStmt) Exec([]driver.Value) (driver.Result, error) {
 	return nil, nil
 }
 
-func (s *mockStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
+func (s *mockStmt) ExecContext(context.Context, []driver.NamedValue) (driver.Result, error) {
 	return nil, nil
 }
 
-func (s *mockStmt) Query(args []driver.Value) (driver.Rows, error) {
+func (s *mockStmt) Query([]driver.Value) (driver.Rows, error) {
 	return newMockRows(), nil
 }
 
-func (s *mockStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
+func (s *mockStmt) QueryContext(context.Context, []driver.NamedValue) (driver.Rows, error) {
 	return newMockRows(), nil
 }

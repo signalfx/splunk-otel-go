@@ -29,7 +29,7 @@ func newMockConnector(d *mockDriver) driver.Connector {
 	return &mockConnector{driver: d}
 }
 
-func (c *mockConnector) Connect(ctx context.Context) (driver.Conn, error) {
+func (c *mockConnector) Connect(context.Context) (driver.Conn, error) {
 	return c.driver.newConnFunc(), nil
 }
 
