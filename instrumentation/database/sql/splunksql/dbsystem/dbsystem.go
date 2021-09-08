@@ -22,7 +22,7 @@ import (
 )
 
 // Type is a database system type.
-type Type attribute.KeyValue
+type Type attribute.KeyValue // nolint: revive
 
 // Attribute returns t as an attribute KeyValue. If t is empty the returned
 // attribute will default to a Type OtherSQL.

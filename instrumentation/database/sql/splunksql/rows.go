@@ -42,7 +42,7 @@ func newRows(ctx context.Context, rows driver.Rows, c traceConfig) *otelRows {
 	}
 }
 
-func (r otelRows) Close() error {
+func (r otelRows) Close() error { // nolint: gocritic
 	defer func() {
 		if r.span != nil {
 			r.span.End()
@@ -54,7 +54,7 @@ func (r otelRows) Close() error {
 	return err
 }
 
-func (r otelRows) Next(dest []driver.Value) error {
+func (r otelRows) Next(dest []driver.Value) error { // nolint: gocritic
 	defer func() {
 		if r.span != nil {
 			r.span.AddEvent(moniker.Next.String())
