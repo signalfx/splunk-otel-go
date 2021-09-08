@@ -23,9 +23,9 @@ type mockConn struct{}
 
 var (
 	_ driver.Pinger             = (*mockConn)(nil)
-	_ driver.Execer             = (*mockConn)(nil)
+	_ driver.Execer             = (*mockConn)(nil) // nolint: staticcheck
 	_ driver.ExecerContext      = (*mockConn)(nil)
-	_ driver.Queryer            = (*mockConn)(nil)
+	_ driver.Queryer            = (*mockConn)(nil) // nolint: staticcheck
 	_ driver.QueryerContext     = (*mockConn)(nil)
 	_ driver.Conn               = (*mockConn)(nil)
 	_ driver.ConnPrepareContext = (*mockConn)(nil)
