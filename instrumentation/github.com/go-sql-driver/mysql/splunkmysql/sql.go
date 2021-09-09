@@ -51,7 +51,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 )
 
-func init() {
+func init() { // nolint: gochecknoinits
 	splunksql.Register("mysql", splunksql.InstrumentationConfig{
 		DBSystem:  dbsystem.MySQL,
 		DSNParser: DSNParser,
