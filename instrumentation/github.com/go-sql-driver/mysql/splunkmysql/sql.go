@@ -12,6 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package splunkmysql provides instrumentation for the
+// github.com/go-sql-driver/mysql package.
+//
+// To use this package, replace any blank identified imports of the
+// github.com/go-sql-driver/mysql package with an import of this package and
+// use the splunksql.Open function as a replacement for any sql.Open function
+// use. For example, if your code looks like this to start.
+//
+//     import (
+//     	"database/sql"
+//     	_ "github.com/go-sql-driver/mysql"
+//     )
+//     // ...
+//     db, err := sql.Open("mysql", "user:password@/dbname")
+//     // ...
+//
+// Update to this.
+//
+//     import (
+//     	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
+//     	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+//     )
+//     // ...
+//     db, err := splunksql.Open("mysql", "user:password@/dbname")
+//     // ...
 package splunkmysql
 
 import (
@@ -28,45 +53,46 @@ import (
 
 func init() {
 	splunksql.Register("mysql", splunksql.InstrumentationConfig{
-		DBSystem: dbsystem.MySQL,
-		DSNParser: func(dsn string) (splunksql.ConnectionConfig, error) {
-			var connCfg splunksql.ConnectionConfig
-			cfg, err := mysql.ParseDSN(dsn)
-			if err != nil {
-				return connCfg, err
-			}
-
-			if cfg.Passwd != "" {
-				// Redact credentials.
-				cfg.Passwd = ""
-			}
-
-			connCfg.Name = cfg.DBName
-			connCfg.ConnectionString = cfg.FormatDSN()
-			connCfg.User = cfg.User
-
-			if cfg.Net != "" {
-				switch cfg.Net {
-				case "pipe":
-					connCfg.Transport = transport.Pipe
-				case "unix", "socket":
-					connCfg.Transport = transport.Unix
-				case "memory":
-					connCfg.Transport = transport.InProc
-				case "tcp":
-					connCfg.Transport = transport.TCP
-				}
-
-				host, port, err := net.SplitHostPort(cfg.Addr)
-				if err == nil {
-					connCfg.Host = host
-					if p, err := strconv.Atoi(port); err == nil {
-						connCfg.Port = p
-					}
-				}
-			}
-
-			return connCfg, nil
-		},
+		DBSystem:  dbsystem.MySQL,
+		DSNParser: DSNParser,
 	})
+}
+
+// DSNParser parses the data source connection name for a connection to a
+// MySQL database using the github.com/go-sql-driver/mysql client package.
+func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
+	var connCfg splunksql.ConnectionConfig
+	cfg, err := mysql.ParseDSN(dataSourceName)
+	if err != nil {
+		return connCfg, err
+	}
+
+	if cfg.Passwd != "" {
+		// Redact credentials.
+		cfg.Passwd = ""
+	}
+
+	connCfg.Name = cfg.DBName
+	connCfg.ConnectionString = cfg.FormatDSN()
+	connCfg.User = cfg.User
+
+	if cfg.Net != "" {
+		// These are the only two cases the instrumented package knows about.
+		switch cfg.Net {
+		case "unix":
+			connCfg.Transport = transport.Unix
+		case "tcp":
+			connCfg.Transport = transport.TCP
+		}
+
+		host, port, err := net.SplitHostPort(cfg.Addr)
+		if err == nil {
+			connCfg.Host = host
+			if p, err := strconv.Atoi(port); err == nil {
+				connCfg.Port = p
+			}
+		}
+	}
+
+	return connCfg, nil
 }
