@@ -102,6 +102,7 @@ Additional recommended Splunk specific instrumentations:
 
 - [`splunksql`](./instrumentation/database/sql/splunksql)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
+- [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
 
 ## Manual Instrumentation
 
