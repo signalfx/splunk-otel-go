@@ -17,6 +17,9 @@ package splunksql
 import (
 	"context"
 	"database/sql/driver"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type mockStmt struct {
@@ -62,10 +65,117 @@ func (s *mockStmt) ExecContext(context.Context, []driver.NamedValue) (driver.Res
 
 func (s *mockStmt) Query([]driver.Value) (driver.Rows, error) {
 	s.queryN++
-	return newMockRows(), s.err
+	return newMockRows(s.err), s.err
 }
 
 func (s *mockStmt) QueryContext(context.Context, []driver.NamedValue) (driver.Rows, error) {
 	s.queryContextN++
-	return newMockRows(), s.err
+	return newMockRows(s.err), s.err
+}
+
+type StmtSuite struct {
+	suite.Suite
+
+	MockStmt *mockStmt
+	OTelStmt *otelStmt
+}
+
+func (s *StmtSuite) SetupTest() {
+	s.MockStmt = newMockStmt(nil)
+	s.OTelStmt = newStmt(s.MockStmt, newTraceConfig(), "")
+}
+
+func (s *StmtSuite) TestCloseCallsWrapped() {
+	s.NoError(s.OTelStmt.Close())
+	s.Equal(1, s.MockStmt.closeN)
+}
+
+func (s *StmtSuite) TestCloseReturnsWrappedError() {
+	s.MockStmt.err = errTest
+	s.ErrorIs(s.OTelStmt.Close(), errTest)
+	s.Equal(1, s.MockStmt.closeN)
+}
+
+func (s *StmtSuite) TestNumInputCallsWrapped() {
+	_ = s.OTelStmt.NumInput()
+	s.Equal(1, s.MockStmt.numInputN)
+}
+
+func (s *StmtSuite) TestExecCallsWrapped() {
+	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck
+	s.NoError(err)
+	s.Equal(1, s.MockStmt.execN)
+}
+
+func (s *StmtSuite) TestExecReturnsWrappedError() {
+	s.MockStmt.err = errTest
+	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck
+	s.ErrorIs(err, errTest)
+	s.Equal(1, s.MockStmt.execN)
+}
+
+func (s *StmtSuite) TestExecContextCallsWrapped() {
+	_, err := s.OTelStmt.ExecContext(context.Background(), nil)
+	s.NoError(err)
+	s.Equal(1, s.MockStmt.execContextN)
+}
+
+func (s *StmtSuite) TestExecContextFallsbackToExec() {
+	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newTraceConfig(), "")
+
+	_, err := s.OTelStmt.ExecContext(context.Background(), nil)
+	s.NoError(err)
+	s.Equal(0, s.MockStmt.execContextN)
+	s.Equal(1, s.MockStmt.execN)
+}
+
+func (s *StmtSuite) TestExecContextReturnsWrappedError() {
+	s.MockStmt.err = errTest
+	_, err := s.OTelStmt.ExecContext(context.Background(), nil)
+	s.ErrorIs(err, errTest)
+	s.Equal(1, s.MockStmt.execContextN)
+}
+
+func (s *StmtSuite) TestQueryCallsWrapped() {
+	q, err := s.OTelStmt.Query(nil) // nolint: staticcheck
+	s.NoError(err)
+	s.Equal(1, s.MockStmt.queryN)
+	_ = q.Close()
+}
+
+func (s *StmtSuite) TestQueryReturnsWrappedError() {
+	s.MockStmt.err = errTest
+	q, err := s.OTelStmt.Query(nil) // nolint: staticcheck
+	s.ErrorIs(err, errTest)
+	s.Equal(1, s.MockStmt.queryN)
+	_ = q.Close()
+}
+
+func (s *StmtSuite) TestQueryContextCallsWrapped() {
+	q, err := s.OTelStmt.QueryContext(context.Background(), nil)
+	s.NoError(err)
+	s.Equal(1, s.MockStmt.queryContextN)
+	_ = q.Close()
+}
+
+func (s *StmtSuite) TestQueryContextFallsbackToQuery() {
+	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newTraceConfig(), "")
+
+	q, err := s.OTelStmt.QueryContext(context.Background(), nil)
+	s.NoError(err)
+	s.Equal(0, s.MockStmt.queryContextN)
+	s.Equal(1, s.MockStmt.queryN)
+	_ = q.Close()
+}
+
+func (s *StmtSuite) TestQueryContextReturnsWrappedError() {
+	s.MockStmt.err = errTest
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic
+	s.ErrorIs(err, errTest)
+	s.Equal(1, s.MockStmt.queryContextN)
+}
+
+func TestStmtSuite(t *testing.T) {
+	s := new(StmtSuite)
+	suite.Run(t, s)
 }

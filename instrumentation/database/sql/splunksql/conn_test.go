@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var testErr = errors.New("testing error")
+var errTest = errors.New("testing error")
 
 type mockConn struct {
 	err error
@@ -57,7 +57,7 @@ func newMockConn(err error) *mockConn {
 	return &mockConn{err: err}
 }
 
-func (c *mockConn) Prepare(query string) (driver.Stmt, error) {
+func (c *mockConn) Prepare(string) (driver.Stmt, error) {
 	c.prepareN++
 	return newMockStmt(c.err), c.err
 }
@@ -89,15 +89,15 @@ func (c *mockConn) ExecContext(context.Context, string, []driver.NamedValue) (dr
 
 func (c *mockConn) Query(string, []driver.Value) (driver.Rows, error) {
 	c.queryN++
-	return newMockRows(), c.err
+	return newMockRows(c.err), c.err
 }
 
 func (c *mockConn) QueryContext(context.Context, string, []driver.NamedValue) (driver.Rows, error) {
 	c.queryContextN++
-	return newMockRows(), c.err
+	return newMockRows(c.err), c.err
 }
 
-func (c *mockConn) PrepareContext(_ context.Context, query string) (driver.Stmt, error) {
+func (c *mockConn) PrepareContext(context.Context, string) (driver.Stmt, error) {
 	c.prepareContextN++
 	return newMockStmt(c.err), c.err
 }
@@ -131,9 +131,9 @@ func (s *ConnSuite) TestPrepareCallsWrapped() {
 }
 
 func (s *ConnSuite) TestPrepareReturnsWrappedError() {
-	s.MockConn.err = testErr
+	s.MockConn.err = errTest
 	_, err := s.OTelConn.Prepare("")
-	s.ErrorIs(err, testErr)
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.prepareN)
 }
 
@@ -143,21 +143,21 @@ func (s *ConnSuite) TestCloseCallsWrapped() {
 }
 
 func (s *ConnSuite) TestCloseReturnsWrappedError() {
-	s.MockConn.err = testErr
-	s.ErrorIs(s.OTelConn.Close(), testErr)
+	s.MockConn.err = errTest
+	s.ErrorIs(s.OTelConn.Close(), errTest)
 	s.Equal(1, s.MockConn.closeN)
 }
 
 func (s *ConnSuite) TestBeginCallsWrapped() {
-	_, err := s.OTelConn.Begin()
+	_, err := s.OTelConn.Begin() // nolint: staticcheck
 	s.NoError(err)
 	s.Equal(1, s.MockConn.beginN)
 }
 
 func (s *ConnSuite) TestBeginReturnsWrappedError() {
-	s.MockConn.err = testErr
-	_, err := s.OTelConn.Begin()
-	s.ErrorIs(err, testErr)
+	s.MockConn.err = errTest
+	_, err := s.OTelConn.Begin() // nolint: staticcheck
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.beginN)
 }
 
@@ -168,9 +168,9 @@ func (s *ConnSuite) TestBeginTxCallsWrapped() {
 }
 
 func (s *ConnSuite) TestBeginTxReturnsWrappedError() {
-	s.MockConn.err = testErr
+	s.MockConn.err = errTest
 	_, err := s.OTelConn.BeginTx(context.Background(), driver.TxOptions{})
-	s.ErrorIs(err, testErr)
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.beginTxN)
 }
 
@@ -191,8 +191,8 @@ func (s *ConnSuite) TestPingCallsWrapped() {
 }
 
 func (s *ConnSuite) TestPingReturnsWrappedError() {
-	s.MockConn.err = testErr
-	s.ErrorIs(s.OTelConn.Ping(context.Background()), testErr)
+	s.MockConn.err = errTest
+	s.ErrorIs(s.OTelConn.Ping(context.Background()), errTest)
 	s.Equal(1, s.MockConn.pingN)
 }
 
@@ -209,9 +209,9 @@ func (s *ConnSuite) TestExecCallsWrapped() {
 }
 
 func (s *ConnSuite) TestExecReturnsWrappedError() {
-	s.MockConn.err = testErr
+	s.MockConn.err = errTest
 	_, err := s.OTelConn.Exec("", nil)
-	s.ErrorIs(err, testErr)
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.execN)
 }
 
@@ -230,7 +230,7 @@ func (s *ConnSuite) TestExecContextCallsWrapped() {
 
 type connExecer interface {
 	driver.Conn
-	driver.Execer
+	driver.Execer // nolint: staticcheck
 }
 
 func (s *ConnSuite) TestExecContextFallsbackToExec() {
@@ -252,9 +252,9 @@ func (s *ConnSuite) TestExecContextReturnsErrSkipIfNotImplemented() {
 }
 
 func (s *ConnSuite) TestExecContextReturnsWrappedError() {
-	s.MockConn.err = testErr
+	s.MockConn.err = errTest
 	_, err := s.OTelConn.ExecContext(context.Background(), "", nil)
-	s.ErrorIs(err, testErr)
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.execContextN)
 }
 
@@ -266,15 +266,15 @@ func (s *ConnSuite) TestQueryCallsWrapped() {
 }
 
 func (s *ConnSuite) TestQueryReturnsWrappedError() {
-	s.MockConn.err = testErr
-	_, err := s.OTelConn.Query("", nil)
-	s.ErrorIs(err, testErr)
+	s.MockConn.err = errTest
+	_, err := s.OTelConn.Query("", nil) // nolint: gocritic
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.queryN)
 }
 
 func (s *ConnSuite) TestQueryReturnsErrSkipIfNotImplemented() {
 	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
-	_, err := s.OTelConn.Query("", nil)
+	_, err := s.OTelConn.Query("", nil) // nolint: gocritic
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryN)
 }
@@ -287,15 +287,15 @@ func (s *ConnSuite) TestQueryContextCallsWrapped() {
 }
 
 func (s *ConnSuite) TestQueryContextReturnsWrappedError() {
-	s.MockConn.err = testErr
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil)
-	s.ErrorIs(err, testErr)
+	s.MockConn.err = errTest
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.queryContextN)
 }
 
 type connQuery interface {
 	driver.Conn
-	driver.Queryer
+	driver.Queryer // nolint: staticcheck
 }
 
 func (s *ConnSuite) TestQueryContextFallsbackToExec() {
@@ -303,7 +303,7 @@ func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 		connQuery
 	}{s.MockConn}, newTraceConfig())
 
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil)
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic
 	s.NoError(err)
 	s.Equal(0, s.MockConn.queryContextN)
 	s.Equal(1, s.MockConn.queryN)
@@ -311,7 +311,7 @@ func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 
 func (s *ConnSuite) TestQueryContextReturnsErrSkipIfNotImplemented() {
 	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil)
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryContextN)
 }
@@ -324,9 +324,9 @@ func (s *ConnSuite) TestPrepareContextCallsWrapped() {
 }
 
 func (s *ConnSuite) TestPrepareContextReturnsWrappedError() {
-	s.MockConn.err = testErr
+	s.MockConn.err = errTest
 	_, err := s.OTelConn.PrepareContext(context.Background(), "")
-	s.ErrorIs(err, testErr)
+	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.prepareContextN)
 }
 
@@ -347,8 +347,8 @@ func (s *ConnSuite) TestResetSessionCallsWrapped() {
 }
 
 func (s *ConnSuite) TestResetSessionReturnsWrappedError() {
-	s.MockConn.err = testErr
-	s.ErrorIs(s.OTelConn.ResetSession(context.Background()), testErr)
+	s.MockConn.err = errTest
+	s.ErrorIs(s.OTelConn.ResetSession(context.Background()), errTest)
 	s.Equal(1, s.MockConn.resetSessionN)
 }
 

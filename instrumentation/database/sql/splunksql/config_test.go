@@ -106,9 +106,13 @@ func TestURLDNSParse(t *testing.T) {
 		errStr      string
 	}{
 		{
-			name:   "not a URL",
-			dsn:    `:¯\_(ツ)_/¯:`,
-			errStr: (&url.Error{"parse", `:¯\_(ツ)_/¯:`, errors.New("missing protocol scheme")}).Error(),
+			name: "not a URL",
+			dsn:  `:¯\_(ツ)_/¯:`,
+			errStr: (&url.Error{
+				Op:  "parse",
+				URL: `:¯\_(ツ)_/¯:`,
+				Err: errors.New("missing protocol scheme"),
+			}).Error(),
 		},
 		{
 			name: "params",
