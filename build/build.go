@@ -22,6 +22,9 @@ import (
 
 func main() {
 	flow := &goyek.Flow{}
-	pipeline.Register(flow)
+	cfg := pipeline.Config{
+		RepoPackagePrefix: "github.com/signalfx/splunk-otel-go",
+	}
+	pipeline.Register(flow, cfg)
 	flow.Main()
 }
