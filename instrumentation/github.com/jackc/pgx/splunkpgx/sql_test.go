@@ -48,10 +48,10 @@ func TestDSNParser(t *testing.T) {
 		},
 		{
 			name: "url: tcp address",
-			dsn:  "postrgres://user:password@localhost:8080/testdb",
+			dsn:  "postgres://user:password@localhost:8080/testdb",
 			connCfg: splunksql.ConnectionConfig{
 				Name:             "testdb",
-				ConnectionString: "postrgres://user@localhost:8080/testdb",
+				ConnectionString: "postgres://user@localhost:8080/testdb",
 				User:             "user",
 				Host:             "localhost",
 				Port:             8080,
