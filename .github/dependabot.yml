@@ -19,6 +19,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jinzhu/gorm/splunkgorm"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/net/http/splunkhttp"
     schedule:
       interval: "daily"
