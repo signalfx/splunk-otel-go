@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 The primary change of this release is updating `go.opentelemetry.io/otel*`
 dependencies to [`v1.0.0-RC3`][otel-v1.0.0-RC3] and
-`go.opentelemetry.io/contrib*` dependencies to [`v0.23.0`][contrib-v0.23.0]..
+`go.opentelemetry.io/contrib*` dependencies to [`v0.23.0`][contrib-v0.23.0].
 
 ### Changed
 
