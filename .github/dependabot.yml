@@ -15,6 +15,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
-    directory: "/internal/tools"
+    directory: "/instrumentation/net/http/splunkhttp"
     schedule:
       interval: "daily"
