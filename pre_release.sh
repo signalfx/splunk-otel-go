@@ -79,7 +79,7 @@ cp ./version.go ./version.go.bak
 sed "s/\( \"\)[0-9]*\.[0-9]*\.[0-9]*\"/\1${VERSION_IN_FILE}\"/" ./version.go.bak >./version.go
 rm -f ./version.go.bak
 
-# Update go.mod
+# Update go.mod files
 PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | egrep -v 'tools' | sed 's/^\.\///' | sort)
 
 for dir in $PACKAGE_DIRS; do
@@ -88,8 +88,8 @@ for dir in $PACKAGE_DIRS; do
 	rm -f "${dir}/go.mod.bak"
 done
 
-# Run mod-tidy to update go.sum
-make mod-tidy
+printf "Updating go.sum files\n"
+./goyek.sh mod-tidy
 
 # Add changes and commit.
 git add .
