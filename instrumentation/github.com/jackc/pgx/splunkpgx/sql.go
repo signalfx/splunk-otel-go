@@ -45,7 +45,7 @@ import (
 
 	"github.com/jackc/pgx"
 	// Make sure to import this so the instrumented driver is registered.
-	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
