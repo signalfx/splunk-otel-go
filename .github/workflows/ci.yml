@@ -27,12 +27,6 @@ jobs:
       - uses: actions/setup-go@v2.1.4
         with:
           go-version: ${{ env.DEFAULT_GO_VERSION }}
-      - uses: actions/cache@v2.1.6
-        env:
-          cache-name: go-mod-cache
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
       - run: ${{ matrix.run-script }}
       - uses: codecov/codecov-action@v2.1.0
         with:
@@ -59,12 +53,6 @@ jobs:
     - uses: actions/setup-go@v2.1.4
       with:
         go-version: ${{ matrix.go-version }}
-    - uses: actions/cache@v2.1.6
-      env:
-        cache-name: go-mod-cache
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
     - run: make test-short
       env:
         GOARCH: ${{ matrix.arch }}
@@ -79,12 +67,6 @@ jobs:
     - uses: actions/setup-go@v2.1.4
       with:
         go-version: ${{ env.DEFAULT_GO_VERSION }}
-    - uses: actions/cache@v2.1.6
-      env:
-        cache-name: go-mod-cache
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
     - env:
         INTEGRATION: ${{ matrix.target }}
       run: |
