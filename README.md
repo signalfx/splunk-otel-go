@@ -101,6 +101,7 @@ Supported libraries are listed
 Additional recommended Splunk specific instrumentations:
 
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
+- [`splunkkafka`](./instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka)
 
 ## Manual Instrumentation
 

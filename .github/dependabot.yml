@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
-    directory: "/build"
+    directory: "/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
