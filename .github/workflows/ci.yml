@@ -34,7 +34,7 @@ jobs:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
       - run: ${{ matrix.run-script }}
-      - uses: codecov/codecov-action@v2.0.3
+      - uses: codecov/codecov-action@v2.1.0
         with:
           files: ./test-results/coverage.out
           flags: ${{ runner.os }}
