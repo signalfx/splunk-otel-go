@@ -35,7 +35,19 @@ func NewConsumer(conf *kafka.ConfigMap, opts ...Option) (*Consumer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return WrapConsumer(c, opts...), nil
+	// The kafka Consumer does not expose this. Give a best effort to add it.
+	var consumerGroup string
+	cGrpVal, err := conf.Get("group.id", "")
+	if err == nil {
+		consumerGroup, _ = cGrpVal.(string)
+	}
+	wrapped := &Consumer{
+		Consumer: c,
+		group:    consumerGroup,
+		cfg:      newConfig(opts...),
+	}
+	wrapped.events = wrapped.traceEventsChannel(c.Events())
+	return wrapped, nil
 }
 
 // NewProducer calls kafka.NewProducer and wraps the resulting Producer with
@@ -52,6 +64,7 @@ func NewProducer(conf *kafka.ConfigMap, opts ...Option) (*Producer, error) {
 type Consumer struct {
 	*kafka.Consumer
 	cfg    config
+	group  string
 	events chan kafka.Event
 	prev   trace.Span
 }
@@ -72,7 +85,7 @@ func (c *Consumer) traceEventsChannel(in chan kafka.Event) chan kafka.Event {
 		return nil
 	}
 
-	out := make(chan kafka.Event, 1)
+	out := make(chan kafka.Event, len(in))
 	go func() {
 		defer close(out)
 		for evt := range in {
@@ -111,7 +124,11 @@ func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
 		semconv.MessagingOperationReceive,
 		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)),
 		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
+		semconv.MessagingKafkaClientIDKey.String(c.Consumer.String()),
 		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
+	}
+	if c.group != "" {
+		attrs = append(attrs, semconv.MessagingKafkaConsumerGroupKey.String(c.group))
 	}
 	opts := []trace.SpanStartOption{
 		trace.WithAttributes(attrs...),
@@ -119,7 +136,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
 	}
 
 	name := fmt.Sprintf("%s receive", *msg.TopicPartition.Topic)
-	ctx, span := c.cfg.tracer(psc).Start(psc, name, opts...)
+	ctx, span := c.cfg.tracer().Start(psc, name, opts...)
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	c.cfg.Propagator.Inject(ctx, carrier)
@@ -180,7 +197,7 @@ func (p *Producer) traceProduceChannel(out chan *kafka.Message) chan *kafka.Mess
 		return out
 	}
 
-	in := make(chan *kafka.Message, 1)
+	in := make(chan *kafka.Message, len(out))
 	go func() {
 		for msg := range in {
 			span := p.startSpan(msg)
@@ -210,7 +227,7 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 	}
 
 	name := fmt.Sprintf("%s send", *msg.TopicPartition.Topic)
-	ctx, span := p.cfg.tracer(psc).Start(psc, name, opts...)
+	ctx, span := p.cfg.tracer().Start(psc, name, opts...)
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	p.cfg.Propagator.Inject(ctx, carrier)

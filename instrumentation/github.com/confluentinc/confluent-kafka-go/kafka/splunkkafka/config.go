@@ -15,8 +15,6 @@
 package splunkkafka
 
 import (
-	"context"
-
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
@@ -42,21 +40,14 @@ func newConfig(options ...Option) config {
 	if c.TracerProvider == nil {
 		c.TracerProvider = otel.GetTracerProvider()
 	}
+	if c.Propagator == nil {
+		c.Propagator = otel.GetTextMapPropagator()
+	}
 	return c
 }
 
 // tracer returns an OTel tracer from the appropriate TracerProvider.
-//
-// If the passed context contains a span, the TracerProvider that created the
-// tracer that created that span will be used. Otherwise, the TracerProvider
-// from c is used.
-func (c config) tracer(ctx context.Context) trace.Tracer {
-	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-		return span.TracerProvider().Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-		)
-	}
+func (c config) tracer() trace.Tracer {
 	return c.TracerProvider.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
