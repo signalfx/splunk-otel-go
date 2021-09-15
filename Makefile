@@ -15,7 +15,7 @@
 SHELL := /bin/bash
 
 GO               = go
-TIMEOUT          = 15
+TIMEOUT          = 60
 PKGS             = ./...
 BUILD_DIR        = ./build
 TEST_RESULTS     = $(CURDIR)/test-results
