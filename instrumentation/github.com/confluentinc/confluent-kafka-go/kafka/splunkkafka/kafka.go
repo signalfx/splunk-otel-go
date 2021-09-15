@@ -122,7 +122,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
 		semconv.MessagingDestinationKindTopic,
 		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
 		semconv.MessagingOperationReceive,
-		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)),
+		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)), // nolint: gomnd
 		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
 		semconv.MessagingKafkaClientIDKey.String(c.Consumer.String()),
 		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
@@ -194,7 +194,7 @@ func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
 
 func (p *Producer) traceProduceChannel(out chan *kafka.Message) chan *kafka.Message {
 	if out == nil {
-		return out
+		return nil
 	}
 
 	in := make(chan *kafka.Message, len(out))
@@ -217,7 +217,7 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 		semconv.MessagingSystemKey.String("kafka"),
 		semconv.MessagingDestinationKindTopic,
 		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
-		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)),
+		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)), // nolint: gomnd
 		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
 		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
 	}
@@ -252,9 +252,9 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 		go func() {
 			var err error
 			evt := <-deliveryChan
-			if msg, ok := evt.(*kafka.Message); ok {
+			if respMsg, ok := evt.(*kafka.Message); ok {
 				// delivery errors are returned via TopicPartition.Error
-				err = msg.TopicPartition.Error
+				err = respMsg.TopicPartition.Error
 			}
 			if err != nil {
 				span.RecordError(err)

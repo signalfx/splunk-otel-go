@@ -19,11 +19,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 )
 
-// A MessageCarrier injects and extracts traces from a sarama.ProducerMessage.
-type MessageCarrier struct {
-	msg *kafka.Message
-}
-
 // textMapCarrier wraps a kafka.Message so it can be used used by a
 // TextMapPropagator to propagate tracing context.
 type textMapCarrier struct {
@@ -40,7 +35,7 @@ func NewMessageCarrier(msg *kafka.Message) propagation.TextMapCarrier {
 // Get returns the value associated with the passed key.
 func (c *textMapCarrier) Get(key string) string {
 	for _, h := range c.msg.Headers {
-		if string(h.Key) == key {
+		if h.Key == key {
 			return string(h.Value)
 		}
 	}
@@ -48,10 +43,10 @@ func (c *textMapCarrier) Get(key string) string {
 }
 
 // Set stores the key-value pair.
-func (c *textMapCarrier) Set(key string, value string) {
+func (c *textMapCarrier) Set(key, value string) {
 	// Ensure the uniqueness of the key.
 	for i := len(c.msg.Headers) - 1; i >= 0; i-- {
-		if string(c.msg.Headers[i].Key) == key {
+		if c.msg.Headers[i].Key == key {
 			c.msg.Headers = append(c.msg.Headers[:i], c.msg.Headers[i+1:]...)
 		}
 	}
@@ -65,7 +60,7 @@ func (c *textMapCarrier) Set(key string, value string) {
 func (c *textMapCarrier) Keys() []string {
 	out := make([]string, len(c.msg.Headers))
 	for i, h := range c.msg.Headers {
-		out[i] = string(h.Key)
+		out[i] = h.Key
 	}
 	return out
 }

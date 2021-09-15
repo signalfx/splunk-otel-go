@@ -36,8 +36,7 @@ var (
 )
 
 func TestConsumerChannel(t *testing.T) {
-	// we can test consuming via the Events channel by artifically sending
-	// messages. Testing .Poll is done via an integration test.
+	// Test consuming via the Events channel by artificially sending messages.
 
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
