@@ -36,6 +36,9 @@ var (
 )
 
 func TestConsumerChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	// Test consuming via the Events channel by artificially sending messages.
 
 	sr := tracetest.NewSpanRecorder()
@@ -125,6 +128,9 @@ to run the integration test locally:
 */
 
 func TestConsumerPoll(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	if _, ok := os.LookupEnv("INTEGRATION"); !ok {
 		t.Skip("to enable integration test, set the INTEGRATION environment variable")
 	}
