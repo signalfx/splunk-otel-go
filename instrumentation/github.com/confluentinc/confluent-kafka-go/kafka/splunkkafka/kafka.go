@@ -136,7 +136,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
 	}
 
 	name := fmt.Sprintf("%s receive", *msg.TopicPartition.Topic)
-	ctx, span := c.cfg.tracer().Start(psc, name, opts...)
+	ctx, span := c.cfg.Tracer.Start(psc, name, opts...)
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	c.cfg.Propagator.Inject(ctx, carrier)
@@ -227,7 +227,7 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 	}
 
 	name := fmt.Sprintf("%s send", *msg.TopicPartition.Topic)
-	ctx, span := p.cfg.tracer().Start(psc, name, opts...)
+	ctx, span := p.cfg.Tracer.Start(psc, name, opts...)
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	p.cfg.Propagator.Inject(ctx, carrier)

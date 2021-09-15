@@ -26,8 +26,8 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 
 // config contains tracing configuration options.
 type config struct {
-	TracerProvider trace.TracerProvider
-	Propagator     propagation.TextMapPropagator
+	Tracer     trace.Tracer
+	Propagator propagation.TextMapPropagator
 }
 
 func newConfig(options ...Option) config {
@@ -37,21 +37,16 @@ func newConfig(options ...Option) config {
 			o.apply(&c)
 		}
 	}
-	if c.TracerProvider == nil {
-		c.TracerProvider = otel.GetTracerProvider()
+	if c.Tracer == nil {
+		c.Tracer = otel.Tracer(
+			instrumentationName,
+			trace.WithInstrumentationVersion(splunkotel.Version()),
+		)
 	}
 	if c.Propagator == nil {
 		c.Propagator = otel.GetTextMapPropagator()
 	}
 	return c
-}
-
-// tracer returns an OTel tracer from the appropriate TracerProvider.
-func (c config) tracer() trace.Tracer {
-	return c.TracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-	)
 }
 
 // Option applies options to a tracing configuration.
@@ -69,7 +64,10 @@ func (o optionFunc) apply(c *config) {
 // this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionFunc(func(c *config) {
-		c.TracerProvider = tp
+		c.Tracer = tp.Tracer(
+			instrumentationName,
+			trace.WithInstrumentationVersion(splunkotel.Version()),
+		)
 	})
 }
 
