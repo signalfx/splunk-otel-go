@@ -22,7 +22,7 @@ import (
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
-const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 
 // config contains tracing configuration options.
 type config struct {
