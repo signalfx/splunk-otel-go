@@ -55,6 +55,38 @@ $(TEST_TARGETS): test
 test tests:
 	${call for-all-modules,$(GO) test -timeout $(TIMEOUT)s $(ARGS) $(PKGS)}
 
+.PHONY: test-kafka
+test-kafka:
+	@set -e; \
+	docker network create confluent; \
+    docker run \
+	  -d \
+	  --rm \
+	  --name zookeeper \
+	  --network confluent \
+	  -p 2181:2181 \
+	  -e ZOOKEEPER_CLIENT_PORT=2181 \
+	  confluentinc/cp-zookeeper:5.0.0; \
+    docker run \
+	  -d \
+	  --rm \
+	  --name kafka \
+	  --network confluent \
+	  -p 9092:9092 \
+	  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+	  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+	  -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+	  -e KAFKA_CREATE_TOPICS=gotest:1:1 \
+	  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+	  confluentinc/cp-kafka:5.0.0; \
+	( \
+	  cd instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka/test && \
+	  $(GO) test -timeout $(TIMEOUT)s ./... ; \
+	); \
+	docker stop kafka; \
+	docker stop zookeeper; \
+	docker network rm confluent;
+
 # Pre-release targets
 
 .PHONY: add-tag
