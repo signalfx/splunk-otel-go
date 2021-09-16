@@ -22,8 +22,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	k, v = "key", "value"
+)
+
 func TestCarrierGet(t *testing.T) {
-	k, v := "key", "value"
 	msg := &kafka.Message{
 		Headers: []kafka.Header{
 			{Key: k, Value: []byte(v)},
@@ -42,7 +45,6 @@ func TestCarrierGetEmpty(t *testing.T) {
 func TestCarrierSet(t *testing.T) {
 	msg := &kafka.Message{}
 	carrier := splunkkafka.NewMessageCarrier(msg)
-	k, v := "key", "value"
 	carrier.Set(k, v)
 	var got string
 	for _, h := range msg.Headers {
@@ -54,7 +56,6 @@ func TestCarrierSet(t *testing.T) {
 }
 
 func TestCarrierSetOverwrites(t *testing.T) {
-	k, v := "key", "value"
 	msg := &kafka.Message{
 		Headers: []kafka.Header{
 			{Key: k, Value: []byte("not value")},
