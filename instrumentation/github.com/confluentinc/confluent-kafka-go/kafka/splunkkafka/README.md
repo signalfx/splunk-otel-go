@@ -16,7 +16,6 @@ binaries](https://github.com/confluentinc/confluent-kafka-go#librdkafka), or
 the library manually. Important to note, similar to the instrumented package,
 this instrumentation does not support the Windows operating system.
 
-
 ## Getting started
 
 A consumer that traces all received messages can be created with `NewConsumer`.
@@ -24,7 +23,7 @@ A consumer that traces all received messages can be created with `NewConsumer`.
 ```golang
 import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
-    /* ... */
+	/* ... */
 )
 
 func main() {
@@ -34,7 +33,7 @@ func main() {
 		"auto.offset.reset": "earliest",
 	})
 
-    /* ... */
+	/* ... */
 }
 ```
 
