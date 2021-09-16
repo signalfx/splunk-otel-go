@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build !windows
+
 // Package splunkkafka provides functions to trace the
 // github.com/confluentinc/confluent-kafka-go/kafka package.
 package splunkkafka // import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
