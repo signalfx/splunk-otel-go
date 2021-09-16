@@ -85,7 +85,7 @@ func (c *Consumer) traceEventsChannel(in chan kafka.Event) chan kafka.Event {
 		return nil
 	}
 
-	out := make(chan kafka.Event, len(in))
+	out := make(chan kafka.Event, cap(in))
 	go func() {
 		defer close(out)
 		for evt := range in {
@@ -197,7 +197,7 @@ func (p *Producer) traceProduceChannel(out chan *kafka.Message) chan *kafka.Mess
 		return nil
 	}
 
-	in := make(chan *kafka.Message, len(out))
+	in := make(chan *kafka.Message, cap(out))
 	go func() {
 		for msg := range in {
 			span := p.startSpan(msg)
