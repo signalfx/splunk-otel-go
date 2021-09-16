@@ -27,7 +27,7 @@ Q = $(if $(filter 1,$V),,@)
 # ALL_MODULES includes ./* dirs (excludes . and ./build dir).
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 # All directories with go.mod files related to opentelemetry library. Used for building, testing and linting.
-ALL_GO_MOD_DIRS := $(filter-out $(BUILD_DIR), $(ALL_MODULES))
+ALL_GO_MOD_DIRS := $(filter-out $(EXCLUDEPKGS) $(BUILD_DIR), $(ALL_MODULES))
 # All directories sub-modules. Used for tagging and generating dependabot config.
 SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 
@@ -35,7 +35,6 @@ SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 .PHONY: goyek
 goyek:
 	./goyek.sh
-
 
 # Build and test targets
 

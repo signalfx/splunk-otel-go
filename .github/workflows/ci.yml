@@ -37,7 +37,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.17, 1.16, 1.15]
-        os: [ubuntu-18.04, windows-2019, macos-10.15]
+        os: [ubuntu-20.04, windows-2019, macos-10.15]
         # GitHub Actions does not support arm* architectures on default
         # runners. It is possible to accomplish this with a self-hosted runner
         # if we want to add this in the future:
@@ -53,18 +53,16 @@ jobs:
     - uses: actions/setup-go@v2.1.4
       with:
         go-version: ${{ matrix.go-version }}
-    - name: Install librdkafka-dev for ubuntu
-      if: contains(matrix.os, 'ubuntu') && matrix.arch == '386'
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get -y install librdkafka-dev:i386
-    - name: Install librdkafka-dev for MacOS
-      if: contains(matrix.os, 'macos')
-      run: brew install librdkafka pkg-config
-    - run: make test-short
+    - name: make test-short (exclude splunkkafka)
+      if: "matrix.arch == '386' || contains(matrix.os, 'windows')"
+      env:
+        EXCLUDEPKGS: "%/splunkkafka %/splunkkafka/test"
+        GOARCH: ${{ matrix.arch }}
+      run: make test-short
+    - if: "!(matrix.arch == '386' || contains(matrix.os, 'windows'))"
       env:
         GOARCH: ${{ matrix.arch }}
+      run: make test-short
 
   integration-tests:
     strategy:
