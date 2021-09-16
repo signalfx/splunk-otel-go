@@ -13,6 +13,7 @@
 // limitations under the License.
 
 //go:build !windows
+// +build !windows
 
 package splunkkafka // import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 
