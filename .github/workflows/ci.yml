@@ -53,6 +53,14 @@ jobs:
     - uses: actions/setup-go@v2.1.4
       with:
         go-version: ${{ matrix.go-version }}
+    - name: Install librdkafka-dev for ubuntu
+      if: contains(matrix.os, 'ubuntu') && matrix.arch == '386'
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install librdkafka-devel
+    - name: Install librdkafka-dev for MacOS
+      if: contains(matrix.os, 'macos')
+      run: brew install librdkafka pkg-config
     - run: make test-short
       env:
         GOARCH: ${{ matrix.arch }}
