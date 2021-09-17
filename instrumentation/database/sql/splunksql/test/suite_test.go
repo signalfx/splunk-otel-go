@@ -312,9 +312,7 @@ func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.Sp
 				s.Failf("non-root span", "span %s should not have a parent", name)
 			}
 		}
-		if roSpan.SpanKind() != traceapi.SpanKindClient {
-			s.Failf("non-client span", "span with kind %q recorded", roSpan.SpanKind())
-		}
+		s.Equalf(traceapi.SpanKindClient, roSpan.SpanKind(), "span %q is not a client span", name)
 	}
 	s.Equalf(count, n, "wrong number of %s spans", name)
 }
