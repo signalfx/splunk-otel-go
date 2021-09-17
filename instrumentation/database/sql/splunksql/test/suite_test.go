@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"github.com/stretchr/testify/suite"
@@ -57,7 +56,7 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 		trace.WithSpanProcessor(s.SpanRecorder),
 	)
 
-	dbSys := dbsystem.OtherSQL
+	dbSys := splunksql.DBSystemOtherSQL
 	connCfg := splunksql.ConnectionConfig{
 		// Do not set the Name field so monikers are used to identify
 		// spans.

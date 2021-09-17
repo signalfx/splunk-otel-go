@@ -18,7 +18,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -39,7 +38,7 @@ func runConcurrently(funcs ...func()) {
 
 func TestRegisterConcurrentSafe(t *testing.T) {
 	instCfg := InstrumentationConfig{
-		DBSystem: dbsystem.Type(
+		DBSystem: DBSystem(
 			attribute.String("test", "database"),
 		),
 	}

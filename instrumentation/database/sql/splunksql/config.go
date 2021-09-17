@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"go.opentelemetry.io/otel"
@@ -264,6 +263,6 @@ type DSNParser func(dataSourceName string) (ConnectionConfig, error)
 // a database driver.
 type InstrumentationConfig struct {
 	// DBSystem is the database system being registered.
-	DBSystem  dbsystem.Type
+	DBSystem  DBSystem
 	DSNParser DSNParser
 }
