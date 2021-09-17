@@ -63,7 +63,7 @@ func (s *otelStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (d
 		}
 		f = func(ctx context.Context) error {
 			var err error
-			res, err = s.Exec(vArgs) // nolint:staticcheck
+			res, err = s.Exec(vArgs) // nolint:staticcheck // Ensure backwards support of deprecated interface.
 			return err
 		}
 	}
@@ -93,7 +93,7 @@ func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (
 		}
 		f = func(ctx context.Context) error {
 			var err error
-			rows, err = s.Query(vArgs) // nolint:staticcheck
+			rows, err = s.Query(vArgs) // nolint:staticcheck // Ensure backwards support of deprecated interface.
 			return err
 		}
 	}

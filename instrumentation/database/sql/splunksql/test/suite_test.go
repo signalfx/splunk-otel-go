@@ -85,11 +85,11 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 	}
 	_, ok := c.(driver.Pinger)
 	s.ConnImplementsPinger = ok
-	_, ok = c.(driver.Execer) // nolint: staticcheck
+	_, ok = c.(driver.Execer) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	s.ConnImplementsExecer = ok
 	_, ok = c.(driver.ExecerContext)
 	s.ConnImplementsExecerContext = ok
-	_, ok = c.(driver.Queryer) // nolint: staticcheck
+	_, ok = c.(driver.Queryer) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	s.ConnImplementsQueryer = ok
 	_, ok = c.(driver.QueryerContext)
 	s.ConnImplementsQueryerContext = ok
@@ -145,7 +145,7 @@ func (s *SplunkSQLSuite) TestDBExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBQuery() {
-	_, err := s.DB.Query("test") // nolint: gocritic, rowserrcheck
+	_, err := s.DB.Query("test") // nolint: gocritic, rowserrcheck // there is no connection leak for this test structure.
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -155,7 +155,7 @@ func (s *SplunkSQLSuite) TestDBQuery() {
 }
 
 func (s *SplunkSQLSuite) TestDBQueryContext() {
-	_, err := s.DB.QueryContext(context.Background(), "test") // nolint: gocritic,rowserrcheck
+	_, err := s.DB.QueryContext(context.Background(), "test") // nolint: gocritic,rowserrcheck // there is no connection leak for this test structure.
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -233,7 +233,7 @@ func (s *SplunkSQLSuite) TestStmtExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestStmtQuery() {
-	r, err := s.newStmt().Query() // nolint: rowserrcheck
+	r, err := s.newStmt().Query() // nolint: rowserrcheck // r is nil, no need to check r.Err.
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 	// Avoid connection leak
@@ -241,7 +241,7 @@ func (s *SplunkSQLSuite) TestStmtQuery() {
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryContext() {
-	r, err := s.newStmt().QueryContext(context.Background()) // nolint: rowserrcheck
+	r, err := s.newStmt().QueryContext(context.Background()) // nolint: rowserrcheck // r is nil, no need to check r.Err.
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 	// Avoid connection leak
@@ -279,7 +279,7 @@ func (s *SplunkSQLSuite) assertSpan(name moniker.Span, opt ...traceapi.SpanStart
 	s.assertSpans(name, 1, c)
 }
 
-func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.SpanConfig) { // nolint: gocritic
+func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.SpanConfig) { // nolint: gocritic // passing c by value is fine.
 	attrs := make([]attribute.KeyValue, 0, len(c.Attributes())+len(s.BaseAttributes))
 	attrs = append(attrs, s.BaseAttributes...)
 	attrs = append(attrs, c.Attributes()...)

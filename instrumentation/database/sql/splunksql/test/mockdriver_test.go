@@ -67,9 +67,9 @@ type mockConn struct{}
 
 var (
 	_ driver.Pinger             = (*mockConn)(nil)
-	_ driver.Execer             = (*mockConn)(nil) // nolint: staticcheck
+	_ driver.Execer             = (*mockConn)(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.ExecerContext      = (*mockConn)(nil)
-	_ driver.Queryer            = (*mockConn)(nil) // nolint: staticcheck
+	_ driver.Queryer            = (*mockConn)(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.QueryerContext     = (*mockConn)(nil)
 	_ driver.Conn               = (*mockConn)(nil)
 	_ driver.ConnPrepareContext = (*mockConn)(nil)

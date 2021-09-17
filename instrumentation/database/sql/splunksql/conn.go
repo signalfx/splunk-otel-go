@@ -33,9 +33,9 @@ type otelConn struct {
 // Compile-time check otelConn implements database interfaces.
 var (
 	_ driver.Pinger             = (*otelConn)(nil)
-	_ driver.Execer             = (*otelConn)(nil) // nolint:staticcheck
+	_ driver.Execer             = (*otelConn)(nil) // nolint:staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.ExecerContext      = (*otelConn)(nil)
-	_ driver.Queryer            = (*otelConn)(nil) // nolint:staticcheck
+	_ driver.Queryer            = (*otelConn)(nil) // nolint:staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.QueryerContext     = (*otelConn)(nil)
 	_ driver.Conn               = (*otelConn)(nil)
 	_ driver.ConnPrepareContext = (*otelConn)(nil)
@@ -58,7 +58,7 @@ func (c *otelConn) Ping(ctx context.Context) error {
 
 // Exec calls the wrapped Connection Exec method if implemented.
 func (c *otelConn) Exec(query string, args []driver.Value) (driver.Result, error) {
-	if execer, ok := c.Conn.(driver.Execer); ok { // nolint:staticcheck
+	if execer, ok := c.Conn.(driver.Execer); ok { // nolint:staticcheck // Ensure backwards support of deprecated interface.
 		return execer.Exec(query, args)
 	}
 	return nil, driver.ErrSkip
@@ -97,7 +97,7 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 
 // Query calls the wrapped Connection Query method if implemented.
 func (c *otelConn) Query(query string, args []driver.Value) (driver.Rows, error) {
-	if queryer, ok := c.Conn.(driver.Queryer); ok { // nolint:staticcheck
+	if queryer, ok := c.Conn.(driver.Queryer); ok { // nolint:staticcheck // Ensure backwards support of deprecated interface.
 		return queryer.Query(query, args)
 	}
 	return nil, driver.ErrSkip
@@ -181,7 +181,7 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		// Fallback to explicitly wrapping Begin.
 		f = func(ctx context.Context) error {
 			var err error
-			tx, err = c.Conn.Begin() // nolint:staticcheck
+			tx, err = c.Conn.Begin() // nolint:staticcheck // Ensure backwards support of deprecated interface.
 			return err
 		}
 	}

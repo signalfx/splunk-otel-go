@@ -102,14 +102,14 @@ func (s *StmtSuite) TestNumInputCallsWrapped() {
 }
 
 func (s *StmtSuite) TestExecCallsWrapped() {
-	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck
+	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.execN)
 }
 
 func (s *StmtSuite) TestExecReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck
+	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.execN)
 }
