@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package transport provides identifiers for communication transport
-// protocols conforming to OpenTelemetry semantic conventions.
-package transport // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
+package splunksql
 
 import (
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-// Type is a communication transport protocol.
-type Type attribute.KeyValue // nolint: revive
+// NetTransport is a communication transport protocol.
+type NetTransport attribute.KeyValue
 
 // Attribute returns t as an attribute KeyValue. If t is empty the returned
-// attribute will default to a Type Other.
-func (t Type) Attribute() attribute.KeyValue {
+// attribute will default to a NetTransportOther.
+func (t NetTransport) Attribute() attribute.KeyValue {
 	if !t.Key.Defined() {
 		return semconv.NetTransportOther
 	}
@@ -35,11 +33,11 @@ func (t Type) Attribute() attribute.KeyValue {
 
 // Valid transport protocols.
 var (
-	TCP    = Type(semconv.NetTransportTCP)
-	UDP    = Type(semconv.NetTransportUDP)
-	IP     = Type(semconv.NetTransportIP)
-	Unix   = Type(semconv.NetTransportUnix)
-	Pipe   = Type(semconv.NetTransportPipe)
-	InProc = Type(semconv.NetTransportInProc)
-	Other  = Type(semconv.NetTransportOther)
+	NetTransportTCP    = NetTransport(semconv.NetTransportTCP)
+	NetTransportUDP    = NetTransport(semconv.NetTransportUDP)
+	NetTransportIP     = NetTransport(semconv.NetTransportIP)
+	NetTransportUnix   = NetTransport(semconv.NetTransportUnix)
+	NetTransportPipe   = NetTransport(semconv.NetTransportPipe)
+	NetTransportInProc = NetTransport(semconv.NetTransportInProc)
+	NetTransportOther  = NetTransport(semconv.NetTransportOther)
 )

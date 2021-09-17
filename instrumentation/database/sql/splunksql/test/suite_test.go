@@ -22,7 +22,6 @@ import (
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"github.com/stretchr/testify/suite"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -64,7 +63,7 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 		User:             "bob",
 		Host:             "localhost",
 		Port:             8080,
-		Transport:        transport.Other,
+		NetTransport:     splunksql.NetTransportOther,
 	}
 	s.BaseAttributes, _ = connCfg.Attributes()
 	s.BaseAttributes = append(s.BaseAttributes, dbSys.Attribute())

@@ -24,7 +24,6 @@ import (
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -188,8 +187,8 @@ type ConnectionConfig struct {
 	Host string
 	// Port is the port the database is lisening on.
 	Port int
-	// Transport is the transport protocol used to connect to the database.
-	Transport transport.Type
+	// NetTransport is the transport protocol used to connect to the database.
+	NetTransport NetTransport
 }
 
 // Attributes returns the connection settings as attributes compliant with
@@ -220,7 +219,7 @@ func (c ConnectionConfig) Attributes() ([]attribute.KeyValue, error) { // nolint
 	if c.Port > 0 {
 		attrs = append(attrs, semconv.NetPeerPortKey.Int(c.Port))
 	}
-	attrs = append(attrs, c.Transport.Attribute())
+	attrs = append(attrs, c.NetTransport.Attribute())
 
 	var err error
 	if len(errs) > 0 {
