@@ -102,5 +102,5 @@ func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (
 	if err != nil {
 		return nil, err
 	}
-	return newRows(ctx, rows, s.config), nil
+	return rows, nil
 }

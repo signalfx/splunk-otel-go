@@ -37,20 +37,7 @@ const (
 	Commit Span = "Commit"
 	// Rollback is the span name for a rollback operation.
 	Rollback Span = "Rollback"
-	// Rows is the span name for a rows operation.
-	Rows Span = "Rows"
 )
 
 // String returns the Span as a string.
 func (n Span) String() string { return string(n) }
-
-// Event is the name of an OpenTelemetry Event.
-type Event string
-
-const (
-	// Next is the event name for a next operation on SQL rows.
-	Next Event = "Next"
-)
-
-// String returns the Event as a string.
-func (n Event) String() string { return string(n) }

@@ -89,12 +89,12 @@ func (c *mockConn) ExecContext(context.Context, string, []driver.NamedValue) (dr
 
 func (c *mockConn) Query(string, []driver.Value) (driver.Rows, error) {
 	c.queryN++
-	return newMockRows(c.err), c.err
+	return nil, c.err
 }
 
 func (c *mockConn) QueryContext(context.Context, string, []driver.NamedValue) (driver.Rows, error) {
 	c.queryContextN++
-	return newMockRows(c.err), c.err
+	return nil, c.err
 }
 
 func (c *mockConn) PrepareContext(context.Context, string) (driver.Stmt, error) {
@@ -259,15 +259,14 @@ func (s *ConnSuite) TestExecContextReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestQueryCallsWrapped() {
-	r, err := s.OTelConn.Query("", nil)
+	_, err := s.OTelConn.Query("", nil) // nolint: gocritic // test Query not Exec
 	s.NoError(err)
 	s.Equal(1, s.MockConn.queryN)
-	_ = r.Close()
 }
 
 func (s *ConnSuite) TestQueryReturnsWrappedError() {
 	s.MockConn.err = errTest
-	_, err := s.OTelConn.Query("", nil) // nolint: gocritic
+	_, err := s.OTelConn.Query("", nil) // nolint: gocritic // test Query not Exec
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.queryN)
 }
@@ -280,10 +279,9 @@ func (s *ConnSuite) TestQueryReturnsErrSkipIfNotImplemented() {
 }
 
 func (s *ConnSuite) TestQueryContextCallsWrapped() {
-	r, err := s.OTelConn.QueryContext(context.Background(), "", nil)
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockConn.queryContextN)
-	_ = r.Close()
 }
 
 func (s *ConnSuite) TestQueryContextReturnsWrappedError() {

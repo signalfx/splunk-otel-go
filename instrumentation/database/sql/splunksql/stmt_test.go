@@ -65,12 +65,12 @@ func (s *mockStmt) ExecContext(context.Context, []driver.NamedValue) (driver.Res
 
 func (s *mockStmt) Query([]driver.Value) (driver.Rows, error) {
 	s.queryN++
-	return newMockRows(s.err), s.err
+	return nil, s.err
 }
 
 func (s *mockStmt) QueryContext(context.Context, []driver.NamedValue) (driver.Rows, error) {
 	s.queryContextN++
-	return newMockRows(s.err), s.err
+	return nil, s.err
 }
 
 type StmtSuite struct {
@@ -137,40 +137,36 @@ func (s *StmtSuite) TestExecContextReturnsWrappedError() {
 }
 
 func (s *StmtSuite) TestQueryCallsWrapped() {
-	q, err := s.OTelStmt.Query(nil) // nolint: staticcheck
+	_, err := s.OTelStmt.Query(nil) // nolint: staticcheck, gocritic // test Query not Exec
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.queryN)
-	_ = q.Close()
 }
 
 func (s *StmtSuite) TestQueryReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	q, err := s.OTelStmt.Query(nil) // nolint: staticcheck
+	_, err := s.OTelStmt.Query(nil) // nolint: staticcheck, gocritic // test Query not Exec
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.queryN)
-	_ = q.Close()
 }
 
 func (s *StmtSuite) TestQueryContextCallsWrapped() {
-	q, err := s.OTelStmt.QueryContext(context.Background(), nil)
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.queryContextN)
-	_ = q.Close()
 }
 
 func (s *StmtSuite) TestQueryContextFallsbackToQuery() {
 	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newTraceConfig(), "")
 
-	q, err := s.OTelStmt.QueryContext(context.Background(), nil)
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(0, s.MockStmt.queryContextN)
 	s.Equal(1, s.MockStmt.queryN)
-	_ = q.Close()
 }
 
 func (s *StmtSuite) TestQueryContextReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // test Query not Exec
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.queryContextN)
 }

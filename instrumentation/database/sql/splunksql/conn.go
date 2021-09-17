@@ -134,7 +134,7 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 	if err != nil {
 		return nil, err
 	}
-	return newRows(ctx, rows, c.config), nil
+	return rows, nil
 }
 
 // PrepareContext returns a prepared statement, bound to this traced connection.

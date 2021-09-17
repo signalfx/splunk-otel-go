@@ -260,22 +260,6 @@ func (s *SplunkSQLSuite) TestStmtQueryRowContext() {
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
-func (s *SplunkSQLSuite) TestRow() {
-	r := s.newStmt().QueryRow()
-	s.Require().NoError(r.Err())
-	s.Require().NoError(r.Scan())
-	var span trace.ReadOnlySpan
-	for _, roSpan := range s.SpanRecorder.Ended() {
-		if roSpan.Name() == moniker.Rows.String() {
-			span = roSpan
-		}
-	}
-	s.Require().NotNil(span)
-	events := span.Events()
-	s.Require().Len(events, 1)
-	s.Equal(moniker.Next.String(), events[0].Name)
-}
-
 func (s *SplunkSQLSuite) TestTxCommit() {
 	tx, err := s.DB.Begin()
 	s.Require().NoError(err)
