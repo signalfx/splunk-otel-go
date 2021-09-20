@@ -11,7 +11,11 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
-    directory: "/build"
+    directory: "/instrumentation/database/sql/splunksql"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/database/sql/splunksql/test"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"

@@ -100,6 +100,7 @@ Supported libraries are listed
 
 Additional recommended Splunk specific instrumentations:
 
+- [`splunksql`](./instrumentation/database/sql/splunksql)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 
 ## Manual Instrumentation
