@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Added the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
+  instrumentation for the `github.com/go-sql-driver/mysql` package. (#90)
+
 ## [0.6.0] - 2021-09-13
 
 The primary change of this release is updating `go.opentelemetry.io/otel*`
