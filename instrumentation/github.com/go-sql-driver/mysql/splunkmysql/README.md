@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-    // Make sure this is imported to ensure driver is registered.
+	// Make sure this is imported to ensure driver is registered.
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
 
