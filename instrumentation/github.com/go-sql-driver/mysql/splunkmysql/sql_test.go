@@ -18,7 +18,6 @@ import (
 	"testing"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,7 +42,7 @@ func TestDSNParser(t *testing.T) {
 				ConnectionString: "tcp(127.0.0.1:3306)/testdb",
 				Host:             "127.0.0.1",
 				Port:             3306,
-				Transport:        transport.TCP,
+				NetTransport:     splunksql.NetTransportTCP,
 			},
 		},
 		{
@@ -55,7 +54,7 @@ func TestDSNParser(t *testing.T) {
 				User:             "user",
 				Host:             "localhost",
 				Port:             8080,
-				Transport:        transport.TCP,
+				NetTransport:     splunksql.NetTransportTCP,
 			},
 		},
 		{
@@ -65,7 +64,7 @@ func TestDSNParser(t *testing.T) {
 				Name:             "testdb",
 				ConnectionString: "user@unix(/tmp)/testdb",
 				User:             "user",
-				Transport:        transport.Unix,
+				NetTransport:     splunksql.NetTransportUnix,
 			},
 		},
 	}

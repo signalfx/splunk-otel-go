@@ -47,13 +47,11 @@ import (
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 )
 
 func init() { // nolint: gochecknoinits
 	splunksql.Register("mysql", splunksql.InstrumentationConfig{
-		DBSystem:  dbsystem.MySQL,
+		DBSystem:  splunksql.DBSystemMySQL,
 		DSNParser: DSNParser,
 	})
 }
@@ -80,9 +78,9 @@ func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 		// These are the only two cases the instrumented package knows about.
 		switch cfg.Net {
 		case "unix":
-			connCfg.Transport = transport.Unix
+			connCfg.NetTransport = splunksql.NetTransportUnix
 		case "tcp":
-			connCfg.Transport = transport.TCP
+			connCfg.NetTransport = splunksql.NetTransportTCP
 		}
 
 		host, port, err := net.SplitHostPort(cfg.Addr)
