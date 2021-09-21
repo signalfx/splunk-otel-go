@@ -47,13 +47,11 @@ import (
 	// Make sure to import this so the instrumented driver is registered.
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/dbsystem"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/transport"
 )
 
 func init() { // nolint: gochecknoinits
 	splunksql.Register("pgx", splunksql.InstrumentationConfig{
-		DBSystem:  dbsystem.PostgreSQL,
+		DBSystem:  splunksql.DBSystemPostgreSQL,
 		DSNParser: DSNParser,
 	})
 }
@@ -75,9 +73,9 @@ func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 		connCfg.Host = "localhost"
 	}
 	if strings.HasPrefix(connCfg.Host, "/") {
-		connCfg.Transport = transport.Unix
+		connCfg.NetTransport = splunksql.NetTransportUnix
 	} else {
-		connCfg.Transport = transport.TCP
+		connCfg.NetTransport = splunksql.NetTransportTCP
 		if c.Port > 0 {
 			connCfg.Port = int(c.Port)
 		} else {
