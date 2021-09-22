@@ -1,5 +1,7 @@
 # Splunk Instrumentation for the MySQL Driver Package
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
+
 This package instruments the
 [`github.com/go-sql-driver/mysql`](https://github.com/go-sql-driver/mysql)
 package using the [`splunksql`](../../../../database/sql/splunksql) package.
