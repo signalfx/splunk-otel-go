@@ -47,12 +47,10 @@ func (s *server) handle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	query := "SELECT squareNumber FROM squarenum WHERE number = ?"
-	// Prepare a statement for reading data. It is important to include the
-	// passed context to ensure if there are any existing trace the spans
-	// created for the database interaction are appropriately included in that
-	// trace.
 	var nSquared int
-	if err := db.QueryRowContext(req.Context(), query, n).Scan(&nSquared); err != nil {
+	// Propagate the context to ensure created spans are included in any
+	// existing trace.
+	if err := s.DB.QueryRowContext(req.Context(), query, n).Scan(&nSquared); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
