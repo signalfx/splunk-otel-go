@@ -66,8 +66,9 @@ func Example() {
 	}
 	// Ensure all spans are flushed before the application exits.
 	defer func() {
-		if err := sdk.Shutdown(context.Background()); err != nil {
-			panic(err)
+		sErr := sdk.Shutdown(context.Background())
+		if sErr != nil {
+			panic(sErr)
 		}
 	}()
 
