@@ -51,17 +51,8 @@ func (s *server) handle(w http.ResponseWriter, req *http.Request) {
 	// passed context to ensure if there are any existing trace the spans
 	// created for the database interaction are appropriately included in that
 	// trace.
-	stmt, err := s.DB.PrepareContext(req.Context(), query)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer stmt.Close()
-
 	var nSquared int
-	// Again, pass the context here to ensure spans are not orphaned.
-	err = stmt.QueryRowContext(req.Context(), n).Scan(&nSquared)
-	if err != nil {
+	if err := db.QueryRowContext(req.Context(), query, n).Scan(&nSquared); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
