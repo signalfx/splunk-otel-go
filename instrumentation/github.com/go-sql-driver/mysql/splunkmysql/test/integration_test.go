@@ -12,15 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+Package test provides end-to-end testing of the splunkmysql instrumentation
+with the default SDK.
+
+This package is in a separate module from the instrumentation it tests to
+isolate the dependency of the default SDK and not impose this as a transitive
+dependency for users.
+*/
 package test
 
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 	"github.com/stretchr/testify/assert"
@@ -30,29 +42,13 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-/*
-To run the integration test locally either run `make test-mysql`, or manually create a MySQL database. To do this with docker:
-
-    docker network create database; \
-    docker run \
-      -d \
-      --rm \
-      --name mysql \
-      --network database \
-      -p 3306:3306 \
-      -e MYSQL_ROOT_PASSWORD=root-password \
-      -e MYSQL_DATABASE=testdb \
-      -e MYSQL_USER=testuser \
-      -e MYSQL_PASSWORD=testuser-password \
-      mysql:8; \
-*/
-
 const (
-	user   = "testuser"
-	pass   = "testuser-password"
-	host   = "localhost"
-	port   = 3306
-	dbName = "testdb"
+	user     = "testuser"
+	pass     = "testuser-password"
+	rootPass = "secret"
+	host     = "localhost"
+	port     = 3306
+	dbName   = "testdb"
 
 	createStmt = "CREATE TABLE IF NOT EXISTS squareNum ( number integer, squareNumber integer )"
 	queryStmt  = "SELECT squareNumber FROM squareNum WHERE number = ?"
@@ -61,6 +57,7 @@ const (
 
 var (
 	dsn          = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", user, pass, host, port, dbName)
+	dsnRoot      = fmt.Sprintf("root:%s@tcp(%s:%d)/%s", rootPass, host, port, dbName)
 	dsnSanitized = fmt.Sprintf("%s@tcp(%s:%d)/%s", user, host, port, dbName)
 )
 
@@ -75,18 +72,7 @@ func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, 
 	}
 }
 
-func skippable(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Not running heavy integration test in short mode.")
-	}
-	if _, ok := os.LookupEnv("INTEGRATION"); !ok {
-		t.Skip("Set the INTEGRATION environment variable to enable test")
-	}
-}
-
 func TestNoContextSpans(t *testing.T) {
-	skippable(t)
-
 	sr, _, db, shutdownFunc := newFixtures(t)
 
 	require.NoError(t, db.Ping())
@@ -126,8 +112,6 @@ func TestNoContextSpans(t *testing.T) {
 }
 
 func TestContextSpans(t *testing.T) {
-	skippable(t)
-
 	sr, tp, db, shutdownFunc := newFixtures(t)
 	// The TracerProvider that created the span in the passed context will be
 	// used to create all the other spans. Make sure to use the TracerProvider
@@ -181,4 +165,56 @@ func assertSpanBaseAttrs(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Contains(t, a, semconv.NetPeerNameKey.String(host))
 	assert.Contains(t, a, semconv.NetPeerPortKey.Int(port))
 	assert.Contains(t, a, semconv.NetTransportTCP)
+}
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	if testing.Short() {
+		fmt.Println("Skipping running heavy integration test in short mode.")
+		return
+	}
+
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("Could not connect to docker: %s", err)
+	}
+
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "mysql",
+		Tag:        "8",
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"3306/tcp": {
+				{HostIP: "localhost", HostPort: "3306"},
+			},
+		},
+		Env: []string{
+			fmt.Sprintf("MYSQL_ROOT_PASSWORD=%s", rootPass),
+			fmt.Sprintf("MYSQL_DATABASE=%s", dbName),
+			fmt.Sprintf("MYSQL_USER=%s", user),
+			fmt.Sprintf("MYSQL_PASSWORD=%s", pass),
+		},
+	})
+	if err != nil {
+		log.Fatalf("Could not start resource: %s", err)
+	}
+
+	// Wait for the database to come up using an exponential-backoff retry.
+	if err := pool.Retry(func() error {
+		db, err := sql.Open("mysql", dsnRoot)
+		if err != nil {
+			return err
+		}
+		return db.Ping()
+	}); err != nil {
+		log.Fatalf("Could not connect to docker: %s", err)
+	}
+
+	code := m.Run()
+
+	// You can't defer this because os.Exit doesn't care for defer
+	if err := pool.Purge(resource); err != nil {
+		log.Fatalf("Could not purge resource: %s", err)
+	}
+
+	os.Exit(code)
 }

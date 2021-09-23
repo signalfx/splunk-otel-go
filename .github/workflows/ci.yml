@@ -6,9 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  DEFAULT_GO_VERSION: 1.17
-
 jobs:
   goyek:
     strategy:
@@ -56,18 +53,3 @@ jobs:
     - run: make test-short
       env:
         GOARCH: ${{ matrix.arch }}
-
-  integration-tests:
-    strategy:
-      matrix:
-        target: [test-mysql]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/setup-go@v2.1.4
-      with:
-        go-version: ${{ env.DEFAULT_GO_VERSION }}
-    - env:
-        INTEGRATION: ${{ matrix.target }}
-      run: |
-        make ${{ matrix.target }}
