@@ -55,6 +55,36 @@ $(TEST_TARGETS): test
 test tests:
 	${call for-all-modules,$(GO) test -timeout $(TIMEOUT)s $(ARGS) $(PKGS)}
 
+.PHONY: test-mysql
+test-mysql:
+	@set -e; \
+	docker network create database; \
+    docker run \
+	  -d \
+	  --rm \
+	  --name mysql \
+	  --network database \
+	  -p 3306:3306 \
+	  -e MYSQL_ROOT_PASSWORD=root-password \
+	  -e MYSQL_DATABASE=testdb \
+	  -e MYSQL_USER=testuser \
+	  -e MYSQL_PASSWORD=testuser-password \
+	  --health-cmd='mysqladmin ping --silent' \
+	  mysql:8; \
+	echo "Waiting for MySQL to start"; \
+	while [ $$(docker inspect --format "{{json .State.Health.Status }}" mysql) != '"healthy"' ]; \
+	do \
+	  printf "."; \
+	  sleep 1; \
+	done; \
+	echo "Started"; \
+	( \
+	  cd instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test && \
+	  $(GO) test -timeout $(TIMEOUT)s ./... ; \
+	); \
+	docker stop mysql; \
+	docker network rm database;
+
 # Pre-release targets
 
 .PHONY: add-tag
