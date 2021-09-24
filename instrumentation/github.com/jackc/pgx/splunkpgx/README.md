@@ -9,7 +9,7 @@ This package instruments the
 ## Getting Started
 
 This package is design to be a drop-in replacement for the existing use of the
-`pgx` package when it is used in conjuction with the `database/sql` package.
+`pgx` package when it is used in conjunction with the `database/sql` package.
 The blank identified imports of that package can be replaced with this package,
 and the standard library `sql.Open` function can be replaced with the
 equivalent `Open` from `splunksql`.
