@@ -60,19 +60,20 @@ var (
 	dsnSanitized = fmt.Sprintf("%s@tcp(%s:%d)/%s", user, host, port, dbName)
 )
 
-func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, *sql.DB, func(*testing.T)) {
+func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, *sql.DB) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 	db, err := splunksql.Open("mysql", dsn, splunksql.WithTracerProvider(tp))
 	require.NoError(t, err)
-	return sr, tp, db, func(t *testing.T) {
+	t.Cleanup(func() {
 		require.NoError(t, db.Close())
 		require.NoError(t, tp.Shutdown(context.Background()))
-	}
+	})
+	return sr, tp, db
 }
 
 func TestNoContextSpans(t *testing.T) {
-	sr, _, db, shutdownFunc := newFixtures(t)
+	sr, _, db := newFixtures(t)
 
 	require.NoError(t, db.Ping())
 
@@ -99,8 +100,6 @@ func TestNoContextSpans(t *testing.T) {
 	require.NoError(t, db.QueryRow(queryStmt, 1).Scan(&sqNum))
 	assert.Equal(t, 1, sqNum, "failed to query square of 1")
 
-	shutdownFunc(t)
-
 	// How the DB ensures connections means the number of spans cannot be
 	// tested for equality, but we can ensure that each of the operations
 	// performed above is represented with at least one span.
@@ -111,7 +110,7 @@ func TestNoContextSpans(t *testing.T) {
 }
 
 func TestContextSpans(t *testing.T) {
-	sr, tp, db, shutdownFunc := newFixtures(t)
+	sr, tp, db := newFixtures(t)
 	// The TracerProvider that created the span in the passed context will be
 	// used to create all the other spans. Make sure to use the TracerProvider
 	// with the registered SpanRecorder.
@@ -141,8 +140,6 @@ func TestContextSpans(t *testing.T) {
 	// Directly do the query.
 	require.NoError(t, db.QueryRowContext(ctx, queryStmt, 1).Scan(&sqNum))
 	assert.Equal(t, 1, sqNum, "failed to query square of 1")
-
-	shutdownFunc(t)
 
 	// How the DB ensures connections means the number of spans cannot be
 	// tested for equality, but we can ensure that each of the operations
