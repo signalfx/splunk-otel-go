@@ -31,6 +31,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jackc/pgx/splunkpgx/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/net/http/splunkhttp"
     schedule:
       interval: "daily"
