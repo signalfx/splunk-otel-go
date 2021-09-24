@@ -22,7 +22,7 @@
 //
 //     import (
 //     	"database/sql"
-//     	_ "github.com/jackc/pgx"
+//     	_ "github.com/jackc/pgx/v4/stdlib"
 //     )
 //     // ...
 //     db, err := sql.Open("pgx", "postgres://localhost:5432/dbname")
