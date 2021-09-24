@@ -11,11 +11,23 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/build"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/database/sql/splunksql"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
     directory: "/instrumentation/database/sql/splunksql/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"

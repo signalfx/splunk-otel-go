@@ -102,6 +102,7 @@ Additional recommended Splunk specific instrumentations:
 
 - [`splunksql`](./instrumentation/database/sql/splunksql)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
+- [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
 - [`splunkpq`](./instrumentation/github.com/lib/pq/splunkpq)
 
 ## Manual Instrumentation
