@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package test provides end-to-end testing of the splunkmysql instrumentation
-with the default SDK.
+//go:build linux
+// +build linux
 
-This package is in a separate module from the instrumentation it tests to
-isolate the dependency of the default SDK and not impose this as a transitive
-dependency for users.
-*/
 package test
+
+// Build restrictions come from docker not being available on Windows and
+// MacOS GitHub Actions. The code itself should be compatible these	systems
+// and the build restrictions can be removed if this is run elsewhere.
 
 import (
 	"context"
