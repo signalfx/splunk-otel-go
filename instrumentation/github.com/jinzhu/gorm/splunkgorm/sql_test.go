@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"testing"
 
 	"github.com/jinzhu/gorm"
@@ -66,4 +67,17 @@ func TestOpen(t *testing.T) {
 	assert.Equal(t, name, m.driverName)
 	assert.Equal(t, dsn, m.dataSourceName)
 	assert.Equal(t, options, m.options)
+}
+
+func TestOpenError(t *testing.T) {
+	want := errors.New("test error")
+	origOpen := openFunc
+	openFunc = func(string, string, ...splunksql.Option) (*sql.DB, error) {
+		return nil, want
+	}
+	defer func() { openFunc = origOpen }()
+
+	// Ensure Open returns any underlying error.
+	_, got := Open("", "")
+	assert.ErrorIs(t, got, want)
 }
