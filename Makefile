@@ -28,7 +28,7 @@ Q = $(if $(filter 1,$V),,@)
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 # All directories with go.mod files related to opentelemetry library. Used for building, testing and linting.
 ALL_GO_MOD_DIRS := $(filter-out $(BUILD_DIR), $(ALL_MODULES))
-# All directories sub-modules. Used for tagging and generating dependabot config.
+# All directories sub-modules. Used for tagging.
 SUBMODULES = $(filter-out ., $(ALL_GO_MOD_DIRS))
 
 .DEFAULT_GOAL := goyek
@@ -101,7 +101,7 @@ gendependabot: # generate dependabot.yml
 	@printf "  - package-ecosystem: \"github-actions\"\n    directory: \"/\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH}
 	@echo "Add entry for \"/\""
 	@printf "  - package-ecosystem: \"gomod\"\n    directory: \"/\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH}
-	@set -e; for dir in $(SUBMODULES); do \
+	@set -e; for dir in $(filter-out ., $(ALL_MODULES)); do \
 		(echo "Add entry for \"$${dir:1}\"" && \
 		  printf "  - package-ecosystem: \"gomod\"\n    directory: \"$${dir:1}\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH} ); \
 	done
