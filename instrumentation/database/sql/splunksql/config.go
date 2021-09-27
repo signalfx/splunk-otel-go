@@ -156,7 +156,9 @@ func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
 	if regCfg.DSNParser != nil {
 		var err error
 		connCfg, err = regCfg.DSNParser(dsn)
-		otel.Handle(err)
+		if err != nil {
+			otel.Handle(err)
+		}
 	} else {
 		// Fallback. This is a best effort attempt if we do not know how to
 		// explicitly parse the DSN.
@@ -164,7 +166,9 @@ func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
 	}
 
 	attrs, err := connCfg.Attributes()
-	otel.Handle(err)
+	if err != nil {
+		otel.Handle(err)
+	}
 	attrs = append(attrs, regCfg.DBSystem.Attribute())
 
 	return optionFunc(func(c *traceConfig) {
