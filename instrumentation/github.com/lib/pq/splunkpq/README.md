@@ -1,4 +1,4 @@
-# Splunk Instrumentation for the Postgres Driver Package lib/pq
+# Splunk Instrumentation for the PostgreSQL Driver Package lib/pq
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq)
 
