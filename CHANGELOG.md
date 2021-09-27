@@ -14,6 +14,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
   instrumentation for the `github.com/go-sql-driver/mysql` package. (#90)
 - Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  instrumentation for the `github.com/jackc/pgx` package. (#91)
+- Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq`
   instrumentation for the `github.com/lib/pq` package. (#92)
 
