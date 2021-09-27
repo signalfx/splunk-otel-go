@@ -1,4 +1,4 @@
-# Splunk Instrumentation for the Postgres Driver Package pgx
+# Splunk Instrumentation for the PostgreSQL Driver Package pgx
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx)
 
@@ -10,8 +10,7 @@ This package instruments the
 
 This package is design to be a drop-in replacement for the existing use of the
 `pgx` package when it is used in conjunction with the `database/sql` package.
-The blank identified imports of that package can be replaced with this package,
-and the standard library `sql.Open` function can be replaced with the
-equivalent `Open` from `splunksql`.
-
-An example can be found [here](./example_test.go).
+The blank identified import of `github.com/jackc/pgx/v4/stdlib` can be replaced
+with this package, and the standard library `sql.Open` function can be replaced
+with the equivalent `Open` from `splunksql`. An example can be found
+[here](./example_test.go).
