@@ -101,6 +101,7 @@ Supported libraries are listed
 Additional recommended Splunk specific instrumentations:
 
 - [`splunksql`](./instrumentation/database/sql/splunksql)
+- [`splunksqlx`](./instrumentation/github.com/jmoiron/sqlx/splunksqlx)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 - [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
 - [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
