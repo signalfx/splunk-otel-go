@@ -19,6 +19,46 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/database/sql/splunksql"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/database/sql/splunksql/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jackc/pgx/splunkpgx"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jackc/pgx/splunkpgx/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jinzhu/gorm/splunkgorm"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jmoiron/sqlx/splunksqlx"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/lib/pq/splunkpq"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/lib/pq/splunkpq/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/net/http/splunkhttp"
     schedule:
       interval: "daily"

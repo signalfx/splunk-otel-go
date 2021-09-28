@@ -100,8 +100,14 @@ Supported libraries are listed
 
 Additional recommended Splunk specific instrumentations:
 
+- [`splunkgorm`](./instrumentation/github.com/jinzhu/gorm/splunkgorm)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 - [`splunkkafka`](./instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka)
+- [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
+- [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
+- [`splunkpq`](./instrumentation/github.com/lib/pq/splunkpq)
+- [`splunksql`](./instrumentation/database/sql/splunksql)
+- [`splunksqlx`](./instrumentation/github.com/jmoiron/sqlx/splunksqlx)
 
 ## Manual Instrumentation
 
