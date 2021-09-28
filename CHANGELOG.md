@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  instrumentation for the `database/sql` package. (#88)
+- Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
   instrumentation for the `github.com/go-sql-driver/mysql` package. (#90)
 - Add the
@@ -19,6 +22,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq`
   instrumentation for the `github.com/lib/pq` package. (#92)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx`
+  instrumentation for the `github.com/jmoiron/sqlx` package. (#93)
 
 ### Changed
 

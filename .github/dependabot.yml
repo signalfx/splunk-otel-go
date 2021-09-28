@@ -43,6 +43,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/jmoiron/sqlx/splunksqlx"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/lib/pq/splunkpq"
     schedule:
       interval: "daily"
