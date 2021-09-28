@@ -11,11 +11,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
-    directory: "/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "gomod"
-    directory: "/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka/test"
+    directory: "/build"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
@@ -24,6 +20,14 @@ updates:
       interval: "daily"
   - package-ecosystem: "gomod"
     directory: "/instrumentation/database/sql/splunksql/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka/test"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
