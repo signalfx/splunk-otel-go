@@ -28,6 +28,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm`
   instrumentation for the `github.com/jinzhu/gorm` package. (#98)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
+  instrumentation for the `github.com/confluentinc/confluent-kafka-go/kafka`
+  package. (#100)
 
 ### Changed
 
