@@ -46,6 +46,121 @@ var (
 	testTopic   = "gotest"
 )
 
+func TestMain(m *testing.M) {
+	flag.Parse()
+	if testing.Short() {
+		fmt.Println("Skipping running heavy integration test in short mode.")
+		return
+	}
+
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("Could not connect to docker: %v", err)
+	}
+
+	confNet, err := pool.CreateNetwork("confluent")
+	if err != nil {
+		log.Fatalf("Could not create docker network: %v", err)
+	}
+
+	zkRes, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "confluentinc/cp-zookeeper",
+		Tag:        "6.2.0",
+		NetworkID:  confNet.Network.ID,
+		Hostname:   "zookeeper",
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"2181/tcp": {{HostIP: "zookeeper", HostPort: "2181/tcp"}},
+		},
+		Env: []string{
+			"ZOOKEEPER_CLIENT_PORT=2181",
+			"ZOOKEEPER_TICK_TIME=2000",
+		},
+	})
+	if err != nil {
+		log.Fatalf("Could not create zookeeper: %v", err)
+	}
+
+	// Wait for the Kafka to come up using an exponential-backoff retry.
+	if err = pool.Retry(func() error {
+		_, dialErr := net.Dial("tcp", "localhost:2181")
+		return dialErr
+	}); err != nil {
+		log.Fatalf("Could not connect to Kafka broker: %v", err)
+	}
+
+	kafkaRes, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "confluentinc/cp-kafka",
+		Tag:        "6.2.0",
+		NetworkID:  confNet.Network.ID,
+		Hostname:   "broker",
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"29092/tcp": {{HostIP: "broker", HostPort: "29092/tcp"}},
+			"9092/tcp":  {{HostIP: "localhost", HostPort: "9092/tcp"}},
+		},
+		Env: []string{
+			"KAFKA_BROKER_ID=1",
+			"KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
+			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
+			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092",
+			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
+			"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
+			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
+			"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
+			fmt.Sprintf("KAFKA_CREATE_TOPICS=%s:1:1", testTopic),
+		},
+	})
+	if err != nil {
+		log.Fatalf("Could not create kakfa container: %v", err)
+	}
+
+	// Wait for the Kafka to come up using an exponential-backoff retry.
+	if err = pool.Retry(verifyCanProduceToKafka); err != nil {
+		log.Fatalf("Could not connect to Kafka broker: %v", err)
+	}
+
+	code := m.Run()
+
+	// Run sequentially becauase os.Exit will skip a defer.
+	if err := pool.Purge(kafkaRes); err != nil {
+		log.Fatalf("Could not purge kafka: %v", err)
+	}
+	if err := pool.Purge(zkRes); err != nil {
+		log.Fatalf("Could not purge zookeeper: %v", err)
+	}
+	if err := confNet.Close(); err != nil {
+		log.Fatalf("Could not remove network: %v", err)
+	}
+
+	os.Exit(code)
+}
+
+func verifyCanProduceToKafka() error {
+	p, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": "127.0.0.1:9092",
+	})
+	if err != nil {
+		return err
+	}
+	defer p.Close()
+
+	err = p.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &testTopic, Partition: 0},
+		Key:            key,
+		Value:          val,
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	e := <-p.Events()
+	if m, ok := e.(*kafka.Message); !ok {
+		return fmt.Errorf("event: %s", e.String())
+	} else if m.TopicPartition.Error != nil {
+		return m.TopicPartition.Error
+	}
+	return nil
+}
+
 func TestChannelBasedProducer(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
@@ -207,119 +322,4 @@ func requireEventIsMessage(t *testing.T, e kafka.Event) *kafka.Message {
 	require.Truef(t, ok, "invalid response from Kafka: %v", e)
 	require.NoError(t, m.TopicPartition.Error)
 	return m
-}
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-	if testing.Short() {
-		fmt.Println("Skipping running heavy integration test in short mode.")
-		return
-	}
-
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Fatalf("Could not connect to docker: %v", err)
-	}
-
-	confNet, err := pool.CreateNetwork("confluent")
-	if err != nil {
-		log.Fatalf("Could not create docker network: %v", err)
-	}
-
-	zkRes, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "confluentinc/cp-zookeeper",
-		Tag:        "6.2.0",
-		NetworkID:  confNet.Network.ID,
-		Hostname:   "zookeeper",
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"2181/tcp": {{HostIP: "zookeeper", HostPort: "2181/tcp"}},
-		},
-		Env: []string{
-			"ZOOKEEPER_CLIENT_PORT=2181",
-			"ZOOKEEPER_TICK_TIME=2000",
-		},
-	})
-	if err != nil {
-		log.Fatalf("Could not create zookeeper: %v", err)
-	}
-
-	// Wait for the Kafka to come up using an exponential-backoff retry.
-	if err = pool.Retry(func() error {
-		_, dialErr := net.Dial("tcp", "localhost:2181")
-		return dialErr
-	}); err != nil {
-		log.Fatalf("Could not connect to Kafka broker: %v", err)
-	}
-
-	kafkaRes, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "confluentinc/cp-kafka",
-		Tag:        "6.2.0",
-		NetworkID:  confNet.Network.ID,
-		Hostname:   "broker",
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"29092/tcp": {{HostIP: "broker", HostPort: "29092/tcp"}},
-			"9092/tcp":  {{HostIP: "localhost", HostPort: "9092/tcp"}},
-		},
-		Env: []string{
-			"KAFKA_BROKER_ID=1",
-			"KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
-			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
-			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092",
-			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
-			"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
-			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
-			"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
-			fmt.Sprintf("KAFKA_CREATE_TOPICS=%s:1:1", testTopic),
-		},
-	})
-	if err != nil {
-		log.Fatalf("Could not create kakfa container: %v", err)
-	}
-
-	// Wait for the Kafka to come up using an exponential-backoff retry.
-	if err = pool.Retry(verifyCanProduceToKafka); err != nil {
-		log.Fatalf("Could not connect to Kafka broker: %v", err)
-	}
-
-	code := m.Run()
-
-	// Run sequentially becauase os.Exit will skip a defer.
-	if err := pool.Purge(kafkaRes); err != nil {
-		log.Fatalf("Could not purge kafka: %v", err)
-	}
-	if err := pool.Purge(zkRes); err != nil {
-		log.Fatalf("Could not purge zookeeper: %v", err)
-	}
-	if err := confNet.Close(); err != nil {
-		log.Fatalf("Could not remove network: %v", err)
-	}
-
-	os.Exit(code)
-}
-
-func verifyCanProduceToKafka() error {
-	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": "127.0.0.1:9092",
-	})
-	if err != nil {
-		return err
-	}
-	defer p.Close()
-
-	err = p.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &testTopic, Partition: 0},
-		Key:            key,
-		Value:          val,
-	}, nil)
-	if err != nil {
-		return err
-	}
-
-	e := <-p.Events()
-	if m, ok := e.(*kafka.Message); !ok {
-		return fmt.Errorf("event: %s", e.String())
-	} else if m.TopicPartition.Error != nil {
-		return m.TopicPartition.Error
-	}
-	return nil
 }
