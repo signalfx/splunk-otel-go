@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.opentelemetry.io/otel/codes"
@@ -33,6 +34,7 @@ import (
 type Producer struct {
 	*kafka.Producer
 	cfg            config
+	waitGroup      sync.WaitGroup
 	produceChannel chan *kafka.Message
 }
 
@@ -48,10 +50,13 @@ func NewProducer(conf *kafka.ConfigMap, opts ...Option) (*Producer, error) {
 
 // WrapProducer wraps a kafka.Producer so that any produced events are traced.
 func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
-	wrapped := &Producer{
-		Producer: p,
-		cfg:      newConfig(opts...),
-	}
+	cfg := newConfig(opts...)
+	// Common attributes for all spans this producer will produce.
+	cfg.Attributes = append(
+		cfg.Attributes,
+		semconv.MessagingDestinationKindTopic,
+	)
+	wrapped := &Producer{Producer: p, cfg: cfg}
 	wrapped.produceChannel = wrapped.traceProduceChannel(p.ProduceChannel())
 	return wrapped
 }
@@ -62,7 +67,9 @@ func (p *Producer) traceProduceChannel(out chan *kafka.Message) chan *kafka.Mess
 	}
 
 	in := make(chan *kafka.Message, cap(out))
+	p.waitGroup.Add(1)
 	go func() {
+		defer p.waitGroup.Done()
 		for msg := range in {
 			span := p.startSpan(msg)
 			out <- msg
@@ -77,21 +84,22 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 	carrier := NewMessageCarrier(msg)
 	psc := p.cfg.Propagator.Extract(context.Background(), carrier)
 
-	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)
-	attrs := append(p.cfg.Attributes,
-		semconv.MessagingDestinationKindTopic,
-		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
-		semconv.MessagingMessageIDKey.String(offset),
-		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
-		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
-	)
+	const base10 = 10
+	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), base10)
 	opts := []trace.SpanStartOption{
-		trace.WithAttributes(attrs...),
+		trace.WithAttributes(p.cfg.Attributes...),
+		trace.WithAttributes(
+			semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
+			semconv.MessagingMessageIDKey.String(offset),
+			semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
+			semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
+		),
 		trace.WithSpanKind(trace.SpanKindProducer),
 	}
 
 	name := fmt.Sprintf("%s send", *msg.TopicPartition.Topic)
 	ctx, span := p.cfg.Tracer.Start(psc, name, opts...)
+
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	p.cfg.Propagator.Inject(ctx, carrier)
@@ -102,30 +110,30 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 func (p *Producer) Close() {
 	close(p.produceChannel)
 	p.Producer.Close()
+	// Wait for any already started spans to end.
+	p.waitGroup.Wait()
 }
 
 // Produce calls the wrapped Producer.Produce and traces the request.
 func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error {
 	span := p.startSpan(msg)
 
-	// if the user has selected a delivery channel, we will wrap it and
-	// wait for the delivery event to finish the span
+	// If the deliveryChan is provided, finish the span when a response is
+	// returned.
 	if deliveryChan != nil {
-		oldDeliveryChan := deliveryChan
+		orig := deliveryChan
 		deliveryChan = make(chan kafka.Event)
 		go func() {
-			var err error
 			evt := <-deliveryChan
 			if respMsg, ok := evt.(*kafka.Message); ok {
-				// delivery errors are returned via TopicPartition.Error
-				err = respMsg.TopicPartition.Error
-			}
-			if err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, err.Error())
+				// Delivery errors are returned via TopicPartition.Error.
+				if err := respMsg.TopicPartition.Error; err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, err.Error())
+				}
 			}
 			span.End()
-			oldDeliveryChan <- evt
+			orig <- evt
 		}()
 	}
 

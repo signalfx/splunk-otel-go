@@ -35,7 +35,7 @@ import (
 func TestNewProducerType(t *testing.T) {
 	p, err := NewProducer(&kafka.ConfigMap{})
 	require.NoError(t, err)
-	assert.IsType(t, Producer{}, *p)
+	assert.IsType(t, &Producer{}, p)
 }
 
 func TestNewProducerReturnsError(t *testing.T) {
