@@ -21,6 +21,7 @@ package splunkkafka
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -39,13 +40,13 @@ var testTopic = "gotest"
 func TestNewConsumerCapturesGroupID(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
-	assert.Equal(t, grpID, c.group)
+	assert.Contains(t, c.cfg.Attributes, semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 }
 
 func TestNewConsumerType(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
-	assert.IsType(t, Consumer{}, *c)
+	assert.IsType(t, &Consumer{}, c)
 }
 
 func TestNewConsumerReturnsError(t *testing.T) {
@@ -154,4 +155,57 @@ func TestConsumerSpan(t *testing.T) {
 		assert.Contains(t, attrs, semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 		assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(1))
 	}
+}
+
+func TestConsumerConcurrentConsuming(t *testing.T) {
+	sr := make(spanRecorder)
+	tp := &fnTracerProvider{
+		tracer: func(string, ...trace.TracerOption) trace.Tracer {
+			return &fnTracer{start: sr.start}
+		},
+	}
+	c, err := NewConsumer(&kafka.ConfigMap{
+		// Required for the events channel to be turned on.
+		"go.events.channel.enable": true,
+		"group.id":                 grpID,
+	}, WithTracerProvider(tp))
+	require.NoError(t, err)
+
+	key := "test key"
+	var wg sync.WaitGroup
+
+	// Seed message to the events channel.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		c.Consumer.Events() <- &kafka.Message{
+			TopicPartition: kafka.TopicPartition{
+				Topic:     &testTopic,
+				Partition: 1,
+				Offset:    1,
+			},
+			Key:   []byte(key),
+			Value: []byte("value"),
+		}
+	}()
+
+	// Consume from the events channel.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		got := (<-c.Events()).(*kafka.Message)
+		assert.Equal(t, []byte(key), got.Key)
+	}()
+
+	// Poll concurrently to the events channel consuming.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// We are synthetically generating messages on the events channel so
+		// we do not actually expect any events to be returned here.
+		_ = c.Poll(100)
+	}()
+
+	wg.Wait()
+	assert.Len(t, sr, 1)
 }

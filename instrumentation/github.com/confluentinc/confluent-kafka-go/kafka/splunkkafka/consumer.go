@@ -22,8 +22,12 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -31,10 +35,10 @@ import (
 // Consumer wraps a kafka.Consumer and traces its operations.
 type Consumer struct {
 	*kafka.Consumer
-	cfg    config
-	group  string
-	events chan kafka.Event
-	prev   trace.Span
+	cfg        config
+	waitGroup  sync.WaitGroup
+	events     chan kafka.Event
+	activeSpan atomic.Value
 }
 
 // NewConsumer calls kafka.NewConsumer and wraps the resulting Consumer with
@@ -44,106 +48,131 @@ func NewConsumer(conf *kafka.ConfigMap, opts ...Option) (*Consumer, error) {
 	if err != nil {
 		return nil, err
 	}
-	// The kafka Consumer does not expose this. Give a best effort to add it.
-	var consumerGroup string
+	cfg := newConfig(opts...)
+	// The kafka Consumer does not expose consumer group, but we want to
+	// include this in the span attributes.
 	cGrpVal, err := conf.Get("group.id", "")
 	if err == nil {
-		consumerGroup, _ = cGrpVal.(string)
+		if groupID, ok := cGrpVal.(string); ok {
+			cfg.Attributes = append(
+				cfg.Attributes,
+				semconv.MessagingKafkaConsumerGroupKey.String(groupID),
+			)
+		}
 	}
-	wrapped := &Consumer{
-		Consumer: c,
-		group:    consumerGroup,
-		cfg:      newConfig(opts...),
-	}
-	wrapped.events = wrapped.traceEventsChannel(c.Events())
-	return wrapped, nil
+	return wrapConsumer(c, cfg), nil
 }
 
 // WrapConsumer wraps a kafka.Consumer so that any consumed events are traced.
 func WrapConsumer(c *kafka.Consumer, opts ...Option) *Consumer {
-	wrapped := &Consumer{
-		Consumer: c,
-		cfg:      newConfig(opts...),
+	return wrapConsumer(c, newConfig(opts...))
+}
+
+// consumerSpan is a wrapper around an OpenTelemetry Span that can be used as
+// an atomic value.
+type consumerSpan struct {
+	otelSpan trace.Span
+}
+
+// End completes the wrapped OpenTelemetry span if one exists.
+func (s consumerSpan) End(options ...trace.SpanEndOption) {
+	if s.otelSpan != nil {
+		s.otelSpan.End(options...)
 	}
+}
+
+func wrapConsumer(c *kafka.Consumer, cfg config) *Consumer {
+	// Common attributes for all spans this consumer will produce.
+	cfg.Attributes = append(
+		cfg.Attributes,
+		semconv.MessagingDestinationKindTopic,
+		semconv.MessagingOperationReceive,
+		semconv.MessagingKafkaClientIDKey.String(c.String()),
+	)
+	wrapped := &Consumer{Consumer: c, cfg: cfg}
+	// Set an empty spanHolder to set the atomic.Value type.
+	wrapped.activeSpan.Store(consumerSpan{})
 	wrapped.events = wrapped.traceEventsChannel(c.Events())
 	return wrapped
 }
 
 func (c *Consumer) traceEventsChannel(in chan kafka.Event) chan kafka.Event {
-	// in will be nil when consuming via the events channel is not enabled.
+	// If the events channel is disabled, in will be nil.
 	if in == nil {
 		return nil
 	}
 
 	out := make(chan kafka.Event, cap(in))
+	c.waitGroup.Add(1)
 	go func() {
+		defer c.waitGroup.Done()
 		defer close(out)
 		for evt := range in {
-			var next trace.Span
+			endTime := time.Now()
 
-			// only trace messages
+			// Only trace messages.
+			var s consumerSpan
 			if msg, ok := evt.(*kafka.Message); ok {
-				next = c.startSpan(msg)
+				s = c.startSpan(msg)
 			}
 
 			out <- evt
 
-			if c.prev != nil {
-				c.prev.End()
-			}
-			c.prev = next
+			existing := c.activeSpan.Swap(s).(consumerSpan)
+			existing.End(trace.WithTimestamp(endTime))
 		}
 		// finish any remaining span
-		if c.prev != nil {
-			c.prev.End()
-			c.prev = nil
-		}
+		c.activeSpan.Load().(consumerSpan).End()
 	}()
 
 	return out
 }
 
-func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
+func (c *Consumer) startSpan(msg *kafka.Message) consumerSpan {
 	carrier := NewMessageCarrier(msg)
 	psc := c.cfg.Propagator.Extract(context.Background(), carrier)
 
-	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)
-	attrs := append(c.cfg.Attributes,
-		semconv.MessagingDestinationKindTopic,
-		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
-		semconv.MessagingOperationReceive,
-		semconv.MessagingMessageIDKey.String(offset),
-		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
-		semconv.MessagingKafkaClientIDKey.String(c.Consumer.String()),
-		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
-	)
-	if c.group != "" {
-		attrs = append(attrs, semconv.MessagingKafkaConsumerGroupKey.String(c.group))
-	}
+	const base10 = 10
+	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), base10)
 	opts := []trace.SpanStartOption{
-		trace.WithAttributes(attrs...),
+		trace.WithAttributes(c.cfg.Attributes...),
+		trace.WithAttributes(
+			semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
+			semconv.MessagingMessageIDKey.String(offset),
+			semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
+			semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
+		),
 		trace.WithSpanKind(trace.SpanKindConsumer),
 	}
 
 	name := fmt.Sprintf("%s receive", *msg.TopicPartition.Topic)
-	ctx, span := c.cfg.Tracer.Start(psc, name, opts...)
+	ctx, otelSpan := c.cfg.Tracer.Start(psc, name, opts...)
+	if err := msg.TopicPartition.Error; err != nil {
+		otelSpan.RecordError(err)
+		otelSpan.SetStatus(codes.Error, err.Error())
+	}
+
 	// Inject the current span into the original message so it can be used to
 	// propagate the span.
 	c.cfg.Propagator.Inject(ctx, carrier)
-	return span
+
+	return consumerSpan{otelSpan: otelSpan}
 }
 
 // Close calls the underlying Consumer.Close and if polling is enabled, ends
 // any remaining span.
 func (c *Consumer) Close() error {
 	err := c.Consumer.Close()
+
 	// Only close the previous span if consuming via the events channel is not
-	// enabled. Otherwise, there would be a data race from the consuming
-	// goroutine.
-	if c.events == nil && c.prev != nil {
-		c.prev.End()
-		c.prev = nil
+	// enabled. Otherwise, let that goroutine end the span.
+	if c.events == nil {
+		// finish any remaining span
+		c.activeSpan.Load().(consumerSpan).End()
 	}
+
+	// Wait for all spawed goroutines to finish.
+	c.waitGroup.Wait()
 	return err
 }
 
@@ -153,14 +182,47 @@ func (c *Consumer) Events() chan kafka.Event {
 }
 
 // Poll polls the consumer for events. Message events are traced.
+//
+// Will block for at most timeoutMs milliseconds.
+//
+// The following callbacks may be triggered:
+//   Subscribe()'s rebalanceCb
+//
+// Returns nil on timeout, else an Event
 func (c *Consumer) Poll(timeoutMS int) (event kafka.Event) {
-	if c.prev != nil {
-		c.prev.End()
-		c.prev = nil
-	}
+	endTime := time.Now()
 	evt := c.Consumer.Poll(timeoutMS)
 	if msg, ok := evt.(*kafka.Message); ok {
-		c.prev = c.startSpan(msg)
+		existing := c.activeSpan.Swap(c.startSpan(msg)).(consumerSpan)
+		existing.End(trace.WithTimestamp(endTime))
 	}
 	return evt
+}
+
+// ReadMessage polls the consumer for a message and traces the read.
+//
+// This is a convenience API that wraps Poll() and only returns messages or
+// errors. All other event types are discarded.
+//
+// The call will block for at most `timeout` waiting for a new message or
+// error. `timeout` may be set to -1 for indefinite wait.
+//
+// Timeout is returned as (nil, err) where err is `err.(kafka.Error).Code() ==
+// kafka.ErrTimedOut`.
+//
+// Messages are returned as (msg, nil), while general errors are returned as
+// (nil, err), and partition-specific errors are returned as (msg, err) where
+// msg.TopicPartition provides partition-specific information (such as topic,
+// partition and offset).
+//
+// All other event types, such as PartitionEOF, AssignedPartitions, etc, are
+// silently discarded.
+func (c *Consumer) ReadMessage(timeout time.Duration) (*kafka.Message, error) {
+	endTime := time.Now()
+	msg, err := c.Consumer.ReadMessage(timeout)
+	if msg != nil {
+		existing := c.activeSpan.Swap(c.startSpan(msg)).(consumerSpan)
+		existing.End(trace.WithTimestamp(endTime))
+	}
+	return msg, err
 }
