@@ -21,7 +21,9 @@ package splunkkafka
 import (
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -32,10 +34,15 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 type config struct {
 	Tracer     trace.Tracer
 	Propagator propagation.TextMapPropagator
+	Attributes []attribute.KeyValue
 }
 
 func newConfig(options ...Option) config {
-	var c config
+	c := config{
+		Attributes: []attribute.KeyValue{
+			semconv.MessagingSystemKey.String("kafka"),
+		},
+	}
 	for _, o := range options {
 		if o != nil {
 			o.apply(&c)
@@ -81,5 +88,13 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 func WithPropagator(propagator propagation.TextMapPropagator) Option {
 	return optionFunc(func(cfg *config) {
 		cfg.Propagator = propagator
+	})
+}
+
+// WithAttributes returns an Option that appends attr to the attributes set
+// for every span created with this instrumentation library.
+func WithAttributes(attr []attribute.KeyValue) Option {
+	return optionFunc(func(c *config) {
+		c.Attributes = append(c.Attributes, attr...)
 	})
 }

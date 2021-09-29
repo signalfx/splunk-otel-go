@@ -26,6 +26,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
@@ -124,7 +125,13 @@ func TestProduceSpan(t *testing.T) {
 		},
 	}
 	prop := propagation.TraceContext{}
-	p, err := NewProducer(&kafka.ConfigMap{}, WithTracerProvider(tp), WithPropagator(prop))
+	commonAttr := attribute.String("key", "value")
+	p, err := NewProducer(
+		&kafka.ConfigMap{},
+		WithTracerProvider(tp),
+		WithPropagator(prop),
+		WithAttributes([]attribute.KeyValue{commonAttr}),
+	)
 	require.NoError(t, err)
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
@@ -160,6 +167,7 @@ func TestProduceSpan(t *testing.T) {
 		assert.Equal(t, record.SpanConfig.SpanKind(), trace.SpanKindProducer)
 		attrs := record.SpanConfig.Attributes()
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
+		assert.Contains(t, attrs, commonAttr)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("1"))

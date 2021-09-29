@@ -26,6 +26,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
@@ -101,11 +102,12 @@ func TestConsumerSpan(t *testing.T) {
 		},
 	}
 	prop := propagation.TraceContext{}
+	commonAttr := attribute.String("key", "value")
 	c, err := NewConsumer(&kafka.ConfigMap{
 		// required for the events channel to be turned on
 		"go.events.channel.enable": true,
 		"group.id":                 grpID,
-	}, WithTracerProvider(tp), WithPropagator(prop))
+	}, WithTracerProvider(tp), WithPropagator(prop), WithAttributes([]attribute.KeyValue{commonAttr}))
 	require.NoError(t, err)
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
@@ -143,6 +145,7 @@ func TestConsumerSpan(t *testing.T) {
 		assert.Equal(t, record.SpanConfig.SpanKind(), trace.SpanKindConsumer)
 		attrs := record.SpanConfig.Attributes()
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
+		assert.Contains(t, attrs, commonAttr)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingOperationReceive)

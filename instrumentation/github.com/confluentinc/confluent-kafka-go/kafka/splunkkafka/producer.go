@@ -24,7 +24,6 @@ import (
 	"strconv"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
@@ -78,14 +77,14 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 	carrier := NewMessageCarrier(msg)
 	psc := p.cfg.Propagator.Extract(context.Background(), carrier)
 
-	attrs := []attribute.KeyValue{
-		semconv.MessagingSystemKey.String("kafka"),
+	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)
+	attrs := append(p.cfg.Attributes,
 		semconv.MessagingDestinationKindTopic,
 		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
-		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)), // nolint: gomnd
+		semconv.MessagingMessageIDKey.String(offset),
 		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
 		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
-	}
+	)
 	opts := []trace.SpanStartOption{
 		trace.WithAttributes(attrs...),
 		trace.WithSpanKind(trace.SpanKindProducer),

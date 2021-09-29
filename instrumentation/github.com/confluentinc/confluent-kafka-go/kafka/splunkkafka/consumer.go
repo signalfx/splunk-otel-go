@@ -24,7 +24,6 @@ import (
 	"strconv"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -108,16 +107,16 @@ func (c *Consumer) startSpan(msg *kafka.Message) trace.Span {
 	carrier := NewMessageCarrier(msg)
 	psc := c.cfg.Propagator.Extract(context.Background(), carrier)
 
-	attrs := []attribute.KeyValue{
-		semconv.MessagingSystemKey.String("kafka"),
+	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)
+	attrs := append(c.cfg.Attributes,
 		semconv.MessagingDestinationKindTopic,
 		semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
 		semconv.MessagingOperationReceive,
-		semconv.MessagingMessageIDKey.String(strconv.FormatInt(int64(msg.TopicPartition.Offset), 10)), // nolint: gomnd
+		semconv.MessagingMessageIDKey.String(offset),
 		semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
 		semconv.MessagingKafkaClientIDKey.String(c.Consumer.String()),
 		semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
-	}
+	)
 	if c.group != "" {
 		attrs = append(attrs, semconv.MessagingKafkaConsumerGroupKey.String(c.group))
 	}
