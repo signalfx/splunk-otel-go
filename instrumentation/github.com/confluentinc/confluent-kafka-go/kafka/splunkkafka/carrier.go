@@ -31,9 +31,10 @@ type textMapCarrier struct {
 
 var _ propagation.TextMapCarrier = (*textMapCarrier)(nil)
 
-// NewMessageCarrier returns a new TextMapCarrier that wraps the passed msg.
-func NewMessageCarrier(msg *kafka.Message) propagation.TextMapCarrier {
-	return &textMapCarrier{msg}
+// NewMessageCarrier returns a TextMapCarrier that will encode and decode
+// tracing information to and from the passed message.
+func NewMessageCarrier(message *kafka.Message) propagation.TextMapCarrier {
+	return &textMapCarrier{message}
 }
 
 // Get returns the value associated with the passed key.
