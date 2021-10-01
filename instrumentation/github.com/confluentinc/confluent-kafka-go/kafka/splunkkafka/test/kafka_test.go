@@ -184,6 +184,11 @@ func TestChannelBasedProducer(t *testing.T) {
 	require.NoError(t, sent.TopicPartition.Error)
 
 	// Ensure all Producer operations complete and all spans are done.
+	for {
+		if remaining := p.Flush(100); remaining == 0 {
+			break
+		}
+	}
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
@@ -224,6 +229,11 @@ func TestFunctionBasedProducer(t *testing.T) {
 	require.NoError(t, sent.TopicPartition.Error)
 
 	// Ensure all Producer operations complete and all spans are done.
+	for {
+		if remaining := p.Flush(100); remaining == 0 {
+			break
+		}
+	}
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
