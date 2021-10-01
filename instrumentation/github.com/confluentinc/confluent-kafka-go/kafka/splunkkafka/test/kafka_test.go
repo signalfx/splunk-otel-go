@@ -189,6 +189,7 @@ func TestChannelBasedProducer(t *testing.T) {
 			break
 		}
 	}
+	// Decommission the producer, ensure it is not used anymore.
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
@@ -234,6 +235,7 @@ func TestFunctionBasedProducer(t *testing.T) {
 			break
 		}
 	}
+	// Decommission the producer, ensure it is not used anymore.
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
