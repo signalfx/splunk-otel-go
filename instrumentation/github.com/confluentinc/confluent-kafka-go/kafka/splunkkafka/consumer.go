@@ -25,6 +25,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"unsafe"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.opentelemetry.io/otel/codes"
@@ -35,10 +36,12 @@ import (
 // Consumer wraps a kafka.Consumer and traces its operations.
 type Consumer struct {
 	*kafka.Consumer
-	cfg        config
-	waitGroup  sync.WaitGroup
-	events     chan kafka.Event
-	activeSpan atomic.Value
+	cfg       config
+	waitGroup sync.WaitGroup
+	events    chan kafka.Event
+	// Use an unsafe.Pointer instead of an atomic.Value to support Go versions
+	// prior to 1.17 which do not include a Value.Swap method.
+	activeSpan unsafe.Pointer // *consumerSpan
 }
 
 // NewConsumer calls kafka.NewConsumer and wraps the resulting Consumer with
@@ -89,9 +92,13 @@ func wrapConsumer(c *kafka.Consumer, cfg config) *Consumer {
 		semconv.MessagingOperationReceive,
 		semconv.MessagingKafkaClientIDKey.String(c.String()),
 	)
-	wrapped := &Consumer{Consumer: c, cfg: cfg}
-	// Set an empty spanHolder to set the atomic.Value type.
-	wrapped.activeSpan.Store(consumerSpan{})
+	wrapped := &Consumer{
+		Consumer: c,
+		cfg:      cfg,
+		// Set an empty spanHolder to set the activeSpan to empty and ensure that
+		// the unsafe.Pointer is set to the correct type.
+		activeSpan: unsafe.Pointer(&consumerSpan{}),
+	}
 	wrapped.events = wrapped.traceEventsChannel(c.Events())
 	return wrapped
 }
@@ -118,11 +125,11 @@ func (c *Consumer) traceEventsChannel(in chan kafka.Event) chan kafka.Event {
 
 			out <- evt
 
-			existing := c.activeSpan.Swap(s).(consumerSpan)
-			existing.End(trace.WithTimestamp(endTime))
+			active := atomic.SwapPointer(&c.activeSpan, unsafe.Pointer(&s))
+			(*consumerSpan)(active).End(trace.WithTimestamp(endTime))
 		}
 		// finish any remaining span
-		c.activeSpan.Load().(consumerSpan).End()
+		(*consumerSpan)(atomic.LoadPointer(&c.activeSpan)).End()
 	}()
 
 	return out
@@ -168,7 +175,7 @@ func (c *Consumer) Close() error {
 	// enabled. Otherwise, let that goroutine end the span.
 	if c.events == nil {
 		// finish any remaining span
-		c.activeSpan.Load().(consumerSpan).End()
+		(*consumerSpan)(atomic.LoadPointer(&c.activeSpan)).End()
 	}
 
 	// Wait for all spawed goroutines to finish.
@@ -193,8 +200,9 @@ func (c *Consumer) Poll(timeoutMS int) (event kafka.Event) {
 	endTime := time.Now()
 	evt := c.Consumer.Poll(timeoutMS)
 	if msg, ok := evt.(*kafka.Message); ok {
-		existing := c.activeSpan.Swap(c.startSpan(msg)).(consumerSpan)
-		existing.End(trace.WithTimestamp(endTime))
+		s := c.startSpan(msg)
+		active := atomic.SwapPointer(&c.activeSpan, unsafe.Pointer(&s))
+		(*consumerSpan)(active).End(trace.WithTimestamp(endTime))
 	}
 	return evt
 }
@@ -221,8 +229,9 @@ func (c *Consumer) ReadMessage(timeout time.Duration) (*kafka.Message, error) {
 	endTime := time.Now()
 	msg, err := c.Consumer.ReadMessage(timeout)
 	if msg != nil {
-		existing := c.activeSpan.Swap(c.startSpan(msg)).(consumerSpan)
-		existing.End(trace.WithTimestamp(endTime))
+		s := c.startSpan(msg)
+		active := atomic.SwapPointer(&c.activeSpan, unsafe.Pointer(&s))
+		(*consumerSpan)(active).End(trace.WithTimestamp(endTime))
 	}
 	return msg, err
 }
