@@ -168,12 +168,6 @@ func TestChannelBasedProducer(t *testing.T) {
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)
 
-	done := make(chan struct{})
-	var sent *kafka.Message
-	go func() {
-		defer close(done)
-		sent = requireEventIsMessage(t, <-p.Events())
-	}()
 	go func() {
 		p.ProduceChannel() <- &kafka.Message{
 			TopicPartition: kafka.TopicPartition{
@@ -186,9 +180,10 @@ func TestChannelBasedProducer(t *testing.T) {
 	}()
 
 	// Wait for the delivery report goroutine to finish.
-	<-done
+	sent := requireEventIsMessage(t, <-p.Events())
 	require.NoError(t, sent.TopicPartition.Error)
 
+	// Ensure all Producer operations complete and all spans are done.
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
@@ -228,6 +223,7 @@ func TestFunctionBasedProducer(t *testing.T) {
 	sent := requireEventIsMessage(t, <-deliveryCh)
 	require.NoError(t, sent.TopicPartition.Error)
 
+	// Ensure all Producer operations complete and all spans are done.
 	p.Close()
 
 	recv := consumeMessage(t, kafka.TopicPartition{
@@ -288,6 +284,7 @@ func consumeMessage(t *testing.T, tp kafka.TopicPartition, opts ...splunkkafka.O
 	assert.NoError(t, err)
 	assert.NoError(t, c.Unassign())
 
+	// Ensure all Consumer operations complete and all spans are done.
 	c.Close()
 	return recv
 }
