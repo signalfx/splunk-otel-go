@@ -34,6 +34,7 @@ import (
 type Producer struct {
 	*kafka.Producer
 	cfg            config
+	stop           chan struct{}
 	waitGroup      sync.WaitGroup
 	produceChannel chan *kafka.Message
 }
@@ -56,7 +57,11 @@ func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
 		cfg.Attributes,
 		semconv.MessagingDestinationKindTopic,
 	)
-	wrapped := &Producer{Producer: p, cfg: cfg}
+	wrapped := &Producer{
+		Producer: p,
+		cfg:      cfg,
+		stop:     make(chan struct{}),
+	}
 	wrapped.produceChannel = wrapped.traceProduceChannel(p.ProduceChannel())
 	return wrapped
 }
@@ -110,6 +115,8 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 func (p *Producer) Close() {
 	close(p.produceChannel)
 	p.Producer.Close()
+	close(p.stop)
+
 	// Wait for any already started spans to end.
 	p.waitGroup.Wait()
 }
@@ -121,24 +128,30 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 	// If the deliveryChan is provided, finish the span when a response is
 	// returned.
 	if deliveryChan != nil {
+		p.waitGroup.Add(1)
 		orig := deliveryChan
 		deliveryChan = make(chan kafka.Event)
 		go func() {
-			evt := <-deliveryChan
-			if respMsg, ok := evt.(*kafka.Message); ok {
-				// Delivery errors are returned via TopicPartition.Error.
-				if err := respMsg.TopicPartition.Error; err != nil {
-					span.RecordError(err)
-					span.SetStatus(codes.Error, err.Error())
+			defer p.waitGroup.Done()
+			select {
+			case <-p.stop:
+				return
+			case evt := <-deliveryChan:
+				if respMsg, ok := evt.(*kafka.Message); ok {
+					// Delivery errors are returned via TopicPartition.Error.
+					if err := respMsg.TopicPartition.Error; err != nil {
+						span.RecordError(err)
+						span.SetStatus(codes.Error, err.Error())
+					}
 				}
+				orig <- evt
 			}
 			span.End()
-			orig <- evt
 		}()
 	}
 
 	err := p.Producer.Produce(msg, deliveryChan)
-	// with no delivery channel, finish immediately
+	// No delivery channel, finish immediately.
 	if deliveryChan == nil {
 		if err != nil {
 			span.RecordError(err)
