@@ -6,6 +6,11 @@ package.
 
 ## Compatibility
 
+The Producer will end spans when a delivery report is returned. Setting
+`"go.delivery.reports"` to `false` will disable the delivery reports and can
+result in an build up of un-ended spans. If delivery reports are disabled, an
+un-instrumented Producer should be used instead.
+
 This instrumentation was built to support
 [v1.7.0](https://github.com/confluentinc/confluent-kafka-go/releases/tag/v1.7.0)
 of github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka. Similar to the
