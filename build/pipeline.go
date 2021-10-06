@@ -49,6 +49,7 @@ type Pipeline struct {
 	Params struct {
 		CI         goyek.RegisteredBoolParam
 		SkipDocker goyek.RegisteredBoolParam
+		TestShrot  goyek.RegisteredBoolParam
 	}
 }
 
@@ -67,13 +68,18 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 		Usage: "Skip tasks using Docker",
 	})
 
+	result.Params.TestShrot = flow.RegisterBoolParam(goyek.BoolParam{
+		Name:  "test-short",
+		Usage: "Do not run long-running tests (using Docker)",
+	})
+
 	// tasks
 	result.Tasks.Clean = flow.Register(taskClean())
 	result.Tasks.Fmt = flow.Register(taskFmt())
 	result.Tasks.Markdownlint = flow.Register(taskMarkdownLint(result.Params.SkipDocker))
 	result.Tasks.Misspell = flow.Register(taskMisspell())
 	result.Tasks.GolangciLint = flow.Register(taskGolangciLint())
-	result.Tasks.Test = flow.Register(taskTest(cfg.RepoPackagePrefix))
+	result.Tasks.Test = flow.Register(taskTest(cfg.RepoPackagePrefix, result.Params.TestShrot))
 	result.Tasks.ModTidy = flow.Register(taskModTidy())
 	result.Tasks.Diff = flow.Register(taskDiff(result.Params.CI))
 
@@ -198,10 +204,11 @@ func taskGolangciLint() goyek.Task {
 	}
 }
 
-func taskTest(repoPrefix string) goyek.Task {
+func taskTest(repoPrefix string, testShort goyek.RegisteredBoolParam) goyek.Task {
 	return goyek.Task{
-		Name:  "test",
-		Usage: "go test with race detector and code covarage",
+		Name:   "test",
+		Usage:  "go test with race detector and code covarage",
+		Params: goyek.Params{testShort},
 		Action: func(tf *goyek.TF) {
 			// prepare test-results
 			curDir := WorkDir(tf)
@@ -217,7 +224,7 @@ func taskTest(repoPrefix string) goyek.Task {
 			ForGoModules(tf, func(tf *goyek.TF) {
 				const fileNameLen = 12
 				covOut := filepath.Join(testResultDir, RandString(tf, fileNameLen)+".out")
-				if err := tf.Cmd("go", goTestArgs(repoPrefix, covOut)...).Run(); err != nil {
+				if err := tf.Cmd("go", goTestArgs(repoPrefix, testShort.Get(tf), covOut)...).Run(); err != nil {
 					tf.Error(err)
 				}
 			})
@@ -258,8 +265,11 @@ func taskTest(repoPrefix string) goyek.Task {
 	}
 }
 
-func goTestArgs(repoPrefix, covOut string) []string {
+func goTestArgs(repoPrefix string, short bool, covOut string) []string {
 	result := []string{"test", "-race", "-covermode=atomic"}
+	if short {
+		result = append(result, "-short")
+	}
 	if repoPrefix != "" {
 		result = append(result, "-coverpkg="+repoPrefix+"/...")
 	}
