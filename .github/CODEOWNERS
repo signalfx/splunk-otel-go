@@ -8,7 +8,7 @@ CODEOWNERS @signalfx/gdi-go-maintainers
 #
 #####################################################
 
-*.md @signalfx/docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
-*.rst @signalfx/docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
-docs/ @signalfx/docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
-README* @signalfx/docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
+*.md @signalfx/gdi-docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
+*.rst @signalfx/gdi-docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
+docs/ @signalfx/gdi-docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
+README* @signalfx/gdi-docs @signalfx/gdi-go-maintainers @signalfx/gdi-go-approvers
