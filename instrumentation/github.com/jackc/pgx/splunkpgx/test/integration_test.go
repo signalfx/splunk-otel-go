@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux
-// +build linux
-
 package test
 
 // Build restrictions come from docker not being available on Windows and
