@@ -15,14 +15,23 @@
 package main
 
 import (
-	"github.com/goyek/goyek"
+	"strconv"
+	"testing"
 )
 
-func main() {
-	flow := &goyek.Flow{}
-	cfg := Config{
-		RepoPackagePrefix: "github.com/signalfx/splunk-otel-go",
+func TestRandString(t *testing.T) {
+	testCases := []int{
+		0,
+		1,
+		2,
+		5,
+		16,
 	}
-	Register(flow, cfg)
-	flow.Main()
+	for _, length := range testCases {
+		t.Run(strconv.Itoa(length), func(t *testing.T) {
+			if got := RandString(nil, length); len(got) != length {
+				t.Errorf("got length %v, want %v", len(got), length)
+			}
+		})
+	}
 }

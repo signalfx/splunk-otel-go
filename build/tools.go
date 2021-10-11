@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+//go:build tools
+// +build tools
 
+package tools
+
+// Manage tool dependencies via go.mod.
+//
+// https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
+// https://github.com/golang/go/issues/25922
 import (
-	"github.com/goyek/goyek"
+	_ "github.com/client9/misspell/cmd/misspell"
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+	_ "github.com/wadey/gocovmerge"
+	_ "mvdan.cc/gofumpt/gofumports"
 )
-
-func main() {
-	flow := &goyek.Flow{}
-	cfg := Config{
-		RepoPackagePrefix: "github.com/signalfx/splunk-otel-go",
-	}
-	Register(flow, cfg)
-	flow.Main()
-}
