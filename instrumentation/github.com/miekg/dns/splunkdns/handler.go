@@ -26,7 +26,7 @@ import (
 type Handler struct {
 	dns.Handler
 
-	cfg config
+	cfg *config
 }
 
 // WrapHandler creates a new, wrapped DNS handler.
@@ -40,7 +40,7 @@ func WrapHandler(handler dns.Handler, opts ...Option) *Handler {
 // ServeDNS dispatches requests to the underlying Handler. All requests will
 // be traced.
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
-	h.cfg.withSpan(context.Background(), r, func(context.Context) error {
+	_ = h.cfg.withSpan(context.Background(), r, func(context.Context) error {
 		rw := &responseWriter{ResponseWriter: w}
 		h.Handler.ServeDNS(rw, r)
 		return rw.err

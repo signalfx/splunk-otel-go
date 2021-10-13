@@ -26,7 +26,7 @@ import (
 type Client struct {
 	*dns.Client
 
-	cfg config
+	cfg *config
 }
 
 // WrapClient returns a wraped DNS client.
@@ -45,9 +45,10 @@ func (c *Client) Exchange(m *dns.Msg, addr string) (*dns.Msg, time.Duration, err
 // ExchangeContext calls the underlying Client.ExchangeContext and traces the
 // request.
 func (c *Client) ExchangeContext(ctx context.Context, m *dns.Msg, addr string) (resp *dns.Msg, rtt time.Duration, err error) {
-	c.cfg.withSpan(ctx, m, func(ctx context.Context) error {
-		resp, rtt, err = c.Client.ExchangeContext(ctx, m, addr)
-		return err
+	err = c.cfg.withSpan(ctx, m, func(ctx context.Context) error {
+		var sErr error
+		resp, rtt, sErr = c.Client.ExchangeContext(ctx, m, addr)
+		return sErr
 	}, trace.WithSpanKind(trace.SpanKindClient))
 	return
 }

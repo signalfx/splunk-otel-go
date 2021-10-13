@@ -44,7 +44,7 @@ func startServer(t *testing.T) *dns.Server {
 	mux.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
 		m := new(dns.Msg)
 		m.SetReply(r)
-		w.WriteMsg(m)
+		_ = w.WriteMsg(m)
 	})
 
 	server := &dns.Server{
@@ -53,7 +53,9 @@ func startServer(t *testing.T) *dns.Server {
 		PacketConn: pc,
 		Handler:    mux,
 	}
-	go server.ActivateAndServe()
+	go func() {
+		_ = server.ActivateAndServe()
+	}()
 	require.NoError(t, serverUp(pc.LocalAddr().String(), time.Second*10))
 
 	return server
@@ -110,7 +112,7 @@ func assertClientSpan(t *testing.T, span trace.ReadOnlySpan) {
 func TestExchange(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
 	defer func() {
-		server.Shutdown()
+		assert.NoError(t, server.Shutdown())
 	}()
 
 	_, err := splunkdns.Exchange(msg, server.Addr, opts...)
@@ -124,7 +126,7 @@ func TestExchange(t *testing.T) {
 func TestExchangeContext(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
 	defer func() {
-		server.Shutdown()
+		assert.NoError(t, server.Shutdown())
 	}()
 
 	_, err := splunkdns.ExchangeContext(context.Background(), msg, server.Addr, opts...)
@@ -138,7 +140,7 @@ func TestExchangeContext(t *testing.T) {
 func TestClientExchange(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
 	defer func() {
-		server.Shutdown()
+		assert.NoError(t, server.Shutdown())
 	}()
 
 	client := splunkdns.WrapClient(&dns.Client{Net: "udp"}, opts...)
@@ -153,7 +155,7 @@ func TestClientExchange(t *testing.T) {
 func TestClientExchangeContext(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
 	defer func() {
-		server.Shutdown()
+		assert.NoError(t, server.Shutdown())
 	}()
 
 	client := splunkdns.WrapClient(&dns.Client{Net: "udp"}, opts...)

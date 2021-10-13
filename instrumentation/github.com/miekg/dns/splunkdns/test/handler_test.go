@@ -51,13 +51,13 @@ func TestHandler(t *testing.T) {
 	mux.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
 		m := new(dns.Msg)
 		m.SetReply(r)
-		w.WriteMsg(m)
+		_ = w.WriteMsg(m)
 	})
 	errCode := dns.RcodeFormatError
 	mux.HandleFunc("error.", func(w dns.ResponseWriter, r *dns.Msg) {
 		m := new(dns.Msg)
 		m.SetRcode(r, errCode)
-		w.WriteMsg(m)
+		_ = w.WriteMsg(m)
 	})
 	handler := splunkdns.WrapHandler(mux, opts...)
 
@@ -67,7 +67,9 @@ func TestHandler(t *testing.T) {
 		PacketConn: pc,
 		Handler:    handler,
 	}
-	go server.ActivateAndServe()
+	go func() {
+		_ = server.ActivateAndServe()
+	}()
 	// serverUp will make a request to the server that will generate a span.
 	require.NoError(t, serverUp(pc.LocalAddr().String(), time.Second*10))
 
@@ -78,7 +80,7 @@ func TestHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	// Ensure all requests are handled and all expected spans are ended.
-	server.Shutdown()
+	require.NoError(t, server.Shutdown())
 
 	spans := sr.Ended()
 	require.Len(t, spans, 2)

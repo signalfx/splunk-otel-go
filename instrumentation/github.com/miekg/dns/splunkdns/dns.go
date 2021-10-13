@@ -24,7 +24,7 @@ import (
 )
 
 // ListenAndServe calls dns.ListenAndServe with a wrapped Handler.
-func ListenAndServe(addr string, network string, handler dns.Handler, opts ...Option) error {
+func ListenAndServe(addr, network string, handler dns.Handler, opts ...Option) error {
 	return dns.ListenAndServe(addr, network, WrapHandler(handler, opts...))
 }
 
@@ -40,9 +40,10 @@ func Exchange(m *dns.Msg, addr string, opts ...Option) (*dns.Msg, error) {
 
 // ExchangeContext calls dns.ExchangeContext and traces the request.
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Option) (r *dns.Msg, err error) {
-	newConfig(opts...).withSpan(ctx, m, func(c context.Context) error {
-		r, err = dns.ExchangeContext(c, m, addr)
-		return err
+	err = newConfig(opts...).withSpan(ctx, m, func(c context.Context) error {
+		var sErr error
+		r, sErr = dns.ExchangeContext(c, m, addr)
+		return sErr
 	}, trace.WithSpanKind(trace.SpanKindClient))
 	return
 }

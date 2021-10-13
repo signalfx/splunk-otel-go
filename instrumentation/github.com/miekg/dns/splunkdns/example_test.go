@@ -34,9 +34,11 @@ func Example_server() {
 	mux.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
 		m := new(dns.Msg)
 		m.SetReply(r)
-		w.WriteMsg(m)
+		_ = w.WriteMsg(m)
 	})
 	// Calling splunkdns.ListenAndServe calls dns.ListenAndServe and traces
 	// all requests to handled by mux.
-	splunkdns.ListenAndServe(":dns", "udp", mux)
+	if err := splunkdns.ListenAndServe(":dns", "udp", mux); err != nil {
+		fmt.Println(err)
+	}
 }

@@ -37,7 +37,7 @@ type config struct {
 	Attributes     []attribute.KeyValue
 }
 
-func newConfig(options ...Option) config {
+func newConfig(options ...Option) *config {
 	var c config
 	for _, o := range options {
 		if o != nil {
@@ -61,7 +61,7 @@ func newConfig(options ...Option) config {
 		c.defaultStartOpts = []trace.SpanStartOption{}
 	}
 
-	return c
+	return &c
 }
 
 // resolveTracer returns an OTel tracer from the appropriate TracerProvider.
@@ -69,7 +69,7 @@ func newConfig(options ...Option) config {
 // If the passed context contains a span, the TracerProvider that created the
 // tracer that created that span will be used. Otherwise, the TracerProvider
 // from c is used.
-func (c config) resolveTracer(ctx context.Context) trace.Tracer {
+func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
@@ -78,7 +78,7 @@ func (c config) resolveTracer(ctx context.Context) trace.Tracer {
 	}
 	// There is a possiblity that the config was not created with newConfig
 	// (i.e. new(Client)), try to handle this situation gracefully.
-	if c.tracer == nil {
+	if c == nil || c.tracer == nil {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
@@ -88,10 +88,16 @@ func (c config) resolveTracer(ctx context.Context) trace.Tracer {
 }
 
 // withSpan wraps the function f with a span.
-func (c config) withSpan(ctx context.Context, m *dns.Msg, f func(context.Context) error, opts ...trace.SpanStartOption) error {
-	o := make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
-	copy(o, c.defaultStartOpts)
-	copy(o[len(c.defaultStartOpts):], opts)
+func (c *config) withSpan(ctx context.Context, m *dns.Msg, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+	var o []trace.SpanStartOption
+	if c == nil || len(c.defaultStartOpts) == 0 {
+		o = make([]trace.SpanStartOption, len(opts))
+		copy(o, opts)
+	} else {
+		o = make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
+		copy(o, c.defaultStartOpts)
+		copy(o[len(c.defaultStartOpts):], opts)
+	}
 
 	name := "DNS " + dns.OpcodeToString[m.Opcode]
 	ctx, span := c.resolveTracer(ctx).Start(ctx, name, o...)
