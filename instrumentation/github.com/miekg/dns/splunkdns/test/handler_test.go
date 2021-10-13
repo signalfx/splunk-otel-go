@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
@@ -52,6 +53,12 @@ func TestHandler(t *testing.T) {
 		m.SetReply(r)
 		w.WriteMsg(m)
 	})
+	errCode := dns.RcodeFormatError
+	mux.HandleFunc("error.", func(w dns.ResponseWriter, r *dns.Msg) {
+		m := new(dns.Msg)
+		m.SetRcode(r, errCode)
+		w.WriteMsg(m)
+	})
 	handler := splunkdns.WrapHandler(mux, opts...)
 
 	server := &dns.Server{
@@ -64,16 +71,27 @@ func TestHandler(t *testing.T) {
 	// serverUp will make a request to the server that will generate a span.
 	require.NoError(t, serverUp(pc.LocalAddr().String(), time.Second*10))
 
+	// Generate an errored span.
+	msg := new(dns.Msg)
+	msg.SetQuestion("error.", dns.TypeMX)
+	_, err = dns.Exchange(msg, pc.LocalAddr().String())
+	require.NoError(t, err)
+
 	// Ensure all requests are handled and all expected spans are ended.
 	server.Shutdown()
 
 	spans := sr.Ended()
-	require.Len(t, spans, 1)
-	span := spans[0]
-	assert.Equal(t, "DNS QUERY", span.Name())
-	assert.Equal(t, traceapi.SpanKindServer, span.SpanKind())
-	attrs := span.Attributes()
-	for _, a := range defaultServerAttrs {
-		assert.Contains(t, attrs, a)
+	require.Len(t, spans, 2)
+	for _, span := range spans {
+		assert.Equal(t, "DNS QUERY", span.Name())
+		assert.Equal(t, traceapi.SpanKindServer, span.SpanKind())
+		attrs := span.Attributes()
+		for _, a := range defaultServerAttrs {
+			assert.Contains(t, attrs, a)
+		}
 	}
+
+	errSpan := spans[1]
+	assert.Equal(t, codes.Error, errSpan.Status().Code)
+	assert.Equal(t, dns.RcodeToString[errCode], errSpan.Status().Description)
 }
