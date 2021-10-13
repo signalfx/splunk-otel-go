@@ -70,7 +70,7 @@ func newConfig(options ...Option) config {
 // tracer that created that span will be used. Otherwise, the TracerProvider
 // from c is used.
 func (c config) resolveTracer(ctx context.Context) trace.Tracer {
-	if span := trace.SpanFromContext(ctx); c.tracer == nil || span.SpanContext().IsValid() {
+	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
