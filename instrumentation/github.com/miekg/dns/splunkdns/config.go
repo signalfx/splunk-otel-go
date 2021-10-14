@@ -76,7 +76,7 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
-	// There is a possiblity that the config was not created with newConfig
+	// There is a possibility that the config was not created with newConfig
 	// (i.e. new(Client)), try to handle this situation gracefully.
 	if c == nil || c.tracer == nil {
 		return otel.Tracer(
