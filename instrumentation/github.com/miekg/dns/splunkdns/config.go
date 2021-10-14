@@ -90,16 +90,13 @@ func (c *config) withSpan(ctx context.Context, m *dns.Msg, f func(context.Contex
 	name := "DNS " + dns.OpcodeToString[m.Opcode]
 	ctx, span := c.resolveTracer(ctx).Start(ctx, name, o...)
 
-	var err error
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
-		span.End()
-	}()
+	err := f(ctx)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+	span.End()
 
-	err = f(ctx)
 	return err
 }
 
