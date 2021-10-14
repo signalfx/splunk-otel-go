@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunkdns provides instrumentation for the github.com/miekg/dns
-// package.
+// Package splunkdns provides OpenTelemetry instrumentation for the
+// github.com/miekg/dns package.
 package splunkdns
 
 import (
@@ -23,22 +23,28 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// ListenAndServe calls dns.ListenAndServe with a wrapped Handler.
+// ListenAndServe wraps the passed handler so all requests it servers are
+// traced and starts a server on addr and network to handle incoming queries.
 func ListenAndServe(addr, network string, handler dns.Handler, opts ...Option) error {
 	return dns.ListenAndServe(addr, network, WrapHandler(handler, opts...))
 }
 
-// ListenAndServeTLS calls dns.ListenAndServeTLS with a wrapped Handler.
+// ListenAndServeTLS wraps the passed handler so all requests it servers are
+// traced and starts a server on addr and network to handle incoming queries
+// using the passed TLS certFile and keyFile.
 func ListenAndServeTLS(addr, certFile, keyFile string, handler dns.Handler, opts ...Option) error {
 	return dns.ListenAndServeTLS(addr, certFile, keyFile, WrapHandler(handler, opts...))
 }
 
-// Exchange calls dns.Exchange and traces the request.
+// Exchange performs a traced synchronous UDP query. It sends the message m to
+// addr and waits for a reply. Exchange does not retry a failed query, nor
+// will it fall back to TCP in case of truncation.
 func Exchange(m *dns.Msg, addr string, opts ...Option) (*dns.Msg, error) {
 	return ExchangeContext(context.Background(), m, addr, opts...)
 }
 
-// ExchangeContext calls dns.ExchangeContext and traces the request.
+// ExchangeContext performs a traced synchronous UDP query, like Exchange. It
+// additionally obeys deadlines from the passed Context.
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Option) (r *dns.Msg, err error) {
 	err = newConfig(opts...).withSpan(ctx, m, func(c context.Context) error {
 		var sErr error
