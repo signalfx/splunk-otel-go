@@ -32,9 +32,6 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 type config struct {
 	tracer           trace.Tracer
 	defaultStartOpts []trace.SpanStartOption
-
-	TracerProvider trace.TracerProvider
-	Attributes     []attribute.KeyValue
 }
 
 func newConfig(options ...Option) *config {
@@ -45,20 +42,11 @@ func newConfig(options ...Option) *config {
 		}
 	}
 
-	if c.TracerProvider == nil {
-		c.TracerProvider = otel.GetTracerProvider()
-	}
-	c.tracer = c.TracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-	)
-
-	if len(c.Attributes) > 0 {
-		c.defaultStartOpts = []trace.SpanStartOption{
-			trace.WithAttributes(c.Attributes...),
-		}
-	} else {
-		c.defaultStartOpts = []trace.SpanStartOption{}
+	if c.tracer == nil {
+		c.tracer = otel.Tracer(
+			instrumentationName,
+			trace.WithInstrumentationVersion(splunkotel.Version()),
+		)
 	}
 
 	return &c
@@ -130,7 +118,10 @@ func (o optionFunc) apply(c *config) {
 // this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionFunc(func(c *config) {
-		c.TracerProvider = tp
+		c.tracer = tp.Tracer(
+			instrumentationName,
+			trace.WithInstrumentationVersion(splunkotel.Version()),
+		)
 	})
 }
 
@@ -138,6 +129,9 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 // for every span created with this instrumentation library.
 func WithAttributes(attr []attribute.KeyValue) Option {
 	return optionFunc(func(c *config) {
-		c.Attributes = append(c.Attributes, attr...)
+		c.defaultStartOpts = append(
+			c.defaultStartOpts,
+			trace.WithAttributes(attr...),
+		)
 	})
 }

@@ -41,23 +41,28 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 	return fn.start(ctx, name, opts...)
 }
 
-func TestConfigDefaultTracerProvider(t *testing.T) {
+func TestConfigDefaultTracer(t *testing.T) {
 	c := newConfig()
-	assert.Equal(t, otel.GetTracerProvider(), c.TracerProvider)
+	expect := otel.Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(splunkotel.Version()),
+	)
+	assert.Equal(t, expect, c.tracer)
 }
 
-func TestWithTracerProvider(t *testing.T) {
+func TestWithTracer(t *testing.T) {
+	tracer := &fnTracer{}
 	// Default is to use the global TracerProvider. This will override that.
 	tp := &fnTracerProvider{
 		tracer: func(string, ...trace.TracerOption) trace.Tracer {
-			return &fnTracer{}
+			return tracer
 		},
 	}
 	c := newConfig(WithTracerProvider(tp))
-	assert.Same(t, tp, c.TracerProvider)
+	assert.Same(t, tracer, c.tracer)
 }
 
-func TestEmptyConfigTracerProvider(t *testing.T) {
+func TestEmptyConfigTracer(t *testing.T) {
 	// If a config is directly created, fallback to the OTel global.
 	c := config{}
 	expected := otel.Tracer(
@@ -116,7 +121,7 @@ func TestWithAttributes(t *testing.T) {
 		attribute.String("key", "value"),
 	}
 	c := newConfig(WithAttributes(attr))
-	assert.Equal(t, attr, c.Attributes)
+	assert.Len(t, c.defaultStartOpts, 1)
 	sc := trace.NewSpanStartConfig(c.defaultStartOpts...)
 	assert.Equal(t, attr, sc.Attributes())
 }
