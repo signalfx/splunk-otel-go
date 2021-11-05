@@ -89,6 +89,9 @@ func serverUp(addr string, timeout time.Duration) error {
 
 func newFixtures(t *testing.T) (*dns.Server, *tracetest.SpanRecorder, []splunkdns.Option, *dns.Msg) {
 	server := startServer(t)
+	t.Cleanup(func() {
+		assert.NoError(t, server.Shutdown())
+	})
 
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
@@ -115,9 +118,6 @@ func assertClientSpan(t *testing.T, span trace.ReadOnlySpan) {
 
 func TestExchange(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
-	t.Cleanup(func() {
-		assert.NoError(t, server.Shutdown())
-	})
 
 	_, err := splunkdns.Exchange(msg, server.Addr, opts...)
 	assert.NoError(t, err)
@@ -129,9 +129,6 @@ func TestExchange(t *testing.T) {
 
 func TestExchangeContext(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
-	t.Cleanup(func() {
-		assert.NoError(t, server.Shutdown())
-	})
 
 	_, err := splunkdns.ExchangeContext(context.Background(), msg, server.Addr, opts...)
 	assert.NoError(t, err)
@@ -143,9 +140,6 @@ func TestExchangeContext(t *testing.T) {
 
 func TestClientExchange(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
-	t.Cleanup(func() {
-		assert.NoError(t, server.Shutdown())
-	})
 
 	client := splunkdns.WrapClient(&dns.Client{Net: "udp"}, opts...)
 	_, _, err := client.Exchange(msg, server.Addr)
@@ -158,9 +152,6 @@ func TestClientExchange(t *testing.T) {
 
 func TestClientExchangeContext(t *testing.T) {
 	server, sr, opts, msg := newFixtures(t)
-	t.Cleanup(func() {
-		assert.NoError(t, server.Shutdown())
-	})
 
 	client := splunkdns.WrapClient(&dns.Client{Net: "udp"}, opts...)
 	_, _, err := client.ExchangeContext(context.Background(), msg, server.Addr)
