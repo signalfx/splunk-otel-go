@@ -58,8 +58,7 @@ func startServer(t *testing.T) *dns.Server {
 		errCh <- server.ActivateAndServe()
 	}()
 	t.Cleanup(func() {
-		err := <-errCh
-		assert.NoError(t, err, "should stop serving without error")
+		assert.NoError(t, <-errCh, "failed to start server")
 	})
 	require.NoError(t, serverUp(pc.LocalAddr().String(), time.Second*10))
 
