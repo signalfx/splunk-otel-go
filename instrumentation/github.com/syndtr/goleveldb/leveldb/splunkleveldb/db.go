@@ -138,9 +138,7 @@ func (db *DB) WithContext(ctx context.Context) *DB {
 // And a nil Range.Limit is treated as a key after all keys in the DB.
 // Therefore if both is nil then it will compact entire DB.
 func (db *DB) CompactRange(r util.Range) error {
-	return db.cfg.withSpan("CompactRange", func(context.Context) error {
-		return db.DB.CompactRange(r)
-	})
+	return db.cfg.withSpan("CompactRange", func() error { return db.DB.CompactRange(r) })
 }
 
 // Delete deletes the value for the given key. Delete will not returns error if
@@ -149,9 +147,7 @@ func (db *DB) CompactRange(r util.Range) error {
 // It is safe to modify the contents of the arguments after Delete returns but
 // not before.
 func (db *DB) Delete(key []byte, wo *opt.WriteOptions) error {
-	return db.cfg.withSpan("Delete", func(context.Context) error {
-		return db.DB.Delete(key, wo)
-	})
+	return db.cfg.withSpan("Delete", func() error { return db.DB.Delete(key, wo) })
 }
 
 // Get gets the value for the given key. It returns ErrNotFound if the
@@ -161,9 +157,10 @@ func (db *DB) Delete(key []byte, wo *opt.WriteOptions) error {
 // of the returned slice.
 // It is safe to modify the contents of the argument after Get returns.
 func (db *DB) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
-	err = db.cfg.withSpan("Get", func(context.Context) error {
-		value, err = db.DB.Get(key, ro)
-		return err
+	err = db.cfg.withSpan("Get", func() error {
+		var e error
+		value, e = db.DB.Get(key, ro)
+		return e
 	})
 	return
 }
@@ -187,9 +184,10 @@ func (db *DB) GetSnapshot() (*Snapshot, error) {
 //
 // It is safe to modify the contents of the argument after Has returns.
 func (db *DB) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
-	err = db.cfg.withSpan("Has", func(context.Context) error {
-		ret, err = db.DB.Has(key, ro)
-		return err
+	err = db.cfg.withSpan("Has", func() error {
+		var e error
+		ret, e = db.DB.Has(key, ro)
+		return e
 	})
 	return
 }
@@ -248,9 +246,7 @@ func (db *DB) OpenTransaction() (*Transaction, error) {
 // It is safe to modify the contents of the arguments after Put returns but not
 // before.
 func (db *DB) Put(key, value []byte, wo *opt.WriteOptions) error {
-	return db.cfg.withSpan("Put", func(context.Context) error {
-		return db.DB.Put(key, value, wo)
-	})
+	return db.cfg.withSpan("Put", func() error { return db.DB.Put(key, value, wo) })
 }
 
 // Write apply the given batch to the DB. The batch records will be applied
@@ -261,7 +257,5 @@ func (db *DB) Put(key, value []byte, wo *opt.WriteOptions) error {
 // It is safe to modify the contents of the arguments after Write returns but
 // not before. Write will not modify content of the batch.
 func (db *DB) Write(batch *leveldb.Batch, wo *opt.WriteOptions) error {
-	return db.cfg.withSpan("Write", func(context.Context) error {
-		return db.DB.Write(batch, wo)
-	})
+	return db.cfg.withSpan("Write", func() error { return db.DB.Write(batch, wo) })
 }

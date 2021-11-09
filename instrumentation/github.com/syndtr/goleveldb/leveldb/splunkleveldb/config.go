@@ -21,6 +21,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -35,7 +36,17 @@ type config struct {
 }
 
 func newConfig(options ...Option) *config {
-	var c config
+	c := config{
+		defaultStartOpts: []trace.SpanStartOption{
+			trace.WithAttributes(
+				semconv.DBSystemKey.String("leveldb"),
+				semconv.NetTransportInProc,
+			),
+			// From the specification: span kind MUST always be CLIENT.
+			trace.WithSpanKind(trace.SpanKindClient),
+		},
+	}
+
 	for _, o := range options {
 		if o != nil {
 			o.apply(&c)
@@ -79,20 +90,28 @@ func (c *config) resolveTracer() trace.Tracer {
 	return c.tracer
 }
 
-// withSpan wraps the function f with a span.
-func (c *config) withSpan(name string, f func(context.Context) error, opts ...trace.SpanStartOption) error {
-	var o []trace.SpanStartOption
-	if c == nil || len(c.defaultStartOpts) == 0 {
-		o = make([]trace.SpanStartOption, len(opts))
-		copy(o, opts)
-	} else {
-		o = make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
-		copy(o, c.defaultStartOpts)
-		copy(o[len(c.defaultStartOpts):], opts)
+func (c *config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
+	if (c == nil && len(opts) == 0) || len(opts)+len(c.defaultStartOpts) == 0 {
+		return nil
 	}
 
-	ctx, span := c.resolveTracer().Start(c.ctx, name, o...)
-	err := f(ctx)
+	var merged []trace.SpanStartOption
+	if c == nil || len(c.defaultStartOpts) == 0 {
+		merged = make([]trace.SpanStartOption, len(opts))
+		copy(merged, opts)
+	} else {
+		merged = make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
+		copy(merged, c.defaultStartOpts)
+		copy(merged[len(c.defaultStartOpts):], opts)
+	}
+	return merged
+}
+
+// withSpan wraps the function f with a span.
+func (c *config) withSpan(name string, f func() error, opts ...trace.SpanStartOption) error {
+	sso := c.mergedSpanStartOptions(opts...)
+	_, span := c.resolveTracer().Start(c.ctx, name, sso...)
+	err := f()
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
