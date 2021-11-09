@@ -102,14 +102,15 @@ func assertSpansFunc(parent string, traceID traceapi.TraceID, names ...string) f
 
 	return func(t *testing.T, spans []trace.ReadOnlySpan) {
 		for _, span := range spans {
-			got[span.Name()] = struct{}{}
+			name := span.Name()
+			got[name] = struct{}{}
 
-			if span.Name() == parent {
+			if name == parent {
 				continue
 			}
 
-			if _, ok := expected[span.Name()]; !ok {
-				t.Errorf("unexpected span %q created", span.Name())
+			if _, ok := expected[name]; !ok {
+				t.Errorf("unexpected span %q created", name)
 				continue
 			}
 
@@ -117,6 +118,7 @@ func assertSpansFunc(parent string, traceID traceapi.TraceID, names ...string) f
 			assert.Equal(t, traceID, span.SpanContext().TraceID())
 			assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("leveldb"))
 			assert.Contains(t, span.Attributes(), semconv.NetTransportInProc)
+			assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
 		}
 
 		for k := range expected {

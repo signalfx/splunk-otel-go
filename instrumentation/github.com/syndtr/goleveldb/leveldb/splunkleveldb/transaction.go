@@ -21,6 +21,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Transaction wraps a *leveldb.Transaction, tracing all operations performed.
@@ -55,7 +57,11 @@ func (tr *Transaction) WithContext(ctx context.Context) *Transaction {
 //
 // Other methods should not be called after transaction has been committed.
 func (tr *Transaction) Commit() error {
-	return tr.cfg.withSpan("Commit", func() error { return tr.Transaction.Commit() })
+	return tr.cfg.withSpan(
+		"Commit",
+		func() error { return tr.Transaction.Commit() },
+		trace.WithAttributes(semconv.DBOperationKey.String("Commit")),
+	)
 }
 
 // Get gets the value for the given key. It returns ErrNotFound if the
@@ -65,11 +71,15 @@ func (tr *Transaction) Commit() error {
 // of the returned slice.
 // It is safe to modify the contents of the argument after Get returns.
 func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
-	err = tr.cfg.withSpan("Get", func() error {
-		var e error
-		value, e = tr.Transaction.Get(key, ro)
-		return e
-	})
+	err = tr.cfg.withSpan(
+		"Get",
+		func() error {
+			var e error
+			value, e = tr.Transaction.Get(key, ro)
+			return e
+		},
+		trace.WithAttributes(semconv.DBOperationKey.String("Get")),
+	)
 	return
 }
 
@@ -77,11 +87,15 @@ func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) (value []byte, err e
 //
 // It is safe to modify the contents of the argument after Has returns.
 func (tr *Transaction) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
-	err = tr.cfg.withSpan("Has", func() error {
-		var e error
-		ret, e = tr.Transaction.Has(key, ro)
-		return e
-	})
+	err = tr.cfg.withSpan(
+		"Has",
+		func() error {
+			var e error
+			ret, e = tr.Transaction.Has(key, ro)
+			return e
+		},
+		trace.WithAttributes(semconv.DBOperationKey.String("Has")),
+	)
 	return
 }
 

@@ -21,6 +21,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Snapshot wraps a leveldb.Snapshot, tracing all operations performed.
@@ -55,11 +57,15 @@ func (snap *Snapshot) WithContext(ctx context.Context) *Snapshot {
 // The caller should not modify the contents of the returned slice, but
 // it is safe to modify the contents of the argument after Get returns.
 func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
-	err = snap.cfg.withSpan("Get", func() error {
-		var e error
-		value, e = snap.Snapshot.Get(key, ro)
-		return e
-	})
+	err = snap.cfg.withSpan(
+		"Get",
+		func() error {
+			var e error
+			value, e = snap.Snapshot.Get(key, ro)
+			return e
+		},
+		trace.WithAttributes(semconv.DBOperationKey.String("Get")),
+	)
 	return
 }
 
@@ -67,11 +73,15 @@ func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err er
 //
 // It is safe to modify the contents of the argument after Get returns.
 func (snap *Snapshot) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
-	err = snap.cfg.withSpan("Has", func() error {
-		var e error
-		ret, e = snap.Snapshot.Has(key, ro)
-		return e
-	})
+	err = snap.cfg.withSpan(
+		"Has",
+		func() error {
+			var e error
+			ret, e = snap.Snapshot.Has(key, ro)
+			return e
+		},
+		trace.WithAttributes(semconv.DBOperationKey.String("Has")),
+	)
 	return
 }
 
