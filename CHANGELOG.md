@@ -32,6 +32,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
   instrumentation for the `github.com/confluentinc/confluent-kafka-go/kafka`
   package. (#100)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`
+  instrumentation for the `github.com/miekg/dns`
+  package. (#155)
 
 ### Changed
 
