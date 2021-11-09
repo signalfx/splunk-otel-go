@@ -24,8 +24,6 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // DB wraps a *leveldb.DB, tracing all operations performed.
@@ -266,31 +264,4 @@ func (db *DB) Write(batch *leveldb.Batch, wo *opt.WriteOptions) error {
 	return db.cfg.withSpan("Write", func(context.Context) error {
 		return db.DB.Write(batch, wo)
 	})
-}
-
-// iter wraps a leveldb.Iterator, tracing all operations performed.
-type iter struct {
-	iterator.Iterator
-	span trace.Span
-}
-
-// WrapIterator returns a traced Iterator that wraps a leveldb
-// iterator.Iterator.
-func WrapIterator(it iterator.Iterator, opts ...Option) iterator.Iterator {
-	c := newConfig(opts...)
-	_, span := c.resolveTracer().Start(c.ctx, "Iterator")
-	return &iter{
-		Iterator: it,
-		span:     span,
-	}
-}
-
-// Release releases associated resources and ends any active span.
-func (it *iter) Release() {
-	if err := it.Error(); err != nil {
-		it.span.RecordError(err)
-		it.span.SetStatus(codes.Error, err.Error())
-	}
-	it.Iterator.Release()
-	it.span.End()
 }
