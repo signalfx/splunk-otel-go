@@ -123,7 +123,7 @@ func TestIteratorOperation(t *testing.T) {
 	}, "Iterator")(t)
 }
 
-func withTestingDeadline(t *testing.T, ctx context.Context) context.Context {
+func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
 	d, ok := t.Deadline()
 	if !ok {
 		d = time.Now().Add(10 * time.Second)
@@ -182,7 +182,7 @@ func testDBOp(f func(*testing.T, *splunkleveldb.DB), spanNames ...string) func(*
 	assertSpans := assertSpansFunc(pname, parent.SpanContext().TraceID(), spanNames...)
 
 	return func(t *testing.T) {
-		ctx = withTestingDeadline(t, ctx)
+		ctx = withTestingDeadline(ctx, t)
 
 		db, err := splunkleveldb.Open(storage.NewMemStorage(), &opt.Options{})
 		require.NoError(t, err)
@@ -206,7 +206,7 @@ func testSnapshotOp(f func(*testing.T, *splunkleveldb.Snapshot), spanNames ...st
 
 	assertSpans := assertSpansFunc(pname, parent.SpanContext().TraceID(), spanNames...)
 	return func(t *testing.T) {
-		ctx = withTestingDeadline(t, ctx)
+		ctx = withTestingDeadline(ctx, t)
 		testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
 			require.NoError(t, db.Put([]byte("hello"), expectedValue, nil))
 
@@ -239,7 +239,7 @@ func testTransactionOp(f func(*testing.T, *splunkleveldb.Transaction), spanNames
 
 	assertSpans := assertSpansFunc(pname, parent.SpanContext().TraceID(), spanNames...)
 	return func(t *testing.T) {
-		ctx = withTestingDeadline(t, ctx)
+		ctx = withTestingDeadline(ctx, t)
 		testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
 			transaction, err := db.OpenTransaction()
 			require.NoError(t, err)
