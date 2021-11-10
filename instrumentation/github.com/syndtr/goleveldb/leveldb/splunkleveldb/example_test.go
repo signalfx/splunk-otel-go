@@ -24,13 +24,10 @@ import (
 )
 
 func Example() {
-	ctx, span := otel.Tracer("my-inst").Start(context.Background(), "main")
-	defer span.End()
-
 	// Open a new database backed by memory storage.
 	memstore := storage.NewMemStorage()
 	// Ensure span is used as a parent for all spans the database will create.
-	db, err := splunkleveldb.Open(memstore, nil, splunkleveldb.WithContext(ctx))
+	db, err := splunkleveldb.Open(memstore, nil)
 	if err != nil {
 		// Assume corruptions and attept a recover.
 		db, err = splunkleveldb.Recover(memstore, nil)
@@ -39,13 +36,18 @@ func Example() {
 		}
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
-			log.Fatal(err)
+		if cErr := db.Close(); cErr != nil {
+			log.Fatal(cErr)
 		}
 	}()
 
+	ctx, span := otel.Tracer("my-inst").Start(context.Background(), "main")
+	defer span.End()
+	// Ensure span is used as a parent for all spans the database will create.
+	db = db.WithContext(ctx)
+
 	// Write to the database. A span is created to trace this operation.
-	if err := db.Put([]byte("key"), []byte("value"), nil); err != nil {
+	if err = db.Put([]byte("key"), []byte("value"), nil); err != nil {
 		log.Println("failed to write data", err)
 	}
 
@@ -58,7 +60,7 @@ func Example() {
 	}
 
 	// Delete the data for the key. A span is created to trace this operation.
-	if err := db.Delete([]byte("key"), nil); err != nil {
+	if err = db.Delete([]byte("key"), nil); err != nil {
 		log.Println("failed to delete data", err)
 	}
 }

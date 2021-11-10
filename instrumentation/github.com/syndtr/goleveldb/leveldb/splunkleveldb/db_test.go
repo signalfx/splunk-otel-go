@@ -21,6 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 )
@@ -84,6 +85,17 @@ func TestDBOpenTransaction(t *testing.T) {
 	assert.Equal(t, db.cfg, transaction.cfg)
 }
 
+func TestDBOpenTransactionForwardsError(t *testing.T) {
+	db, err := Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	// Close right away so the OpenTransaction call will fail.
+	require.NoError(t, db.Close())
+
+	// Closing the DB will discard this transaction.
+	_, err = db.OpenTransaction()
+	assert.ErrorIs(t, err, leveldb.ErrClosed)
+}
+
 func TestDBNewIterator(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
@@ -105,4 +117,14 @@ func TestDBGetSnapshot(t *testing.T) {
 	assert.IsType(t, &Snapshot{}, snap)
 	assert.Equal(t, db.cfg, snap.cfg)
 	snap.Release()
+}
+
+func TestDBGetSnapshotForwardsError(t *testing.T) {
+	db, err := Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	// Close right away so the OpenTransaction call will fail.
+	require.NoError(t, db.Close())
+
+	_, err = db.GetSnapshot()
+	assert.ErrorIs(t, err, leveldb.ErrClosed)
 }
