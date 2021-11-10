@@ -123,3 +123,58 @@ func (tr *Transaction) NewIterator(slice *util.Range, ro *opt.ReadOptions) itera
 		*cfg = *tr.cfg
 	}))
 }
+
+// Delete deletes the value for the given key.
+// Please note that the transaction is not compacted until committed, so if you
+// writes 10 same keys, then those 10 same keys are in the transaction.
+//
+// It is safe to modify the contents of the arguments after Delete returns.
+func (tr *Transaction) Delete(key []byte, wo *opt.WriteOptions) error {
+	return tr.cfg.withSpan(
+		"Delete",
+		func() error { return tr.Transaction.Delete(key, wo) },
+		trace.WithAttributes(semconv.DBOperationKey.String("Delete")),
+	)
+}
+
+// Discard discards the transaction.
+//
+// Other methods should not be called after transaction has been discarded.
+func (tr *Transaction) Discard() {
+	_ = tr.cfg.withSpan(
+		"Discard",
+		func() error {
+			tr.Transaction.Discard()
+			return nil
+		},
+		trace.WithAttributes(semconv.DBOperationKey.String("Discard")),
+	)
+}
+
+// Put sets the value for the given key. It overwrites any previous value
+// for that key; a DB is not a multi-map.
+// Please note that the transaction is not compacted until committed, so if you
+// writes 10 same keys, then those 10 same keys are in the transaction.
+//
+// It is safe to modify the contents of the arguments after Put returns.
+func (tr *Transaction) Put(key, value []byte, wo *opt.WriteOptions) error {
+	return tr.cfg.withSpan(
+		"Put",
+		func() error { return tr.Transaction.Put(key, value, wo) },
+		trace.WithAttributes(semconv.DBOperationKey.String("Put")),
+	)
+}
+
+// Write applies the given batch to the transaction. The batch will be applied
+// sequentially.
+// Please note that the transaction is not compacted until committed, so if you
+// writes 10 same keys, then those 10 same keys are in the transaction.
+//
+// It is safe to modify the contents of the arguments after Write returns.
+func (tr *Transaction) Write(b *leveldb.Batch, wo *opt.WriteOptions) error {
+	return tr.cfg.withSpan(
+		"Write",
+		func() error { return tr.Transaction.Write(b, wo) },
+		trace.WithAttributes(semconv.DBOperationKey.String("Write")),
+	)
+}

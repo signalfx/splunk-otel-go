@@ -80,6 +80,42 @@ func TestSnapshotOperations(t *testing.T) {
 	}, "Get"))
 }
 
+func TestTransactionOperations(t *testing.T) {
+	t.Run("Commit", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		assert.NoError(t, transaction.Commit())
+	}, "Commit"))
+
+	t.Run("Discard", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		transaction.Discard()
+	}, "Discard"))
+
+	t.Run("Delete", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		assert.NoError(t, transaction.Delete([]byte("hello"), nil))
+	}, "Delete"))
+
+	t.Run("Put/Has", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		assert.NoError(t, transaction.Put([]byte("hello"), expectedValue, nil))
+
+		ok, err := transaction.Has([]byte("hello"), nil)
+		assert.NoError(t, err)
+		assert.True(t, ok, "should contain key 'hello'")
+	}, "Put", "Has"))
+
+	t.Run("Put/Get", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		assert.NoError(t, transaction.Put([]byte("hello"), expectedValue, nil))
+
+		v, err := transaction.Get([]byte("hello"), nil)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedValue, v)
+	}, "Put", "Get"))
+
+	t.Run("Write", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+		var batch leveldb.Batch
+		batch.Put([]byte("hello"), []byte("world"))
+		assert.NoError(t, transaction.Write(&batch, nil))
+	}, "Write"))
+}
+
 func withTestingDeadline(t *testing.T, ctx context.Context) context.Context {
 	d, ok := t.Deadline()
 	if !ok {
@@ -184,5 +220,32 @@ func testSnapshotOp(f func(*testing.T, *splunkleveldb.Snapshot), spanNames ...st
 
 			assertSpans(t, sr.Ended())
 		}, "Put", "Delete")(t)
+	}
+}
+
+func testTransactionOp(f func(*testing.T, *splunkleveldb.Transaction), spanNames ...string) func(*testing.T) {
+	sr := tracetest.NewSpanRecorder()
+	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+
+	pname := "Parent Transaction Span"
+	ctx, parent := tp.Tracer("testTransactionOp").Start(context.Background(), pname)
+
+	assertSpans := assertSpansFunc(pname, parent.SpanContext().TraceID(), spanNames...)
+	return func(t *testing.T) {
+		ctx = withTestingDeadline(t, ctx)
+		testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
+			transaction, err := db.OpenTransaction()
+			require.NoError(t, err)
+
+			// Reset the context to use the TracerProvider from this tests'
+			// parent span.
+			transaction = transaction.WithContext(ctx)
+			f(t, transaction)
+
+			parent.End()
+			require.NoError(t, tp.Shutdown(ctx))
+
+			assertSpans(t, sr.Ended())
+		})(t)
 	}
 }
