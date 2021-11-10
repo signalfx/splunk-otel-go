@@ -73,15 +73,23 @@ func newConfig(options ...Option) *config {
 // tracer that created that span will be used. Otherwise, the TracerProvider
 // from c is used.
 func (c *config) resolveTracer() trace.Tracer {
+	// There is a possibility that the config was not created with newConfig,
+	// try to handle this situation gracefully.
+	if c == nil {
+		return otel.Tracer(
+			instrumentationName,
+			trace.WithInstrumentationVersion(splunkotel.Version()),
+		)
+	}
+
 	if span := trace.SpanFromContext(c.ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
-	// There is a possibility that the config was not created with newConfig,
-	// try to handle this situation gracefully.
-	if c == nil || c.tracer == nil {
+
+	if c.tracer == nil {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
