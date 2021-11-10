@@ -16,6 +16,7 @@ package test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -23,9 +24,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -118,8 +121,7 @@ func TestTransactionOperations(t *testing.T) {
 
 func TestIteratorOperation(t *testing.T) {
 	testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
-		iterator := db.NewIterator(nil, nil)
-		iterator.Release()
+		db.NewIterator(nil, nil).Release()
 	}, "Iterator")(t)
 }
 
@@ -255,4 +257,35 @@ func testTransactionOp(f func(*testing.T, *splunkleveldb.Transaction), spanNames
 			assertSpans(t, sr.Ended())
 		})(t)
 	}
+}
+
+type errIterator struct {
+	iterator.Iterator
+}
+
+var errExpected = errors.New("expected error")
+
+func (errIterator) Error() error {
+	return errExpected
+}
+
+func TestIteratorErrors(t *testing.T) {
+	db, err := leveldb.Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	sr := tracetest.NewSpanRecorder()
+	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+	errIter := errIterator{db.NewIterator(nil, nil)}
+	i := splunkleveldb.WrapIterator(errIter, splunkleveldb.WithTracerProvider(tp))
+	i.Release()
+
+	ctx := withTestingDeadline(context.Background(), t)
+	require.NoError(t, tp.Shutdown(ctx))
+
+	spans := sr.Ended()
+	require.Len(t, spans, 1)
+	span := spans[0]
+	assert.Equal(t, codes.Error, span.Status().Code)
+	assert.Equal(t, errExpected.Error(), span.Status().Description)
 }
