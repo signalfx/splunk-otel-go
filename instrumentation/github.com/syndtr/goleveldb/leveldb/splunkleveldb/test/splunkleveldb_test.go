@@ -116,6 +116,13 @@ func TestTransactionOperations(t *testing.T) {
 	}, "Write"))
 }
 
+func TestIteratorOperation(t *testing.T) {
+	testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
+		iterator := db.NewIterator(nil, nil)
+		iterator.Release()
+	}, "Iterator")(t)
+}
+
 func withTestingDeadline(t *testing.T, ctx context.Context) context.Context {
 	d, ok := t.Deadline()
 	if !ok {

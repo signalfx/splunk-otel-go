@@ -17,6 +17,7 @@ package splunkleveldb
 import (
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -27,10 +28,14 @@ type iter struct {
 }
 
 // WrapIterator returns a traced Iterator that wraps a leveldb
-// iterator.Iterator.
+// iterator.Iterator with a span. The span is ended when Iterator.Release is
+// called.
 func WrapIterator(it iterator.Iterator, opts ...Option) iterator.Iterator {
 	c := newConfig(opts...)
-	_, span := c.resolveTracer().Start(c.ctx, "Iterator")
+	sso := c.mergedSpanStartOptions(
+		trace.WithAttributes(semconv.DBOperationKey.String("Iterator")),
+	)
+	_, span := c.resolveTracer().Start(c.ctx, "Iterator", sso...)
 	return &iter{
 		Iterator: it,
 		span:     span,
