@@ -72,7 +72,7 @@ func TestRecover(t *testing.T) {
 	require.NoError(t, db.Close())
 }
 
-func TestOpenTransaction(t *testing.T) {
+func TestDBOpenTransaction(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
@@ -84,7 +84,7 @@ func TestOpenTransaction(t *testing.T) {
 	assert.Equal(t, db.cfg, transaction.cfg)
 }
 
-func TestNewIterator(t *testing.T) {
+func TestDBNewIterator(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
@@ -95,7 +95,7 @@ func TestNewIterator(t *testing.T) {
 	i.Release()
 }
 
-func TestGetSnapshot(t *testing.T) {
+func TestDBGetSnapshot(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
