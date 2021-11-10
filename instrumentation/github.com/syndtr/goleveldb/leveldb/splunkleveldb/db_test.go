@@ -71,3 +71,38 @@ func TestRecover(t *testing.T) {
 	assert.NoError(t, err)
 	require.NoError(t, db.Close())
 }
+
+func TestOpenTransaction(t *testing.T) {
+	db, err := Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	// Closing the DB will discard this transaction.
+	transaction, err := db.OpenTransaction()
+	assert.NoError(t, err)
+	assert.IsType(t, &Transaction{}, transaction)
+	assert.Equal(t, db.cfg, transaction.cfg)
+}
+
+func TestNewIterator(t *testing.T) {
+	db, err := Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	i := db.NewIterator(nil, nil)
+	assert.IsType(t, &iter{}, i)
+	assert.NotNil(t, i.(*iter).span)
+	i.Release()
+}
+
+func TestGetSnapshot(t *testing.T) {
+	db, err := Open(storage.NewMemStorage(), nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	snap, err := db.GetSnapshot()
+	assert.NoError(t, err)
+	assert.IsType(t, &Snapshot{}, snap)
+	assert.Equal(t, db.cfg, snap.cfg)
+	snap.Release()
+}
