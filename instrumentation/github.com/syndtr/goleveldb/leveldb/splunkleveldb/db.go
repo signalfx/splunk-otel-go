@@ -34,8 +34,6 @@ type DB struct {
 	cfg *config
 }
 
-// Open calls leveldb.Open and wraps the resulting DB.
-
 // Open opens or creates a traced DB for the given storage.
 // The DB will be created if not exist, unless ErrorIfMissing is true.
 // Also, if ErrorIfExist is true and the DB exist Open will returns
