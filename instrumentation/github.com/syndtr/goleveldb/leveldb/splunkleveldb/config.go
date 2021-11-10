@@ -91,8 +91,14 @@ func (c *config) resolveTracer() trace.Tracer {
 }
 
 func (c *config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
-	if (c == nil && len(opts) == 0) || len(opts)+len(c.defaultStartOpts) == 0 {
-		return nil
+	if c == nil {
+		if len(opts) == 0 {
+			return nil
+		}
+	} else {
+		if len(opts)+len(c.defaultStartOpts) == 0 {
+			return nil
+		}
 	}
 
 	var merged []trace.SpanStartOption
