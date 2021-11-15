@@ -18,9 +18,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 	"go.opentelemetry.io/otel"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb"
 )
 
 func Example() {

@@ -17,12 +17,13 @@ package splunkleveldb
 import (
 	"context"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
