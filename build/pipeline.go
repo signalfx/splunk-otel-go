@@ -134,14 +134,24 @@ func taskFmt(repoPrefix string) goyek.Task {
 		Name:  "fmt",
 		Usage: "gofumports",
 		Action: func(tf *goyek.TF) {
-			installFmt := tf.Cmd("go", "install", "mvdan.cc/gofumpt/gofumports")
+			installFmt := tf.Cmd("go", "install", "mvdan.cc/gofumpt")
 			installFmt.Dir = buildDir
 			if err := installFmt.Run(); err != nil {
 				tf.Fatal(err)
 			}
 
 			ForGoModules(tf, func(tf *goyek.TF) {
-				tf.Cmd("gofumports", "-l", "-w", "-local", repoPrefix, "github.com/goyek/goyek", ".").Run() //nolint // it is OK if it returns error
+				tf.Cmd("gofumpt", "-l", "-w", ".").Run() //nolint // it is OK if it returns error
+			})
+
+			installGoImports := tf.Cmd("go", "install", "golang.org/x/tools/cmd/goimports")
+			installGoImports.Dir = buildDir
+			if err := installGoImports.Run(); err != nil {
+				tf.Fatal(err)
+			}
+
+			ForGoModules(tf, func(tf *goyek.TF) {
+				tf.Cmd("goimports", "-l", "-w", "-local", repoPrefix, ".").Run() //nolint // it is OK if it returns error
 			})
 		},
 	}
