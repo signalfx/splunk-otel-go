@@ -22,13 +22,14 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns"
 )
 
 var defaultClientAttrs = []attribute.KeyValue{

@@ -17,8 +17,9 @@ package splunkotel_test
 import (
 	"testing"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/stretchr/testify/assert"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 func TestVersionSemver(t *testing.T) {

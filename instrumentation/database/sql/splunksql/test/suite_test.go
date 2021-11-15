@@ -20,14 +20,15 @@ import (
 	"database/sql/driver"
 	"fmt"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"github.com/stretchr/testify/suite"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	traceapi "go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
 
 // SplunkSQLSuite is the tracing test suite for the splunksql package.

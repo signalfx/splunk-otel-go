@@ -18,11 +18,12 @@ import (
 	"context"
 
 	"github.com/miekg/dns"
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.

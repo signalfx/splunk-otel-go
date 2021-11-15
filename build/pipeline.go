@@ -28,7 +28,7 @@ import (
 
 // Config is used to configure the registered pipeline.
 type Config struct {
-	RepoPackagePrefix string // used in "test" task to specify coverpkg
+	RepoPackagePrefix string // used in "fmt" and "test" tasks
 }
 
 // Pipeline contains the tasks and parameters
@@ -75,7 +75,7 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 
 	// tasks
 	result.Tasks.Clean = flow.Register(taskClean())
-	result.Tasks.Fmt = flow.Register(taskFmt())
+	result.Tasks.Fmt = flow.Register(taskFmt(cfg.RepoPackagePrefix))
 	result.Tasks.Markdownlint = flow.Register(taskMarkdownLint(result.Params.SkipDocker))
 	result.Tasks.Misspell = flow.Register(taskMisspell())
 	result.Tasks.GolangciLint = flow.Register(taskGolangciLint())
@@ -129,7 +129,7 @@ func taskModTidy() goyek.Task {
 	}
 }
 
-func taskFmt() goyek.Task {
+func taskFmt(repoPrefix string) goyek.Task {
 	return goyek.Task{
 		Name:  "fmt",
 		Usage: "gofumports",
@@ -141,7 +141,7 @@ func taskFmt() goyek.Task {
 			}
 
 			ForGoModules(tf, func(tf *goyek.TF) {
-				tf.Cmd("gofumports", strings.Split("-l -w -local github.com/goyek/goyek .", " ")...).Run() //nolint // it is OK if it returns error
+				tf.Cmd("gofumports", "-l", "-w", "-local", repoPrefix, "github.com/goyek/goyek", ".").Run() //nolint // it is OK if it returns error
 			})
 		},
 	}
