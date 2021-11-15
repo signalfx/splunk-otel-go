@@ -18,6 +18,7 @@ package splunksqlx // import "github.com/signalfx/splunk-otel-go/instrumentation
 
 import (
 	"github.com/jmoiron/sqlx"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 

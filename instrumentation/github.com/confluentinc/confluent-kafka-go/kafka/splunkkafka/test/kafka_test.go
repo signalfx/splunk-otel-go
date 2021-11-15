@@ -28,7 +28,6 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/propagation"
@@ -37,6 +36,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/goleak"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 )
 
 var (

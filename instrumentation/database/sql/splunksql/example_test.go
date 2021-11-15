@@ -18,9 +18,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
 const (

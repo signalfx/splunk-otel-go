@@ -47,6 +47,7 @@ import (
 
 	// Make sure to import this so the instrumented driver is registered.
 	_ "github.com/lib/pq"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/internal"
 )

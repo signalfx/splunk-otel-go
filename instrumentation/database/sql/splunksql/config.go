@@ -22,12 +22,13 @@ import (
 	"strconv"
 	"strings"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.

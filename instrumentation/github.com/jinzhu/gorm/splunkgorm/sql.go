@@ -18,6 +18,7 @@ package splunkgorm // import "github.com/signalfx/splunk-otel-go/instrumentation
 
 import (
 	"github.com/jinzhu/gorm"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 

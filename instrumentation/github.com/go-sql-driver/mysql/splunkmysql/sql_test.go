@@ -17,9 +17,10 @@ package splunkmysql_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDSNParser(t *testing.T) {
