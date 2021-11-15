@@ -20,11 +20,12 @@ import (
 	"net/url"
 	"testing"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
 
 type fnTracerProvider struct {

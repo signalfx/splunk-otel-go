@@ -22,8 +22,9 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
 type mockOpen struct {

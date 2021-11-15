@@ -22,11 +22,12 @@ import (
 	"context"
 	"testing"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 type fnTracerProvider struct {

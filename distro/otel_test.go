@@ -21,11 +21,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/signalfx/splunk-otel-go/distro"
 )
 
 // TestRun is a collection of sanity tests that ensure that traces are sent using thrift protocol.

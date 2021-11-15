@@ -25,5 +25,6 @@ import (
 	_ "github.com/client9/misspell/cmd/misspell"
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/wadey/gocovmerge"
-	_ "mvdan.cc/gofumpt/gofumports"
+	_ "golang.org/x/tools/cmd/goimports"
+	_ "mvdan.cc/gofumpt"
 )

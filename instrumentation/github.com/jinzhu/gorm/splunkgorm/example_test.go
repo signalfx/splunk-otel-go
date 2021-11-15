@@ -18,6 +18,7 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm"
 )
 

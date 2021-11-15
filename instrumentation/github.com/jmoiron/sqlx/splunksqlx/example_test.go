@@ -18,6 +18,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx"
 )
 
