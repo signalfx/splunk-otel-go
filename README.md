@@ -104,6 +104,7 @@ Additional recommended Splunk specific instrumentations:
 - [`splunkgorm`](./instrumentation/github.com/jinzhu/gorm/splunkgorm)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
 - [`splunkkafka`](./instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka)
+- [`splunkleveldb`](./instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb)
 - [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
 - [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
 - [`splunkpq`](./instrumentation/github.com/lib/pq/splunkpq)

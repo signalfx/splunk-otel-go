@@ -36,6 +36,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`
   instrumentation for the `github.com/miekg/dns`
   package. (#155)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
+  instrumentation for the `github.com/syndtr/goleveldb/leveldb`
+  package. (#186)
 
 ### Changed
 
