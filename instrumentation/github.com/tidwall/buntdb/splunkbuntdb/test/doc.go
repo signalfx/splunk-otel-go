@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package test validates the splunkkafka instrumentation with the default SDK.
+// Package test validates the splunkbuntdb instrumentation with the default SDK.
 // This package is in a separate module from the instrumentation it tests to
 // isolate the dependency of the default SDK and not impose this as a transitive
 // dependency for users.

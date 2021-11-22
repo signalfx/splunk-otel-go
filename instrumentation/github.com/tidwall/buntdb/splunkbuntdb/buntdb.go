@@ -18,6 +18,7 @@ package splunkbuntdb
 
 import (
 	"context"
+	"time"
 
 	"github.com/tidwall/buntdb"
 )
@@ -173,14 +174,14 @@ func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.Index
 }
 
 // Delete calls the underlying Tx.Delete and traces the query.
-/*
 func (tx *Tx) Delete(key string) (val string, err error) {
-	return tx.cfg.withSpan("Delete")
-	val, err = tx.Tx.Delete(key)
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return val, err
+	err = tx.cfg.withSpan("CreateSpatialIndexOptions", func() error {
+		var iErr error
+		val, iErr = tx.Tx.Delete(key)
+		return iErr
+	})
+	return
 }
-*/
 
 // DeleteAll calls the underlying Tx.DeleteAll and traces the query.
 func (tx *Tx) DeleteAll() error {
@@ -239,24 +240,24 @@ func (tx *Tx) DropIndex(name string) error {
 }
 
 // Get calls the underlying Tx.Get and traces the query.
-/*
 func (tx *Tx) Get(key string, ignoreExpired ...bool) (val string, err error) {
-	return tx.cfg.withSpan("Get")
-	val, err = tx.Tx.Get(key, ignoreExpired...)
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return val, err
+	err = tx.cfg.withSpan("Get", func() error {
+		var iErr error
+		val, iErr = tx.Tx.Get(key, ignoreExpired...)
+		return iErr
+	})
+	return
 }
-*/
 
 // Indexes calls the underlying Tx.Indexes and traces the query.
-/*
-func (tx *Tx) Indexes() ([]string, error) {
-	return tx.cfg.withSpan("Indexes")
-	indexes, err := tx.Tx.Indexes()
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return indexes, err
+func (tx *Tx) Indexes() (indexes []string, err error) {
+	err = tx.cfg.withSpan("Indexes", func() error {
+		var iErr error
+		indexes, iErr = tx.Tx.Indexes()
+		return iErr
+	})
+	return
 }
-*/
 
 // Intersects calls the underlying Tx.Intersects and traces the query.
 func (tx *Tx) Intersects(index, bounds string, iterator func(key, value string) bool) error {
@@ -266,14 +267,14 @@ func (tx *Tx) Intersects(index, bounds string, iterator func(key, value string) 
 }
 
 // Len calls the underlying Tx.Len and traces the query.
-/*
-func (tx *Tx) Len() (int, error) {
-	return tx.cfg.withSpan("Len")
-	n, err := tx.Tx.Len()
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return n, err
+func (tx *Tx) Len() (n int, err error) {
+	err = tx.cfg.withSpan("Len", func() error {
+		var iErr error
+		n, iErr = tx.Tx.Len()
+		return iErr
+	})
+	return
 }
-*/
 
 // Nearby calls the underlying Tx.Nearby and traces the query.
 func (tx *Tx) Nearby(index, bounds string, iterator func(key, value string, dist float64) bool) error {
@@ -282,20 +283,22 @@ func (tx *Tx) Nearby(index, bounds string, iterator func(key, value string, dist
 	})
 }
 
-/*
 // Set calls the underlying Tx.Set and traces the query.
 func (tx *Tx) Set(key, value string, opts *buntdb.SetOptions) (previousValue string, replaced bool, err error) {
-	return tx.cfg.withSpan("Set")
-	previousValue, replaced, err = tx.Tx.Set(key, value, opts)
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return previousValue, replaced, err
+	err = tx.cfg.withSpan("Set", func() error {
+		var iErr error
+		previousValue, replaced, iErr = tx.Tx.Set(key, value, opts)
+		return iErr
+	})
+	return
 }
 
 // TTL calls the underlying Tx.TTL and traces the query.
-func (tx *Tx) TTL(key string) (time.Duration, error) {
-	return tx.cfg.withSpan("TTL")
-	duration, err := tx.Tx.TTL(key)
-	span.FinishWithOptionsExt(tracer.WithError(err))
-	return duration, err
+func (tx *Tx) TTL(key string) (duration time.Duration, err error) {
+	err = tx.cfg.withSpan("TTL", func() error {
+		var iErr error
+		duration, iErr = tx.Tx.TTL(key)
+		return iErr
+	})
+	return
 }
-*/
