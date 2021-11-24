@@ -62,6 +62,7 @@ func TestConfigDefaultTracer(t *testing.T) {
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, c.tracer)
 }
@@ -78,6 +79,7 @@ func TestResolveTracerFromGlobal(t *testing.T) {
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.resolveTracer()
 	assert.Equal(t, expected, got)
@@ -88,6 +90,7 @@ func TestNilConfigResolvedTracer(t *testing.T) {
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, c.resolveTracer())
 }
@@ -97,6 +100,7 @@ func TestEmptyConfigResolvedTracer(t *testing.T) {
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, c.resolveTracer())
 }
@@ -106,6 +110,7 @@ func TestConfigTracerFromConfig(t *testing.T) {
 	expected := mockTracerProvider.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.resolveTracer()
 	assert.Equal(t, expected, got)

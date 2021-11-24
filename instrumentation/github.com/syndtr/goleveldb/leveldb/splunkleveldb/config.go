@@ -58,6 +58,7 @@ func newConfig(options ...Option) *config {
 		c.tracer = otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 
@@ -80,6 +81,7 @@ func (c *config) resolveTracer() trace.Tracer {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 
@@ -87,6 +89,7 @@ func (c *config) resolveTracer() trace.Tracer {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 
@@ -94,6 +97,7 @@ func (c *config) resolveTracer() trace.Tracer {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	return c.tracer
