@@ -79,6 +79,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/k8s.io/client-go/splunkclient-go"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/net/http/splunkhttp"
     schedule:
       interval: "daily"
