@@ -19,24 +19,28 @@ package transport
 import (
 	"net/http"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
 	"k8s.io/client-go/transport"
 )
 
-func NewWrapperFunc(opts ...otelhttp.Option) transport.WrapperFunc {
+func NewWrapperFunc(opts ...config.Option) transport.WrapperFunc {
 	return func(rt http.RoundTripper) http.RoundTripper {
-		return wrapRoundTripper(rt, opts...)
+		if rt == nil {
+			rt = http.DefaultTransport
+		}
+
+		wrapped := roundTripper{
+			RoundTripper: rt,
+			cfg:          config.NewConfig(opts...),
+		}
+
+		return wrapped
 	}
 }
 
-func wrapRoundTripper(rt http.RoundTripper, opts ...otelhttp.Option) http.RoundTripper {
-	defaults := []otelhttp.Option{
-		otelhttp.WithSpanNameFormatter(nameFormatter),
-	}
+// roundTripper wraps an http.RoundTripper requests with a span.
+type roundTripper struct {
+	http.RoundTripper
 
-	return otelhttp.NewTransport(rt, append(defaults, opts...)...)
-}
-
-func nameFormatter(operation string, req *http.Request) string {
-	return ""
+	cfg *config.Config
 }
