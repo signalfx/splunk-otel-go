@@ -17,9 +17,16 @@
 package transport
 
 import (
+	"context"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/transport"
 )
 
@@ -34,13 +41,125 @@ func NewWrapperFunc(opts ...config.Option) transport.WrapperFunc {
 			cfg:          config.NewConfig(opts...),
 		}
 
-		return wrapped
+		return &wrapped
 	}
 }
 
-// roundTripper wraps an http.RoundTripper requests with a span.
+// roundTripper wraps an http.RoundTripper's requests with a span.
 type roundTripper struct {
 	http.RoundTripper
 
 	cfg *config.Config
+}
+
+var _ http.RoundTripper = (*roundTripper)(nil)
+
+func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err error) {
+	tracer := rt.cfg.ResolveTracer(r.Context())
+	ctx, span := tracer.Start(r.Context(), name(r), append(
+		rt.cfg.DefaultStartOpts,
+		trace.WithAttributes(semconv.HTTPClientAttributesFromHTTPRequest(r)...),
+	)...)
+	defer span.End()
+
+	// Ensure anything downstream knows about the started span.
+	r = r.WithContext(ctx)
+	rt.cfg.Propagators.Inject(ctx, propagation.HeaderCarrier(r.Header))
+
+	resp, err = rt.RoundTripper.RoundTrip(r)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return
+	}
+
+	span.SetAttributes(semconv.HTTPAttributesFromHTTPStatusCode(resp.StatusCode)...)
+	span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode))
+	resp.Body = &wrappedBody{ctx: ctx, span: span, body: resp.Body}
+
+	return
+}
+
+const (
+	prefixAPI   = "/api/v1/"
+	prefixWatch = "watch/"
+)
+
+// name returns an appropriate span name based on the client request.
+// OpenTelemetry semantic conventions require this name to be low cardinality,
+// but since the Kubernetes API is somewhat predictable we can usually return
+// more than just "HTTP {METHOD}".
+func name(r *http.Request) string {
+	path := r.URL.Path
+	method := r.Method
+
+	if !strings.HasPrefix(path, prefixAPI) {
+		return "HTTP " + method
+	}
+
+	var out strings.Builder
+	out.WriteString("HTTP " + method + " ")
+
+	path = strings.TrimPrefix(path, prefixAPI)
+
+	if strings.HasPrefix(path, prefixWatch) {
+		path = strings.TrimPrefix(path, prefixWatch)
+		out.WriteString(prefixWatch)
+	}
+
+	// For each {type}/{name}, tokenize the {name} portion.
+	var previous string
+	for i, part := range strings.Split(path, "/") {
+		if i > 0 {
+			out.WriteRune('/')
+		}
+
+		if i%2 == 0 {
+			out.WriteString(part)
+			previous = part
+		} else {
+			out.WriteString(tokenize(previous))
+		}
+	}
+
+	return out.String()
+}
+
+func tokenize(k8Type string) string {
+	switch k8Type {
+	case "namespaces":
+		return "{namespace}"
+	case "proxy":
+		return "{path}"
+	default:
+		return "{name}"
+	}
+}
+
+type wrappedBody struct {
+	ctx  context.Context
+	span trace.Span
+	body io.ReadCloser
+}
+
+var _ io.ReadCloser = (*wrappedBody)(nil)
+
+func (wb *wrappedBody) Read(b []byte) (int, error) {
+	n, err := wb.body.Read(b)
+	switch err {
+	case nil:
+		// nothing to do here but fall through to the return
+	case io.EOF:
+		wb.span.End()
+	default:
+		wb.span.RecordError(err)
+		wb.span.SetStatus(codes.Error, err.Error())
+	}
+
+	return n, err
+}
+
+func (wb *wrappedBody) Close() error {
+	wb.span.End()
+	return wb.body.Close()
 }

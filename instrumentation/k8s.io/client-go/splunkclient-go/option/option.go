@@ -20,6 +20,7 @@ import (
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -47,5 +48,13 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 			c.DefaultStartOpts,
 			trace.WithAttributes(attr...),
 		)
+	})
+}
+
+// WithPropagator returns an Option that sets p as the TextMapPropagator used
+// when propagating a span context.
+func WithPropagator(p propagation.TextMapPropagator) Option {
+	return config.OptionFunc(func(c *config.Config) {
+		c.Propagators = p
 	})
 }

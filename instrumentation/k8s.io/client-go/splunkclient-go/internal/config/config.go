@@ -19,7 +19,7 @@ import (
 	"context"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -31,6 +31,7 @@ const InstrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 // Config contains tracing configuration options.
 type Config struct {
 	Tracer           trace.Tracer
+	Propagators      propagation.TextMapPropagator
 	DefaultStartOpts []trace.SpanStartOption
 }
 
@@ -107,20 +108,6 @@ func (c *Config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.S
 		copy(merged[len(c.DefaultStartOpts):], opts)
 	}
 	return merged
-}
-
-// WithSpan wraps the function f with a span.
-func (c *Config) WithSpan(ctx context.Context, name string, f func() error, opts ...trace.SpanStartOption) error {
-	sso := c.mergedSpanStartOptions(opts...)
-	_, span := c.ResolveTracer(ctx).Start(ctx, name, sso...)
-	err := f()
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
-	span.End()
-
-	return err
 }
 
 // Option applies options to a configuration.
