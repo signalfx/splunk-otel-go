@@ -67,7 +67,6 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 
 	tracer := rt.cfg.ResolveTracer(r.Context())
 	ctx, span := tracer.Start(r.Context(), name(r), opts...)
-	defer span.End()
 
 	// Ensure anything downstream knows about the started span.
 	r = r.WithContext(ctx)
@@ -77,6 +76,7 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+		span.End()
 		return
 	}
 
