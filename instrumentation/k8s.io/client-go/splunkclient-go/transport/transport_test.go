@@ -15,11 +15,15 @@
 package transport
 
 import (
+	"errors"
+	"io"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestRequestToSpanNameUnrecognized(t *testing.T) {
@@ -31,7 +35,7 @@ func TestRequestToSpanNameUnrecognized(t *testing.T) {
 	assert.Equalf(t, expected, name(r), "path: %q", path)
 }
 
-func TestRequestToSpanName(t *testing.T) {
+func TestRequestPathToSpanName(t *testing.T) {
 	tests := []struct {
 		path string
 		name string
@@ -97,4 +101,158 @@ func TestRequestToSpanName(t *testing.T) {
 		expected := "HTTP GET " + test.name
 		assert.Equalf(t, expected, name(r), "path: %q", test.path)
 	}
+}
+
+func TestRequestMethodToSpanName(t *testing.T) {
+	var tests = []struct {
+		method string
+		name   string
+	}{
+		{
+			method: http.MethodGet,
+			name:   "HTTP GET",
+		},
+		{
+			method: http.MethodHead,
+			name:   "HTTP HEAD",
+		},
+		{
+			method: http.MethodPost,
+			name:   "HTTP POST",
+		},
+		{
+			method: http.MethodPut,
+			name:   "HTTP PUT",
+		},
+		{
+			method: http.MethodPatch,
+			name:   "HTTP PATCH",
+		},
+		{
+			method: http.MethodDelete,
+			name:   "HTTP DELETE",
+		},
+		{
+			method: http.MethodConnect,
+			name:   "HTTP CONNECT",
+		},
+		{
+			method: http.MethodOptions,
+			name:   "HTTP OPTIONS",
+		},
+		{
+			method: http.MethodTrace,
+			name:   "HTTP TRACE",
+		},
+	}
+
+	for _, test := range tests {
+		r, err := http.NewRequest(test.method, "http://localhost/", http.NoBody)
+		require.NoError(t, err)
+		assert.Equalf(t, test.name, name(r), "method: %q", test.method)
+	}
+}
+
+type readCloser struct {
+	readErr, closeErr error
+}
+
+var _ io.ReadCloser = readCloser{}
+
+func (rc readCloser) Read(p []byte) (n int, err error) {
+	return len(p), rc.readErr
+}
+func (rc readCloser) Close() error {
+	return rc.closeErr
+}
+
+type span struct {
+	trace.Span
+
+	ended       bool
+	recordedErr error
+
+	statusCode codes.Code
+	statusDesc string
+}
+
+func (s *span) End(...trace.SpanEndOption) {
+	s.ended = true
+}
+
+func (s *span) RecordError(err error, _ ...trace.EventOption) {
+	s.recordedErr = err
+}
+
+func (s *span) SetStatus(c codes.Code, d string) {
+	s.statusCode, s.statusDesc = c, d
+}
+
+func TestWrappedBodyRead(t *testing.T) {
+	s := new(span)
+	wb := &wrappedBody{span: trace.Span(s), body: readCloser{}}
+
+	msg := []byte("testing response")
+	n, err := wb.Read(msg)
+	assert.Equal(t, len(msg), n, "Read bytes not forwarded")
+	assert.NoError(t, err)
+
+	assert.False(t, s.ended, "span ended without Close")
+	assert.NoError(t, s.recordedErr)
+	assert.Equal(t, codes.Unset, s.statusCode)
+	assert.Equal(t, "", s.statusDesc)
+}
+
+func TestWrappedBodyReadEOFError(t *testing.T) {
+	s := new(span)
+	wb := &wrappedBody{span: trace.Span(s), body: readCloser{readErr: io.EOF}}
+
+	msg := []byte("testing response")
+	n, err := wb.Read(msg)
+	assert.Equal(t, len(msg), n, "Read bytes not forwarded")
+	assert.ErrorIs(t, err, io.EOF)
+
+	assert.True(t, s.ended, "span not ended on read completion")
+	assert.NoError(t, s.recordedErr)
+	assert.Equal(t, codes.Unset, s.statusCode)
+	assert.Equal(t, "", s.statusDesc)
+}
+
+func TestWrappedBodyReadError(t *testing.T) {
+	s := new(span)
+	expectedErr := errors.New("test")
+	wb := &wrappedBody{span: trace.Span(s), body: readCloser{readErr: expectedErr}}
+
+	msg := []byte("testing response")
+	n, err := wb.Read(msg)
+	assert.Equal(t, len(msg), n, "Read bytes not forwarded")
+	assert.ErrorIs(t, err, expectedErr)
+
+	assert.False(t, s.ended, "span ended on non-EOF read error")
+	assert.ErrorIs(t, s.recordedErr, expectedErr)
+	assert.Equal(t, codes.Error, s.statusCode)
+	assert.Equal(t, expectedErr.Error(), s.statusDesc)
+}
+
+func TestWrappedBodyClose(t *testing.T) {
+	s := new(span)
+	wb := &wrappedBody{span: trace.Span(s), body: readCloser{}}
+	assert.NoError(t, wb.Close())
+
+	assert.True(t, s.ended, "span not ended when Close called")
+	assert.NoError(t, s.recordedErr)
+	assert.Equal(t, codes.Unset, s.statusCode)
+	assert.Equal(t, "", s.statusDesc)
+}
+
+func TestWrappedBodyCloseError(t *testing.T) {
+	s := new(span)
+	expectedErr := errors.New("test")
+	wb := &wrappedBody{span: trace.Span(s), body: readCloser{closeErr: expectedErr}}
+	assert.ErrorIs(t, wb.Close(), expectedErr)
+
+	assert.True(t, s.ended, "span not ended when Close called")
+	assert.NoError(t, s.recordedErr)
+	assert.Equal(t, codes.Unset, s.statusCode)
+	assert.Equal(t, "", s.statusDesc)
 }
