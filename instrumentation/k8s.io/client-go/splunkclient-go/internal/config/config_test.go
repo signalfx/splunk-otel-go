@@ -20,94 +20,46 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
-type fnTracerProvider struct {
-	tracer func(string, ...trace.TracerOption) trace.Tracer
-}
-
-func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trace.Tracer {
-	return fn.tracer(name, opts...)
-}
-
-type fnTracer struct {
-	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
-}
-
-func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	return fn.start(ctx, name, opts...)
-}
-
-var mockTracerProvider = &fnTracerProvider{
-	tracer: func() func(string, ...trace.TracerOption) trace.Tracer {
-		registry := make(map[string]trace.Tracer)
-		return func(name string, opts ...trace.TracerOption) trace.Tracer {
-			t, ok := registry[name]
-			if !ok {
-				t = &fnTracer{}
-				registry[name] = t
-			}
-			return t
-		}
-	}(),
-}
-
 func TestConfigDefaultTracer(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	expected := otel.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	assert.Equal(t, expected, c.tracer)
-}
-
-func TestWithTracer(t *testing.T) {
-	// Default is to use the global TracerProvider. This will override that.
-	c := newConfig(WithTracerProvider(mockTracerProvider))
-	expected := mockTracerProvider.Tracer(instrumentationName)
-	assert.Same(t, expected, c.tracer)
+	assert.Equal(t, expected, c.Tracer)
 }
 
 func TestResolveTracerFromGlobal(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	expected := otel.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	got := c.resolveTracer(context.Background())
+	got := c.ResolveTracer(context.Background())
 	assert.Equal(t, expected, got)
 }
 
 func TestNilConfigResolvedTracer(t *testing.T) {
-	c := (*config)(nil)
+	c := (*Config)(nil)
 	expected := otel.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	assert.Equal(t, expected, c.resolveTracer(context.Background()))
+	assert.Equal(t, expected, c.ResolveTracer(context.Background()))
 }
 
 func TestEmptyConfigResolvedTracer(t *testing.T) {
-	c := &config{}
+	c := &Config{}
 	expected := otel.Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
-	assert.Equal(t, expected, c.resolveTracer(context.Background()))
-}
-
-func TestConfigTracerFromConfig(t *testing.T) {
-	c := newConfig(WithTracerProvider(mockTracerProvider))
-	expected := mockTracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-	)
-	got := c.resolveTracer(context.Background())
-	assert.Equal(t, expected, got)
+	assert.Equal(t, expected, c.ResolveTracer(context.Background()))
 }
 
 func TestConfigTracerFromContext(t *testing.T) {
@@ -117,51 +69,44 @@ func TestConfigTracerFromContext(t *testing.T) {
 	})
 	// This context will contain a non-recording span.
 	ctx := trace.ContextWithSpanContext(context.Background(), sc)
-	got := newConfig().resolveTracer(ctx)
+	got := NewConfig().ResolveTracer(ctx)
 	expected := trace.NewNoopTracerProvider().Tracer(
-		instrumentationName,
+		InstrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 	)
 	assert.Equal(t, expected, got)
 }
 
 func TestDefaultSpanStartOptions(t *testing.T) {
-	c := newConfig()
-	assert.Len(t, c.defaultStartOpts, 0)
-}
-
-func TestWithAttributes(t *testing.T) {
-	attr := attribute.String("key", "value")
-	c := newConfig(WithAttributes([]attribute.KeyValue{attr}))
-	ssc := trace.NewSpanStartConfig(c.defaultStartOpts...)
-	assert.Contains(t, ssc.Attributes(), attr)
+	c := NewConfig()
+	assert.Len(t, c.DefaultStartOpts, 0)
 }
 
 func TestMergedSpanStartOptionsNilConifg(t *testing.T) {
-	c := (*config)(nil)
+	c := (*Config)(nil)
 	assert.Nil(t, c.mergedSpanStartOptions())
 }
 
 func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
-	c := (*config)(nil)
+	c := (*Config)(nil)
 	sso := c.mergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 1)
 }
 
 func TestMergedSpanStartOptionsEmptyConfigNoPassedOpts(t *testing.T) {
-	c := newConfig()
-	c.defaultStartOpts = nil
+	c := NewConfig()
+	c.DefaultStartOpts = nil
 	assert.Nil(t, c.mergedSpanStartOptions())
 }
 
 func TestMergedSpanStartOptionsPassedNoOpts(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	sso := c.mergedSpanStartOptions()
 	assert.Len(t, sso, 0)
 }
 
 func TestMergedSpanStartOptionsPassedOpts(t *testing.T) {
-	c := newConfig()
+	c := NewConfig()
 	sso := c.mergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 1)
 }

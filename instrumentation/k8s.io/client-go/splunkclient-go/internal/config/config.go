@@ -19,24 +19,24 @@ import (
 	"context"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
-// instrumentationName is the instrumentation library identifier for a Tracer.
-const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
+// InstrumentationName is the instrumentation library identifier for a Tracer.
+const InstrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
 
-// config contains tracing configuration options.
-type config struct {
-	tracer           trace.Tracer
-	defaultStartOpts []trace.SpanStartOption
+// Config contains tracing configuration options.
+type Config struct {
+	Tracer           trace.Tracer
+	DefaultStartOpts []trace.SpanStartOption
 }
 
-func newConfig(options ...Option) *config {
-	c := config{}
+// NewConfig returns a Config with all options applied and defaults set.
+func NewConfig(options ...Option) *Config {
+	c := Config{}
 
 	for _, o := range options {
 		if o != nil {
@@ -44,9 +44,9 @@ func newConfig(options ...Option) *config {
 		}
 	}
 
-	if c.tracer == nil {
-		c.tracer = otel.Tracer(
-			instrumentationName,
+	if c.Tracer == nil {
+		c.Tracer = otel.Tracer(
+			InstrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
@@ -54,64 +54,65 @@ func newConfig(options ...Option) *config {
 	return &c
 }
 
-// resolveTracer returns an OTel tracer from the appropriate TracerProvider.
+// ResolveTracer returns an OpenTelemetry Tracer from the appropriate
+// TracerProvider.
 //
-// If the passed context contains a span, the TracerProvider that created the
-// tracer that created that span will be used. Otherwise, the TracerProvider
-// from c is used.
-func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
+// If the passed context contains a Span, the TracerProvider that created the
+// Tracer that created that Span will be returned. Otherwise, c.Tracer is
+// returned.
+func (c *Config) ResolveTracer(ctx context.Context) trace.Tracer {
 	// There is a possibility that the config was not created with newConfig,
 	// try to handle this situation gracefully.
 	if c == nil {
 		return otel.Tracer(
-			instrumentationName,
+			InstrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
 
 	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
 		return span.TracerProvider().Tracer(
-			instrumentationName,
+			InstrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
 
-	if c.tracer == nil {
+	if c.Tracer == nil {
 		return otel.Tracer(
-			instrumentationName,
+			InstrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 		)
 	}
-	return c.tracer
+	return c.Tracer
 }
 
-func (c *config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
+func (c *Config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
 	if c == nil {
 		if len(opts) == 0 {
 			return nil
 		}
 	} else {
-		if len(opts)+len(c.defaultStartOpts) == 0 {
+		if len(opts)+len(c.DefaultStartOpts) == 0 {
 			return nil
 		}
 	}
 
 	var merged []trace.SpanStartOption
-	if c == nil || len(c.defaultStartOpts) == 0 {
+	if c == nil || len(c.DefaultStartOpts) == 0 {
 		merged = make([]trace.SpanStartOption, len(opts))
 		copy(merged, opts)
 	} else {
-		merged = make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
-		copy(merged, c.defaultStartOpts)
-		copy(merged[len(c.defaultStartOpts):], opts)
+		merged = make([]trace.SpanStartOption, len(c.DefaultStartOpts)+len(opts))
+		copy(merged, c.DefaultStartOpts)
+		copy(merged[len(c.DefaultStartOpts):], opts)
 	}
 	return merged
 }
 
-// withSpan wraps the function f with a span.
-func (c *config) withSpan(ctx context.Context, name string, f func() error, opts ...trace.SpanStartOption) error {
+// WithSpan wraps the function f with a span.
+func (c *Config) WithSpan(ctx context.Context, name string, f func() error, opts ...trace.SpanStartOption) error {
 	sso := c.mergedSpanStartOptions(opts...)
-	_, span := c.resolveTracer(ctx).Start(ctx, name, sso...)
+	_, span := c.ResolveTracer(ctx).Start(ctx, name, sso...)
 	err := f()
 	if err != nil {
 		span.RecordError(err)
@@ -124,33 +125,12 @@ func (c *config) withSpan(ctx context.Context, name string, f func() error, opts
 
 // Option applies options to a configuration.
 type Option interface {
-	apply(*config)
+	apply(*Config)
 }
 
-type optionFunc func(*config)
+// OptionFunc applies a functional setting to a configuration.
+type OptionFunc func(*Config)
 
-func (o optionFunc) apply(c *config) {
+func (o OptionFunc) apply(c *Config) {
 	o(c)
-}
-
-// WithTracerProvider returns an Option that sets the TracerProvider used with
-// this instrumentation library.
-func WithTracerProvider(tp trace.TracerProvider) Option {
-	return optionFunc(func(c *config) {
-		c.tracer = tp.Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-		)
-	})
-}
-
-// WithAttributes returns an Option that appends attr to the attributes set
-// for every span created with this instrumentation library.
-func WithAttributes(attr []attribute.KeyValue) Option {
-	return optionFunc(func(c *config) {
-		c.defaultStartOpts = append(
-			c.defaultStartOpts,
-			trace.WithAttributes(attr...),
-		)
-	})
 }
