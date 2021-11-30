@@ -57,11 +57,16 @@ type roundTripper struct {
 var _ http.RoundTripper = (*roundTripper)(nil)
 
 func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err error) {
-	tracer := rt.cfg.ResolveTracer(r.Context())
-	ctx, span := tracer.Start(r.Context(), name(r), append(
-		rt.cfg.DefaultStartOpts,
+	opts := make([]trace.SpanStartOption, len(rt.cfg.DefaultStartOpts), len(rt.cfg.DefaultStartOpts)+2)
+	copy(opts, rt.cfg.DefaultStartOpts)
+	opts = append(
+		opts,
+		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(semconv.HTTPClientAttributesFromHTTPRequest(r)...),
-	)...)
+	)
+
+	tracer := rt.cfg.ResolveTracer(r.Context())
+	ctx, span := tracer.Start(r.Context(), name(r), opts...)
 	defer span.End()
 
 	// Ensure anything downstream knows about the started span.
