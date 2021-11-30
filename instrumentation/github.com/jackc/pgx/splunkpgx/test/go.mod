@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx/test
 
-go 1.15
+go 1.16
 
 require (
 	github.com/ory/dockertest/v3 v3.8.1
