@@ -24,7 +24,7 @@ import (
 
 func TestRequestToSpanNameUnrecognized(t *testing.T) {
 	path := "/unrecognized"
-	r, err := http.NewRequest("GET", path, nil)
+	r, err := http.NewRequest("GET", path, http.NoBody)
 	require.NoError(t, err)
 
 	expected := "HTTP GET"
@@ -91,7 +91,7 @@ func TestRequestToSpanName(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		r, err := http.NewRequest("GET", test.path, nil)
+		r, err := http.NewRequest("GET", test.path, http.NoBody)
 		require.NoError(t, err)
 
 		expected := "HTTP GET " + test.name
