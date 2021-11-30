@@ -30,6 +30,8 @@ import (
 	"k8s.io/client-go/transport"
 )
 
+// NewWrapperFunc returns a Kubernetes WrapperFunc that can be used with a
+// client configuration to trace all communication the client makes.
 func NewWrapperFunc(opts ...config.Option) transport.WrapperFunc {
 	return func(rt http.RoundTripper) http.RoundTripper {
 		if rt == nil {
