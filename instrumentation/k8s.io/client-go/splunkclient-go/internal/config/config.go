@@ -52,6 +52,10 @@ func NewConfig(options ...Option) *Config {
 		)
 	}
 
+	if c.Propagator == nil {
+		c.Propagator = otel.GetTextMapPropagator()
+	}
+
 	return &c
 }
 
