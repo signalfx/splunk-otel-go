@@ -72,7 +72,7 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 
 	// Ensure anything downstream knows about the started span.
 	r = r.WithContext(ctx)
-	rt.cfg.Propagators.Inject(ctx, propagation.HeaderCarrier(r.Header))
+	rt.cfg.Propagator.Inject(ctx, propagation.HeaderCarrier(r.Header))
 
 	resp, err = rt.RoundTripper.RoundTrip(r)
 	if err != nil {

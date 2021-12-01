@@ -56,6 +56,6 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 // when propagating a span context.
 func WithPropagator(p propagation.TextMapPropagator) Option {
 	return config.OptionFunc(func(c *config.Config) {
-		c.Propagators = p
+		c.Propagator = p
 	})
 }

@@ -31,7 +31,7 @@ const InstrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 // Config contains tracing configuration options.
 type Config struct {
 	Tracer           trace.Tracer
-	Propagators      propagation.TextMapPropagator
+	Propagator       propagation.TextMapPropagator
 	DefaultStartOpts []trace.SpanStartOption
 }
 
