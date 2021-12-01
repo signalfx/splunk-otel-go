@@ -35,23 +35,22 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/transport"
 )
 
-func TestEndToEndWrappedTransport(t *testing.T) {
+func request(t *testing.T, handle func(http.ResponseWriter, *http.Request)) (*tracetest.SpanRecorder, *http.Response, string) {
 	sr := tracetest.NewSpanRecorder()
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(sr))
 	prop := propagation.TraceContext{}
-	content := []byte("Hello, world!")
 
-	ctx, parent := tp.Tracer("TestEndToEndWrappedTransport").Start(context.Background(), "parent")
+	ctx, parent := tp.Tracer("request").Start(context.Background(), "parent")
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := trace.SpanContextFromContext(
 			prop.Extract(r.Context(), propagation.HeaderCarrier(r.Header)),
 		)
 		assert.Equal(t, parent.SpanContext().TraceID(), span.TraceID())
-		_, err := w.Write(content)
-		assert.NoError(t, err)
+
+		handle(w, r)
 	}))
-	defer ts.Close()
+	t.Cleanup(ts.Close)
 
 	r, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL, http.NoBody)
 	require.NoError(t, err)
@@ -65,23 +64,47 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 	resp, err := c.Do(r)
 	require.NoError(t, err)
 
+	t.Cleanup(func() { require.NoError(t, tp.Shutdown(context.Background())) })
+
+	return sr, resp, ts.URL
+}
+
+func TestEndToEndWrappedTransport(t *testing.T) {
+	content := []byte("Hello, world!")
+	sr, resp, url := request(t, func(w http.ResponseWriter, r *http.Request) {
+		n, err := w.Write(content)
+		assert.NoError(t, err)
+		assert.Equal(t, len(content), n)
+	})
+
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Equal(t, content, body)
 	require.NoError(t, resp.Body.Close())
 
-	require.NoError(t, tp.Shutdown(context.Background()))
 	require.Len(t, sr.Ended(), 1)
-
 	span := sr.Ended()[0]
 	assert.Equal(t, "HTTP GET", span.Name())
 	assert.Equal(t, trace.SpanKindClient, span.SpanKind())
 	assert.Contains(t, span.Attributes(), attribute.String("http.method", "GET"))
-	assert.Contains(t, span.Attributes(), attribute.String("http.url", ts.URL))
+	assert.Contains(t, span.Attributes(), attribute.String("http.url", url))
 	assert.Contains(t, span.Attributes(), attribute.String("http.scheme", "http"))
-	assert.Contains(t, span.Attributes(), attribute.String("http.host", strings.TrimPrefix(ts.URL, "http://")))
+	assert.Contains(t, span.Attributes(), attribute.String("http.host", strings.TrimPrefix(url, "http://")))
 	assert.Contains(t, span.Attributes(), attribute.String("http.flavor", "1.1"))
 	assert.Contains(t, span.Attributes(), attribute.Int("http.status_code", 200))
 	assert.Equal(t, codes.Unset, span.Status().Code)
+	assert.Equal(t, "", span.Status().Description)
+}
+
+func TestWrappedTransportErrorResponse(t *testing.T) {
+	sr, resp, _ := request(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	})
+	require.NoError(t, resp.Body.Close())
+
+	require.Len(t, sr.Ended(), 1)
+	span := sr.Ended()[0]
+	assert.Contains(t, span.Attributes(), attribute.Int("http.status_code", 400))
+	assert.Equal(t, codes.Error, span.Status().Code)
 	assert.Equal(t, "", span.Status().Description)
 }
