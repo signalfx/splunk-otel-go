@@ -282,6 +282,6 @@ func TestWrappedRoundTripperError(t *testing.T) {
 	c := http.Client{Transport: tr}
 	r, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost", http.NoBody)
 	require.NoError(t, err)
-	_, err = c.Do(r)
+	_, err = c.Do(r) // nolint: bodyclose // do not deref a nil response
 	require.ErrorIs(t, err, expected)
 }
