@@ -22,12 +22,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/transport"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
 )
 
 // NewWrapperFunc returns a Kubernetes WrapperFunc that can be used with a
@@ -57,7 +58,8 @@ type roundTripper struct {
 var _ http.RoundTripper = (*roundTripper)(nil)
 
 func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err error) {
-	opts := make([]trace.SpanStartOption, len(rt.cfg.DefaultStartOpts), len(rt.cfg.DefaultStartOpts)+2)
+	const nLocalOpts = 2
+	opts := make([]trace.SpanStartOption, len(rt.cfg.DefaultStartOpts), len(rt.cfg.DefaultStartOpts)+nLocalOpts)
 	copy(opts, rt.cfg.DefaultStartOpts)
 	opts = append(
 		opts,

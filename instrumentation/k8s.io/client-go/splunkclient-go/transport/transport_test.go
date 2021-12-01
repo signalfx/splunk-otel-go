@@ -35,7 +35,7 @@ func TestNewWrapperFuncNilRoundTripper(t *testing.T) {
 
 func TestRequestToSpanNameUnrecognized(t *testing.T) {
 	path := "/unrecognized"
-	r, err := http.NewRequest("GET", path, http.NoBody)
+	r, err := http.NewRequest("GET", path, http.NoBody) // nolint: noctx  // Unused request does not need context.
 	require.NoError(t, err)
 
 	expected := "HTTP GET"
@@ -102,7 +102,7 @@ func TestRequestPathToSpanName(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		r, err := http.NewRequest("GET", test.path, http.NoBody)
+		r, err := http.NewRequest("GET", test.path, http.NoBody) // nolint: noctx  // Unused request does not need context.
 		require.NoError(t, err)
 
 		expected := "HTTP GET " + test.name
@@ -111,7 +111,7 @@ func TestRequestPathToSpanName(t *testing.T) {
 }
 
 func TestRequestMethodToSpanName(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		method string
 		name   string
 	}{
@@ -154,7 +154,7 @@ func TestRequestMethodToSpanName(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		r, err := http.NewRequest(test.method, "http://localhost/", http.NoBody)
+		r, err := http.NewRequest(test.method, "http://localhost/", http.NoBody) // nolint: noctx  // Unused request does not need context.
 		require.NoError(t, err)
 		assert.Equalf(t, test.name, name(r), "method: %q", test.method)
 	}
@@ -169,6 +169,7 @@ var _ io.ReadCloser = readCloser{}
 func (rc readCloser) Read(p []byte) (n int, err error) {
 	return len(p), rc.readErr
 }
+
 func (rc readCloser) Close() error {
 	return rc.closeErr
 }
