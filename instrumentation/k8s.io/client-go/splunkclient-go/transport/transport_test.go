@@ -26,6 +26,13 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func TestNewWrapperFuncNilRoundTripper(t *testing.T) {
+	rt := NewWrapperFunc()(nil)
+	require.IsType(t, &roundTripper{}, rt)
+	wrapped := rt.(*roundTripper)
+	assert.Same(t, http.DefaultTransport, wrapped.RoundTripper)
+}
+
 func TestRequestToSpanNameUnrecognized(t *testing.T) {
 	path := "/unrecognized"
 	r, err := http.NewRequest("GET", path, http.NoBody)
