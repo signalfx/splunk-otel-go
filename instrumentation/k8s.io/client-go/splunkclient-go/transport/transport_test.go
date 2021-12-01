@@ -15,6 +15,7 @@
 package transport
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -263,4 +264,24 @@ func TestWrappedBodyCloseError(t *testing.T) {
 	assert.NoError(t, s.recordedErr)
 	assert.Equal(t, codes.Unset, s.statusCode)
 	assert.Equal(t, "", s.statusDesc)
+}
+
+type errRoundTripper struct {
+	err error
+}
+
+var _ http.RoundTripper = (*errRoundTripper)(nil)
+
+func (e *errRoundTripper) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, e.err
+}
+
+func TestWrappedRoundTripperError(t *testing.T) {
+	expected := errors.New("test error")
+	tr := NewWrapperFunc()(&errRoundTripper{err: expected})
+	c := http.Client{Transport: tr}
+	r, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost", http.NoBody)
+	require.NoError(t, err)
+	_, err = c.Do(r)
+	require.ErrorIs(t, err, expected)
 }
