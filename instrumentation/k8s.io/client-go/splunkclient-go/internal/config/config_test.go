@@ -87,26 +87,40 @@ func TestMergedSpanStartOptionsNilConifg(t *testing.T) {
 	assert.Nil(t, c.mergedSpanStartOptions())
 }
 
-func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
-	c := (*Config)(nil)
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
-	assert.Len(t, sso, 1)
-}
-
 func TestMergedSpanStartOptionsEmptyConfigNoPassedOpts(t *testing.T) {
 	c := NewConfig()
 	c.DefaultStartOpts = nil
 	assert.Nil(t, c.mergedSpanStartOptions())
 }
 
-func TestMergedSpanStartOptionsPassedNoOpts(t *testing.T) {
-	c := NewConfig()
+func TestMergedSpanStartOptionsPassedNoOptsWithDefaults(t *testing.T) {
+	c := Config{
+		DefaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
+	}
 	sso := c.mergedSpanStartOptions()
-	assert.Len(t, sso, 0)
+	assert.Len(t, sso, 1)
+	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }
 
-func TestMergedSpanStartOptionsPassedOpts(t *testing.T) {
-	c := NewConfig()
+func TestMergedSpanStartOptionsPassedNoOptsNoDefaults(t *testing.T) {
+	c := Config{DefaultStartOpts: nil}
+	sso := c.mergedSpanStartOptions()
+	assert.Len(t, sso, 0)
+	assert.Equal(t, 0, cap(sso), "incorrectly sized slice")
+}
+
+func TestMergedSpanStartOptionsPassedOptsWithDefaults(t *testing.T) {
+	c := Config{
+		DefaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
+	}
+	sso := c.mergedSpanStartOptions(trace.WithAttributes())
+	assert.Len(t, sso, 2)
+	assert.Equal(t, 2, cap(sso), "incorrectly sized slice")
+}
+
+func TestMergedSpanStartOptionsPassedOptsNoDefaults(t *testing.T) {
+	c := Config{DefaultStartOpts: nil}
 	sso := c.mergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 1)
+	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }
