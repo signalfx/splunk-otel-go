@@ -17,12 +17,13 @@ package internal
 import (
 	"context"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // Config contains configuration options.
@@ -35,6 +36,10 @@ type Config struct {
 	DefaultStartOpts []trace.SpanStartOption
 }
 
+// NewConfig returns a Config for instrumentation with all options applied.
+//
+// If no TracerProvider or Propagator are specified with options, the default
+// OpenTelemetry globals will be used.
 func NewConfig(instrumentationName string, options ...Option) *Config {
 	c := Config{instName: instrumentationName}
 

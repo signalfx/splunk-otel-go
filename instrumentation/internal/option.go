@@ -15,11 +15,12 @@
 package internal
 
 import (
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // Option applies options to a configuration.
@@ -27,6 +28,7 @@ type Option interface {
 	apply(*Config)
 }
 
+// OptionFunc is a generic way to set an option using a func.
 type OptionFunc func(*Config)
 
 func (o OptionFunc) apply(c *Config) {
