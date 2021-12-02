@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx
 
-go 1.15
+go 1.16
 
 require (
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect

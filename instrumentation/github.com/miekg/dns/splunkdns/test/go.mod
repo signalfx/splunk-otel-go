@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns/test
 
-go 1.15
+go 1.16
 
 replace github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns => ../
 
