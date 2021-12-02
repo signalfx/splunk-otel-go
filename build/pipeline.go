@@ -205,7 +205,7 @@ func taskGolangciLint() goyek.Task {
 			}
 
 			ForGoModules(tf, func(tf *goyek.TF) {
-				lint := tf.Cmd("golangci-lint", "run")
+				lint := tf.Cmd("golangci-lint", "run", "--timeout", "2m0s")
 				if err := lint.Run(); err != nil {
 					tf.Error(err)
 				}
