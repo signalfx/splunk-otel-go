@@ -100,6 +100,7 @@ Supported libraries are listed
 
 Additional recommended Splunk specific instrumentations:
 
+- [`splunkchi`](./instrumentation/github.com/go-chi/chi/splunkchi)
 - [`splunkdns`](./instrumentation/github.com/miekg/dns/splunkdns)
 - [`splunkgorm`](./instrumentation/github.com/jinzhu/gorm/splunkgorm)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)
