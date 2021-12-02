@@ -15,3 +15,24 @@
 // Package splunkchi provides OpenTelemetry instrumentation for the
 // github.com/go-chi/chi package.
 package splunkchi
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/middleware"
+)
+
+// Middleware returns middleware that will trace incoming requests.
+func Middleware(options ...Option) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// FIXME: start span.
+			ctx := r.Context()
+
+			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+			next.ServeHTTP(ww, r.WithContext(ctx))
+
+			// FIXME: finalize span.
+		})
+	}
+}
