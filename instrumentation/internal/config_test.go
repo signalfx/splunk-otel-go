@@ -115,14 +115,6 @@ func TestConfigDefaultTracer(t *testing.T) {
 	assert.Equal(t, expected, c.Tracer)
 }
 
-func TestWithTracer(t *testing.T) {
-	mtp := mockTracerProvider(nil)
-	// Default is to use the global TracerProvider. This will override that.
-	c := NewConfig(iName, WithTracerProvider(mtp))
-	expected := mtp.Tracer(iName)
-	assert.Same(t, expected, c.Tracer)
-}
-
 func TestResolveTracerFromGlobal(t *testing.T) {
 	c := NewConfig(iName)
 	expected := otel.Tracer(
