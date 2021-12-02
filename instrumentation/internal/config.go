@@ -62,10 +62,10 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 // Copy returns a deep copy of c.
 func (c *Config) Copy() *Config {
 	newC := Config{
-		instName: c.instName,
-		Tracer:   c.Tracer,
-		// FIXME: is this right?
-		DefaultStartOpts: make([]trace.SpanStartOption, 0, len(c.DefaultStartOpts)),
+		instName:         c.instName,
+		Tracer:           c.Tracer,
+		Propagator:       c.Propagator,
+		DefaultStartOpts: make([]trace.SpanStartOption, len(c.DefaultStartOpts)),
 	}
 
 	copy(newC.DefaultStartOpts, c.DefaultStartOpts)

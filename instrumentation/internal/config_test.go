@@ -21,6 +21,8 @@ import (
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -162,4 +164,42 @@ func TestConfigDefaultPropagator(t *testing.T) {
 	c := NewConfig(iName)
 	expected := otel.GetTextMapPropagator()
 	assert.Equal(t, expected, c.Propagator)
+}
+
+func TestCopy(t *testing.T) {
+	prop := propagation.NewCompositeTextMapPropagator()
+	// Use a non-nil propagator.
+	prop = propagation.NewCompositeTextMapPropagator(prop)
+
+	c := NewConfig(
+		iName,
+		WithTracerProvider(mockTracerProvider),
+		WithPropagator(prop),
+		WithAttributes([]attribute.KeyValue{}),
+	)
+	cp := c.Copy()
+
+	assert.Equal(t, c, cp)
+
+	// cp should be completely independent of c.
+
+	c.instName = "different"
+	assert.NotEqual(t, iName, c.instName)
+	assert.Equal(t, iName, cp.instName)
+
+	origTracer := cp.Tracer
+	c.Tracer = otel.Tracer("different")
+	assert.NotEqual(t, origTracer, c.Tracer)
+	assert.Equal(t, origTracer, cp.Tracer)
+
+	origProp := cp.Propagator
+	c.Propagator = otel.GetTextMapPropagator()
+	assert.NotEqual(t, origProp, c.Propagator)
+	assert.Equal(t, origProp, cp.Propagator)
+
+	origOpt := cp.DefaultStartOpts[0]
+	// Changing the underlying array data does not change the copied data.
+	c.DefaultStartOpts[0] = trace.WithNewRoot()
+	assert.NotEqual(t, []trace.SpanStartOption{origOpt}, c.DefaultStartOpts)
+	assert.Equal(t, []trace.SpanStartOption{origOpt}, cp.DefaultStartOpts)
 }
