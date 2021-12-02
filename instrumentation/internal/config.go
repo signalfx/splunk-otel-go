@@ -20,6 +20,7 @@ import (
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -30,6 +31,7 @@ type Config struct {
 	instName string
 
 	Tracer           trace.Tracer
+	Propagator       propagation.TextMapPropagator
 	DefaultStartOpts []trace.SpanStartOption
 }
 
@@ -48,6 +50,10 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 			trace.WithSchemaURL(semconv.SchemaURL),
 		)
+	}
+
+	if c.Propagator == nil {
+		c.Propagator = otel.GetTextMapPropagator()
 	}
 
 	return &c

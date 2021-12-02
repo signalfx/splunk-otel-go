@@ -157,3 +157,9 @@ func TestMergedSpanStartOptionsPassedOptsNoDefaults(t *testing.T) {
 	assert.Len(t, sso, 1)
 	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }
+
+func TestConfigDefaultPropagator(t *testing.T) {
+	c := NewConfig(iName)
+	expected := otel.GetTextMapPropagator()
+	assert.Equal(t, expected, c.Propagator)
+}
