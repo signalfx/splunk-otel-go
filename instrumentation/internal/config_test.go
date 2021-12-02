@@ -170,6 +170,13 @@ func TestMergedSpanStartOptionsNilConifg(t *testing.T) {
 	assert.Nil(t, c.mergedSpanStartOptions())
 }
 
+func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
+	c := (*Config)(nil)
+	sso := c.mergedSpanStartOptions(trace.WithAttributes())
+	assert.Len(t, sso, 1)
+	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
+}
+
 func TestMergedSpanStartOptionsEmptyConfigNoPassedOpts(t *testing.T) {
 	c := NewConfig(iName)
 	c.DefaultStartOpts = nil
