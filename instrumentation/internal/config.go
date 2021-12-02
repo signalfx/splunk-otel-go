@@ -103,7 +103,7 @@ func (c *Config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.S
 		}
 	}
 
-	// FIXME: make sure to test capacity is exact.
+	// FIXME: if c is nil we can still get here.
 	merged := make([]trace.SpanStartOption, len(c.DefaultStartOpts)+len(opts))
 	if c == nil || len(c.DefaultStartOpts) == 0 {
 		copy(merged, opts)

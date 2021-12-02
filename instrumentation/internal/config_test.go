@@ -16,12 +16,15 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
@@ -29,18 +32,33 @@ import (
 
 const iName = "github.com/signalfx/splunk-otel-go/instrumentation/internal"
 
-var mockTracerProvider = &fnTracerProvider{
-	tracer: func() func(string, ...trace.TracerOption) trace.Tracer {
-		registry := make(map[string]trace.Tracer)
-		return func(name string, opts ...trace.TracerOption) trace.Tracer {
-			t, ok := registry[name]
-			if !ok {
-				t = &fnTracer{}
-				registry[name] = t
-			}
-			return t
+var mockTracerProvider = func(spanRecorder map[string]*mockSpan) trace.TracerProvider {
+	recordSpan := func(s *mockSpan) {
+		if spanRecorder != nil {
+			spanRecorder[s.Name] = s
 		}
-	}(),
+	}
+
+	return &fnTracerProvider{
+		tracer: func() func(string, ...trace.TracerOption) trace.Tracer {
+			registry := make(map[string]trace.Tracer)
+			return func(name string, opts ...trace.TracerOption) trace.Tracer {
+				t, ok := registry[name]
+				if !ok {
+					t = &fnTracer{
+						start: func(ctx context.Context, n string, o ...trace.SpanStartOption) (context.Context, trace.Span) {
+							span := &mockSpan{Name: n, StartOpts: o}
+							recordSpan(span)
+							ctx = trace.ContextWithSpan(ctx, span)
+							return ctx, span
+						},
+					}
+					registry[name] = t
+				}
+				return t
+			}
+		}(),
+	}
 }
 
 type fnTracerProvider struct {
@@ -59,6 +77,34 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 	return fn.start(ctx, name, opts...)
 }
 
+type status struct {
+	Code        codes.Code
+	Description string
+}
+
+type mockSpan struct {
+	trace.Span
+
+	Name      string
+	StartOpts []trace.SpanStartOption
+
+	RecordedErrs []error
+	Statuses     []status
+	Ended        bool
+}
+
+func (s *mockSpan) RecordError(err error, _ ...trace.EventOption) {
+	s.RecordedErrs = append(s.RecordedErrs, err)
+}
+
+func (s *mockSpan) SetStatus(c codes.Code, desc string) {
+	s.Statuses = append(s.Statuses, status{Code: c, Description: desc})
+}
+
+func (s *mockSpan) End(...trace.SpanEndOption) {
+	s.Ended = true
+}
+
 func TestConfigDefaultTracer(t *testing.T) {
 	c := NewConfig(iName)
 	expected := otel.Tracer(
@@ -70,9 +116,10 @@ func TestConfigDefaultTracer(t *testing.T) {
 }
 
 func TestWithTracer(t *testing.T) {
+	mtp := mockTracerProvider(nil)
 	// Default is to use the global TracerProvider. This will override that.
-	c := NewConfig(iName, WithTracerProvider(mockTracerProvider))
-	expected := mockTracerProvider.Tracer(iName)
+	c := NewConfig(iName, WithTracerProvider(mtp))
+	expected := mtp.Tracer(iName)
 	assert.Same(t, expected, c.Tracer)
 }
 
@@ -88,8 +135,9 @@ func TestResolveTracerFromGlobal(t *testing.T) {
 }
 
 func TestConfigTracerFromConfig(t *testing.T) {
-	c := NewConfig(iName, WithTracerProvider(mockTracerProvider))
-	expected := mockTracerProvider.Tracer(
+	mtp := mockTracerProvider(nil)
+	c := NewConfig(iName, WithTracerProvider(mtp))
+	expected := mtp.Tracer(
 		iName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
 		trace.WithSchemaURL(semconv.SchemaURL),
@@ -173,7 +221,7 @@ func TestCopy(t *testing.T) {
 
 	c := NewConfig(
 		iName,
-		WithTracerProvider(mockTracerProvider),
+		WithTracerProvider(mockTracerProvider(nil)),
 		WithPropagator(prop),
 		WithAttributes([]attribute.KeyValue{}),
 	)
@@ -202,4 +250,37 @@ func TestCopy(t *testing.T) {
 	c.DefaultStartOpts[0] = trace.WithNewRoot()
 	assert.NotEqual(t, []trace.SpanStartOption{origOpt}, c.DefaultStartOpts)
 	assert.Equal(t, []trace.SpanStartOption{origOpt}, cp.DefaultStartOpts)
+}
+
+func TestWithSpan(t *testing.T) {
+	const spanName = "TestWithSpan span"
+	opts := []trace.SpanStartOption{
+		trace.WithAttributes(),
+		trace.WithAttributes(attribute.Bool("set", true)),
+	}
+	spanRecorder := make(map[string]*mockSpan)
+	c := NewConfig(iName, WithTracerProvider(mockTracerProvider(spanRecorder)))
+
+	expectedErr := errors.New("TestWithSpan error")
+	var called bool
+	err := c.WithSpan(context.Background(), spanName, func(c context.Context) error {
+		called = true
+		return expectedErr
+	}, opts...)
+	assert.ErrorIs(t, err, expectedErr)
+	assert.True(t, called, "WithSpan did not call passed func")
+
+	require.Contains(t, spanRecorder, spanName)
+	span := spanRecorder[spanName]
+
+	assert.Equal(t, spanName, span.Name)
+	assert.Equal(t, opts, span.StartOpts)
+
+	require.Len(t, span.RecordedErrs, 1)
+	assert.ErrorIs(t, span.RecordedErrs[0], expectedErr)
+
+	require.Len(t, span.Statuses, 1)
+	assert.Equal(t, span.Statuses[0], status{Code: codes.Error, Description: expectedErr.Error()})
+
+	assert.True(t, span.Ended, "mockSpan not ended by WithSpan")
 }
