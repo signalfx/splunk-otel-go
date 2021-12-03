@@ -23,12 +23,12 @@ dependency for users.
 package test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-chi/chi"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -37,6 +37,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	traceapi "go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
 )
 
 func newTestServer(tp *trace.TracerProvider) *chi.Mux {
@@ -63,6 +65,7 @@ func newTestServer(tp *trace.TracerProvider) *chi.Mux {
 func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *chi.Mux) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+	t.Cleanup(func() { require.NoError(t, tp.Shutdown(context.Background())) })
 	return sr, newTestServer(tp)
 }
 
