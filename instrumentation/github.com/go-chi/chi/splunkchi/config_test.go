@@ -16,11 +16,9 @@ package splunkchi
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -156,93 +154,10 @@ func TestConfigTracerFromContext(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
-func TestMergedSpanStartOptionsNilConifg(t *testing.T) {
-	c := (*config)(nil)
-	assert.Nil(t, c.mergedSpanStartOptions())
-}
-
-func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
-	c := (*config)(nil)
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
-	assert.Len(t, sso, 1)
-	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
-}
-
-func TestMergedSpanStartOptionsEmptyConfigNoPassedOpts(t *testing.T) {
-	c := newConfig()
-	c.defaultStartOpts = nil
-	assert.Nil(t, c.mergedSpanStartOptions())
-}
-
-func TestMergedSpanStartOptionsPassedNoOptsWithDefaults(t *testing.T) {
-	c := config{
-		defaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
-	}
-	sso := c.mergedSpanStartOptions()
-	assert.Len(t, sso, 1)
-	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
-}
-
-func TestMergedSpanStartOptionsPassedNoOptsNoDefaults(t *testing.T) {
-	c := config{defaultStartOpts: nil}
-	sso := c.mergedSpanStartOptions()
-	assert.Len(t, sso, 0)
-	assert.Equal(t, 0, cap(sso), "incorrectly sized slice")
-}
-
-func TestMergedSpanStartOptionsPassedOptsWithDefaults(t *testing.T) {
-	c := config{
-		defaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
-	}
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
-	assert.Len(t, sso, 2)
-	assert.Equal(t, 2, cap(sso), "incorrectly sized slice")
-}
-
-func TestMergedSpanStartOptionsPassedOptsNoDefaults(t *testing.T) {
-	c := config{defaultStartOpts: nil}
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
-	assert.Len(t, sso, 1)
-	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
-}
-
 func TestConfigDefaultPropagator(t *testing.T) {
 	c := newConfig()
 	expected := otel.GetTextMapPropagator()
 	assert.Equal(t, expected, c.propagator)
-}
-
-func TestWithSpan(t *testing.T) {
-	const spanName = "TestWithSpan span"
-	opts := []trace.SpanStartOption{
-		trace.WithAttributes(),
-		trace.WithAttributes(attribute.Bool("set", true)),
-	}
-	spanRecorder := make(map[string]*mockSpan)
-	c := newConfig(WithTracerProvider(mockTracerProvider(spanRecorder)))
-
-	expectedErr := errors.New("TestWithSpan error")
-	var called bool
-	err := c.withSpan(context.Background(), spanName, func(c context.Context) error {
-		called = true
-		return expectedErr
-	}, opts...)
-	assert.ErrorIs(t, err, expectedErr)
-	assert.True(t, called, "WithSpan did not call passed func")
-
-	require.Contains(t, spanRecorder, spanName)
-	span := spanRecorder[spanName]
-
-	assert.Equal(t, spanName, span.Name)
-	assert.Equal(t, opts, span.StartOpts)
-
-	require.Len(t, span.RecordedErrs, 1)
-	assert.ErrorIs(t, span.RecordedErrs[0], expectedErr)
-
-	require.Len(t, span.Statuses, 1)
-	assert.Equal(t, span.Statuses[0], status{Code: codes.Error, Description: expectedErr.Error()})
-
-	assert.True(t, span.Ended, "mockSpan not ended by WithSpan")
 }
 
 func TestWithTracerProvider(t *testing.T) {

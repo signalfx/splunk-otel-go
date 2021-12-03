@@ -19,7 +19,6 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
@@ -42,7 +41,11 @@ type config struct {
 // If no TracerProvider or Propagator are specified with options, the default
 // OpenTelemetry globals will be used.
 func newConfig(options ...Option) *config {
-	c := &config{}
+	c := &config{
+		defaultStartOpts: []trace.SpanStartOption{
+			trace.WithSpanKind(trace.SpanKindServer),
+		},
+	}
 
 	for _, o := range options {
 		if o != nil {
@@ -80,38 +83,6 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 		)
 	}
 	return c.tracer
-}
-
-// mergedSpanStartOptions returns a copy of opts with any DefaultStartOpts
-// that c is configured with prepended.
-func (c *config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
-	if c == nil || len(c.defaultStartOpts) == 0 {
-		if len(opts) == 0 {
-			return nil
-		}
-		cp := make([]trace.SpanStartOption, len(opts))
-		copy(cp, opts)
-		return cp
-	}
-
-	merged := make([]trace.SpanStartOption, len(c.defaultStartOpts)+len(opts))
-	copy(merged, c.defaultStartOpts)
-	copy(merged[len(c.defaultStartOpts):], opts)
-	return merged
-}
-
-// WithSpan wraps the function f with a span named name.
-func (c *config) withSpan(ctx context.Context, name string, f func(context.Context) error, opts ...trace.SpanStartOption) error {
-	sso := c.mergedSpanStartOptions(opts...)
-	ctx, span := c.resolveTracer(ctx).Start(ctx, name, sso...)
-	err := f(ctx)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
-	span.End()
-
-	return err
 }
 
 // Option applies options to a configuration.

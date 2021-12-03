@@ -19,20 +19,46 @@ package splunkchi
 import (
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"go.opentelemetry.io/otel/propagation"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
 // Middleware returns middleware that will trace incoming requests.
 func Middleware(options ...Option) func(http.Handler) http.Handler {
+	cfg := newConfig(options...)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// FIXME: start span.
-			ctx := r.Context()
-
+			// Allows us to track the ultimate status.
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
-			next.ServeHTTP(ww, r.WithContext(ctx))
 
-			// FIXME: finalize span.
+			tracer := cfg.resolveTracer(r.Context())
+			carrier := propagation.HeaderCarrier(r.Header)
+			ctx := cfg.propagator.Extract(r.Context(), carrier)
+			// The full handler chain needs to be complete before we are sure
+			// what path is being requested. Delay full naming and annotation
+			// until then.
+			name := "HTTP " + r.Method
+			ctx, span := tracer.Start(ctx, name, cfg.defaultStartOpts...)
+			defer span.End()
+			r = r.WithContext(ctx)
+
+			next.ServeHTTP(ww, r)
+
+			path := chi.RouteContext(r.Context()).RoutePattern()
+			attrs := semconv.HTTPServerAttributesFromHTTPRequest("", path, r)
+			attrs = append(attrs, semconv.HTTPAttributesFromHTTPStatusCode(ww.Status())...)
+			attrs = append(attrs, semconv.NetAttributesFromHTTPRequest("tcp", r)...)
+			attrs = append(attrs, semconv.EndUserAttributesFromHTTPRequest(r)...)
+			span.SetAttributes(attrs...)
+
+			if path != "" {
+				span.SetName(name + " " + path)
+			}
+
+			code, desc := semconv.SpanStatusFromHTTPStatusCode(ww.Status())
+			span.SetStatus(code, desc)
 		})
 	}
 }
