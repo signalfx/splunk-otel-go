@@ -25,7 +25,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
-// Middleware returns middleware that will trace incoming requests.
+// Middleware returns github.com/go-chi/chi middleware that traces served
+// requests.
 func Middleware(options ...Option) func(http.Handler) http.Handler {
 	cfg := newConfig(options...)
 	return func(next http.Handler) http.Handler {
