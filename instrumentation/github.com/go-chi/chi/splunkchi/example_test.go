@@ -12,8 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package splunkchi
+package splunkchi_test
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
+)
 
 func Example() {
-	// FIXME: implement.
+	router := chi.NewRouter()
+	router.Use(splunkchi.Middleware())
+	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello World!\n"))
+	})
+	http.ListenAndServe(":8080", router)
 }
