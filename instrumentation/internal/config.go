@@ -45,7 +45,7 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 
 	for _, o := range options {
 		if o != nil {
-			o.apply(&c)
+			o.Apply(&c)
 		}
 	}
 
@@ -97,7 +97,7 @@ func (c *Config) ResolveTracer(ctx context.Context) trace.Tracer {
 
 // mergedSpanStartOptions returns a copy of opts with any DefaultStartOpts
 // that c is configured with prepended.
-func (c *Config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
+func (c *Config) MergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
 	if c == nil || len(c.DefaultStartOpts) == 0 {
 		if len(opts) == 0 {
 			return nil
@@ -115,7 +115,7 @@ func (c *Config) mergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.S
 
 // WithSpan wraps the function f with a span named name.
 func (c *Config) WithSpan(ctx context.Context, name string, f func(context.Context) error, opts ...trace.SpanStartOption) error {
-	sso := c.mergedSpanStartOptions(opts...)
+	sso := c.MergedSpanStartOptions(opts...)
 	ctx, span := c.ResolveTracer(ctx).Start(ctx, name, sso...)
 	err := f(ctx)
 	if err != nil {

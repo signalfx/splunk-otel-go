@@ -25,13 +25,13 @@ import (
 
 // Option applies options to a configuration.
 type Option interface {
-	apply(*Config)
+	Apply(*Config)
 }
 
 // OptionFunc is a generic way to set an option using a func.
 type OptionFunc func(*Config)
 
-func (o OptionFunc) apply(c *Config) {
+func (o OptionFunc) Apply(c *Config) {
 	o(c)
 }
 
