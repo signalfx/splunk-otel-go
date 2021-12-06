@@ -19,6 +19,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -41,6 +42,16 @@ func newConfig(options ...Option) *config {
 		}
 	}
 
+	attrs := []attribute.KeyValue{
+		semconv.DBSystemKey.String("splunkbuntdb"),
+		attribute.Key("db.buntdb.file").String(":memory:"), // TODO: is this what we want?
+	}
+
+	c.defaultStartOpts = []trace.SpanStartOption{
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(attrs...),
+	}
+
 	if c.tracer == nil {
 		c.tracer = otel.Tracer(
 			instrumentationName,
@@ -53,6 +64,19 @@ func newConfig(options ...Option) *config {
 	}
 
 	return &c
+}
+
+// copyConfig is used internally to create new config instance
+func copyConfig(c *config) *config {
+	copyOpts := make([]trace.SpanStartOption, len(c.defaultStartOpts))
+	copy(copyOpts, c.defaultStartOpts)
+
+	newCfg := &config{
+		ctx:              c.ctx,
+		tracer:           c.tracer,
+		defaultStartOpts: copyOpts,
+	}
+	return newCfg
 }
 
 // resolveTracer returns an OTel tracer from the appropriate TracerProvider.
@@ -80,8 +104,6 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 
 // withSpan wraps the function f with a span.
 func (c *config) withSpan(spanName string, f func() error, opts ...trace.SpanStartOption) error {
-	// func (c *config) withSpan(ctx context.Context, m *dns.Msg, f func() error, opts ...trace.SpanStartOption) error {
-
 	var o []trace.SpanStartOption
 	if c == nil || len(c.defaultStartOpts) == 0 {
 		o = make([]trace.SpanStartOption, len(opts))
@@ -91,6 +113,14 @@ func (c *config) withSpan(spanName string, f func() error, opts ...trace.SpanSta
 		copy(o, c.defaultStartOpts)
 		copy(o[len(c.defaultStartOpts):], opts)
 	}
+
+	extraAttrs := []attribute.KeyValue{
+		semconv.DBOperationKey.String(spanName),
+	}
+
+	traceAttr := trace.WithAttributes(extraAttrs...)
+
+	o = append(o, traceAttr)
 
 	name := spanName
 	_, span := c.resolveTracer(c.ctx).Start(c.ctx, name, o...)
@@ -142,13 +172,5 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 func WithContext(ctx context.Context) Option {
 	return optionFunc(func(c *config) {
 		c.ctx = ctx
-	})
-}
-
-// WithServiceName sets the given service name for the transaction.
-
-func WithServiceName(serviceName string) Option {
-	return optionFunc(func(c *config) {
-		// cfg.serviceName = serviceName // TODO
 	})
 }

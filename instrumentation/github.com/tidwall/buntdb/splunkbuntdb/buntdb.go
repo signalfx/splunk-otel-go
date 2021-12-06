@@ -72,12 +72,18 @@ func (db *DB) View(fn func(tx *Tx) error) error {
 
 // WithContext sets the context for the DB.
 func (db *DB) WithContext(ctx context.Context) *DB {
-	db.cfg.ctx = ctx
-	return db
-	//newdb := *db
-	//newdb.opts = append(newdb.opts[:len(newdb.opts):len(newdb.opts)], WithContext(ctx))
-	//return &newdb
+	newdb := WrapDB(db.DB, optionFunc(func(c *config) {
+		// FIXME: add a cfg.copy method that will make a deep copy.
+		// specifically the options slice.
+		newCopy := copyConfig(db.cfg)
+		*c = *newCopy
+	}))
+	return newdb
 }
+
+// outside context
+// db.WIthContext(newContext).Update(...)
+// returns
 
 // A Tx wraps a buntdb.Tx, automatically tracing any queries.
 type Tx struct {
@@ -301,4 +307,19 @@ func (tx *Tx) TTL(key string) (duration time.Duration, err error) {
 		return iErr
 	})
 	return
+}
+
+// Commit calls the underlying Tx.Commit and traces the query.
+func (tx *Tx) Commit() error {
+	return tx.cfg.withSpan("Commit", func() error {
+		return tx.Tx.Commit()
+	})
+}
+
+// Rollback calls the underlying Tx.Rollback and traces the query.
+func (tx *Tx) Rollback() {
+	tx.cfg.withSpan("Rollback", func() error {
+		tx.Tx.Rollback()
+		return nil
+	})
 }

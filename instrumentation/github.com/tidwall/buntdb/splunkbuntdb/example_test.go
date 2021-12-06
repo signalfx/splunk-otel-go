@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package test
+package splunkbuntdb_test
 
 import (
 	"context"
@@ -22,46 +22,12 @@ import (
 	"os"
 
 	buntdb "github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb/splunkbuntdb"
-
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 // name is the Tracer name used to identify this instrumentation library.
 const name = "splunkdb"
 
-// newExporter returns a console exporter.
-func newExporter(w io.Writer) (trace.SpanExporter, error) {
-	return stdouttrace.New(
-		stdouttrace.WithWriter(w),
-		// Use human-readable output.
-		stdouttrace.WithPrettyPrint(),
-		// Do not print timestamps for the demo.
-		stdouttrace.WithoutTimestamps(),
-	)
-}
-
 func Example() {
-	exp, err := newExporter(os.Stdout)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exp),
-	)
-	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			log.Fatal(err)
-		}
-	}()
-	otel.SetTracerProvider(tp)
-
-	// var span trace.Span
-	_, span := otel.Tracer(name).Start(context.Background(), "Run")
-
 	// Open the data.db file. It will be created if it doesn't exist.
 	db, err := buntdb.Open(":memory:")
 	if err != nil {
