@@ -24,11 +24,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
@@ -86,12 +86,12 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 	span := sr.Ended()[0]
 	assert.Equal(t, "HTTP GET", span.Name())
 	assert.Equal(t, trace.SpanKindClient, span.SpanKind())
-	assert.Contains(t, span.Attributes(), attribute.String("http.method", "GET"))
-	assert.Contains(t, span.Attributes(), attribute.String("http.url", url))
-	assert.Contains(t, span.Attributes(), attribute.String("http.scheme", "http"))
-	assert.Contains(t, span.Attributes(), attribute.String("http.host", strings.TrimPrefix(url, "http://")))
-	assert.Contains(t, span.Attributes(), attribute.String("http.flavor", "1.1"))
-	assert.Contains(t, span.Attributes(), attribute.Int("http.status_code", 200))
+	assert.Contains(t, span.Attributes(), semconv.HTTPMethodKey.String("GET"))
+	assert.Contains(t, span.Attributes(), semconv.HTTPURLKey.String(url))
+	assert.Contains(t, span.Attributes(), semconv.HTTPSchemeHTTP)
+	assert.Contains(t, span.Attributes(), semconv.HTTPHostKey.String(strings.TrimPrefix(url, "http://")))
+	assert.Contains(t, span.Attributes(), semconv.HTTPFlavorHTTP11)
+	assert.Contains(t, span.Attributes(), semconv.HTTPStatusCodeKey.Int(200))
 	assert.Equal(t, codes.Unset, span.Status().Code)
 	assert.Equal(t, "", span.Status().Description)
 }
@@ -104,7 +104,7 @@ func TestWrappedTransportErrorResponse(t *testing.T) {
 
 	require.Len(t, sr.Ended(), 1)
 	span := sr.Ended()[0]
-	assert.Contains(t, span.Attributes(), attribute.Int("http.status_code", 400))
+	assert.Contains(t, span.Attributes(), semconv.HTTPStatusCodeKey.Int(400))
 	assert.Equal(t, codes.Error, span.Status().Code)
 	assert.Equal(t, "", span.Status().Description)
 }
