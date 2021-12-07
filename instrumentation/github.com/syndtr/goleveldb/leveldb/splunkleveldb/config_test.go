@@ -128,6 +128,7 @@ func TestConfigTracerFromContext(t *testing.T) {
 	expected := trace.NewNoopTracerProvider().Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, got)
 }
