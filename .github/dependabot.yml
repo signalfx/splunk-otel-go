@@ -39,6 +39,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/jackc/pgx/splunkpgx"
     schedule:
       interval: "daily"
