@@ -21,6 +21,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -47,6 +48,7 @@ func newConfig(options ...Option) *config {
 		c.tracer = otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 
@@ -63,6 +65,7 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	// There is a possibility that the config was not created with newConfig
@@ -71,6 +74,7 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	return c.tracer
@@ -119,6 +123,7 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 		c.tracer = tp.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	})
 }

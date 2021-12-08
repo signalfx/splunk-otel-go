@@ -24,7 +24,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -65,11 +65,13 @@ func (c traceConfig) tracer(ctx context.Context) trace.Tracer {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	return c.TracerProvider.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 }
 
