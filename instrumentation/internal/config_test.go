@@ -160,12 +160,12 @@ func TestConfigTracerFromContext(t *testing.T) {
 
 func TestMergedSpanStartOptionsNilConifg(t *testing.T) {
 	c := (*Config)(nil)
-	assert.Nil(t, c.mergedSpanStartOptions())
+	assert.Nil(t, c.MergedSpanStartOptions())
 }
 
 func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
 	c := (*Config)(nil)
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
+	sso := c.MergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 1)
 	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }
@@ -173,21 +173,21 @@ func TestMergedSpanStartOptionsNilConifgPassedOpts(t *testing.T) {
 func TestMergedSpanStartOptionsEmptyConfigNoPassedOpts(t *testing.T) {
 	c := NewConfig(iName)
 	c.DefaultStartOpts = nil
-	assert.Nil(t, c.mergedSpanStartOptions())
+	assert.Nil(t, c.MergedSpanStartOptions())
 }
 
 func TestMergedSpanStartOptionsPassedNoOptsWithDefaults(t *testing.T) {
 	c := Config{
 		DefaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
 	}
-	sso := c.mergedSpanStartOptions()
+	sso := c.MergedSpanStartOptions()
 	assert.Len(t, sso, 1)
 	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }
 
 func TestMergedSpanStartOptionsPassedNoOptsNoDefaults(t *testing.T) {
 	c := Config{DefaultStartOpts: nil}
-	sso := c.mergedSpanStartOptions()
+	sso := c.MergedSpanStartOptions()
 	assert.Len(t, sso, 0)
 	assert.Equal(t, 0, cap(sso), "incorrectly sized slice")
 }
@@ -196,14 +196,14 @@ func TestMergedSpanStartOptionsPassedOptsWithDefaults(t *testing.T) {
 	c := Config{
 		DefaultStartOpts: []trace.SpanStartOption{trace.WithAttributes()},
 	}
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
+	sso := c.MergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 2)
 	assert.Equal(t, 2, cap(sso), "incorrectly sized slice")
 }
 
 func TestMergedSpanStartOptionsPassedOptsNoDefaults(t *testing.T) {
 	c := Config{DefaultStartOpts: nil}
-	sso := c.mergedSpanStartOptions(trace.WithAttributes())
+	sso := c.MergedSpanStartOptions(trace.WithAttributes())
 	assert.Len(t, sso, 1)
 	assert.Equal(t, 1, cap(sso), "incorrectly sized slice")
 }

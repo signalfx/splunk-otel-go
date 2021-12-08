@@ -31,6 +31,7 @@ type Option interface {
 // OptionFunc is a generic way to set an option using a func.
 type OptionFunc func(*Config)
 
+// Apply applies the configuration option.
 func (o OptionFunc) Apply(c *Config) {
 	o(c)
 }

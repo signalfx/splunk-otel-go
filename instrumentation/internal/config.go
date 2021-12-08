@@ -95,7 +95,7 @@ func (c *Config) ResolveTracer(ctx context.Context) trace.Tracer {
 	return c.Tracer
 }
 
-// mergedSpanStartOptions returns a copy of opts with any DefaultStartOpts
+// MergedSpanStartOptions returns a copy of opts with any DefaultStartOpts
 // that c is configured with prepended.
 func (c *Config) MergedSpanStartOptions(opts ...trace.SpanStartOption) []trace.SpanStartOption {
 	if c == nil || len(c.DefaultStartOpts) == 0 {
