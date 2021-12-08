@@ -43,8 +43,8 @@ func newConfig(options ...Option) *config {
 	}
 
 	attrs := []attribute.KeyValue{
-		semconv.DBSystemKey.String("splunkbuntdb"),
-		attribute.Key("db.buntdb.file").String(":memory:"), // TODO: is this what we want?
+		semconv.DBSystemKey.String("buntdb"),
+		//attribute.Key("db.buntdb.file").String(":memory:"), // TODO: is this what we want?
 	}
 
 	c.defaultStartOpts = []trace.SpanStartOption{

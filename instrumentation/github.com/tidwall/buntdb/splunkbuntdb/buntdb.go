@@ -181,7 +181,7 @@ func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.Index
 
 // Delete calls the underlying Tx.Delete and traces the query.
 func (tx *Tx) Delete(key string) (val string, err error) {
-	err = tx.cfg.withSpan("CreateSpatialIndexOptions", func() error {
+	err = tx.cfg.withSpan("Delete", func() error {
 		var iErr error
 		val, iErr = tx.Tx.Delete(key)
 		return iErr

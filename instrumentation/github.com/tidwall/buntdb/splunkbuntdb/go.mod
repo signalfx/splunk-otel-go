@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb
 
-go 1.16
+go 1.15
 
 require (
 	github.com/signalfx/splunk-otel-go v0.6.0
