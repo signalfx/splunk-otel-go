@@ -21,27 +21,31 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
+// instrumentationName is the instrumentation library identifier for a Tracer.
+const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
+
 // Middleware returns github.com/go-chi/chi middleware that traces served
 // requests.
 func Middleware(options ...Option) func(http.Handler) http.Handler {
-	cfg := newConfig(options...)
+	cfg := internal.NewConfig(instrumentationName, localToInternal(options)...)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Allows us to track the ultimate status.
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
-			tracer := cfg.resolveTracer(r.Context())
+			tracer := cfg.ResolveTracer(r.Context())
 			carrier := propagation.HeaderCarrier(r.Header)
-			ctx := cfg.propagator.Extract(r.Context(), carrier)
+			ctx := cfg.Propagator.Extract(r.Context(), carrier)
 			// The full handler chain needs to be complete before we are sure
 			// what path is being requested. Delay full naming and annotation
 			// until then.
 			name := "HTTP " + r.Method
-			ctx, span := tracer.Start(ctx, name, cfg.defaultStartOpts...)
+			ctx, span := tracer.Start(ctx, name, cfg.DefaultStartOpts...)
 			defer span.End()
 			r = r.WithContext(ctx)
 
