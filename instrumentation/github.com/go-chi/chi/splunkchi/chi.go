@@ -21,9 +21,11 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
@@ -32,7 +34,13 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 // Middleware returns github.com/go-chi/chi middleware that traces served
 // requests.
 func Middleware(options ...Option) func(http.Handler) http.Handler {
-	cfg := internal.NewConfig(instrumentationName, localToInternal(options)...)
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.DefaultStartOpts = append(c.DefaultStartOpts, trace.WithSpanKind(trace.SpanKindServer))
+		}),
+	}, localToInternal(options)...)
+	cfg := internal.NewConfig(instrumentationName, o...)
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Allows us to track the ultimate status.

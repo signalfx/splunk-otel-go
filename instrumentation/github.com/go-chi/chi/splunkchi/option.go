@@ -15,10 +15,11 @@
 package splunkchi
 
 import (
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 func localToInternal(opts []Option) []internal.Option {
