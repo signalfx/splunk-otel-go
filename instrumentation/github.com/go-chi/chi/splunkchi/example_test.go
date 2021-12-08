@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
 )
 
@@ -25,7 +26,12 @@ func Example() {
 	router := chi.NewRouter()
 	router.Use(splunkchi.Middleware())
 	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!\n"))
+		_, err := w.Write([]byte("Hello World!\n"))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	})
-	http.ListenAndServe(":8080", router)
+	if err := http.ListenAndServe(":8080", router); err != nil {
+		panic(err)
+	}
 }
