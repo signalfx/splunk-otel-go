@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -61,6 +62,7 @@ func TestConfigTracerFromGlobal(t *testing.T) {
 	expected := otel.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.tracer(context.Background())
 	assert.Equal(t, expected, got)
@@ -76,6 +78,7 @@ func TestConfigTracerFromConfig(t *testing.T) {
 	expected := tp.Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.tracer(context.Background())
 	assert.Equal(t, expected, got)
@@ -95,6 +98,7 @@ func TestConfigTracerFromContext(t *testing.T) {
 	expected := trace.NewNoopTracerProvider().Tracer(
 		instrumentationName,
 		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, got)
 }
