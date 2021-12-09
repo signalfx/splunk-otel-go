@@ -32,10 +32,10 @@ type iter struct {
 // called.
 func WrapIterator(it iterator.Iterator, opts ...Option) iterator.Iterator {
 	c := newConfig(opts...)
-	sso := c.mergedSpanStartOptions(
+	sso := c.MergedSpanStartOptions(
 		trace.WithAttributes(semconv.DBOperationKey.String("Iterator")),
 	)
-	_, span := c.resolveTracer().Start(c.ctx, "Iterator", sso...)
+	_, span := c.ResolveTracer(c.ctx).Start(c.ctx, "Iterator", sso...)
 	return &iter{
 		Iterator: it,
 		span:     span,

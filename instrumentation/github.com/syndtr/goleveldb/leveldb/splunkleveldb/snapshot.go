@@ -57,9 +57,10 @@ func (snap *Snapshot) WithContext(ctx context.Context) *Snapshot {
 // The caller should not modify the contents of the returned slice, but
 // it is safe to modify the contents of the argument after Get returns.
 func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
-	err = snap.cfg.withSpan(
+	err = snap.cfg.WithSpan(
+		snap.cfg.ctx,
 		"Get",
-		func() error {
+		func(context.Context) error {
 			var e error
 			value, e = snap.Snapshot.Get(key, ro)
 			return e
@@ -73,9 +74,10 @@ func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err er
 //
 // It is safe to modify the contents of the argument after Get returns.
 func (snap *Snapshot) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
-	err = snap.cfg.withSpan(
+	err = snap.cfg.WithSpan(
+		snap.cfg.ctx,
 		"Has",
-		func() error {
+		func(context.Context) error {
 			var e error
 			ret, e = snap.Snapshot.Has(key, ro)
 			return e

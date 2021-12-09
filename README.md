@@ -100,6 +100,7 @@ Supported libraries are listed
 
 Additional recommended Splunk specific instrumentations:
 
+- [`splunkclient-go`](./instrumentation/k8s.io/client-go/splunkclient-go)
 - [`splunkdns`](./instrumentation/github.com/miekg/dns/splunkdns)
 - [`splunkgorm`](./instrumentation/github.com/jinzhu/gorm/splunkgorm)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)

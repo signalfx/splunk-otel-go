@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm
 
-go 1.15
+go 1.16
 
 require (
 	github.com/jinzhu/gorm v1.9.16

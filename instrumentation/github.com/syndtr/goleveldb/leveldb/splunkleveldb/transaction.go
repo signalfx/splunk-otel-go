@@ -57,9 +57,10 @@ func (tr *Transaction) WithContext(ctx context.Context) *Transaction {
 //
 // Other methods should not be called after transaction has been committed.
 func (tr *Transaction) Commit() error {
-	return tr.cfg.withSpan(
+	return tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Commit",
-		func() error { return tr.Transaction.Commit() },
+		func(context.Context) error { return tr.Transaction.Commit() },
 		trace.WithAttributes(semconv.DBOperationKey.String("Commit")),
 	)
 }
@@ -71,9 +72,10 @@ func (tr *Transaction) Commit() error {
 // of the returned slice.
 // It is safe to modify the contents of the argument after Get returns.
 func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
-	err = tr.cfg.withSpan(
+	err = tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Get",
-		func() error {
+		func(context.Context) error {
 			var e error
 			value, e = tr.Transaction.Get(key, ro)
 			return e
@@ -87,9 +89,10 @@ func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) (value []byte, err e
 //
 // It is safe to modify the contents of the argument after Has returns.
 func (tr *Transaction) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
-	err = tr.cfg.withSpan(
+	err = tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Has",
-		func() error {
+		func(context.Context) error {
 			var e error
 			ret, e = tr.Transaction.Has(key, ro)
 			return e
@@ -130,9 +133,10 @@ func (tr *Transaction) NewIterator(slice *util.Range, ro *opt.ReadOptions) itera
 //
 // It is safe to modify the contents of the arguments after Delete returns.
 func (tr *Transaction) Delete(key []byte, wo *opt.WriteOptions) error {
-	return tr.cfg.withSpan(
+	return tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Delete",
-		func() error { return tr.Transaction.Delete(key, wo) },
+		func(context.Context) error { return tr.Transaction.Delete(key, wo) },
 		trace.WithAttributes(semconv.DBOperationKey.String("Delete")),
 	)
 }
@@ -141,9 +145,10 @@ func (tr *Transaction) Delete(key []byte, wo *opt.WriteOptions) error {
 //
 // Other methods should not be called after transaction has been discarded.
 func (tr *Transaction) Discard() {
-	_ = tr.cfg.withSpan(
+	_ = tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Discard",
-		func() error {
+		func(context.Context) error {
 			tr.Transaction.Discard()
 			return nil
 		},
@@ -158,9 +163,10 @@ func (tr *Transaction) Discard() {
 //
 // It is safe to modify the contents of the arguments after Put returns.
 func (tr *Transaction) Put(key, value []byte, wo *opt.WriteOptions) error {
-	return tr.cfg.withSpan(
+	return tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Put",
-		func() error { return tr.Transaction.Put(key, value, wo) },
+		func(context.Context) error { return tr.Transaction.Put(key, value, wo) },
 		trace.WithAttributes(semconv.DBOperationKey.String("Put")),
 	)
 }
@@ -172,9 +178,10 @@ func (tr *Transaction) Put(key, value []byte, wo *opt.WriteOptions) error {
 //
 // It is safe to modify the contents of the arguments after Write returns.
 func (tr *Transaction) Write(b *leveldb.Batch, wo *opt.WriteOptions) error {
-	return tr.cfg.withSpan(
+	return tr.cfg.WithSpan(
+		tr.cfg.ctx,
 		"Write",
-		func() error { return tr.Transaction.Write(b, wo) },
+		func(context.Context) error { return tr.Transaction.Write(b, wo) },
 		trace.WithAttributes(semconv.DBOperationKey.String("Write")),
 	)
 }
