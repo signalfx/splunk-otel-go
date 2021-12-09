@@ -15,13 +15,12 @@
 package splunkbuntdb_test
 
 import (
-	"context"
 	"fmt"
-	"io"
 	"log"
-	"os"
 
-	"github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb/splunkbuntdb"
+	"github.com/tidwall/buntdb"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb"
 )
 
 // name is the Tracer name used to identify this instrumentation library.
@@ -29,7 +28,7 @@ const name = "splunkdb"
 
 func Example() {
 	// Open the data.db file. It will be created if it doesn't exist.
-	db, err := buntdb.Open(":memory:")
+	db, err := splunkbuntdb.Open(":memory:")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,5 +47,5 @@ func Example() {
 		return err
 	})
 
-	span.End()
+	// span.End()
 }

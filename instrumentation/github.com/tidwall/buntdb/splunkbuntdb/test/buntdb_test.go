@@ -32,7 +32,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
-	"github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb/splunkbuntdb"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb"
 )
 
 func TestAscend(t *testing.T) {
