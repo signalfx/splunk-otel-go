@@ -21,7 +21,7 @@ import (
 	"log"
 	"os"
 
-	buntdb "github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb/splunkbuntdb"
+	"github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb/splunkbuntdb"
 )
 
 // name is the Tracer name used to identify this instrumentation library.

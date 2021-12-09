@@ -66,7 +66,7 @@ func newConfig(options ...Option) *config {
 	return &c
 }
 
-// copyConfig is used internally to create new config instance
+// copyConfig returns a deep copy of c.
 func copyConfig(c *config) *config {
 	copyOpts := make([]trace.SpanStartOption, len(c.defaultStartOpts))
 	copy(copyOpts, c.defaultStartOpts)
@@ -89,6 +89,7 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 		return span.TracerProvider().Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	// There is a possibility that the config was not created with newConfig
@@ -97,6 +98,7 @@ func (c *config) resolveTracer(ctx context.Context) trace.Tracer {
 		return otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 	return c.tracer
@@ -153,6 +155,7 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 		c.tracer = tp.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	})
 }

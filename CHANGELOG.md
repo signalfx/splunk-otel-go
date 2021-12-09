@@ -43,7 +43,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
   instrumentation for the `github.com/tidwall/buntdb`
-  package. (#217)
+  package. (#228)
 
 ### Changed
 
