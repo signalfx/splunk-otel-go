@@ -120,63 +120,63 @@ func (tx *Tx) Ascend(index string, iterator func(key, value string) bool) error 
 func (tx *Tx) AscendEqual(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("AscendEqual", func() error {
 		return tx.Tx.AscendEqual(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("AscendEqual")))
 }
 
 // AscendGreaterOrEqual calls the underlying Tx.AscendGreaterOrEqual and traces the query.
 func (tx *Tx) AscendGreaterOrEqual(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("AscendGreaterOrEqual", func() error {
 		return tx.Tx.AscendGreaterOrEqual(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("AscendGreaterOrEqual")))
 }
 
 // AscendKeys calls the underlying Tx.AscendKeys and traces the query.
 func (tx *Tx) AscendKeys(pattern string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("AscendKeys", func() error {
 		return tx.Tx.AscendKeys(pattern, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("AscendKeys")))
 }
 
 // AscendLessThan calls the underlying Tx.AscendLessThan and traces the query.
 func (tx *Tx) AscendLessThan(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("AscendLessThan", func() error {
 		return tx.Tx.AscendLessThan(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("AscendLessThan")))
 }
 
 // AscendRange calls the underlying Tx.AscendRange and traces the query.
 func (tx *Tx) AscendRange(index, greaterOrEqual, lessThan string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("AscendRange", func() error {
 		return tx.Tx.AscendRange(index, greaterOrEqual, lessThan, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("AscendRange")))
 }
 
 // CreateIndex calls the underlying Tx.CreateIndex and traces the query.
 func (tx *Tx) CreateIndex(name, pattern string, less ...func(a, b string) bool) error {
 	return tx.cfg.withSpan("CreateIndex", func() error {
 		return tx.Tx.CreateIndex(name, pattern, less...)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateIndex")))
 }
 
 // CreateIndexOptions calls the underlying Tx.CreateIndexOptions and traces the query.
 func (tx *Tx) CreateIndexOptions(name, pattern string, opts *buntdb.IndexOptions, less ...func(a, b string) bool) error {
 	return tx.cfg.withSpan("CreateIndexOptions", func() error {
 		return tx.Tx.CreateIndexOptions(name, pattern, opts, less...)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateIndexOptions")))
 }
 
 // CreateSpatialIndex calls the underlying Tx.CreateSpatialIndex and traces the query.
 func (tx *Tx) CreateSpatialIndex(name, pattern string, rect func(item string) (min, max []float64)) error {
 	return tx.cfg.withSpan("CreateSpatialIndex", func() error {
 		return tx.Tx.CreateSpatialIndex(name, pattern, rect)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateSpatialIndex")))
 }
 
 // CreateSpatialIndexOptions calls the underlying Tx.CreateSpatialIndexOptions and traces the query.
 func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.IndexOptions, rect func(item string) (min, max []float64)) error {
 	return tx.cfg.withSpan("CreateSpatialIndexOptions", func() error {
 		return tx.Tx.CreateSpatialIndexOptions(name, pattern, opts, rect)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateSpatialIndexOptions")))
 }
 
 // Delete calls the underlying Tx.Delete and traces the query.
@@ -185,7 +185,7 @@ func (tx *Tx) Delete(key string) (val string, err error) {
 		var iErr error
 		val, iErr = tx.Tx.Delete(key)
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Delete")))
 	return
 }
 
@@ -193,56 +193,56 @@ func (tx *Tx) Delete(key string) (val string, err error) {
 func (tx *Tx) DeleteAll() error {
 	return tx.cfg.withSpan("DeleteAll", func() error {
 		return tx.Tx.DeleteAll()
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DeleteAll")))
 }
 
 // Descend calls the underlying Tx.Descend and traces the query.
 func (tx *Tx) Descend(index string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("Descend", func() error {
 		return tx.Tx.Descend(index, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Descend")))
 }
 
 // DescendEqual calls the underlying Tx.DescendEqual and traces the query.
 func (tx *Tx) DescendEqual(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("DescendEqual", func() error {
 		return tx.Tx.DescendEqual(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DescendEqual")))
 }
 
 // DescendGreaterThan calls the underlying Tx.DescendGreaterThan and traces the query.
 func (tx *Tx) DescendGreaterThan(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("DescendGreaterThan", func() error {
 		return tx.Tx.DescendGreaterThan(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DescendGreaterThan")))
 }
 
 // DescendKeys calls the underlying Tx.DescendKeys and traces the query.
 func (tx *Tx) DescendKeys(pattern string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("DescendKeys", func() error {
 		return tx.Tx.DescendKeys(pattern, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DescendKeys")))
 }
 
 // DescendLessOrEqual calls the underlying Tx.DescendLessOrEqual and traces the query.
 func (tx *Tx) DescendLessOrEqual(index, pivot string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("DescendLessOrEqual", func() error {
 		return tx.Tx.DescendLessOrEqual(index, pivot, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DescendLessOrEqual")))
 }
 
 // DescendRange calls the underlying Tx.DescendRange and traces the query.
 func (tx *Tx) DescendRange(index, lessOrEqual, greaterThan string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("DescendRange", func() error {
 		return tx.Tx.DescendRange(index, lessOrEqual, greaterThan, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DescendRange")))
 }
 
 // DropIndex calls the underlying Tx.DropIndex and traces the query.
 func (tx *Tx) DropIndex(name string) error {
 	return tx.cfg.withSpan("DropIndex", func() error {
 		return tx.Tx.DropIndex(name)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("DropIndex")))
 }
 
 // Get calls the underlying Tx.Get and traces the query.
@@ -251,7 +251,7 @@ func (tx *Tx) Get(key string, ignoreExpired ...bool) (val string, err error) {
 		var iErr error
 		val, iErr = tx.Tx.Get(key, ignoreExpired...)
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Get")))
 	return
 }
 
@@ -261,7 +261,7 @@ func (tx *Tx) Indexes() (indexes []string, err error) {
 		var iErr error
 		indexes, iErr = tx.Tx.Indexes()
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Indexes")))
 	return
 }
 
@@ -269,7 +269,7 @@ func (tx *Tx) Indexes() (indexes []string, err error) {
 func (tx *Tx) Intersects(index, bounds string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("Intersects", func() error {
 		return tx.Tx.Intersects(index, bounds, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Intersects")))
 }
 
 // Len calls the underlying Tx.Len and traces the query.
@@ -278,7 +278,7 @@ func (tx *Tx) Len() (n int, err error) {
 		var iErr error
 		n, iErr = tx.Tx.Len()
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Len")))
 	return
 }
 
@@ -286,7 +286,7 @@ func (tx *Tx) Len() (n int, err error) {
 func (tx *Tx) Nearby(index, bounds string, iterator func(key, value string, dist float64) bool) error {
 	return tx.cfg.withSpan("Nearby", func() error {
 		return tx.Tx.Nearby(index, bounds, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Nearby")))
 }
 
 // Set calls the underlying Tx.Set and traces the query.
@@ -295,7 +295,7 @@ func (tx *Tx) Set(key, value string, opts *buntdb.SetOptions) (previousValue str
 		var iErr error
 		previousValue, replaced, iErr = tx.Tx.Set(key, value, opts)
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Set")))
 	return
 }
 
@@ -305,7 +305,7 @@ func (tx *Tx) TTL(key string) (duration time.Duration, err error) {
 		var iErr error
 		duration, iErr = tx.Tx.TTL(key)
 		return iErr
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("TTL")))
 	return
 }
 
@@ -313,12 +313,12 @@ func (tx *Tx) TTL(key string) (duration time.Duration, err error) {
 func (tx *Tx) Commit() error {
 	return tx.cfg.withSpan("Commit", func() error {
 		return tx.Tx.Commit()
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Commit")))
 }
 
 // Rollback calls the underlying Tx.Rollback and traces the query.
 func (tx *Tx) Rollback() error {
 	return tx.cfg.withSpan("Rollback", func() error {
 		return tx.Tx.Rollback()
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Rollback")))
 }
