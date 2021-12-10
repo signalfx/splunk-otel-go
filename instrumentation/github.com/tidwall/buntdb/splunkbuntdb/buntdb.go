@@ -81,10 +81,6 @@ func (db *DB) WithContext(ctx context.Context) *DB {
 	return newdb
 }
 
-// outside context
-// db.WIthContext(newContext).Update(...)
-// returns
-
 // A Tx wraps a buntdb.Tx, automatically tracing any queries.
 type Tx struct {
 	*buntdb.Tx
