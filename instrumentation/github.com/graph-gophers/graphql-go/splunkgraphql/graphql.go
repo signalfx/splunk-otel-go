@@ -23,19 +23,13 @@ import (
 	"github.com/graph-gophers/graphql-go/errors"
 	"github.com/graph-gophers/graphql-go/introspection"
 	"github.com/graph-gophers/graphql-go/trace"
+	gql "github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
-
-var (
-	graphqlFieldKey = attribute.Key("graphql.field")
-	graphqlQueryKey = attribute.Key("graphql.query")
-	graphqlTypeKey  = attribute.Key("graphql.type")
-)
 
 // otelTracer implements the graphql-go/trace.Tracer interface using
 // OpenTelemetry.
@@ -78,7 +72,7 @@ func (t *otelTracer) TraceQuery(ctx context.Context, queryString string, operati
 		ctx,
 		"GraphQL request",
 		oteltrace.WithSpanKind(oteltrace.SpanKindServer),
-		oteltrace.WithAttributes(graphqlQueryKey.String(queryString)),
+		oteltrace.WithAttributes(gql.GraphQLQueryKey.String(queryString)),
 	)
 
 	return spanCtx, traceQueryFinishFunc(span)
@@ -93,9 +87,10 @@ func (t *otelTracer) TraceField(ctx context.Context, label, typeName, fieldName 
 	spanCtx, span := t.cfg.ResolveTracer(ctx).Start(
 		ctx,
 		"GraphQL field",
+		oteltrace.WithSpanKind(oteltrace.SpanKindServer),
 		oteltrace.WithAttributes(
-			graphqlFieldKey.String(fieldName),
-			graphqlTypeKey.String(typeName),
+			gql.GraphQLFieldKey.String(fieldName),
+			gql.GraphQLTypeKey.String(typeName),
 		),
 	)
 
@@ -110,6 +105,10 @@ func (t *otelTracer) TraceField(ctx context.Context, label, typeName, fieldName 
 
 // TraceValidation traces the schema validation step preceding an operation.
 func (t *otelTracer) TraceValidation(ctx context.Context) trace.TraceValidationFinishFunc {
-	_, span := t.cfg.ResolveTracer(ctx).Start(ctx, "GraphQL validation")
+	_, span := t.cfg.ResolveTracer(ctx).Start(
+		ctx,
+		"GraphQL validation",
+		oteltrace.WithSpanKind(oteltrace.SpanKindInternal),
+	)
 	return traceQueryFinishFunc(span)
 }
