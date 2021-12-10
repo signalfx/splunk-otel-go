@@ -79,6 +79,14 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/tidwall/buntdb/splunkbuntdb"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/tidwall/buntdb/splunkbuntdb/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/k8s.io/client-go/splunkclient-go"
     schedule:
       interval: "daily"
