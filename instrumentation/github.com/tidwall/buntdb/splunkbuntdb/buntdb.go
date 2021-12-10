@@ -54,20 +54,29 @@ func (db *DB) Begin(writable bool) (*Tx, error) {
 	if err != nil {
 		return nil, err
 	}
-	return WrapTx(tx, db.cfg), nil
+	return WrapTx(tx, optionFunc(func(c *config) {
+		newCopy := db.cfg.copy()
+		*c = *newCopy
+	})), nil
 }
 
 // Update calls the underlying DB.Update and traces the transaction.
 func (db *DB) Update(fn func(tx *Tx) error) error {
 	return db.DB.Update(func(tx *buntdb.Tx) error {
-		return fn(WrapTx(tx, db.cfg))
+		return fn(WrapTx(tx, optionFunc(func(c *config) {
+			newCopy := db.cfg.copy()
+			*c = *newCopy
+		})))
 	})
 }
 
 // View calls the underlying DB.View and traces the transaction.
 func (db *DB) View(fn func(tx *Tx) error) error {
 	return db.DB.View(func(tx *buntdb.Tx) error {
-		return fn(WrapTx(tx, db.cfg))
+		return fn(WrapTx(tx, optionFunc(func(c *config) {
+			newCopy := db.cfg.copy()
+			*c = *newCopy
+		})))
 	})
 }
 
@@ -92,10 +101,10 @@ type Tx struct {
 }
 
 // WrapTx wraps a buntdb.Tx so it can be traced.
-func WrapTx(tx *buntdb.Tx, cfg *config) *Tx {
+func WrapTx(tx *buntdb.Tx, opts ...Option) *Tx {
 	return &Tx{
 		Tx:  tx,
-		cfg: cfg,
+		cfg: newConfig(opts...),
 	}
 }
 

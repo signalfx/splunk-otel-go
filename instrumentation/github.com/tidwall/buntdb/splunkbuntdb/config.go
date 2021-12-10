@@ -56,6 +56,7 @@ func newConfig(options ...Option) *config {
 		c.tracer = otel.Tracer(
 			instrumentationName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
+			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
 
@@ -116,8 +117,7 @@ func (c *config) withSpan(spanName string, f func() error, opts ...trace.SpanSta
 		copy(o[len(c.defaultStartOpts):], opts)
 	}
 
-	name := spanName
-	_, span := c.resolveTracer(c.ctx).Start(c.ctx, name, o...)
+	_, span := c.resolveTracer(c.ctx).Start(c.ctx, spanName, o...)
 
 	err := f()
 	if err != nil {
