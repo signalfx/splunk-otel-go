@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+// Copyright Splunk Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package test
 
 import (
 	"context"
-	//	"os"
 	"testing"
 	"time"
 
@@ -447,17 +446,17 @@ func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
 	}
 
 	err = bdb.Update(func(tx *buntdb.Tx) error {
-		tx.Set("regular:a", "1", nil)
-		tx.Set("regular:b", "2", nil)
-		tx.Set("regular:c", "3", nil)
-		tx.Set("regular:d", "4", nil)
-		tx.Set("regular:e", "5", nil)
+		_, _, _ = tx.Set("regular:a", "1", nil)
+		_, _, _ = tx.Set("regular:b", "2", nil)
+		_, _, _ = tx.Set("regular:c", "3", nil)
+		_, _, _ = tx.Set("regular:d", "4", nil)
+		_, _, _ = tx.Set("regular:e", "5", nil)
 
-		tx.Set("spatial:a", "[1 1]", nil)
-		tx.Set("spatial:b", "[2 2]", nil)
-		tx.Set("spatial:c", "[3 3]", nil)
-		tx.Set("spatial:d", "[4 4]", nil)
-		tx.Set("spatial:e", "[5 5]", nil)
+		_, _, _ = tx.Set("spatial:a", "[1 1]", nil)
+		_, _, _ = tx.Set("spatial:b", "[2 2]", nil)
+		_, _, _ = tx.Set("spatial:c", "[3 3]", nil)
+		_, _, _ = tx.Set("spatial:d", "[4 4]", nil)
+		_, _, _ = tx.Set("spatial:e", "[5 5]", nil)
 
 		return nil
 	})

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package splunkbuntdb
 
 import (
@@ -44,7 +45,6 @@ func newConfig(options ...Option) *config {
 
 	attrs := []attribute.KeyValue{
 		semconv.DBSystemKey.String("buntdb"),
-		//attribute.Key("db.buntdb.file").String(":memory:"), // TODO: is this what we want?
 	}
 
 	c.defaultStartOpts = []trace.SpanStartOption{
@@ -66,8 +66,8 @@ func newConfig(options ...Option) *config {
 	return &c
 }
 
-// copyConfig returns a deep copy of c.
-func copyConfig(c *config) *config {
+// copy returns a deep copy of c.
+func (c *config) copy() *config {
 	copyOpts := make([]trace.SpanStartOption, len(c.defaultStartOpts))
 	copy(copyOpts, c.defaultStartOpts)
 
@@ -115,14 +115,6 @@ func (c *config) withSpan(spanName string, f func() error, opts ...trace.SpanSta
 		copy(o, c.defaultStartOpts)
 		copy(o[len(c.defaultStartOpts):], opts)
 	}
-
-	extraAttrs := []attribute.KeyValue{
-		semconv.DBOperationKey.String(spanName),
-	}
-
-	traceAttr := trace.WithAttributes(extraAttrs...)
-
-	o = append(o, traceAttr)
 
 	name := spanName
 	_, span := c.resolveTracer(c.ctx).Start(c.ctx, name, o...)

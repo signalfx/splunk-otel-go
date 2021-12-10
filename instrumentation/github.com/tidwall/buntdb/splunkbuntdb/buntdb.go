@@ -21,6 +21,8 @@ import (
 	"time"
 
 	"github.com/tidwall/buntdb"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // A DB wraps a buntdb.DB, automatically tracing any transactions.
@@ -42,8 +44,7 @@ func Open(path string, opts ...Option) (*DB, error) {
 func WrapDB(db *buntdb.DB, opts ...Option) *DB {
 	return &DB{
 		DB:  db,
-		cfg: newConfig(),
-		// cfg: newConfig(opts), // TODO: fixme
+		cfg: newConfig(opts...),
 	}
 }
 
@@ -73,9 +74,8 @@ func (db *DB) View(fn func(tx *Tx) error) error {
 // WithContext sets the context for the DB.
 func (db *DB) WithContext(ctx context.Context) *DB {
 	newdb := WrapDB(db.DB, optionFunc(func(c *config) {
-		// FIXME: add a cfg.copy method that will make a deep copy.
-		// specifically the options slice.
-		newCopy := copyConfig(db.cfg)
+		newCopy := db.cfg.copy()
+		newCopy.ctx = ctx
 		*c = *newCopy
 	}))
 	return newdb
@@ -113,7 +113,7 @@ func (tx *Tx) WithContext(ctx context.Context) *Tx {
 func (tx *Tx) Ascend(index string, iterator func(key, value string) bool) error {
 	return tx.cfg.withSpan("Ascend", func() error {
 		return tx.Tx.Ascend(index, iterator)
-	})
+	}, trace.WithAttributes(semconv.DBOperationKey.String("Ascend")))
 }
 
 // AscendEqual calls the underlying Tx.AscendEqual and traces the query.
@@ -317,9 +317,8 @@ func (tx *Tx) Commit() error {
 }
 
 // Rollback calls the underlying Tx.Rollback and traces the query.
-func (tx *Tx) Rollback() {
-	tx.cfg.withSpan("Rollback", func() error {
-		tx.Tx.Rollback()
-		return nil
+func (tx *Tx) Rollback() error {
+	return tx.cfg.withSpan("Rollback", func() error {
+		return tx.Tx.Rollback()
 	})
 }

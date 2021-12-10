@@ -16,36 +16,36 @@ package splunkbuntdb_test
 
 import (
 	"fmt"
-	"log"
-
-	"github.com/tidwall/buntdb"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb"
 )
-
-// name is the Tracer name used to identify this instrumentation library.
-const name = "splunkdb"
 
 func Example() {
 	// Open the data.db file. It will be created if it doesn't exist.
 	db, err := splunkbuntdb.Open(":memory:")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer db.Close()
 
-	err = db.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set("mykey", "myvalue", nil)
-		return err
+	err = db.Update(func(tx *splunkbuntdb.Tx) error {
+		_, _, errIn := tx.Set("mykey", "myvalue", nil)
+		return errIn
 	})
 
-	err = db.View(func(tx *buntdb.Tx) error {
-		err := tx.Ascend("", func(key, value string) bool {
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.View(func(tx *splunkbuntdb.Tx) error {
+		errIn := tx.Ascend("", func(key, value string) bool {
 			fmt.Printf("key: %s, value: %s\n", key, value)
 			return true
 		})
-		return err
+		return errIn
 	})
 
-	// span.End()
+	if err != nil {
+		panic(err)
+	}
 }
