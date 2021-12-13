@@ -163,7 +163,7 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 	})
 }
 
-// WithContext sets the context for the transaction.
+// WithContext sets the parent context for spans.
 func WithContext(ctx context.Context) Option {
 	return optionFunc(func(c *config) {
 		c.ctx = ctx
