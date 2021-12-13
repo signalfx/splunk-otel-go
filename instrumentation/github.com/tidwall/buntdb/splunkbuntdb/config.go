@@ -36,20 +36,17 @@ type config struct {
 }
 
 func newConfig(options ...Option) *config {
-	var c config
+	c := config{
+		defaultStartOpts: []trace.SpanStartOption{
+			trace.WithSpanKind(trace.SpanKindClient),
+			trace.WithAttributes(semconv.DBSystemKey.String("buntdb")),
+		},
+	}
+
 	for _, o := range options {
 		if o != nil {
 			o.apply(&c)
 		}
-	}
-
-	attrs := []attribute.KeyValue{
-		semconv.DBSystemKey.String("buntdb"),
-	}
-
-	c.defaultStartOpts = []trace.SpanStartOption{
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(attrs...),
 	}
 
 	if c.tracer == nil {

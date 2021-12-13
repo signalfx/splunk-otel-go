@@ -106,11 +106,11 @@ func WrapTx(tx *buntdb.Tx, opts ...Option) *Tx {
 
 // WithContext sets the context for the Tx.
 func (tx *Tx) WithContext(ctx context.Context) *Tx {
-	newcfg := *tx.cfg
-	newcfg.ctx = ctx
+	newCfg := tx.cfg.copy()
+	newCfg.ctx = ctx
 	return &Tx{
 		Tx:  tx.Tx,
-		cfg: &newcfg,
+		cfg: newCfg,
 	}
 }
 
