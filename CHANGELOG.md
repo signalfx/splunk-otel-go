@@ -43,6 +43,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
   instrumentation for the `k8s.io/client-go` package. (#224)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`
+  instrumentation for the `github.com/julienschmidt/httprouter` package. (#273)
 
 ### Changed
 

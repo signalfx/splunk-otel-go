@@ -55,6 +55,14 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/lib/pq/splunkpq"
     schedule:
       interval: "daily"
