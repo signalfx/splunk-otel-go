@@ -32,7 +32,6 @@ func Example() {
 		_, _, errIn := tx.Set("mykey", "myvalue", nil)
 		return errIn
 	})
-
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +43,6 @@ func Example() {
 		})
 		return errIn
 	})
-
 	if err != nil {
 		panic(err)
 	}
