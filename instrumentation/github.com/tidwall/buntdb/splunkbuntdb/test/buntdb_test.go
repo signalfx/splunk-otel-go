@@ -27,7 +27,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 
-	global "go.opentelemetry.io/otel"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
@@ -385,8 +384,7 @@ func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
-	global.SetTracerProvider(tp)
-	db := getDatabase(t)
+	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
 
 	err := db.Update(f)
@@ -409,8 +407,7 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
-	global.SetTracerProvider(tp)
-	db := getDatabase(t)
+	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
 
 	err := db.View(f)
