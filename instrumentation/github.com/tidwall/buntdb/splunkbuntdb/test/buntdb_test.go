@@ -396,7 +396,6 @@ func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	require.Len(t, spans, 1)
 	span := spans[0]
 
-	assert.Len(t, spans, 1)
 	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
 	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
 	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
@@ -419,7 +418,6 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	require.Len(t, spans, 1)
 	span := spans[0]
 
-	assert.Len(t, spans, 1)
 	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
 	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
 	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
@@ -428,21 +426,15 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 
 func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
 	bdb, err := buntdb.Open(":memory:")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = bdb.CreateIndex("test-index", "regular:*", buntdb.IndexBinary)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = bdb.CreateSpatialIndex("test-spatial-index", "spatial:*", buntdb.IndexRect)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	err = bdb.Update(func(tx *buntdb.Tx) error {
+	require.NoError(t, bdb.Update(func(tx *buntdb.Tx) error {
 		_, _, _ = tx.Set("regular:a", "1", nil)
 		_, _, _ = tx.Set("regular:b", "2", nil)
 		_, _, _ = tx.Set("regular:c", "3", nil)
@@ -456,10 +448,7 @@ func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
 		_, _, _ = tx.Set("spatial:e", "[5 5]", nil)
 
 		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	return splunkbuntdb.WrapDB(bdb, opts...)
 }
