@@ -23,10 +23,11 @@ import (
 	"github.com/graph-gophers/graphql-go/errors"
 	"github.com/graph-gophers/graphql-go/introspection"
 	"github.com/graph-gophers/graphql-go/trace"
-	gql "github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	"go.opentelemetry.io/otel/codes"
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	gql "github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
@@ -67,7 +68,7 @@ func traceQueryFinishFunc(span oteltrace.Span) trace.TraceQueryFinishFunc {
 }
 
 // TraceQuery traces a GraphQL query.
-func (t *otelTracer) TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}, varTypes map[string]*introspection.Type) (context.Context, trace.TraceQueryFinishFunc) {
+func (t *otelTracer) TraceQuery(ctx context.Context, queryString, _ string, _ map[string]interface{}, _ map[string]*introspection.Type) (context.Context, trace.TraceQueryFinishFunc) {
 	spanCtx, span := t.cfg.ResolveTracer(ctx).Start(
 		ctx,
 		"GraphQL request",
@@ -79,7 +80,7 @@ func (t *otelTracer) TraceQuery(ctx context.Context, queryString string, operati
 }
 
 // TraceField traces a GraphQL field access.
-func (t *otelTracer) TraceField(ctx context.Context, label, typeName, fieldName string, trivial bool, args map[string]interface{}) (context.Context, trace.TraceFieldFinishFunc) {
+func (t *otelTracer) TraceField(ctx context.Context, _, typeName, fieldName string, trivial bool, _ map[string]interface{}) (context.Context, trace.TraceFieldFinishFunc) {
 	if trivial {
 		return ctx, func(*errors.QueryError) {}
 	}

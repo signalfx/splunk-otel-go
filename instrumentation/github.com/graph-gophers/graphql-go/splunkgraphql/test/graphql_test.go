@@ -32,13 +32,14 @@ import (
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 )
 
 const testSchema = `
@@ -51,10 +52,12 @@ const testSchema = `
 	}
 `
 
+const helloWorld = "Hello, world!"
+
 type testResolver struct{}
 
-func (*testResolver) Hello() string                    { return "Hello, world!" }
-func (*testResolver) HelloNonTrivial() (string, error) { return "Hello, world!", nil }
+func (*testResolver) Hello() string                    { return helloWorld }
+func (*testResolver) HelloNonTrivial() (string, error) { return helloWorld, nil }
 
 func fixtures(t *testing.T) (*tracetest.SpanRecorder, *httptest.Server) {
 	sr := tracetest.NewSpanRecorder()
@@ -71,10 +74,13 @@ func fixtures(t *testing.T) (*tracetest.SpanRecorder, *httptest.Server) {
 
 func TestTracerNonTrivial(t *testing.T) {
 	sr, srv := fixtures(t)
-	resp, err := http.Post(srv.URL, "application/json", strings.NewReader(`{
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, srv.URL, strings.NewReader(`{
 		"query": "query TestQuery() { hello, helloNonTrivial }",
 		"operationName": "TestQuery"
 	}`))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, resp.Body.Close()) })
 	body, err := io.ReadAll(resp.Body)
@@ -105,9 +111,12 @@ func TestTracerNonTrivial(t *testing.T) {
 
 func TestTracerTrivial(t *testing.T) {
 	sr, srv := fixtures(t)
-	resp, err := http.Post(srv.URL, "application/json", strings.NewReader(`{
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, srv.URL, strings.NewReader(`{
 		"query": "{ hello }"
 	}`))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, resp.Body.Close()) })
 	body, err := io.ReadAll(resp.Body)

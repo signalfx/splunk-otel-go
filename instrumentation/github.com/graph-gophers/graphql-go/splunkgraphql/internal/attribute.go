@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package internal provides common non-exported objects to the splunkgraphql
+// and the splunkgraphql/test modules
 package internal
 
 import "go.opentelemetry.io/otel/attribute"
