@@ -33,6 +33,7 @@ import (
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -87,17 +88,19 @@ func TestTracerNonTrivial(t *testing.T) {
 	s := spans[0]
 	assert.Equal(t, "GraphQL validation", s.Name())
 	assert.Equal(t, traceapi.SpanKindInternal, s.SpanKind())
-	// FIXME: validate the rest.
 
 	s = spans[1]
 	assert.Equal(t, "GraphQL field", s.Name())
 	assert.Equal(t, traceapi.SpanKindServer, s.SpanKind())
-	// FIXME: validate the rest.
+	assert.Contains(t, s.Attributes(), internal.GraphQLFieldKey.String("helloNonTrivial"))
+	assert.Contains(t, s.Attributes(), internal.GraphQLTypeKey.String("Query"))
 
 	s = spans[2]
 	assert.Equal(t, "GraphQL request", s.Name())
 	assert.Equal(t, traceapi.SpanKindServer, s.SpanKind())
-	// FIXME: validate the rest.
+	assert.Contains(t, s.Attributes(), internal.GraphQLQueryKey.String(
+		"query TestQuery() { hello, helloNonTrivial }",
+	))
 }
 
 func TestTracerTrivial(t *testing.T) {
@@ -118,4 +121,5 @@ func TestTracerTrivial(t *testing.T) {
 	s0, s1 := spans[0], spans[1]
 	assert.Equal(t, "GraphQL validation", s0.Name())
 	assert.Equal(t, "GraphQL request", s1.Name())
+	assert.Contains(t, s1.Attributes(), internal.GraphQLQueryKey.String("{ hello }"))
 }
