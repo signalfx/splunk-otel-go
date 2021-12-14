@@ -497,13 +497,6 @@ func TestRollback(t *testing.T) {
 	assertSpan(t, "Get", spans[2])
 }
 
-func TestOpenClose(t *testing.T) {
-	bdb, err := splunkbuntdb.Open(":memory:")
-	require.NoError(t, err)
-	err = bdb.Close()
-	require.NoError(t, err)
-}
-
 func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
 	bdb, err := buntdb.Open(":memory:")
 	require.NoError(t, err)
