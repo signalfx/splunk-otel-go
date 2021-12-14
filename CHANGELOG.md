@@ -49,6 +49,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/graphql-gophers/graphql-go/splunkgraphql`
   instrumentation for the `github.com/graph-gophers/graphql-go` module. (#232)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`
+  instrumentation for the `github.com/julienschmidt/httprouter` package. (#273)
 
 ### Changed
 
