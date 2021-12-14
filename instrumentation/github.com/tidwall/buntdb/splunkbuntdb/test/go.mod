@@ -12,6 +12,6 @@ require (
 )
 
 replace (
+	github.com/signalfx/splunk-otel-go => ../../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb => ../
-	github.com/signalfx/splunk-otel-go => ../../../../../..
 )
