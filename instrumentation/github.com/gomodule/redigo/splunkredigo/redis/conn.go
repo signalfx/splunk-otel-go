@@ -17,12 +17,17 @@
 package redis
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo"
@@ -65,19 +70,83 @@ func WrapConn(conn redis.Conn, opts ...option.Option) redis.Conn {
 	return struct{ redis.Conn }{&otelConn{conn, *cfg}}
 }
 
+func (c *otelConn) params(commandName string, args ...interface{}) (string, []trace.SpanStartOption) {
+	name := commandName
+	if name == "" {
+		// When the command argument to the Do method is "", then the Do
+		// method will flush the output buffer. See
+		// https://godoc.org/github.com/gomodule/redigo/redis#hdr-Pipelining
+		name = "redigo.Conn.Flush"
+	}
+
+	var b bytes.Buffer
+	b.WriteString(commandName)
+	for _, arg := range args {
+		b.WriteString(" ")
+		switch arg := arg.(type) {
+		case string:
+			b.WriteString(arg)
+		case int:
+			b.WriteString(strconv.Itoa(arg))
+		case int32:
+			b.WriteString(strconv.FormatInt(int64(arg), 10))
+		case int64:
+			b.WriteString(strconv.FormatInt(arg, 10))
+		case fmt.Stringer:
+			b.WriteString(arg.String())
+		}
+	}
+
+	return name, []trace.SpanStartOption{
+		trace.WithAttributes(
+			semconv.DBSystemRedis,
+			semconv.DBOperationKey.String(b.String()),
+		),
+		trace.WithSpanKind(trace.SpanKindClient),
+	}
+}
+
 // Do sends a command to the server and returns the received reply.
 // This function will use the timeout which was set when the connection is created
 func (c *otelConn) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
-	// FIXME: trace
-	return c.Conn.Do(commandName, args...)
+	ctx := context.Background()
+	for i, a := range args {
+		if c, ok := a.(context.Context); ok {
+			ctx = c
+			args = append(args[:i], args[i+1:]...)
+			break
+		}
+	}
+
+	name, sso := c.params(commandName, args...)
+	err = c.cfg.WithSpan(ctx, name, func(ctx context.Context) error {
+		var e error
+		reply, e = c.Conn.Do(commandName, args...)
+		return e
+	}, sso...)
+	return
 }
 
 // DoWithTimeout sends a command to the server and returns the received reply.
 // The timeout overrides the readtimeout set when dialing the connection.
 func (c *otelConn) DoWithTimeout(timeout time.Duration, commandName string, args ...interface{}) (reply interface{}, err error) {
-	// FIXME: trace
-	// This should not panic given the guard in WrapConn.
-	return c.Conn.(redis.ConnWithTimeout).DoWithTimeout(timeout, commandName, args...)
+	ctx := context.Background()
+	for i, a := range args {
+		if c, ok := a.(context.Context); ok {
+			ctx = c
+			args = append(args[:i], args[i+1:]...)
+			break
+		}
+	}
+
+	name, sso := c.params(commandName, args...)
+	err = c.cfg.WithSpan(ctx, name, func(ctx context.Context) error {
+		var e error
+		// This should not panic given the guard in WrapConn.
+		reply, e = c.Conn.(redis.ConnWithTimeout).DoWithTimeout(timeout, commandName, args...)
+		return e
+	}, sso...)
+	return
 }
 
 // ReceiveWithTimeout receives a single reply from the Redis server.
@@ -94,9 +163,14 @@ func (c *otelConn) ReceiveWithTimeout(timeout time.Duration) (reply interface{},
 // ctx timeout return err context.DeadlineExceeded.
 // ctx canceled return err context.Canceled.
 func (c *otelConn) DoContext(ctx context.Context, commandName string, args ...interface{}) (reply interface{}, err error) {
-	// FIXME: trace
-	// This should not panic given the guard in WrapConn.
-	return c.Conn.(redis.ConnWithContext).DoContext(ctx, commandName, args...)
+	name, sso := c.params(commandName, args...)
+	err = c.cfg.WithSpan(ctx, name, func(ctx context.Context) error {
+		var e error
+		// This should not panic given the guard in WrapConn.
+		reply, e = c.Conn.(redis.ConnWithContext).DoContext(ctx, commandName, args...)
+		return e
+	}, sso...)
+	return
 }
 
 // ReceiveContext receives a single reply from the Redis server.
