@@ -394,10 +394,11 @@ func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
 
-	err := db.Update(f)
+	ctx := withTestingDeadline(context.Background(), t)
+
+	err := db.WithContext(ctx).Update(f)
 	assert.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
 	require.NoError(t, tp.Shutdown(ctx))
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
@@ -412,10 +413,11 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
 	t.Cleanup(func() { require.NoError(t, db.Close()) })
 
-	err := db.View(f)
+	ctx := withTestingDeadline(context.Background(), t)
+
+	err := db.WithContext(ctx).View(f)
 	assert.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
 	require.NoError(t, tp.Shutdown(ctx))
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
@@ -493,6 +495,13 @@ func TestRollback(t *testing.T) {
 	assertSpan(t, "Set", spans[0])
 	assertSpan(t, "Rollback", spans[1])
 	assertSpan(t, "Get", spans[2])
+}
+
+func TestOpenClose(t *testing.T) {
+	bdb, err := splunkbuntdb.Open(":memory:")
+	require.NoError(t, err)
+	err = bdb.Close()
+	require.NoError(t, err)
 }
 
 func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
