@@ -31,6 +31,14 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-chi/chi/splunkchi"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/go-chi/chi/splunkchi/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
     schedule:
       interval: "daily"
