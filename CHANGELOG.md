@@ -44,6 +44,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
   instrumentation for the `k8s.io/client-go` package. (#224)
 - Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`
+  instrumentation for the `github.com/go-chi/chi` package. (#227)
+- Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/graphql-gophers/graphql-go/splunkgraphql`
   instrumentation for the `github.com/graph-gophers/graphql-go` module. (#232)
 
