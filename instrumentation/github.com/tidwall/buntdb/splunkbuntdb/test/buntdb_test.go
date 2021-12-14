@@ -433,7 +433,7 @@ func TestCommit(t *testing.T) {
 	tx, err := db.Begin(true)
 	assert.NoError(t, err)
 
-	previousValue, replaced, err := tx.Set("regular:a", "11", nil)
+	previousValue, replaced, err := tx.Set("regular:a", "7", nil)
 	assert.NoError(t, err)
 	assert.True(t, replaced)
 	assert.Equal(t, "1", previousValue)
@@ -442,9 +442,9 @@ func TestCommit(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = db.View(func(tx *splunkbuntdb.Tx) error {
-		val, err := tx.Get("regular:a")
-		assert.NoError(t, err)
-		assert.Equal(t, "11", val)
+		val, errIn := tx.Get("regular:a")
+		assert.NoError(t, errIn)
+		assert.Equal(t, "7", val)
 		return nil
 	})
 	assert.NoError(t, err)
@@ -456,6 +456,42 @@ func TestCommit(t *testing.T) {
 
 	assertSpan(t, "Set", spans[0])
 	assertSpan(t, "Commit", spans[1])
+	assertSpan(t, "Get", spans[2])
+}
+
+func TestRollback(t *testing.T) {
+	sr := tracetest.NewSpanRecorder()
+	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+
+	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	tx, err := db.Begin(true)
+	assert.NoError(t, err)
+
+	previousValue, replaced, err := tx.Set("regular:a", "11", nil)
+	assert.NoError(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "1", previousValue)
+
+	err = tx.Rollback()
+	assert.NoError(t, err)
+
+	err = db.View(func(tx *splunkbuntdb.Tx) error {
+		val, errIn := tx.Get("regular:a")
+		assert.NoError(t, errIn)
+		assert.Equal(t, "1", val)
+		return nil
+	})
+	assert.NoError(t, err)
+
+	ctx := withTestingDeadline(context.Background(), t)
+	require.NoError(t, tp.Shutdown(ctx))
+	spans := sr.Ended()
+	require.Len(t, spans, 3)
+
+	assertSpan(t, "Set", spans[0])
+	assertSpan(t, "Rollback", spans[1])
 	assertSpan(t, "Get", spans[2])
 }
 
