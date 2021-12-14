@@ -380,6 +380,13 @@ func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
 	return ctx
 }
 
+func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
+	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
+	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
+	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
+	assert.Equal(t, span.Name(), name)
+}
+
 func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
@@ -394,12 +401,8 @@ func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	require.NoError(t, tp.Shutdown(ctx))
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
-	span := spans[0]
 
-	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
-	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
-	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
-	assert.Equal(t, span.Name(), name)
+	assertSpan(t, name, spans[0])
 }
 
 func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
@@ -416,12 +419,44 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	require.NoError(t, tp.Shutdown(ctx))
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
-	span := spans[0]
 
-	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
-	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
-	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
-	assert.Equal(t, span.Name(), name)
+	assertSpan(t, name, spans[0])
+}
+
+func TestCommit(t *testing.T) {
+	sr := tracetest.NewSpanRecorder()
+	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
+
+	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
+	t.Cleanup(func() { require.NoError(t, db.Close()) })
+
+	tx, err := db.Begin(true)
+	assert.NoError(t, err)
+
+	previousValue, replaced, err := tx.Set("regular:a", "11", nil)
+	assert.NoError(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "1", previousValue)
+
+	err = tx.Commit()
+	assert.NoError(t, err)
+
+	err = db.View(func(tx *splunkbuntdb.Tx) error {
+		val, err := tx.Get("regular:a")
+		assert.NoError(t, err)
+		assert.Equal(t, "11", val)
+		return nil
+	})
+	assert.NoError(t, err)
+
+	ctx := withTestingDeadline(context.Background(), t)
+	require.NoError(t, tp.Shutdown(ctx))
+	spans := sr.Ended()
+	require.Len(t, spans, 3)
+
+	assertSpan(t, "Set", spans[0])
+	assertSpan(t, "Commit", spans[1])
+	assertSpan(t, "Get", spans[2])
 }
 
 func getDatabase(t *testing.T, opts ...splunkbuntdb.Option) *splunkbuntdb.DB {
