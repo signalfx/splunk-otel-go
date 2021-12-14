@@ -33,10 +33,12 @@ func TestOpenReturnType(t *testing.T) {
 	assert.IsType(t, &DB{}, db)
 }
 
+type key string
+
 func TestDBWithContext(t *testing.T) {
 	db, err := Open(":memory:")
 	require.NoError(t, err)
-	ctx := context.WithValue(context.Background(), "key", "val")
+	ctx := context.WithValue(context.Background(), key("key"), "val")
 	db = db.WithContext(ctx)
 	assert.Equal(t, ctx, db.cfg.ctx)
 }
@@ -44,7 +46,7 @@ func TestDBWithContext(t *testing.T) {
 func TestTxWithContext(t *testing.T) {
 	db, err := Open(":memory:")
 	require.NoError(t, err)
-	ctx := context.WithValue(context.Background(), "key", "val")
+	ctx := context.WithValue(context.Background(), key("key"), "val")
 	tx, err := db.Begin(true)
 	require.NoError(t, err)
 	contextedTx := tx.WithContext(ctx)
