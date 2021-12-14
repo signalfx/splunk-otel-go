@@ -40,3 +40,13 @@ func TestDBWithContext(t *testing.T) {
 	db = db.WithContext(ctx)
 	assert.Equal(t, ctx, db.cfg.ctx)
 }
+
+func TestTxWithContext(t *testing.T) {
+	db, err := Open(":memory:")
+	require.NoError(t, err)
+	ctx := context.WithValue(context.Background(), "key", "val")
+	tx, err := db.Begin(true)
+	require.NoError(t, err)
+	contextedTx := tx.WithContext(ctx)
+	assert.Equal(t, ctx, contextedTx.cfg.ctx)
+}
