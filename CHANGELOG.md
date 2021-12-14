@@ -56,6 +56,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`
   instrumentation for the `github.com/julienschmidt/httprouter` package. (#273)
+- Add the
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
+  instrumentation for the `github.com/gomodule/redigo` package. (#288)
 
 ### Changed
 
