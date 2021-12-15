@@ -24,10 +24,11 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo"

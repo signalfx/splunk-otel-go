@@ -42,18 +42,18 @@ func TestNetAttributes(t *testing.T) {
 	}
 
 	addresses := map[string][]attribute.KeyValue{
-		"": []attribute.KeyValue{},
-		"localhost": []attribute.KeyValue{
+		"": {},
+		"localhost": {
 			semconv.NetPeerNameKey.String("localhost"),
 		},
-		"localhost:80": []attribute.KeyValue{
+		"localhost:80": {
 			semconv.NetPeerNameKey.String("localhost"),
 			semconv.NetPeerPortKey.Int(80),
 		},
-		"127.0.0.1": []attribute.KeyValue{
+		"127.0.0.1": {
 			semconv.NetPeerIPKey.String("127.0.0.1"),
 		},
-		"127.0.0.1:80": []attribute.KeyValue{
+		"127.0.0.1:80": {
 			semconv.NetPeerIPKey.String("127.0.0.1"),
 			semconv.NetPeerPortKey.Int(80),
 		},
@@ -61,7 +61,7 @@ func TestNetAttributes(t *testing.T) {
 
 	for net, netAttr := range networks {
 		for addr, addrAttrs := range addresses {
-			want := append(addrAttrs, netAttr)
+			want := append([]attribute.KeyValue{netAttr}, addrAttrs...)
 			got := netAttributes(net, addr)
 			assert.ElementsMatch(t, want, got)
 		}

@@ -23,9 +23,10 @@ import (
 	"strconv"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 )
 
 // Dial dials into the network address and returns a traced redis.Conn. The
