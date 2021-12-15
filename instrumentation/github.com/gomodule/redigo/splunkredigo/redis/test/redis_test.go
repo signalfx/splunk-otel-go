@@ -74,16 +74,16 @@ func TestMain(m *testing.M) {
 
 	// Wait for the Redis to come up using an exponential-backoff retry.
 	if err = pool.Retry(func() error {
-		conn, err := redis.Dial(
+		conn, e := redis.Dial(
 			"tcp", addr, redis.DialConnectTimeout(time.Second),
 		)
 		defer func() { _ = conn.Close() }()
-		if err != nil {
-			return err
+		if e != nil {
+			return e
 		}
 
-		_, err = conn.Do("SELECT", db)
-		return err
+		_, e = conn.Do("SELECT", db)
+		return e
 	}); err != nil {
 		log.Fatalf("Could not connect to redis server: %s", err)
 	}
