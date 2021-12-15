@@ -80,32 +80,47 @@ func (c *otelConn) params(commandName string, args ...interface{}) (string, []tr
 		name = "redigo.Conn.Flush"
 	}
 
+	return name, []trace.SpanStartOption{
+		c.attrsOpt(commandName, args...),
+		trace.WithSpanKind(trace.SpanKindClient),
+	}
+}
+
+func (c *otelConn) attrsOpt(commandName string, args ...interface{}) trace.SpanStartOption {
+	if commandName == "" {
+		return trace.WithAttributes(semconv.DBSystemRedis)
+	}
+
 	const base10 = 10
 	var b bytes.Buffer
 	b.WriteString(commandName)
 	for _, arg := range args {
-		b.WriteString(" ")
-		switch arg := arg.(type) {
+		var s string
+		switch a := arg.(type) {
 		case string:
-			b.WriteString(arg)
+			s = a
 		case int:
-			b.WriteString(strconv.Itoa(arg))
+			s = strconv.Itoa(a)
+		case int8:
+			s = strconv.FormatInt(int64(a), base10)
+		case int16:
+			s = strconv.FormatInt(int64(a), base10)
 		case int32:
-			b.WriteString(strconv.FormatInt(int64(arg), base10))
+			s = strconv.FormatInt(int64(a), base10)
 		case int64:
-			b.WriteString(strconv.FormatInt(arg, base10))
+			s = strconv.FormatInt(a, base10)
 		case fmt.Stringer:
-			b.WriteString(arg.String())
+			s = a.String()
+		default:
+			continue
 		}
+		b.WriteString(" " + s)
 	}
 
-	return name, []trace.SpanStartOption{
-		trace.WithAttributes(
-			semconv.DBSystemRedis,
-			semconv.DBOperationKey.String(b.String()),
-		),
-		trace.WithSpanKind(trace.SpanKindClient),
-	}
+	return trace.WithAttributes(
+		semconv.DBSystemRedis,
+		semconv.DBOperationKey.String(b.String()),
+	)
 }
 
 // Do sends a command to the server and returns the received reply.
