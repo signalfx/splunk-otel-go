@@ -79,6 +79,7 @@ func (c *otelConn) params(commandName string, args ...interface{}) (string, []tr
 		name = "redigo.Conn.Flush"
 	}
 
+	const base10 = 10
 	var b bytes.Buffer
 	b.WriteString(commandName)
 	for _, arg := range args {
@@ -89,9 +90,9 @@ func (c *otelConn) params(commandName string, args ...interface{}) (string, []tr
 		case int:
 			b.WriteString(strconv.Itoa(arg))
 		case int32:
-			b.WriteString(strconv.FormatInt(int64(arg), 10))
+			b.WriteString(strconv.FormatInt(int64(arg), base10))
 		case int64:
-			b.WriteString(strconv.FormatInt(arg, 10))
+			b.WriteString(strconv.FormatInt(arg, base10))
 		case fmt.Stringer:
 			b.WriteString(arg.String())
 		}

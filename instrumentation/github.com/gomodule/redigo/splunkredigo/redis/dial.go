@@ -77,7 +77,8 @@ func DialURLContext(ctx context.Context, rawurl string, options ...interface{}) 
 	}
 
 	var db int
-	if match := pathDBRegexp.FindStringSubmatch(u.Path); len(match) == 2 {
+	const matchN = 2
+	if match := pathDBRegexp.FindStringSubmatch(u.Path); len(match) == matchN {
 		if len(match[1]) > 0 {
 			db, err = strconv.Atoi(match[1])
 			if err != nil {
@@ -190,7 +191,11 @@ func splitAddress(address string) (ip string, hostname string, port int) {
 	} else {
 		hostname = h
 	}
-	if p64, err := strconv.ParseUint(p, 10, 16); err == nil {
+	const (
+		base10 = 10
+		bit16  = 16
+	)
+	if p64, err := strconv.ParseUint(p, base10, bit16); err == nil {
 		port = int(p64)
 	}
 	return
