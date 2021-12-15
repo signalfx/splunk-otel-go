@@ -52,9 +52,9 @@ func localToInternal(opts []option.Option) []internal.Option {
 	return out
 }
 
-// WrapConn returns a redis.Conn backed by conn that traces all operations it
+// newConn returns a redis.Conn backed by conn that traces all operations it
 // performs with OpenTelemetry.
-func WrapConn(conn redis.Conn, opts ...option.Option) redis.Conn {
+func newConn(conn redis.Conn, opts ...option.Option) redis.Conn {
 	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
 
 	// Remove the functionality the underlying conn does not implement.
