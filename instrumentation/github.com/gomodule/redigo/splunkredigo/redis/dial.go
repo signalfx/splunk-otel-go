@@ -181,7 +181,7 @@ func netAttributes(network, address string) []attribute.KeyValue {
 // valid IPv4 or IPv6 address, ip will be empty and hostname will contain the
 // extracted hostname. Otherwise, hostname will be empty and ip will contain
 // the IP address. If address does not contain a port, port will be zero.
-func splitAddress(address string) (ip string, hostname string, port int) {
+func splitAddress(address string) (ip, hostname string, port int) {
 	h, p, err := net.SplitHostPort(address)
 	if err != nil {
 		h, p = address, ""
