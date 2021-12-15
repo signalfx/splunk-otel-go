@@ -83,7 +83,6 @@ func Example_pool() {
 
 	conn := pool.Get()
 	if _, err := conn.Do("SET", "vehicle", "truck"); err != nil {
-    :x
 		panic(err)
 	}
 }
