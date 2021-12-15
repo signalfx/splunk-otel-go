@@ -47,7 +47,9 @@ func Example() {
 	}
 
 	// Create spans per command by using the Redis connection as usual.
-	conn.Do("SET", "vehicle", "truck")
+	if _, err := conn.Do("SET", "vehicle", "truck"); err != nil {
+		panic(err)
+	}
 
 	tracer := otel.Tracer("my-instrumentation.name")
 	// Use a context to pass information down the processing chain.
@@ -55,7 +57,9 @@ func Example() {
 
 	// When passed a context as an argument, conn.Do will create a span
 	// inheriting from the active span it contains ('parent.request').
-	conn.Do("SET", "food", "cheese", ctx)
+	if _, err := conn.Do("SET", "food", "cheese", ctx); err != nil {
+		panic(err)
+	}
 	root.End()
 }
 
@@ -64,7 +68,9 @@ func Example_dialURL() {
 	if err != nil {
 		panic(err)
 	}
-	conn.Do("SET", "vehicle", "truck")
+	if _, err := conn.Do("SET", "vehicle", "truck"); err != nil {
+		panic(err)
+	}
 }
 
 func Example_pool() {
@@ -76,5 +82,8 @@ func Example_pool() {
 	}
 
 	conn := pool.Get()
-	conn.Do("SET", "vehicle", "truck")
+	if _, err := conn.Do("SET", "vehicle", "truck"); err != nil {
+    :x
+		panic(err)
+	}
 }
