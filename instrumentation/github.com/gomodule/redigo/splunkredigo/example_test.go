@@ -14,6 +14,67 @@
 
 package splunkredigo
 
+import (
+	"context"
+	"time"
+
+	"github.com/gomodule/redigo/redis"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
+	splunkredis "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+)
+
 func Example() {
-	// FIXME
+	// The context used should be propagated from a calling process to ensure
+	// trace continuity.
+	ctx := context.TODO()
+
+	const db = 15
+	// Options passed to Dial* functions can be either redis DialOptions or
+	// splunkredigo options.
+	conn, err := splunkredis.DialContext(ctx, "tcp", "127.0.0.1:6379",
+		redis.DialDatabase(db),
+		option.WithAttributes([]attribute.KeyValue{
+			attribute.String("tier", "alpha"),
+			semconv.DBRedisDBIndexKey.Int(db),
+		}),
+		redis.DialConnectTimeout(1*time.Minute),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create spans per command by using the Redis connection as usual.
+	conn.Do("SET", "vehicle", "truck")
+
+	tracer := otel.Tracer("my-instrumentation.name")
+	// Use a context to pass information down the processing chain.
+	ctx, root := tracer.Start(ctx, "parent.request")
+
+	// When passed a context as an argument, conn.Do will create a span
+	// inheriting from the active span it contains ('parent.request').
+	conn.Do("SET", "food", "cheese", ctx)
+	root.End()
+}
+
+func Example_dialURL() {
+	conn, err := splunkredis.DialURL("redis://127.0.0.1:6379/15")
+	if err != nil {
+		panic(err)
+	}
+	conn.Do("SET", "vehicle", "truck")
+}
+
+func Example_pool() {
+	// Set your Dial function when using a redis Pool to trace all Conn.
+	pool := &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return splunkredis.Dial("tcp", "127.0.0.1:6379")
+		},
+	}
+
+	conn := pool.Get()
+	conn.Do("SET", "vehicle", "truck")
 }
