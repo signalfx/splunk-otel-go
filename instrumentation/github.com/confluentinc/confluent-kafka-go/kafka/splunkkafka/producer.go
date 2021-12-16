@@ -28,12 +28,14 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // A Producer wraps a kafka.Producer and traces its operations.
 type Producer struct {
 	*kafka.Producer
-	cfg            config
+	cfg            *internal.Config
 	stop           chan struct{}
 	waitGroup      sync.WaitGroup
 	produceChannel chan *kafka.Message
@@ -53,9 +55,11 @@ func NewProducer(conf *kafka.ConfigMap, opts ...Option) (*Producer, error) {
 func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
 	cfg := newConfig(opts...)
 	// Common attributes for all spans this producer will produce.
-	cfg.Attributes = append(
-		cfg.Attributes,
-		semconv.MessagingDestinationKindTopic,
+	cfg.DefaultStartOpts = append(
+		cfg.DefaultStartOpts,
+		trace.WithAttributes(
+			semconv.MessagingDestinationKindTopic,
+		),
 	)
 	wrapped := &Producer{
 		Producer: p,
@@ -91,8 +95,7 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 
 	const base10 = 10
 	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), base10)
-	opts := []trace.SpanStartOption{
-		trace.WithAttributes(p.cfg.Attributes...),
+	opts := p.cfg.MergedSpanStartOptions(
 		trace.WithAttributes(
 			semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
 			semconv.MessagingMessageIDKey.String(offset),
@@ -100,7 +103,7 @@ func (p *Producer) startSpan(msg *kafka.Message) trace.Span {
 			semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
 		),
 		trace.WithSpanKind(trace.SpanKindProducer),
-	}
+	)
 
 	name := fmt.Sprintf("%s send", *msg.TopicPartition.Topic)
 	ctx, span := p.cfg.Tracer.Start(psc, name, opts...)

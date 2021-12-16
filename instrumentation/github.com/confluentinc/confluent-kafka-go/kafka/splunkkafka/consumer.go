@@ -31,12 +31,14 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // Consumer wraps a kafka.Consumer and traces its operations.
 type Consumer struct {
 	*kafka.Consumer
-	cfg       config
+	cfg       *internal.Config
 	waitGroup sync.WaitGroup
 	events    chan kafka.Event
 	// Use an unsafe.Pointer instead of an atomic.Value to support Go versions
@@ -57,9 +59,11 @@ func NewConsumer(conf *kafka.ConfigMap, opts ...Option) (*Consumer, error) {
 	cGrpVal, err := conf.Get("group.id", "")
 	if err == nil {
 		if groupID, ok := cGrpVal.(string); ok {
-			cfg.Attributes = append(
-				cfg.Attributes,
-				semconv.MessagingKafkaConsumerGroupKey.String(groupID),
+			cfg.DefaultStartOpts = append(
+				cfg.DefaultStartOpts,
+				trace.WithAttributes(
+					semconv.MessagingKafkaConsumerGroupKey.String(groupID),
+				),
 			)
 		}
 	}
@@ -84,13 +88,15 @@ func (s consumerSpan) End(options ...trace.SpanEndOption) {
 	}
 }
 
-func wrapConsumer(c *kafka.Consumer, cfg config) *Consumer {
+func wrapConsumer(c *kafka.Consumer, cfg *internal.Config) *Consumer {
 	// Common attributes for all spans this consumer will produce.
-	cfg.Attributes = append(
-		cfg.Attributes,
-		semconv.MessagingDestinationKindTopic,
-		semconv.MessagingOperationReceive,
-		semconv.MessagingKafkaClientIDKey.String(c.String()),
+	cfg.DefaultStartOpts = append(
+		cfg.DefaultStartOpts,
+		trace.WithAttributes(
+			semconv.MessagingDestinationKindTopic,
+			semconv.MessagingOperationReceive,
+			semconv.MessagingKafkaClientIDKey.String(c.String()),
+		),
 	)
 	wrapped := &Consumer{
 		Consumer: c,
@@ -141,8 +147,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) consumerSpan {
 
 	const base10 = 10
 	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), base10)
-	opts := []trace.SpanStartOption{
-		trace.WithAttributes(c.cfg.Attributes...),
+	opts := c.cfg.MergedSpanStartOptions(
 		trace.WithAttributes(
 			semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
 			semconv.MessagingMessageIDKey.String(offset),
@@ -150,7 +155,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) consumerSpan {
 			semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
 		),
 		trace.WithSpanKind(trace.SpanKindConsumer),
-	}
+	)
 
 	name := fmt.Sprintf("%s receive", *msg.TopicPartition.Topic)
 	ctx, otelSpan := c.cfg.Tracer.Start(psc, name, opts...)

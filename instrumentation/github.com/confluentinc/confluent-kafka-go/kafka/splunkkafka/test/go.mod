@@ -13,4 +13,7 @@ require (
 	go.uber.org/goleak v1.1.12
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka => ../
+replace (
+	github.com/signalfx/splunk-otel-go => ../../../../../../../
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka => ../
+)
