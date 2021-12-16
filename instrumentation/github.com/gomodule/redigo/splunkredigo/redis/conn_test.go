@@ -159,7 +159,7 @@ func (r *receiveContextChecker) ReceiveContext(context.Context) (interface{}, er
 func TestReceiveContextForwarded(t *testing.T) {
 	r := new(receiveContextChecker)
 	conn := newConn(r)
-	_, err := conn.(redis.ConnWithContext).ReceiveContext(nil)
+	_, err := conn.(redis.ConnWithContext).ReceiveContext(context.Background())
 	require.NoError(t, err)
 	assert.True(t, r.called, "ReceiveContext not forwarded")
 }
