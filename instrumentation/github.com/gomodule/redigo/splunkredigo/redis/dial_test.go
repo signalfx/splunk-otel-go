@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/gomodule/redigo/redis"
@@ -80,16 +81,18 @@ func TestDialContextForwardsError(t *testing.T) {
 
 func TestDialURLContextErrorsForInvalidURL(t *testing.T) {
 	ctx := context.Background()
-	u := "not a valid URL"
+	u := "\not a valid URL/"
 	_, err := DialURLContext(ctx, u)
-	assert.Error(t, err)
+	want := fmt.Sprintf("parse %q: net/url: invalid control character in URL", u)
+	assert.EqualError(t, err, want)
 }
 
 func TestDialURLContextErrorsForInvalidDBPath(t *testing.T) {
 	ctx := context.Background()
-	u := "redis://localhost:6379/invalid/db/path"
+	db := "9999999999999999999"
+	u := "redis://localhost:6379/" + db
 	_, err := DialURLContext(ctx, u)
-	assert.Error(t, err)
+	assert.EqualError(t, err, "invalid database: "+db)
 }
 
 func TestDialURLContextAttrs(t *testing.T) {
