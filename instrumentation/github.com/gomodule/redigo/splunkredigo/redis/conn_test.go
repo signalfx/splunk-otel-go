@@ -15,10 +15,14 @@
 package redis
 
 import (
+	"context"
 	"strconv"
 	"testing"
+	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -85,4 +89,77 @@ func TestParams(t *testing.T) {
 		assert.Equal(t, test.wantName, gotName)
 		assert.Equal(t, test.wantConfig, trace.NewSpanStartConfig(gotOpts...))
 	}
+}
+
+type combined struct {
+	redis.ConnWithTimeout
+	redis.ConnWithContext
+}
+
+func (*combined) Close() error                                   { return nil }
+func (*combined) Err() error                                     { return nil }
+func (*combined) Do(string, ...interface{}) (interface{}, error) { return nil, nil }
+func (*combined) Send(string, ...interface{}) error              { return nil }
+func (*combined) Flush() error                                   { return nil }
+func (*combined) Receive() (interface{}, error)                  { return nil, nil }
+
+func TestNewConnWithTimeoutAndConnWithContext(t *testing.T) {
+	conn := newConn(new(combined))
+	assert.Implements(t, (*redis.ConnWithTimeout)(nil), conn)
+	assert.Implements(t, (*redis.ConnWithContext)(nil), conn)
+}
+
+func TestNewConnWithContext(t *testing.T) {
+	conn := newConn(struct{ redis.ConnWithContext }{})
+	assert.Implements(t, (*redis.Conn)(nil), conn)
+	assert.Implements(t, (*redis.ConnWithContext)(nil), conn)
+}
+
+func TestNewConnWithTimeout(t *testing.T) {
+	conn := newConn(struct{ redis.ConnWithTimeout }{})
+	assert.Implements(t, (*redis.Conn)(nil), conn)
+	assert.Implements(t, (*redis.ConnWithTimeout)(nil), conn)
+}
+
+func TestNewConn(t *testing.T) {
+	conn := newConn(struct{ redis.Conn }{})
+	assert.Implements(t, (*redis.Conn)(nil), conn)
+}
+
+type receiveWithTimeoutChecker struct {
+	combined
+
+	called bool
+}
+
+func (r *receiveWithTimeoutChecker) ReceiveWithTimeout(time.Duration) (interface{}, error) {
+	r.called = true
+	return nil, nil
+}
+
+func TestReceiveWithTimeoutForwarded(t *testing.T) {
+	r := new(receiveWithTimeoutChecker)
+	conn := newConn(r)
+	_, err := conn.(redis.ConnWithTimeout).ReceiveWithTimeout(time.Minute)
+	require.NoError(t, err)
+	assert.True(t, r.called, "ReceiveWithTimeout not forwarded")
+}
+
+type receiveContextChecker struct {
+	combined
+
+	called bool
+}
+
+func (r *receiveContextChecker) ReceiveContext(context.Context) (interface{}, error) {
+	r.called = true
+	return nil, nil
+}
+
+func TestReceiveContextForwarded(t *testing.T) {
+	r := new(receiveContextChecker)
+	conn := newConn(r)
+	_, err := conn.(redis.ConnWithContext).ReceiveContext(nil)
+	require.NoError(t, err)
+	assert.True(t, r.called, "ReceiveContext not forwarded")
 }
