@@ -29,12 +29,16 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/transport"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/internal/config"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
+	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
 )
+
+// instrumentationName is the instrumentation library identifier for a Tracer.
+const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
 
 // NewWrapperFunc returns a Kubernetes WrapperFunc that can be used with a
 // client configuration to trace all communication the client makes.
-func NewWrapperFunc(opts ...config.Option) transport.WrapperFunc {
+func NewWrapperFunc(opts ...option.Option) transport.WrapperFunc {
 	return func(rt http.RoundTripper) http.RoundTripper {
 		if rt == nil {
 			rt = http.DefaultTransport
@@ -42,18 +46,29 @@ func NewWrapperFunc(opts ...config.Option) transport.WrapperFunc {
 
 		wrapped := roundTripper{
 			RoundTripper: rt,
-			cfg:          config.NewConfig(opts...),
+			cfg: internal.NewConfig(
+				instrumentationName,
+				localToInternal(opts)...,
+			),
 		}
 
 		return &wrapped
 	}
 }
 
+func localToInternal(opts []option.Option) []internal.Option {
+	out := make([]internal.Option, len(opts))
+	for i, o := range opts {
+		out[i] = internal.Option(o)
+	}
+	return out
+}
+
 // roundTripper wraps an http.RoundTripper's requests with a span.
 type roundTripper struct {
 	http.RoundTripper
 
-	cfg *config.Config
+	cfg *internal.Config
 }
 
 var _ http.RoundTripper = (*roundTripper)(nil)
