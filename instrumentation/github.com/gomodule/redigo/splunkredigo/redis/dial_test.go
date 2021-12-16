@@ -15,11 +15,14 @@
 package redis
 
 import (
+	"context"
 	"testing"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestNetAttributes(t *testing.T) {
@@ -65,5 +68,87 @@ func TestNetAttributes(t *testing.T) {
 			got := netAttributes(net, addr)
 			assert.ElementsMatch(t, want, got)
 		}
+	}
+}
+
+func TestDialContextForwardsError(t *testing.T) {
+	// This should fail because it is not going to be able to connect to a
+	// Redis server and the lookup of DB 15 will fail.
+	_, err := DialContext(context.Background(), "tcp", "not.valid.localhost", redis.DialDatabase(15))
+	assert.Error(t, err)
+}
+
+func TestDialURLContextErrorsForInvalidURL(t *testing.T) {
+	ctx := context.Background()
+	u := "not a valid URL"
+	_, err := DialURLContext(ctx, u)
+	assert.Error(t, err)
+}
+
+func TestDialURLContextErrorsForInvalidDBPath(t *testing.T) {
+	ctx := context.Background()
+	u := "redis://localhost:6379/invalid/db/path"
+	_, err := DialURLContext(ctx, u)
+	assert.Error(t, err)
+}
+
+func TestDialURLContextAttrs(t *testing.T) {
+	tests := []struct {
+		name string
+		u    string
+		want []attribute.KeyValue
+	}{
+		{
+			name: "db",
+			u:    "redis://fake.localhost:6379/15",
+			want: []attribute.KeyValue{
+				semconv.NetTransportTCP,
+				semconv.NetPeerNameKey.String("fake.localhost"),
+				semconv.NetPeerPortKey.Int(6379),
+				semconv.DBRedisDBIndexKey.Int(15),
+			},
+		},
+		{
+			name: "default address",
+			u:    "",
+			want: []attribute.KeyValue{
+				semconv.NetTransportTCP,
+				semconv.NetPeerNameKey.String("localhost"),
+				semconv.NetPeerPortKey.Int(6379),
+			},
+		},
+		{
+			name: "default port",
+			u:    "redis://fake.localhost",
+			want: []attribute.KeyValue{
+				semconv.NetTransportTCP,
+				semconv.NetPeerNameKey.String("fake.localhost"),
+				semconv.NetPeerPortKey.Int(6379),
+			},
+		},
+		{
+			name: "custom port",
+			u:    "redis://fake.localhost:80",
+			want: []attribute.KeyValue{
+				semconv.NetTransportTCP,
+				semconv.NetPeerNameKey.String("fake.localhost"),
+				semconv.NetPeerPortKey.Int(80),
+			},
+		},
+	}
+
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Do not check error as we only care about conn.
+			conn, _ := DialURLContext(ctx, test.u)
+			oConn := conn.(struct{ redis.Conn }).Conn.(*otelConn)
+			sConf := trace.NewSpanStartConfig(oConn.cfg.DefaultStartOpts...)
+			attrs := sConf.Attributes()
+
+			for _, want := range test.want {
+				assert.Contains(t, attrs, want)
+			}
+		})
 	}
 }
