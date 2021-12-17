@@ -25,7 +25,6 @@ package distro
 import (
 	"context"
 
-	"go.opentelemetry.io/contrib/propagators/b3"
 	global "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -44,6 +43,10 @@ func (s SDK) Shutdown(ctx context.Context) error {
 }
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
+//
+// It is the callers responsibility to shut down the returned SDK when
+// complete. This ensures all resources are released and all telemetry
+// flushed.
 func Run(opts ...Option) (SDK, error) {
 	c, err := newConfig(opts...)
 	if err != nil {
@@ -71,8 +74,10 @@ func Run(opts ...Option) (SDK, error) {
 	)
 	global.SetTracerProvider(traceProvider)
 
-	// TODO: add and honor option to set additional propagators.
-	global.SetTextMapPropagator(b3.New())
+	if c.Propagator != nil {
+		// Only set the global TextMapPropagator if "none" was not specified.
+		global.SetTextMapPropagator(c.Propagator)
+	}
 
 	return SDK{
 		config: *c,
