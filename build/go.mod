@@ -7,6 +7,6 @@ require (
 	github.com/golangci/golangci-lint v1.43.0
 	github.com/goyek/goyek v0.6.0
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
-	golang.org/x/tools v0.1.8-0.20211102182255-bb4add04ddef
-	mvdan.cc/gofumpt v0.2.0
+	golang.org/x/tools v0.1.8
+	mvdan.cc/gofumpt v0.2.1
 )
