@@ -15,7 +15,6 @@
 package splunkmysql_test
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -23,7 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
@@ -59,19 +57,6 @@ func (s *server) handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func Example() {
-	// Setup the Splunk OTel Go distribution.
-	sdk, err := distro.Run()
-	if err != nil {
-		panic(err)
-	}
-	// Ensure all spans are flushed before the application exits.
-	defer func() {
-		sErr := sdk.Shutdown(context.Background())
-		if sErr != nil {
-			panic(sErr)
-		}
-	}()
-
 	// Create a traced connection to the MySQL database.
 	db, err := splunksql.Open("mysql", "user:password@/dbname")
 	if err != nil {
