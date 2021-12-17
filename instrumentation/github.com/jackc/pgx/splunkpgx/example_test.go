@@ -15,14 +15,12 @@
 package splunkpgx_test
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
 	// Make sure to import this so the instrumented driver is registered.
@@ -60,19 +58,6 @@ func (s *server) handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func Example() {
-	// Setup the Splunk OTel Go distribution.
-	sdk, err := distro.Run()
-	if err != nil {
-		panic(err)
-	}
-	// Ensure all spans are flushed before the application exits.
-	defer func() {
-		sErr := sdk.Shutdown(context.Background())
-		if sErr != nil {
-			panic(sErr)
-		}
-	}()
-
 	// Create a traced connection to the Postgres database.
 	db, err := splunksql.Open("pgx", "postgres://localhost:5432/dbname")
 	if err != nil {
