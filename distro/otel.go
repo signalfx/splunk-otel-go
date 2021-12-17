@@ -24,9 +24,9 @@ package distro
 
 import (
 	"context"
+	"errors"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -54,16 +54,19 @@ func Run(opts ...Option) (SDK, error) {
 		return SDK{}, err
 	}
 
-	var jeagerOpts []jaeger.CollectorEndpointOption
-	if c.Endpoint != "" {
-		jeagerOpts = append(jeagerOpts, jaeger.WithEndpoint(c.Endpoint))
-	}
-	if c.AccessToken != "" {
-		jeagerOpts = append(jeagerOpts, jaeger.WithUsername("auth"), jaeger.WithPassword(c.AccessToken))
+	if c.Propagator != nil {
+		if c.Propagator == nonePropagator {
+			// Set to an empty propagator if none was specified
+			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
+		} else {
+			otel.SetTextMapPropagator(c.Propagator)
+		}
 	}
 
-	opt := jaeger.WithCollectorEndpoint(jeagerOpts...)
-	exp, err := jaeger.New(opt)
+	if c.TraceExporterFunc == nil {
+		return SDK{}, errors.New(`"none" exporter set`)
+	}
+	exp, err := c.TraceExporterFunc(c.ExportConfig)
 	if err != nil {
 		return SDK{}, err
 	}
@@ -74,15 +77,6 @@ func Run(opts ...Option) (SDK, error) {
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
 	otel.SetTracerProvider(traceProvider)
-
-	if c.Propagator != nil {
-		if c.Propagator == nonePropagator {
-			// Set to an empty propagator if none was specified
-			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
-		} else {
-			otel.SetTextMapPropagator(c.Propagator)
-		}
-	}
 
 	return SDK{
 		config: *c,

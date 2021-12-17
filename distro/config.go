@@ -15,6 +15,7 @@
 package distro
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -24,7 +25,10 @@ import (
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/contrib/propagators/ot"
+	jaegerexporter "go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -35,22 +39,59 @@ const (
 	// OpenTelemetry TextMapPropagator to set as global.
 	otelPropagatorsKey = "OTEL_PROPAGATORS"
 
+	// OpenTelemetry trace exporter to use.
+	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
+
 	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
 	// FIXME: support OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
-	// FIXME: support OTEL_TRACES_EXPORTER
 )
+
+// Default configuration values.
+const (
+	defaultAccessToken   = ""
+	defaultPropagator    = "tracecontext,baggage"
+	defaultTraceExporter = "otlp"
+
+	defaultOTLPEndpoint   = "localhost:4317"
+	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
+)
+
+type exporterConfig struct {
+	AccessToken string
+	Endpoint    string
+}
+
+// Validate ensures c is valid, otherwise returning an appropriate error.
+func (c exporterConfig) Validate() error {
+	var errs []string
+
+	if c.Endpoint != "" {
+		if _, err := url.Parse(c.Endpoint); err != nil {
+			errs = append(errs, "invalid endpoint: %s", err.Error())
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("invalid exporter config: %v", errs)
+	}
+	return nil
+}
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
-	AccessToken string
-	Endpoint    string
-	Propagator  propagation.TextMapPropagator
+	Propagator propagation.TextMapPropagator
+
+	ExportConfig      *exporterConfig
+	TraceExporterFunc traceExporterFunc
 }
 
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) (*config, error) {
 	c := &config{
-		AccessToken: envOr(accessTokenKey, ""),
+		ExportConfig: &exporterConfig{
+			AccessToken: envOr(accessTokenKey, defaultAccessToken),
+		},
+		TraceExporterFunc: loadTraceExporter(envOr(otelTracesExporterKey, defaultTraceExporter)),
 	}
 
 	for _, o := range opts {
@@ -74,11 +115,7 @@ func newConfig(opts ...Option) (*config, error) {
 func (c *config) Validate() error {
 	var errs []string
 
-	if c.Endpoint != "" {
-		if _, err := url.Parse(c.Endpoint); err != nil {
-			errs = append(errs, "invalid endpoint: %s", err.Error())
-		}
-	}
+	errs = append(errs, c.ExportConfig.Validate().Error())
 
 	if len(errs) > 0 {
 		return fmt.Errorf("invalid config: %v", errs)
@@ -152,6 +189,63 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 	}
 }
 
+type traceExporterFunc func(*exporterConfig) (sdktrace.SpanExporter, error)
+
+// exporters maps environment variable values to trace exporter creation
+// functions.
+var exporters = map[string]traceExporterFunc{
+	// OTLP gRPC exporter.
+	"otlp": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
+		var opts []otlptracegrpc.Option
+
+		endpoint := c.Endpoint
+		if endpoint == "" {
+			endpoint = defaultJaegerEndpoint
+		}
+		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
+
+		if c.AccessToken != "" {
+			opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
+				"X-Sf-Token": c.AccessToken,
+			}))
+		}
+
+		return otlptracegrpc.New(context.Background(), opts...)
+	},
+	// Jaeger thrift exporter.
+	"jaeger-thrift-splunk": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
+		var opts []jaegerexporter.CollectorEndpointOption
+
+		endpoint := c.Endpoint
+		if endpoint == "" {
+			endpoint = defaultJaegerEndpoint
+		}
+		opts = append(opts, jaegerexporter.WithEndpoint(endpoint))
+
+		if c.AccessToken != "" {
+			opts = append(
+				opts,
+				jaegerexporter.WithUsername("auth"),
+				jaegerexporter.WithPassword(c.AccessToken),
+			)
+		}
+
+		return jaegerexporter.New(
+			jaegerexporter.WithCollectorEndpoint(opts...),
+		)
+	},
+	// None, explicitly do not set an exporter.
+	"none": nil,
+}
+
+func loadTraceExporter(name string) traceExporterFunc {
+	tef, ok := exporters[name]
+	if !ok {
+		return exporters[defaultTraceExporter]
+	}
+	return tef
+}
+
 // envOr returns the environment variable value associated with key if it
 // exists, otherwise it returns alt.
 func envOr(key, alt string) string {
@@ -178,7 +272,7 @@ func (fn optionFunc) apply(c *config) {
 // string results in the default value being used.
 func WithEndpoint(endpoint string) Option {
 	return optionFunc(func(c *config) {
-		c.Endpoint = endpoint
+		c.ExportConfig.Endpoint = endpoint
 	})
 }
 
@@ -191,7 +285,7 @@ func WithEndpoint(endpoint string) Option {
 // is not provided.
 func WithAccessToken(accessToken string) Option {
 	return optionFunc(func(c *config) {
-		c.AccessToken = accessToken
+		c.ExportConfig.AccessToken = accessToken
 	})
 }
 
@@ -211,5 +305,25 @@ func WithPropagator(p propagation.TextMapPropagator) Option {
 			p = nonePropagator
 		}
 		c.Propagator = p
+	})
+}
+
+// WithTraceExporter configures the OpenTelemetry trace SpanExporter used to
+// deliver telemetry. This exporter is registered with the OpenTelemetry SDK
+// using a batch span processor.
+//
+// The OTEL_TRACES_EXPORTER environment variable value is used if this Option
+// is not provided. Valid values for this environment variable are "otlp" for
+// an OTLP exporter, and "jaeger-thrift-splunk" for a Splunk specific Jaeger
+// thrift exporter. If this environment variable is set to "none", no exporter
+// is registered and Run will return an error stating this.
+//
+// By default, an OTLP exporter is used if this is not provided or the
+// OTEL_TRACES_EXPORTER environment variable is not set.
+func WithTraceExporter(e sdktrace.SpanExporter) Option {
+	return optionFunc(func(c *config) {
+		c.TraceExporterFunc = func(*exporterConfig) (sdktrace.SpanExporter, error) {
+			return e, nil
+		}
 	})
 }
