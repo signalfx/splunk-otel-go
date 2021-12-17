@@ -18,23 +18,40 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
+
+	"go.opentelemetry.io/contrib/propagators/aws/xray"
+	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/contrib/propagators/jaeger"
+	"go.opentelemetry.io/contrib/propagators/ot"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 // Environment variable keys that set values of the configuration.
 const (
+	// Access token added to exported data.
 	accessTokenKey = "SPLUNK_ACCESS_TOKEN"
+
+	// OpenTelemetry TextMapPropagator to set as global.
+	otelPropagatorsKey = "OTEL_PROPAGATORS"
+
+	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
+	// FIXME: support OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
+	// FIXME: support OTEL_TRACES_EXPORTER
 )
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
 	AccessToken string
 	Endpoint    string
+	Propagator  propagation.TextMapPropagator
 }
 
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) (*config, error) {
 	c := &config{
 		AccessToken: envOr(accessTokenKey, ""),
+		Propagator:  loadPropagator(envOr(otelPropagatorsKey, "tracecontext,baggage")),
 	}
 
 	for _, o := range opts {
@@ -62,6 +79,70 @@ func (c config) Validate() error {
 	return nil
 }
 
+// propagators maps environment variable values to TextMapPropagator creation
+// functions.
+var propagators = map[string]func() propagation.TextMapPropagator{
+	// W3C Trace Context.
+	"tracecontext": func() propagation.TextMapPropagator {
+		return propagation.TraceContext{}
+	},
+	// W3C Baggage
+	"baggage": func() propagation.TextMapPropagator {
+		return propagation.Baggage{}
+	},
+	// B3 Single
+	"b3": func() propagation.TextMapPropagator {
+		return b3.New(b3.WithInjectEncoding(b3.B3SingleHeader))
+	},
+	//  B3 Multi
+	"b3multi": func() propagation.TextMapPropagator {
+		return b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
+	},
+	// Jaeger
+	"jaeger": func() propagation.TextMapPropagator {
+		return jaeger.Jaeger{}
+	},
+	// AWS X-Ray.
+	"xray": func() propagation.TextMapPropagator {
+		return xray.Propagator{}
+	},
+	//  OpenTracing Trace
+	"ottrace": func() propagation.TextMapPropagator {
+		return ot.OT{}
+	},
+	// None, explicitly do not set a global propagator.
+	"none": nil,
+}
+
+func loadPropagator(name string) propagation.TextMapPropagator {
+	var props []propagation.TextMapPropagator
+	for _, part := range strings.Split(name, ",") {
+		factory, ok := propagators[part]
+		if !ok {
+			// Skip invalid data.
+			continue
+		}
+		if factory == nil {
+			// "none" was explicitly passed.
+			return nil
+		}
+		props = append(props, factory())
+	}
+
+	switch len(props) {
+	case 0:
+		// Default to tracecontext,baggage
+		return propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		)
+	case 1:
+		return props[0]
+	default:
+		return propagation.NewCompositeTextMapPropagator(props...)
+	}
+}
+
 // envOr returns the environment variable value associated with key if it
 // exists, otherwise it returns alt.
 func envOr(key, alt string) string {
@@ -85,7 +166,7 @@ func (fn optionFunc) apply(c *config) {
 }
 
 // WithEndpoint configures the endpoint telemetry is sent to.
-// Setting empty string results in no operation.
+// Setting an empty string results in no operation.
 func WithEndpoint(endpoint string) Option {
 	return optionFunc(func(c *config) {
 		c.Endpoint = endpoint
@@ -94,9 +175,25 @@ func WithEndpoint(endpoint string) Option {
 
 // WithAccessToken configures the authentication token
 // allowing exporters to send data directly to a Splunk back-end.
-// Setting empty string results in no operation.
+// Setting an empty string results in no operation.
 func WithAccessToken(accessToken string) Option {
 	return optionFunc(func(c *config) {
 		c.AccessToken = accessToken
+	})
+}
+
+// WithPropagator configures the OpenTelemetry TextMapPropagator set as the
+// global TextMapPropagator. Setting to nil will prevent any global
+// TextMapPropagator from being set.
+//
+// The OTEL_PROPAGATORS environment variable value is used if this Option is
+// not provided.
+//
+// By default, a tracecontext and baggage TextMapPropagator is set as the
+// global TextMapPropagator if this is not provided or the OTEL_PROPAGATORS
+// environment variable is not set.
+func WithPropagator(p propagation.TextMapPropagator) Option {
+	return optionFunc(func(c *config) {
+		c.Propagator = p
 	})
 }

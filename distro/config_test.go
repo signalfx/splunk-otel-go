@@ -19,6 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/contrib/propagators/aws/xray"
+	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/contrib/propagators/jaeger"
+	"go.opentelemetry.io/contrib/propagators/ot"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 type KeyValue struct {
@@ -90,6 +95,41 @@ var ConfigurationTests = []*ConfigFieldTest{
 			},
 		},
 	},
+	{
+		Name: "Propagator",
+		ValueFunc: func(c *config) interface{} {
+			return c.Propagator
+		},
+		DefaultValue: propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		),
+		EnvironmentTests: []KeyValue{
+			{Key: otelPropagatorsKey, Value: "tracecontext"},
+		},
+		OptionTests: []OptionTest{
+			{
+				Name: "nil propagator",
+				Options: []Option{
+					WithPropagator(nil),
+				},
+				AssertionFunc: func(t *testing.T, c *config, e error) {
+					assert.NoError(t, e)
+					assert.Nil(t, c.Propagator)
+				},
+			},
+			{
+				Name: "set to tracecontext",
+				Options: []Option{
+					WithPropagator(propagation.TraceContext{}),
+				},
+				AssertionFunc: func(t *testing.T, c *config, e error) {
+					assert.NoError(t, e)
+					assert.Equal(t, propagation.TraceContext{}, c.Propagator)
+				},
+			},
+		},
+	},
 }
 
 func TestConfig(t *testing.T) {
@@ -144,4 +184,27 @@ func testOptions(t *testing.T, tc *ConfigFieldTest) {
 			})
 		}(t, o)
 	}
+}
+
+func TestLoadPropagatorNone(t *testing.T) {
+	assert.Nil(t, loadPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage,none"))
+}
+
+func TestLoadPropagatorComposite(t *testing.T) {
+	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+		b3.New(b3.WithInjectEncoding(b3.B3SingleHeader)),
+		b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)),
+		jaeger.Jaeger{},
+		xray.Propagator{},
+		ot.OT{},
+	), loadPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage"))
+}
+
+func TestLoadPropagatorDefault(t *testing.T) {
+	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	), loadPropagator(""))
 }
