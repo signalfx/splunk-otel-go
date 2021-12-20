@@ -94,7 +94,7 @@ var propagators = map[string]func() propagation.TextMapPropagator{
 	"b3": func() propagation.TextMapPropagator {
 		return b3.New(b3.WithInjectEncoding(b3.B3SingleHeader))
 	},
-	//  B3 Multi
+	// B3 Multi
 	"b3multi": func() propagation.TextMapPropagator {
 		return b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	},
@@ -106,7 +106,7 @@ var propagators = map[string]func() propagation.TextMapPropagator{
 	"xray": func() propagation.TextMapPropagator {
 		return xray.Propagator{}
 	},
-	//  OpenTracing Trace
+	// OpenTracing Trace
 	"ottrace": func() propagation.TextMapPropagator {
 		return ot.OT{}
 	},
