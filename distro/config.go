@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -62,7 +63,11 @@ type exporterConfig struct {
 }
 
 // Validate ensures c is valid, otherwise returning an appropriate error.
-func (c exporterConfig) Validate() error {
+func (c *exporterConfig) Validate() error {
+	if c == nil {
+		return nil
+	}
+
 	var errs []string
 
 	if c.Endpoint != "" {
@@ -91,6 +96,8 @@ func newConfig(opts ...Option) (*config, error) {
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
+		// FIXME: only load this after checking if the user passed
+		// WithTraceExporter or not.
 		TraceExporterFunc: loadTraceExporter(envOr(otelTracesExporterKey, defaultTraceExporter)),
 	}
 
@@ -115,7 +122,9 @@ func newConfig(opts ...Option) (*config, error) {
 func (c *config) Validate() error {
 	var errs []string
 
-	errs = append(errs, c.ExportConfig.Validate().Error())
+	if ecErr := c.ExportConfig.Validate(); ecErr != nil {
+		errs = append(errs, ecErr.Error())
+	}
 
 	if len(errs) > 0 {
 		return fmt.Errorf("invalid config: %v", errs)
@@ -196,13 +205,15 @@ type traceExporterFunc func(*exporterConfig) (sdktrace.SpanExporter, error)
 var exporters = map[string]traceExporterFunc{
 	// OTLP gRPC exporter.
 	"otlp": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
-		var opts []otlptracegrpc.Option
-
 		endpoint := c.Endpoint
 		if endpoint == "" {
 			endpoint = defaultJaegerEndpoint
 		}
-		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
+		opts := []otlptracegrpc.Option{
+			// FIXME: remove (maybe?)
+			otlptracegrpc.WithDialOption(grpc.WithBlock()),
+			otlptracegrpc.WithEndpoint(endpoint),
+		}
 
 		if c.AccessToken != "" {
 			opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{

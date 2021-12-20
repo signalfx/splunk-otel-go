@@ -48,7 +48,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 	{
 		Name: "AccessToken",
 		ValueFunc: func(c *config) interface{} {
-			return c.AccessToken
+			return c.ExportConfig.AccessToken
 		},
 		DefaultValue: "",
 		EnvironmentTests: []KeyValue{
@@ -62,7 +62,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 				},
 				AssertionFunc: func(t *testing.T, c *config, e error) {
 					assert.NoError(t, e)
-					assert.Equal(t, "secret", c.AccessToken)
+					assert.Equal(t, "secret", c.ExportConfig.AccessToken)
 				},
 			},
 		},
@@ -70,7 +70,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 	{
 		Name: "Endpoint",
 		ValueFunc: func(c *config) interface{} {
-			return c.Endpoint
+			return c.ExportConfig.Endpoint
 		},
 		DefaultValue: "",
 		OptionTests: []OptionTest{
@@ -81,7 +81,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 				},
 				AssertionFunc: func(t *testing.T, c *config, e error) {
 					assert.NoError(t, e)
-					assert.Equal(t, "https://localhost/", c.Endpoint)
+					assert.Equal(t, "https://localhost/", c.ExportConfig.Endpoint)
 				},
 			},
 			{
