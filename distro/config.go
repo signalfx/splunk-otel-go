@@ -174,17 +174,21 @@ func (fn optionFunc) apply(c *config) {
 	fn(c)
 }
 
-// WithEndpoint configures the endpoint telemetry is sent to.
-// Setting an empty string results in no operation.
+// WithEndpoint configures the endpoint telemetry is sent to. Passing an empty
+// string results in the default value being used.
 func WithEndpoint(endpoint string) Option {
 	return optionFunc(func(c *config) {
 		c.Endpoint = endpoint
 	})
 }
 
-// WithAccessToken configures the authentication token
-// allowing exporters to send data directly to a Splunk back-end.
-// Setting an empty string results in no operation.
+// WithAccessToken configures the authentication token used to authenticate
+// telemetry delivery requests to a Splunk back-end. Passing an empty string
+// results in no authentication token being used, and assumes authentication
+// is handled by another system.
+//
+// The SPLUNK_ACCESS_TOKEN environment variable value is used if this Option
+// is not provided.
 func WithAccessToken(accessToken string) Option {
 	return optionFunc(func(c *config) {
 		c.AccessToken = accessToken
