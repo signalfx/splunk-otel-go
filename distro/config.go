@@ -70,7 +70,7 @@ func newConfig(opts ...Option) (*config, error) {
 	return c, nil
 }
 
-// Validate ensures c is valid or a, otherwise returning an appropriate error.
+// Validate ensures c is valid, otherwise returning an appropriate error.
 func (c *config) Validate() error {
 	var errs []string
 
