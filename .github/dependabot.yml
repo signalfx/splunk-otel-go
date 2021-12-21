@@ -39,6 +39,14 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/gomodule/redigo/splunkredigo"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/gomodule/redigo/splunkredigo/redis/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
     schedule:
       interval: "daily"

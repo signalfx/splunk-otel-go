@@ -1,4 +1,4 @@
-# Splunk distribution of OpenTelemetry Go
+# Splunk Distribution of OpenTelemetry Go
 
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go?include_prereleases)](https://github.com/signalfx/splunk-otel-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
@@ -113,6 +113,7 @@ Additional recommended Splunk specific instrumentations:
 - [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
 - [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
 - [`splunkpq`](./instrumentation/github.com/lib/pq/splunkpq)
+- [`splunkredigo`](./instrumentation/github.com/gomodule/redigo/splunkredigo)
 - [`splunksql`](./instrumentation/database/sql/splunksql)
 - [`splunksqlx`](./instrumentation/github.com/jmoiron/sqlx/splunksqlx)
 
@@ -176,3 +177,7 @@ distribution of the [OpenTelemetry Go
 project](https://github.com/open-telemetry/opentelemetry-go). It is
 released under the terms of the Apache Software License version 2.0. See [the
 license file](./LICENSE) for more details.
+
+>ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk
+SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html)
+for more information.
