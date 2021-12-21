@@ -18,10 +18,12 @@ The [`SDK`][] is configured with the following options.
 | Option Name | Default Value | Environment Variable |
 | ---| --- | --- |
 | `WithAccessToken` | `""` | `SPLUNK_ACCESS_TOKEN` |
-| `WithEndpoint` | `"localhost:4317"`(1) | none |
+| `WithEndpoint` | (1) | (2) |
 | `WithPropagator` | `tracecontext,baggage` | `OTEL_PROPAGATORS` |
 
 (1): The default value depends on the exporter used. See the
+[`WithEndpoint`](#withendpoint) section for more details.
+(2): The environment variable depends on the exporter used. See the
 [`WithEndpoint`](#withendpoint) section for more details.
 
 Environment variable can be used to set related option values, but the value
@@ -45,6 +47,11 @@ telemetry delivery requests to a Splunk back-end.
 - Default value: depends on the exporter used.
   - For the `otlp` over gRPC exporter: `"localhost:4317"`
   - For the `jaeger-thrift-splunk` exporter: `"http://127.0.0.1:9080/v1/trace"`
+- Environment variable: depends on the exporter used.
+  - For the `otlp` over gRPC exporter:
+    - `OTEL_EXPORTER_OTLP_ENDPOINT`
+    - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+  - For the `jaeger-thrift-splunk` exporter: `OTEL_EXPORTER_JAEGER_ENDPOINT`
 
 ### `WithPropagator`
 
