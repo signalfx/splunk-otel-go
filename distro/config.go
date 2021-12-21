@@ -96,9 +96,6 @@ func newConfig(opts ...Option) (*config, error) {
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
-		// FIXME: only load this after checking if the user passed
-		// WithTraceExporter or not.
-		TraceExporterFunc: loadTraceExporter(envOr(otelTracesExporterKey, defaultTraceExporter)),
 	}
 
 	for _, o := range opts {
@@ -109,6 +106,11 @@ func newConfig(opts ...Option) (*config, error) {
 	if c.Propagator == nil {
 		c.Propagator = loadPropagator(
 			envOr(otelPropagatorsKey, "tracecontext,baggage"),
+		)
+	}
+	if c.TraceExporterFunc == nil {
+		c.TraceExporterFunc = loadTraceExporter(
+			envOr(otelTracesExporterKey, defaultTraceExporter),
 		)
 	}
 
