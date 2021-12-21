@@ -209,7 +209,7 @@ var exporters = map[string]traceExporterFunc{
 	"otlp": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
 		endpoint := c.Endpoint
 		if endpoint == "" {
-			endpoint = defaultJaegerEndpoint
+			endpoint = defaultOTLPEndpoint
 		}
 		opts := []otlptracegrpc.Option{
 			// FIXME: remove (maybe?)
