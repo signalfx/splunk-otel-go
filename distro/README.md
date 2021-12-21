@@ -18,7 +18,7 @@ The [`SDK`][] is configured with the following options.
 | Option Name | Default Value | Environment Variable |
 | ---| --- | --- |
 | `WithAccessToken` | `""` | `SPLUNK_ACCESS_TOKEN` |
-| `WithEndpoint` | `"localhost:4317"` or `"http://127.0.0.1:9080/v1/trace"`(1) | none |
+| `WithEndpoint` | `"localhost:4317"`(1) | none |
 | `WithPropagator` | `tracecontext,baggage` | `OTEL_PROPAGATORS` |
 
 (1): The default value depends on the exporter used. See the
