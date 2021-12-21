@@ -25,12 +25,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.uber.org/goleak"
 
 	"github.com/signalfx/splunk-otel-go/distro"
 )
 
-// TestRun is a collection of sanity tests that ensure that traces are sent using thrift protocol.
-func TestRun(t *testing.T) {
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
+
+func TestRunJaegerExporter(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		setupFn  func(t *testing.T, url string) (distro.SDK, error)
@@ -106,6 +110,7 @@ func TestRun(t *testing.T) {
 			defer srv.Close()
 
 			// setup tracer
+			t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 			sdk, err := tc.setupFn(t, srv.URL)
 			require.NoError(t, err, "should configure tracing")
 
