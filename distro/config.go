@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -42,6 +41,11 @@ const (
 
 	// OpenTelemetry trace exporter to use.
 	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
+
+	// OpenTelemetry exporter endpoints.
+	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
+	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
 
 	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
 	// FIXME: support OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
@@ -207,14 +211,23 @@ type traceExporterFunc func(*exporterConfig) (sdktrace.SpanExporter, error)
 var exporters = map[string]traceExporterFunc{
 	// OTLP gRPC exporter.
 	"otlp": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
-		endpoint := c.Endpoint
-		if endpoint == "" {
-			endpoint = defaultOTLPEndpoint
-		}
-		opts := []otlptracegrpc.Option{
-			// FIXME: remove (maybe?)
-			otlptracegrpc.WithDialOption(grpc.WithBlock()),
-			otlptracegrpc.WithEndpoint(endpoint),
+		var opts []otlptracegrpc.Option
+
+		if c.Endpoint == "" {
+			if endpoint := func() string {
+				// Allow the exporter to use environment variables if set.
+				if _, ok := os.LookupEnv(otelExporterOTLPEndpointKey); ok {
+					return ""
+				}
+				if _, ok := os.LookupEnv(otelExporterOTLPTracesEndpointKey); ok {
+					return ""
+				}
+				return defaultOTLPEndpoint
+			}(); endpoint != "" {
+				opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
+			}
+		} else {
+			opts = append(opts, otlptracegrpc.WithEndpoint(c.Endpoint))
 		}
 
 		if c.AccessToken != "" {
@@ -229,11 +242,19 @@ var exporters = map[string]traceExporterFunc{
 	"jaeger-thrift-splunk": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
 		var opts []jaegerexporter.CollectorEndpointOption
 
-		endpoint := c.Endpoint
-		if endpoint == "" {
-			endpoint = defaultJaegerEndpoint
+		if c.Endpoint == "" {
+			if endpoint := func() string {
+				// Allow the exporter to use environment variables.
+				if _, ok := os.LookupEnv(otelExporterJaegerEndpointKey); ok {
+					return ""
+				}
+				return defaultJaegerEndpoint
+			}(); endpoint != "" {
+				opts = append(opts, jaegerexporter.WithEndpoint(endpoint))
+			}
+		} else {
+			opts = append(opts, jaegerexporter.WithEndpoint(c.Endpoint))
 		}
-		opts = append(opts, jaegerexporter.WithEndpoint(endpoint))
 
 		if c.AccessToken != "" {
 			opts = append(
