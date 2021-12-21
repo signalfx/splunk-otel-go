@@ -25,8 +25,9 @@ package distro
 import (
 	"context"
 
-	global "go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -72,11 +73,15 @@ func Run(opts ...Option) (SDK, error) {
 		// TODO: configure batching policy with configured values.
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
-	global.SetTracerProvider(traceProvider)
+	otel.SetTracerProvider(traceProvider)
 
 	if c.Propagator != nil {
-		// Only set the global TextMapPropagator if "none" was not specified.
-		global.SetTextMapPropagator(c.Propagator)
+		if c.Propagator == nonePropagator {
+			// Set to an empty propagator if none was specified
+			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
+		} else {
+			otel.SetTextMapPropagator(c.Propagator)
+		}
 	}
 
 	return SDK{

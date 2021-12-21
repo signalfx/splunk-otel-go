@@ -115,7 +115,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 				},
 				AssertionFunc: func(t *testing.T, c *config, e error) {
 					assert.NoError(t, e)
-					assert.Nil(t, c.Propagator)
+					assert.Equal(t, nonePropagator, c.Propagator)
 				},
 			},
 			{
@@ -184,10 +184,6 @@ func testOptions(t *testing.T, tc *ConfigFieldTest) {
 			})
 		}(t, o)
 	}
-}
-
-func TestLoadPropagatorNone(t *testing.T) {
-	assert.Nil(t, loadPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage,none"))
 }
 
 func TestLoadPropagatorComposite(t *testing.T) {

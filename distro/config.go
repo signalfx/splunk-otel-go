@@ -51,20 +51,27 @@ type config struct {
 func newConfig(opts ...Option) (*config, error) {
 	c := &config{
 		AccessToken: envOr(accessTokenKey, ""),
-		Propagator:  loadPropagator(envOr(otelPropagatorsKey, "tracecontext,baggage")),
 	}
 
 	for _, o := range opts {
 		o.apply(c)
 	}
+
+	// Apply default field values if they were not set.
+	if c.Propagator == nil {
+		c.Propagator = loadPropagator(
+			envOr(otelPropagatorsKey, "tracecontext,baggage"),
+		)
+	}
+
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
 	return c, nil
 }
 
-// Validate ensures c is valid, otherwise returning an appropriate error.
-func (c config) Validate() error {
+// Validate ensures c is valid or a, otherwise returning an appropriate error.
+func (c *config) Validate() error {
 	var errs []string
 
 	if c.Endpoint != "" {
@@ -78,6 +85,10 @@ func (c config) Validate() error {
 	}
 	return nil
 }
+
+type nonePropagatorType struct{ propagation.TextMapPropagator }
+
+var nonePropagator = nonePropagatorType{}
 
 // propagators maps environment variable values to TextMapPropagator creation
 // functions.
@@ -111,7 +122,9 @@ var propagators = map[string]func() propagation.TextMapPropagator{
 		return ot.OT{}
 	},
 	// None, explicitly do not set a global propagator.
-	"none": nil,
+	"none": func() propagation.TextMapPropagator {
+		return nonePropagator
+	},
 }
 
 func loadPropagator(name string) propagation.TextMapPropagator {
@@ -122,16 +135,12 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 			// Skip invalid data.
 			continue
 		}
-		if factory == nil {
-			// "none" was explicitly passed.
-			return nil
-		}
 		props = append(props, factory())
 	}
 
 	switch len(props) {
 	case 0:
-		// Default to tracecontext,baggage
+		// Default to "tracecontext,baggage".
 		return propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{},
 			propagation.Baggage{},
@@ -183,8 +192,8 @@ func WithAccessToken(accessToken string) Option {
 }
 
 // WithPropagator configures the OpenTelemetry TextMapPropagator set as the
-// global TextMapPropagator. Setting to nil will prevent any global
-// TextMapPropagator from being set.
+// global TextMapPropagator. Passing nil will set a TextMapPropagator that
+// propagates nothing.
 //
 // The OTEL_PROPAGATORS environment variable value is used if this Option is
 // not provided.
@@ -194,6 +203,9 @@ func WithAccessToken(accessToken string) Option {
 // environment variable is not set.
 func WithPropagator(p propagation.TextMapPropagator) Option {
 	return optionFunc(func(c *config) {
+		if p == nil {
+			p = nonePropagator
+		}
 		c.Propagator = p
 	})
 }
