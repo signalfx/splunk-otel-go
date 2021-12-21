@@ -1,6 +1,6 @@
 # Package `github.com/signalfx/splunk-otel-go/distro`
 
-This package provides a Splunk distributed of the OpenTelemetry Go SDK. It is
+This package provides a Splunk distribution of the OpenTelemetry Go SDK. It is
 designed to provide an SDK properly configured to be used with the Splunk
 platform out-of-the-box.
 
@@ -56,7 +56,6 @@ global `TextMapPropagator`. Setting to `nil` will prevent any global
 - Environment variable: `OTEL_PROPAGATORS`
 
   The environment variable values are restricted to the following.
-
   - `"tracecontext"`: W3C tracecontext
   - `"baggage"`: W3C baggage
   - `"b3"`: B3 single-header format
