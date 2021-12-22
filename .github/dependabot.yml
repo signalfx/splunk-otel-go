@@ -31,6 +31,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/github.com/globalsign/mgo/splunkmgo"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/github.com/go-chi/chi/splunkchi"
     schedule:
       interval: "daily"
