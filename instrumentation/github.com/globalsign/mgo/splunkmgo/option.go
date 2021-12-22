@@ -57,6 +57,12 @@ func newConfig(options ...Option) *config {
 	return &c
 }
 
+// Copy returns a deep copy of c.
+func (c *config) Copy() *config {
+	return &config{Config: c.Config.Copy(), ctx: c.ctx}
+
+}
+
 // Option applies options to a configuration.
 type Option interface {
 	apply(*config)
