@@ -40,7 +40,6 @@ func Dial(url string, opts ...Option) (*Session, error) {
 // info.
 func DialWithInfo(dialInfo *mgo.DialInfo, opts ...Option) (*Session, error) {
 	// FIXME: extract and annotate username.
-	// FIXME: extract and annotate default DB name.
 	s, err := mgo.DialWithInfo(dialInfo)
 	if err != nil {
 		return nil, err
@@ -113,6 +112,11 @@ func (s *Session) New() *Session {
 	return &Session{Session: s.Session.New(), cfg: s.cfg.Copy()}
 }
 
+// Ping runs a trivial ping command just to get in touch with the server.
+func (s *Session) Ping() error {
+	return s.Run("ping", nil)
+}
+
 // DB returns a traced *Database representing the named database. If name is
 // empty, the database name provided in the dialed URL is used instead. If
 // that is also empty, "test" is used as a fallback in a way equivalent to the
@@ -131,6 +135,13 @@ func (s *Session) DB(name string) *Database {
 func (s *Session) Login(cred *mgo.Credential) error {
 	// FIXME: extract and annoate username.
 	return s.Session.Login(cred)
+}
+
+// LogoutAll removes all established authentication credentials for the session.
+func (s *Session) LogoutAll() {
+	// FIXME: remove all annotated usernames.
+	s.Session.LogoutAll()
+	return
 }
 
 // Run traces and issues the provided command on the "admin" database and and
