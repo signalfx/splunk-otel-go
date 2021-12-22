@@ -12,8 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package splunkmgo
+package splunkmgo_test
+
+import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/globalsign/mgo/splunkmgo"
 
 func Example() {
-	// FIXME
+	session, err := splunkmgo.Dial("mongodb://localhost:40003?ssl=true")
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	// Use session as normal.
 }
