@@ -110,6 +110,7 @@ Additional recommended Splunk specific instrumentations:
 - [`splunkhttprouter`](./instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter)
 - [`splunkkafka`](./instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka)
 - [`splunkleveldb`](./instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb)
+- [`splunkmgo`](./instrumentation/github.com/globalsign/mgo/splunkmgo)
 - [`splunkmysql`](./instrumentation/github.com/go-sql-driver/mysql/splunkmysql)
 - [`splunkpgx`](./instrumentation/github.com/jackc/pgx/splunkpgx)
 - [`splunkpq`](./instrumentation/github.com/lib/pq/splunkpq)
