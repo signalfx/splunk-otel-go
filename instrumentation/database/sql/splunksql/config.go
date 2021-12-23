@@ -27,8 +27,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
@@ -36,63 +36,35 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 
 // traceConfig contains tracing configuration options.
 type traceConfig struct {
-	TracerProvider trace.TracerProvider
+	*internal.Config
 
-	DBName     string
-	Attributes []attribute.KeyValue
+	DBName string
 }
 
 func newTraceConfig(options ...Option) traceConfig {
-	var c traceConfig
+	c := traceConfig{
+		Config: internal.NewConfig(instrumentationName, internal.OptionFunc(
+			func(c *internal.Config) {
+				c.DefaultStartOpts = []trace.SpanStartOption{
+					// From the specification: span kind MUST always be CLIENT.
+					trace.WithSpanKind(trace.SpanKindClient),
+				}
+			}),
+		),
+	}
+
 	for _, o := range options {
 		if o != nil {
 			o.apply(&c)
 		}
 	}
-	if c.TracerProvider == nil {
-		c.TracerProvider = otel.GetTracerProvider()
-	}
-	return c
-}
 
-// tracer returns an OTel tracer from the appropriate TracerProvider.
-//
-// If the passed context contains a span, the TracerProvider that created the
-// tracer that created that span will be used. Otherwise, the TracerProvider
-// from c is used.
-func (c traceConfig) tracer(ctx context.Context) trace.Tracer {
-	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-		return span.TracerProvider().Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
-	}
-	return c.TracerProvider.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
+	return c
 }
 
 // withSpan wraps the function f with a span.
 func (c traceConfig) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
-	opts = append([]trace.SpanStartOption{trace.WithAttributes(c.Attributes...)}, opts...)
-	// From the specification: span kind MUST always be CLIENT.
-	opts = append(opts, trace.WithSpanKind(trace.SpanKindClient))
-
-	var (
-		err  error
-		span trace.Span
-	)
-	ctx, span = c.tracer(ctx).Start(ctx, c.spanName(m), opts...)
-	defer func() {
-		handleErr(span, err)
-		span.End()
-	}()
-
-	err = f(ctx)
-	return err
+	return c.WithSpan(ctx, c.spanName(m), f, opts...)
 }
 
 // spanName returns the OpenTelemetry compliant span name.
@@ -129,6 +101,14 @@ type Option interface {
 	apply(*traceConfig)
 }
 
+type optionConv struct {
+	iOpt internal.Option
+}
+
+func (o optionConv) apply(c *traceConfig) {
+	o.iOpt.Apply(c.Config)
+}
+
 type optionFunc func(*traceConfig)
 
 func (o optionFunc) apply(c *traceConfig) {
@@ -138,17 +118,13 @@ func (o optionFunc) apply(c *traceConfig) {
 // WithTracerProvider returns an Option that sets the TracerProvider used with
 // this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return optionFunc(func(c *traceConfig) {
-		c.TracerProvider = tp
-	})
+	return optionConv{iOpt: internal.WithTracerProvider(tp)}
 }
 
 // WithAttributes returns an Option that appends attr to the attributes set
 // for every span created with this instrumentation library.
 func WithAttributes(attr []attribute.KeyValue) Option {
-	return optionFunc(func(c *traceConfig) {
-		c.Attributes = append(c.Attributes, attr...)
-	})
+	return optionConv{iOpt: internal.WithAttributes(attr)}
 }
 
 // withRegistrationConfig returns an Option that sets database attributes
@@ -176,7 +152,7 @@ func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
 
 	return optionFunc(func(c *traceConfig) {
 		c.DBName = connCfg.Name
-		c.Attributes = append(c.Attributes, attrs...)
+		c.DefaultStartOpts = append(c.DefaultStartOpts, trace.WithAttributes(attrs...))
 	})
 }
 

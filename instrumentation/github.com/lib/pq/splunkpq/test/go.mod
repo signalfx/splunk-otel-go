@@ -3,6 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splu
 go 1.16
 
 replace (
+	github.com/signalfx/splunk-otel-go => ../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq => ../
 )
