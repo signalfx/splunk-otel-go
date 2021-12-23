@@ -21,6 +21,8 @@ import (
 
 	"github.com/miekg/dns"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // ListenAndServe wraps the passed handler so all requests it servers are
@@ -46,7 +48,8 @@ func Exchange(m *dns.Msg, addr string, opts ...Option) (*dns.Msg, error) {
 // ExchangeContext performs a traced synchronous UDP query, like Exchange. It
 // additionally obeys deadlines from the passed Context.
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Option) (r *dns.Msg, err error) {
-	err = newConfig(opts...).withSpan(ctx, m, func(c context.Context) error {
+	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
+	err = cfg.WithSpan(ctx, name(m), func(c context.Context) error {
 		var sErr error
 		r, sErr = dns.ExchangeContext(c, m, addr)
 		return sErr
