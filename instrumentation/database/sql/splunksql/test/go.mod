@@ -10,4 +10,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.3.0
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../
+replace (
+	github.com/signalfx/splunk-otel-go => ../../../../../
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../
+)
