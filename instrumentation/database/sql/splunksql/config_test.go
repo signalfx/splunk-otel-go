@@ -15,93 +15,14 @@
 package splunksql
 
 import (
-	"context"
 	"errors"
 	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
-	"go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
-
-type fnTracerProvider struct {
-	tracer func(string, ...trace.TracerOption) trace.Tracer
-}
-
-func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trace.Tracer {
-	return fn.tracer(name, opts...)
-}
-
-type fnTracer struct {
-	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
-}
-
-func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	return fn.start(ctx, name, opts...)
-}
-
-func TestConfigDefaultTracerProvider(t *testing.T) {
-	c := newTraceConfig()
-	assert.Equal(t, otel.GetTracerProvider(), c.TracerProvider)
-}
-
-func TestWithTracerProvider(t *testing.T) {
-	// Default is to use the global TracerProvider. This will override that.
-	tp := new(fnTracerProvider)
-	c := newTraceConfig(WithTracerProvider(tp))
-	assert.Same(t, tp, c.TracerProvider)
-}
-
-func TestConfigTracerFromGlobal(t *testing.T) {
-	c := newTraceConfig()
-	expected := otel.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
-	got := c.tracer(context.Background())
-	assert.Equal(t, expected, got)
-}
-
-func TestConfigTracerFromConfig(t *testing.T) {
-	tp := &fnTracerProvider{
-		tracer: func(string, ...trace.TracerOption) trace.Tracer {
-			return &fnTracer{}
-		},
-	}
-	c := newTraceConfig(WithTracerProvider(tp))
-	expected := tp.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
-	got := c.tracer(context.Background())
-	assert.Equal(t, expected, got)
-}
-
-func TestConfigTracerFromContext(t *testing.T) {
-	sc := trace.NewSpanContext(trace.SpanContextConfig{
-		TraceID: trace.TraceID{0x01},
-		SpanID:  trace.SpanID{0x01},
-	})
-	// This context will contain a non-recording span.
-	ctx := trace.ContextWithSpanContext(context.Background(), sc)
-	// Use the global TracerProvider in the config and override with the
-	// passed context to the tracer method.
-	c := newTraceConfig()
-	got := c.tracer(ctx)
-	expected := trace.NewNoopTracerProvider().Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
-	assert.Equal(t, expected, got)
-}
 
 func TestURLDNSParse(t *testing.T) {
 	testcases := []struct {

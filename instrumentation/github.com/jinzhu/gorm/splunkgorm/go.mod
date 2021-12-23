@@ -8,4 +8,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../database/sql/splunksql
+replace (
+	github.com/signalfx/splunk-otel-go => ../../../../../
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../database/sql/splunksql
+)
