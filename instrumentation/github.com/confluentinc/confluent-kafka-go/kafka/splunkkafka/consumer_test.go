@@ -37,10 +37,27 @@ const grpID = "test group ID"
 
 var testTopic = "gotest"
 
+type fnTracerProvider struct {
+	tracer func(string, ...trace.TracerOption) trace.Tracer
+}
+
+func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trace.Tracer {
+	return fn.tracer(name, opts...)
+}
+
+type fnTracer struct {
+	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
+}
+
+func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+	return fn.start(ctx, name, opts...)
+}
+
 func TestNewConsumerCapturesGroupID(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
-	assert.Contains(t, c.cfg.Attributes, semconv.MessagingKafkaConsumerGroupKey.String(grpID))
+	sConf := trace.NewSpanStartConfig(c.cfg.DefaultStartOpts...)
+	assert.Contains(t, sConf.Attributes(), semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 }
 
 func TestNewConsumerType(t *testing.T) {
