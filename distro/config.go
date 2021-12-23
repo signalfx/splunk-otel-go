@@ -109,7 +109,7 @@ func newConfig(opts ...Option) (*config, error) {
 	// Apply default field values if they were not set.
 	if c.Propagator == nil {
 		c.Propagator = loadPropagator(
-			envOr(otelPropagatorsKey, "tracecontext,baggage"),
+			envOr(otelPropagatorsKey, defaultPropagator),
 		)
 	}
 	if c.TraceExporterFunc == nil {
