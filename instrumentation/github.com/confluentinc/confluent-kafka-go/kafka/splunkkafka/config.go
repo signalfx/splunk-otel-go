@@ -19,85 +19,53 @@
 package splunkkafka
 
 import (
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 
-// config contains tracing configuration options.
-type config struct {
-	Tracer     trace.Tracer
-	Propagator propagation.TextMapPropagator
-	Attributes []attribute.KeyValue
-}
-
-func newConfig(options ...Option) config {
-	c := config{
-		Attributes: []attribute.KeyValue{
-			semconv.MessagingSystemKey.String("kafka"),
-		},
-	}
-	for _, o := range options {
-		if o != nil {
-			o.apply(&c)
+func newConfig(options ...Option) *internal.Config {
+	o := append([]internal.Option{internal.OptionFunc(func(c *internal.Config) {
+		c.DefaultStartOpts = []trace.SpanStartOption{
+			trace.WithAttributes(semconv.MessagingSystemKey.String("kafka")),
 		}
-	}
-	if c.Tracer == nil {
-		c.Tracer = otel.Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
-	}
-	if c.Propagator == nil {
-		c.Propagator = otel.GetTextMapPropagator()
-	}
-	return c
+	})}, localToInternal(options)...)
+	return internal.NewConfig(instrumentationName, o...)
 }
 
-// Option applies options to a tracing configuration.
+func localToInternal(opts []Option) []internal.Option {
+	out := make([]internal.Option, len(opts))
+	for i, o := range opts {
+		out[i] = internal.Option(o)
+	}
+	return out
+}
+
+// Option applies options to a configuration.
 type Option interface {
-	apply(*config)
+	internal.Option
 }
 
-type optionFunc func(*config)
-
-func (o optionFunc) apply(c *config) {
-	o(c)
-}
-
-// WithTracerProvider returns an Option that sets the TracerProvider used with
-// this instrumentation library.
+// WithTracerProvider returns an Option that sets the TracerProvider used for
+// a configuration.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return optionFunc(func(c *config) {
-		c.Tracer = tp.Tracer(
-			instrumentationName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
-	})
-}
-
-// WithPropagator specifies the TextMapPropagator to use when extracting and
-// injecting cross-cutting concerns. If none is specified, the global
-// TextMapPropagator will be used.
-func WithPropagator(propagator propagation.TextMapPropagator) Option {
-	return optionFunc(func(cfg *config) {
-		cfg.Propagator = propagator
-	})
+	return Option(internal.WithTracerProvider(tp))
 }
 
 // WithAttributes returns an Option that appends attr to the attributes set
-// for every span created with this instrumentation library.
+// for every span created.
 func WithAttributes(attr []attribute.KeyValue) Option {
-	return optionFunc(func(c *config) {
-		c.Attributes = append(c.Attributes, attr...)
-	})
+	return Option(internal.WithAttributes(attr))
+}
+
+// WithPropagator returns an Option that sets p as the TextMapPropagator used
+// when propagating a span context.
+func WithPropagator(p propagation.TextMapPropagator) Option {
+	return Option(internal.WithPropagator(p))
 }
