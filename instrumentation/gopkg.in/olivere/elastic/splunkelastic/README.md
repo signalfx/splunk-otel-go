@@ -6,6 +6,6 @@ packages.
 
 ## Getting Started
 
-This package provides an `http.Client` that can used with
+This package provides an `http.Transport` that can used with
 `gopkg.in/olivere/elastic` to instrument requests that package makes. See
 [example_test.go](./example_test.go) for more information.
