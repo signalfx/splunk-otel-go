@@ -90,8 +90,11 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 // but since the Elasticsearch API is somewhat predictable we can usually
 // return more than just "HTTP {METHOD}".
 func name(r *http.Request) string {
-	// TODO: tokenize request path and include in name.
-	return "HTTP " + r.Method
+	path := tokenize(r.URL.Path)
+	if path == "" {
+		return "HTTP " + r.Method
+	}
+	return "HTTP " + r.Method + " " + path
 }
 
 type wrappedBody struct {

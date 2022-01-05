@@ -16,8 +16,11 @@ package splunkelastic
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 )
+
+var metricRegexp = regexp.MustCompile(`/_nodes/{metric}`)
 
 var result string
 
@@ -25,54 +28,26 @@ func testPaths() map[string]int {
 	// Use a map here to radomize benchmark.
 	tp := make(map[string]int, len(paths))
 	for i, p := range paths {
+		// {metric} and {node_id} need to be distinguished. Replace {metric}
+		// with all the known values it can be.
 		metricR := []byte("/_nodes/process")
-		tokenR := []byte(fmt.Sprintf("token-%d", i))
-
 		testPath := metricRegexp.ReplaceAll([]byte(p), metricR)
+
+		tokenR := []byte(fmt.Sprintf("token-%d", i))
 		testPath = tokenRegexp.ReplaceAll(testPath, tokenR)
 		tp[string(testPath)] = i
 	}
 	return tp
 }
 
-func BenchmarkTokenizeFromSlice(b *testing.B) {
+func BenchmarkTokenize(b *testing.B) {
 	tp := testPaths()
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		for p, i := range tp {
-			result = tokenizeFromSlice(p)
-			if want := paths[i]; want != result {
-				b.Errorf("[%d:%q] %q != %q", i, p, want, result)
-			}
-		}
-	}
-}
-
-func BenchmarkTokenizeFromTrie(b *testing.B) {
-	tp := testPaths()
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		for p, i := range tp {
-			result = tokenizeFromTrie(p)
-			if want := paths[i]; want != result {
-				b.Errorf("[%d:%q] %q != %q", i, p, want, result)
-			}
-		}
-	}
-}
-
-func BenchmarkTokenizeFromNoAllocTrie(b *testing.B) {
-	tp := testPaths()
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		for p, i := range tp {
-			result = tokenizeFromNoAllocTrie(p)
+			result = tokenize(p)
 			if want := paths[i]; want != result {
 				b.Errorf("[%d:%q] %q != %q", i, p, want, result)
 			}
