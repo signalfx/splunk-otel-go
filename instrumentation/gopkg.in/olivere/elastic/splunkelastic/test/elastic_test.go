@@ -33,12 +33,13 @@ import (
 
 	"github.com/olivere/elastic/v7"
 	"github.com/ory/dockertest"
-	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	apitrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
 var addr string
@@ -116,18 +117,7 @@ type Tweet struct {
 	Suggest  *elastic.SuggestField `json:"suggest_field,omitempty"`
 }
 
-func run(ctx context.Context, t *testing.T, client *elastic.Client) {
-	// Ping the Elasticsearch server to get e.g. the version number
-	info, code, err := client.Ping(addr).Do(ctx)
-	require.NoError(t, err)
-	t.Logf("Elasticsearch returned with code %d and version %s", code, info.Version.Number)
-
-	// Use the IndexExists service to check if a specified index exists.
-	exists, err := client.IndexExists("twitter").Do(ctx)
-	require.NoError(t, err)
-	if !exists {
-		// Create a new index.
-		mapping := `
+var mapping = `
 {
 	"settings":{
 		"number_of_shards":1,
@@ -159,36 +149,37 @@ func run(ctx context.Context, t *testing.T, client *elastic.Client) {
 	}
 }
 `
-		createIndex, err := client.CreateIndex("twitter").Body(mapping).Do(ctx)
-		require.NoError(t, err)
+
+func run(ctx context.Context, t *testing.T, client *elastic.Client) {
+	// Ping the Elasticsearch server to get e.g. the version number
+	info, code, err := client.Ping(addr).Do(ctx)
+	require.NoError(t, err)
+	t.Logf("Elasticsearch returned with code %d and version %s", code, info.Version.Number)
+
+	// Use the IndexExists service to check if a specified index exists.
+	exists, err := client.IndexExists("twitter").Do(ctx)
+	require.NoError(t, err)
+	if !exists {
+		// Create a new index.
+		createIndex, e := client.CreateIndex("twitter").Body(mapping).Do(ctx)
+		require.NoError(t, e)
 		require.True(t, createIndex.Acknowledged, "createIndex unacknowledged")
 	}
 
 	// Index a tweet (using JSON serialization)
 	tweet1 := Tweet{User: "olivere", Message: "Take Five", Retweets: 0}
-	put1, err := client.Index().
-		Index("twitter").
-		Id("1").
-		BodyJson(tweet1).
-		Do(ctx)
+	put1, err := client.Index().Index("twitter").Id("1").BodyJson(tweet1).Do(ctx)
 	require.NoError(t, err)
 	t.Logf("Indexed tweet %s to index %s, type %s", put1.Id, put1.Index, put1.Type)
 
 	// Index a second tweet (by string)
 	tweet2 := `{"user" : "olivere", "message" : "It's a Raggy Waltz"}`
-	put2, err := client.Index().
-		Index("twitter").
-		Id("2").
-		BodyString(tweet2).
-		Do(ctx)
+	put2, err := client.Index().Index("twitter").Id("2").BodyString(tweet2).Do(ctx)
 	require.NoError(t, err)
 	t.Logf("Indexed tweet %s to index %s, type %s", put2.Id, put2.Index, put2.Type)
 
 	// Get tweet with specified ID
-	get1, err := client.Get().
-		Index("twitter").
-		Id("1").
-		Do(ctx)
+	get1, err := client.Get().Index("twitter").Id("1").Do(ctx)
 	require.NoError(t, err)
 	t.Logf("Got document %s in version %d from index %s, type %s", get1.Id, get1.Version, get1.Index, get1.Type)
 
@@ -233,10 +224,7 @@ func run(ctx context.Context, t *testing.T, client *elastic.Client) {
 
 			// Deserialize hit.Source into a Tweet (could also be just a map[string]interface{}).
 			var tweet Tweet
-			err := json.Unmarshal(hit.Source, &tweet)
-			if err != nil {
-				// Deserialization failed
-			}
+			require.NoError(t, json.Unmarshal(hit.Source, &tweet))
 
 			// Work with tweet
 			t.Logf("Tweet by %s: %s", tweet.User, tweet.Message)

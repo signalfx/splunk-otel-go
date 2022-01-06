@@ -42,7 +42,6 @@ func Example() {
 	// Elasticsearch cluster.
 	_, err = client.Index().
 		Index("twitter").
-		Type("tweet").
 		Index("1").
 		BodyString(`{"user": "test", "message": "hello"}`).
 		// If a context that contains an span is passed here it will be used
