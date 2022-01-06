@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var metricRegexp = regexp.MustCompile(`/_nodes/{metric}`)
@@ -46,11 +48,78 @@ func BenchmarkTokenize(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		for p, i := range tp {
+		for p, _ := range tp {
 			result = tokenize(p)
-			if want := paths[i]; want != result {
-				b.Errorf("[%d:%q] %q != %q", i, p, want, result)
-			}
 		}
+	}
+}
+
+func TestTokenizeValidPaths(t *testing.T) {
+	for p, i := range testPaths() {
+		assert.Equalf(t, paths[i], tokenize(p), "tokenize(%q)", p)
+	}
+}
+
+func TestTokenizeInvalidPaths(t *testing.T) {
+	paths := []string{
+		"",
+		"/not/a/valid/path",
+	}
+	for _, p := range paths {
+		assert.Equalf(t, "", tokenize(p), "invalid path %q should be empty", p)
+	}
+}
+
+func TestSegment(t *testing.T) {
+	path := "/_security/service/{namespace}/{service}/credential/token/{name}/_clear_cache"
+	segments := []struct {
+		part       string
+		start, end int
+	}{
+		{
+			part:  "/_security",
+			start: 0,
+			end:   10,
+		},
+		{
+			part:  "/service",
+			start: 10,
+			end:   18,
+		},
+		{
+			part:  "/{namespace}",
+			start: 18,
+			end:   30,
+		},
+		{
+			part:  "/{service}",
+			start: 30,
+			end:   40,
+		},
+		{
+			part:  "/credential",
+			start: 40,
+			end:   51,
+		},
+		{
+			part:  "/token",
+			start: 51,
+			end:   57,
+		},
+		{
+			part:  "/{name}",
+			start: 57,
+			end:   64,
+		},
+		{
+			part:  "/_clear_cache",
+			start: 64,
+			end:   -1,
+		},
+	}
+	for _, s := range segments {
+		part, end := segment(path, s.start)
+		assert.Equal(t, part, s.part)
+		assert.Equal(t, end, s.end)
 	}
 }

@@ -497,11 +497,6 @@ func newNode() *node {
 // Insert inserts value into the trie at the given key, replacing any existing
 // value if it exists.
 func (root *node) Insert(key, value string) {
-	if root == nil {
-		n := newNode()
-		*root = *n
-	}
-
 	n := root
 	for part, i := segment(key, 0); part != ""; part, i = segment(key, i) {
 		var child *node
@@ -528,10 +523,6 @@ func (root *node) Insert(key, value string) {
 // Get returns the value stored for the given key. An empty string is returned
 // if key is not found in the trie.
 func (root *node) Get(key string) string {
-	if root == nil {
-		return ""
-	}
-
 	n := root
 	for part, i := segment(key, 0); part != ""; part, i = segment(key, i) {
 		if child := n.children[part]; child != nil {
