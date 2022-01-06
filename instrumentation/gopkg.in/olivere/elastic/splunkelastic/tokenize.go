@@ -466,31 +466,36 @@ var paths = []string{
 // tokenRegexp matches parts of a path that have a token wildcard.
 var tokenRegexp = regexp.MustCompile(`{[^}]+}`)
 
-// segment returns the first segment of path from start to the next occurance
+// segment returns the first segment of path from start to the next occurrence
 // of the path separator and the ending index. When the final segment of the
 // path is reached, the returned index is -1. This is all done without any
 // allocations to the heap (something strings.Split would not accomplish).
-func segment(path string, start int) (string, int) {
-	if len(path) == 0 || start < 0 || start > len(path)-1 {
+func segment(path string, start int) (part string, end int) {
+	if path == "" || start < 0 || start > len(path)-1 {
 		return "", -1
 	}
-	end := strings.IndexRune(path[start+1:], '/')
-	if end == -1 {
+	idx := strings.IndexRune(path[start+1:], '/')
+	if idx == -1 {
 		return path[start:], -1
 	}
-	return path[start : start+end+1], start + end + 1
+	end = start + idx + 1
+	return path[start:end], end
 }
 
+// node is a path segment in a composed trie.
 type node struct {
 	value    string
 	children map[string]*node
-	wildcard *node
+	wildcard *node // Token path segment for variable values.
 }
 
+// newNode returns an initialized node pointer.
 func newNode() *node {
 	return &node{children: make(map[string]*node)}
 }
 
+// Insert inserts value into the trie at the given key, replacing any existing
+// value if it exists.
 func (root *node) Insert(key, value string) {
 	if root == nil {
 		n := newNode()
@@ -499,10 +504,8 @@ func (root *node) Insert(key, value string) {
 
 	n := root
 	for part, i := segment(key, 0); part != ""; part, i = segment(key, i) {
-		//iter := pathIterator(key)
-		//for part := iter(); part != ""; part = iter() {
 		var child *node
-		if tokenRegexp.Match([]byte(part)) {
+		if tokenRegexp.MatchString(part) {
 			child = n.wildcard
 			if child == nil {
 				child = newNode()
@@ -522,6 +525,8 @@ func (root *node) Insert(key, value string) {
 	n.value = value
 }
 
+// Get returns the value stored for the given key. An empty string is returned
+// if key is not found in the trie.
 func (root *node) Get(key string) string {
 	if root == nil {
 		return ""
@@ -529,8 +534,6 @@ func (root *node) Get(key string) string {
 
 	n := root
 	for part, i := segment(key, 0); part != ""; part, i = segment(key, i) {
-		//iter := pathIterator(key)
-		//for part := iter(); part != ""; part = iter() {
 		if child := n.children[part]; child != nil {
 			n = child
 		} else if n.wildcard != nil {
@@ -544,6 +547,7 @@ func (root *node) Get(key string) string {
 	return n.value
 }
 
+// build returns a trie for the all Elasticsearch API paths.
 func build() *node {
 	// Fix overlap of `/_node/{metric}` and `/_node/{node_id}`. The {metric}
 	// value has a limited set of known values it can be. Replace the token
@@ -583,6 +587,7 @@ func build() *node {
 	return root
 }
 
+// elasticsearchPathTrie is a trie for all Elasticsearch API paths.
 var elasticsearchPathTrie = build()
 
 // tokenize returns the tokenized form of path if it is known, otherwise an

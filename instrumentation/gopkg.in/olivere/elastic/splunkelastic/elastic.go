@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package splunkelastic provides OpenTelemetry instrumentation for the
+// gopkg.in/olivere/elastic package.
 package splunkelastic
 
 import (
@@ -19,11 +21,12 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
@@ -46,7 +49,6 @@ func WrapRoundTripper(rt http.RoundTripper, opts ...Option) http.RoundTripper {
 	}, cfg.DefaultStartOpts...)
 
 	return &roundTripper{RoundTripper: rt, cfg: cfg}
-
 }
 
 // roundTripper wraps an http.RoundTripper's requests with a span.
