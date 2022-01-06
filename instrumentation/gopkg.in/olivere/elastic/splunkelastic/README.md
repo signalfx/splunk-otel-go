@@ -1,7 +1,7 @@
 # Splunk instrumentation for `gopkg.in/olivere/elastic`
 
 This package provides OpenTelemetry instrumentation for the
-[gopkg.in/olivere/elastic.v{3,5}](https://gopkg.in/olivere/elastic.v5)
+[gopkg.in/olivere/elastic.v{3,7}](https://gopkg.in/olivere/elastic.v7)
 packages.
 
 ## Getting Started

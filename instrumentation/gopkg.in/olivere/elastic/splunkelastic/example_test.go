@@ -18,18 +18,18 @@ import (
 	"context"
 	"net/http"
 
+	elasticv7 "github.com/olivere/elastic/v7"
 	elasticv3 "gopkg.in/olivere/elastic.v3"
-	elasticv5 "gopkg.in/olivere/elastic.v5"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
-func Example_v5() {
+func Example() {
 	// Wrap the HTTP Transport used by the client to communicate with the
 	// Elasticsearch cluster so all requests made are included in traces.
-	client, err := elasticv5.NewClient(
-		elasticv5.SetURL("http://127.0.0.1:9200"),
-		elasticv5.SetHttpClient(&http.Client{
+	client, err := elasticv7.NewClient(
+		elasticv7.SetURL("http://127.0.0.1:9200"),
+		elasticv7.SetHttpClient(&http.Client{
 			Transport: splunkelastic.WrapRoundTripper(http.DefaultTransport),
 		}),
 	)
