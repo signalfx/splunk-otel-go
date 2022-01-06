@@ -18,9 +18,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 	elasticv3 "gopkg.in/olivere/elastic.v3"
 	elasticv5 "gopkg.in/olivere/elastic.v5"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
 func Example_v5() {

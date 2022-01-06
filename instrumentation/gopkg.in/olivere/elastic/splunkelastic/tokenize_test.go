@@ -48,7 +48,7 @@ func BenchmarkTokenize(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		for p, _ := range tp {
+		for p := range tp {
 			result = tokenize(p)
 		}
 	}
