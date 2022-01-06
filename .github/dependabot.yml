@@ -123,6 +123,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/instrumentation/gopkg.in/olivere/elastic/splunkelastic/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/k8s.io/client-go/splunkclient-go"
     schedule:
       interval: "daily"
