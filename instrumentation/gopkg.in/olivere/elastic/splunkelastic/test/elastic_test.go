@@ -35,6 +35,7 @@ import (
 	"github.com/ory/dockertest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	apitrace "go.opentelemetry.io/otel/trace"
@@ -258,6 +259,8 @@ func (l testLogger) Printf(format string, v ...interface{}) {
 	l.t.Logf(format, v...)
 }
 
+var attr = attribute.Bool("testing", true)
+
 func TestSpans(t *testing.T) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
@@ -269,6 +272,7 @@ func TestSpans(t *testing.T) {
 			Transport: splunkelastic.WrapRoundTripper(
 				http.DefaultTransport,
 				splunkelastic.WithTracerProvider(tp),
+				splunkelastic.WithAttributes([]attribute.KeyValue{attr}),
 			),
 		}),
 	)
@@ -321,4 +325,5 @@ func TestSpans(t *testing.T) {
 func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
 	assert.Equal(t, name, span.Name())
 	assert.Equal(t, apitrace.SpanKindClient, span.SpanKind())
+	assert.Contains(t, span.Attributes(), attr)
 }
