@@ -93,7 +93,9 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 // name returns an appropriate span name based on the client request.
 // OpenTelemetry semantic conventions require this name to be low cardinality,
 // but since the Elasticsearch API is somewhat predictable we can usually
-// return more than just "HTTP {METHOD}".
+// return more than just "HTTP {METHOD}". If this is a recognized
+// Elasticsearch operation the returned span name will conform with
+// OpenTelemetry database semantics, otherwise HTTP semantics will be used.
 func name(r *http.Request) string {
 	path := r.URL.Path
 	if path == "" {
