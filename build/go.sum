@@ -357,8 +357,8 @@ github.com/gostaticanalysis/nilerr v0.1.1/go.mod h1:wZYb6YI5YAxxq0i1+VJbY0s2YONW
 github.com/gostaticanalysis/testutil v0.3.1-0.20210208050101-bfb5c8eec0e4/go.mod h1:D+FIZ+7OahH3ePw/izIEeH5I06eKs1IKI4Xr64/Am3M=
 github.com/gostaticanalysis/testutil v0.4.0 h1:nhdCmubdmDF6VEatUNjgUZBJKWRqugoISdUv3PPQgHY=
 github.com/gostaticanalysis/testutil v0.4.0/go.mod h1:bLIoPefWXrRi/ssLFWX1dx7Repi5x3CuviD3dgAZaBU=
-github.com/goyek/goyek v0.6.0 h1:2YQ4V3X7q+zFF98IBWMc1WRwfzs0TQ8jrwOKY3XRQRk=
-github.com/goyek/goyek v0.6.0/go.mod h1:UGjZz3juJL2l2eMqRbxQYjG8ieyKb7WMYPv0KB0KVxA=
+github.com/goyek/goyek v0.6.1 h1:OUS2m15J6clUtpKK4LBduTxxtfNa5Dh8gO0N3kuy9hw=
+github.com/goyek/goyek v0.6.1/go.mod h1:UGjZz3juJL2l2eMqRbxQYjG8ieyKb7WMYPv0KB0KVxA=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79/go.mod h1:FecbI9+v66THATjSRHfNgh1IVFe/9kFxbXtjV0ctIMA=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-middleware v1.2.2/go.mod h1:EaizFBKfUKtMIF5iaDEhniwNedqGo9FuLFzppDr3uwI=
