@@ -51,6 +51,9 @@ func TestPropagation(t *testing.T) {
 	req, err := http.NewRequestWithContext(ctx, "GET", "127.0.0.1", http.NoBody)
 	require.NoError(t, err)
 	// p.Inject will assert proper span context injection.
-	rt.RoundTrip(req)
+	resp, _ := rt.RoundTrip(req)
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
 	assert.True(t, p.called, "did not inject span context")
 }
