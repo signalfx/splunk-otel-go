@@ -38,6 +38,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	apitrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
@@ -294,7 +295,7 @@ func TestSpans(t *testing.T) {
 
 	// Client creation spans are not children of parent, test them
 	// independently.
-	expectedNames := []string{"HTTP HEAD"}
+	expectedNames := []string{"ping"}
 	require.GreaterOrEqual(t, len(spans), len(expectedNames), "no client creation spans created")
 	createClientSpans := spans[:len(expectedNames)]
 	for i, span := range createClientSpans {
@@ -303,16 +304,16 @@ func TestSpans(t *testing.T) {
 
 	spans = spans[len(expectedNames):]
 	expectedNames = []string{
-		"HTTP GET /",                      // Ping.
-		"HTTP HEAD /{index}",              // IndexExists.
-		"HTTP PUT /{index}",               // Create a new index.
-		"HTTP PUT /{index}/_doc/{id}",     // Index a tweet (using JSON serialization).
-		"HTTP PUT /{index}/_doc/{id}",     // Index a second tweet (by string).
-		"HTTP GET /{index}/_doc/{id}",     // Get tweet with specified ID.
-		"HTTP POST /{index}/_refresh",     // Refresh to make sure the documents are searchable.
-		"HTTP POST /{index}/_search",      // Search with a term qauery.
-		"HTTP POST /{index}/_update/{id}", // Update a tweet.
-		"HTTP DELETE /{index}",            // Delete an index.
+		"info",                    // "HTTP GET /", Ping.
+		"indices.exists twitter",  // "HTTP HEAD /{index}", IndexExists.
+		"indices.create twitter",  // "HTTP PUT /{index}", Create a new index.
+		"index twitter",           // "HTTP PUT /{index}/_doc/{id}", Index a tweet (using JSON serialization).
+		"index twitter",           // "HTTP PUT /{index}/_doc/{id}", Index a second tweet (by string).
+		"get twitter",             // "HTTP GET /{index}/_doc/{id}", Get tweet with specified ID.
+		"indices.refresh twitter", // "HTTP POST /{index}/_refresh", Refresh to make sure the documents are searchable.
+		"search twitter",          // "HTTP POST /{index}/_search", Search with a term qauery.
+		"update twitter",          // "HTTP POST /{index}/_update/{id}", Update a tweet.
+		"indices.delete twitter",  // "HTTP DELETE /{index}", Delete an index.
 	}
 	require.Len(t, spans, len(expectedNames))
 	traceid := parentRO.SpanContext().TraceID()
@@ -325,5 +326,6 @@ func TestSpans(t *testing.T) {
 func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
 	assert.Equal(t, name, span.Name())
 	assert.Equal(t, apitrace.SpanKindClient, span.SpanKind())
+	assert.Contains(t, span.Attributes(), semconv.DBSystemElasticsearch)
 	assert.Contains(t, span.Attributes(), attr)
 }

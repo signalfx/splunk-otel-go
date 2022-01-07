@@ -20,6 +20,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strings"
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
@@ -46,6 +47,7 @@ func WrapRoundTripper(rt http.RoundTripper, opts ...Option) http.RoundTripper {
 	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
 	cfg.DefaultStartOpts = append([]trace.SpanStartOption{
 		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(semconv.DBSystemElasticsearch),
 	}, cfg.DefaultStartOpts...)
 
 	return &roundTripper{RoundTripper: rt, cfg: cfg}
@@ -63,6 +65,7 @@ var _ http.RoundTripper = (*roundTripper)(nil)
 func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err error) {
 	opts := rt.cfg.MergedSpanStartOptions(
 		trace.WithAttributes(semconv.HTTPClientAttributesFromHTTPRequest(r)...),
+		trace.WithAttributes(semconv.NetAttributesFromHTTPRequest("tcp", r)...),
 	)
 
 	tracer := rt.cfg.ResolveTracer(r.Context())
@@ -92,11 +95,34 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 // but since the Elasticsearch API is somewhat predictable we can usually
 // return more than just "HTTP {METHOD}".
 func name(r *http.Request) string {
-	path := tokenize(r.URL.Path)
+	path := r.URL.Path
 	if path == "" {
+		path = "/"
+	}
+
+	tokenized := tokenize(path)
+	if tokenized == "" {
+		// Unrecognized Elasticsearch path, default to HTTP semantics.
 		return "HTTP " + r.Method
 	}
-	return "HTTP " + r.Method + " " + path
+
+	op, ok := operations[url{method: r.Method, path: tokenized}]
+	if !ok {
+		// Unrecognized Elasticsearch operation, default to HTTP semantics.
+		return "HTTP " + r.Method + " " + tokenized
+	}
+
+	if strings.HasPrefix(tokenized, "/{index}") {
+		// Use the {index} as the OpenTelemetry semantic for DB name.
+		p := strings.TrimPrefix(path, "/")
+		// Either: ["example-index"] or ["example-index", "*"]
+		idx := strings.SplitN(p, "/", 2)[0]
+		// <db.operation> <db.name>
+		return op + " " + idx
+	}
+
+	// <db.operation>
+	return op
 }
 
 type wrappedBody struct {

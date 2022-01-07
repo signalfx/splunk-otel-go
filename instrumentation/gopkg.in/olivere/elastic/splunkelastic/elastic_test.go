@@ -57,3 +57,49 @@ func TestPropagation(t *testing.T) {
 	}
 	assert.True(t, p.called, "did not inject span context")
 }
+
+func TestName(t *testing.T) {
+	tests := []struct {
+		method string
+		path   string
+		name   string
+	}{
+		{
+			method: "HEAD",
+			path:   "", // Test changed to "/" in name func.
+			name:   "ping",
+		},
+		{
+			method: "GET",
+			path:   "/junk/path",
+			name:   "HTTP GET",
+		},
+		{
+			method: "DELETE", // Unknown method for the passed path.
+			path:   "/",
+			name:   "HTTP DELETE /",
+		},
+		{
+			method: "GET",
+			path:   "/_alias",
+			name:   "indices.get_alias",
+		},
+		{
+			method: "DELETE",
+			path:   "/example_index",
+			name:   "indices.delete example_index",
+		},
+		{
+			method: "PUT",
+			path:   "/example_index/_bulk",
+			name:   "bulk example_index",
+		},
+	}
+
+	for _, test := range tests {
+		url := "http://localhost:9200" + test.path
+		req, err := http.NewRequest(test.method, url, http.NoBody)
+		require.NoError(t, err)
+		assert.Equal(t, test.name, name(req))
+	}
+}
