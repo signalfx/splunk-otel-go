@@ -98,7 +98,7 @@ func TestName(t *testing.T) {
 
 	for _, test := range tests {
 		url := "http://localhost:9200" + test.path
-		req, err := http.NewRequest(test.method, url, http.NoBody)
+		req, err := http.NewRequestWithContext(context.Background(), test.method, url, http.NoBody)
 		require.NoError(t, err)
 		assert.Equal(t, test.name, name(req))
 	}

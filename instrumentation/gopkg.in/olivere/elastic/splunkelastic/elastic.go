@@ -116,7 +116,8 @@ func name(r *http.Request) string {
 		// Use the {index} as the OpenTelemetry semantic for DB name.
 		p := strings.TrimPrefix(path, "/")
 		// Either: ["example-index"] or ["example-index", "*"]
-		idx := strings.SplitN(p, "/", 2)[0]
+		const nParts = 2
+		idx := strings.SplitN(p, "/", nParts)[0]
 		// <db.operation> <db.name>
 		return op + " " + idx
 	}

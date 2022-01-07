@@ -17,8 +17,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"sort"
 )
 
@@ -35,14 +35,14 @@ const (
 	schemaURL = "https://github.com/elastic/elasticsearch-specification/blob/60aa3a276e4c617ca7944816a6b4979c2384c675/output/schema/schema.json"
 )
 
-type Schema struct {
-	Info      Info       `json:"_info"`
-	Endpoints []Endpoint `json:"endpoints"`
+type schema struct {
+	Info      info       `json:"_info"`
+	Endpoints []endpoint `json:"endpoints"`
 
 	Discard []byte `json:"-"`
 }
 
-type Info struct {
+type info struct {
 	Title   string `json:"title"`
 	Version string `json:"version"`
 	Hash    string `json:"hash"`
@@ -50,31 +50,35 @@ type Info struct {
 	Discard []byte `json:"-"`
 }
 
-type Endpoint struct {
+type endpoint struct {
 	Name       string `json:"name"`
-	URLs       []URL  `json:"urls"`
+	URLs       []url  `json:"urls"`
 	Visibility string `json:"visibility"`
 
 	Discard []byte `json:"-"`
 }
 
-type URL struct {
+func (e *endpoint) public() bool {
+	return e.Visibility == "public"
+}
+
+type url struct {
 	Path    string   `json:"path"`
 	Methods []string `json:"methods"`
 
 	Discard []byte `json:"-"`
 }
 
-func printOrigin(schema *Schema) {
-	fmt.Printf("// Generated from the %s\n", schema.Info.Title)
-	fmt.Printf("// Version: %s (hash: %s)\n", schema.Info.Version, schema.Info.Hash)
+func printOrigin(s *schema) {
+	fmt.Printf("// Generated from the %s\n", s.Info.Title)
+	fmt.Printf("// Version: %s (hash: %s)\n", s.Info.Version, s.Info.Hash)
 	fmt.Printf("// %s\n", schemaURL)
 }
 
-func printPaths(schema *Schema) {
-	paths := make([]string, 0, len(schema.Endpoints))
-	for _, ep := range schema.Endpoints {
-		if ep.Visibility != "public" {
+func printPaths(s *schema) {
+	paths := make([]string, 0, len(s.Endpoints))
+	for _, ep := range s.Endpoints {
+		if ep.public() {
 			continue
 		}
 		for _, u := range ep.URLs {
@@ -83,7 +87,7 @@ func printPaths(schema *Schema) {
 	}
 	paths = unique(paths)
 
-	printOrigin(schema)
+	printOrigin(s)
 	fmt.Println("var paths = []string{")
 	for _, p := range paths {
 		fmt.Printf("\t%q,\n", p)
@@ -97,10 +101,10 @@ type url struct {
 }
 `
 
-func printOperationsMap(schema *Schema) {
-	operations := make([]string, 0, len(schema.Endpoints))
-	for _, ep := range schema.Endpoints {
-		if ep.Visibility != "public" {
+func printOperationsMap(s *schema) {
+	operations := make([]string, 0, len(s.Endpoints))
+	for _, ep := range s.Endpoints {
+		if ep.public() {
 			continue
 		}
 		for _, u := range ep.URLs {
@@ -113,7 +117,7 @@ func printOperationsMap(schema *Schema) {
 	operations = unique(operations)
 
 	fmt.Println(urlType)
-	printOrigin(schema)
+	printOrigin(s)
 	fmt.Println("var operations = map[url]string{")
 	for _, o := range operations {
 		fmt.Println(o)
@@ -143,18 +147,18 @@ func unique(s []string) []string {
 }
 
 func main() {
-	schemaData, err := ioutil.ReadFile(filepath)
+	schemaData, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Fatalf("failed to read schema file: %v", err)
 	}
 
-	schema := &Schema{}
-	err = json.Unmarshal([]byte(schemaData), schema)
+	s := &schema{}
+	err = json.Unmarshal(schemaData, s)
 	if err != nil {
 		log.Fatalf("failed to parse schema file: %v", err)
 	}
 
-	printPaths(schema)
+	printPaths(s)
 	fmt.Println()
-	printOperationsMap(schema)
+	printOperationsMap(s)
 }
