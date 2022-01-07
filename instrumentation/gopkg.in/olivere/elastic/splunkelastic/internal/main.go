@@ -23,7 +23,9 @@ import (
 )
 
 // To update Elasticsearch paths and operations:
-//  - download the latest schema.json file and put it in this directory.
+//  - Download the latest schema.json file and put it in this directory.
+//  - Prune schema.json for all `type` definitions (only `_info` and
+//    `endpoints` are needed for the generation).
 //  - Update the `filepath` and `schemaURL` const below.
 //  - Run `go run main.go`
 //  - Copy printed output into ../tokenize.go, replacing existing definitions.
