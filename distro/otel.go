@@ -27,7 +27,6 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -75,13 +74,8 @@ func Run(opts ...Option) (SDK, error) {
 	)
 	otel.SetTracerProvider(traceProvider)
 
-	if c.Propagator != nil {
-		if c.Propagator == nonePropagator {
-			// Set to an empty propagator if none was specified
-			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
-		} else {
-			otel.SetTextMapPropagator(c.Propagator)
-		}
+	if c.Propagator != nil && c.Propagator != nonePropagator {
+		otel.SetTextMapPropagator(c.Propagator)
 	}
 
 	return SDK{

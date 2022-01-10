@@ -88,6 +88,8 @@ func (c *config) Validate() error {
 
 type nonePropagatorType struct{ propagation.TextMapPropagator }
 
+// nonePropagator signals the disablement of setting a global
+// TextMapPropagator.
 var nonePropagator = nonePropagatorType{}
 
 // propagators maps environment variable values to TextMapPropagator creation
@@ -135,7 +137,14 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 			// Skip invalid data.
 			continue
 		}
-		props = append(props, factory())
+
+		p := factory()
+		if p == nonePropagator {
+			// Make sure the disablement of the global propagator does not get
+			// lost as a composite below.
+			return p
+		}
+		props = append(props, p)
 	}
 
 	switch len(props) {
@@ -196,8 +205,8 @@ func WithAccessToken(accessToken string) Option {
 }
 
 // WithPropagator configures the OpenTelemetry TextMapPropagator set as the
-// global TextMapPropagator. Passing nil will set a TextMapPropagator that
-// propagates nothing.
+// global TextMapPropagator. Passing nil will prevent any TextMapPropagator
+// from being set.
 //
 // The OTEL_PROPAGATORS environment variable value is used if this Option is
 // not provided.
@@ -208,6 +217,9 @@ func WithAccessToken(accessToken string) Option {
 func WithPropagator(p propagation.TextMapPropagator) Option {
 	return optionFunc(func(c *config) {
 		if p == nil {
+			// Set to nonePropagator so when environment variable overrides
+			// are applied this is distinguishable from no WithPropagator
+			// option being passed.
 			p = nonePropagator
 		}
 		c.Propagator = p
