@@ -1172,7 +1172,7 @@ func (root *node) Get(key string) string {
 	return n.value
 }
 
-// build returns a trie for the all Elasticsearch API paths.
+// build returns a trie for all Elasticsearch API paths.
 func build() *node {
 	// Fix overlap of `/_node/{metric}` and `/_node/{node_id}`. The {metric}
 	// value has a limited set of known values it can be. Replace the token
