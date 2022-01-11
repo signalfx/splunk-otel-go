@@ -294,16 +294,24 @@ func TestSpans(t *testing.T) {
 	spans = spans[:len(spans)-1]
 
 	// Client creation spans are not children of parent, test them
-	// independently.
-	expectedNames := []string{"ping"}
-	require.GreaterOrEqual(t, len(spans), len(expectedNames), "no client creation spans created")
-	createClientSpans := spans[:len(expectedNames)]
-	for i, span := range createClientSpans {
-		assertSpan(t, expectedNames[i], span)
+	// independently. Pings are used during creation which will distinguish
+	// these spans from the "info" span created in `run` with the Ping method.
+	require.Greater(t, len(spans), 0, "no client creation spans created")
+	const pingSpanName = "ping"
+	var pingSpanN int
+	for _, span := range spans {
+		if span.Name() == pingSpanName {
+			pingSpanN++
+			assertSpan(t, pingSpanName, span)
+		} else {
+			break
+		}
 	}
+	require.Greater(t, pingSpanN, 0, "missing client creation spans")
+	require.Greater(t, len(spans), pingSpanN, "no spans created")
+	spans = spans[pingSpanN:]
 
-	spans = spans[len(expectedNames):]
-	expectedNames = []string{
+	expectedNames := []string{
 		"info",                    // "HTTP GET /", Ping.
 		"indices.exists twitter",  // "HTTP HEAD /{index}", IndexExists.
 		"indices.create twitter",  // "HTTP PUT /{index}", Create a new index.

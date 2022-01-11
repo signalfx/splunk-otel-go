@@ -17,8 +17,6 @@
 package splunkelastic
 
 import (
-	"context"
-	"io"
 	"net/http"
 	"strings"
 
@@ -76,17 +74,14 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 	rt.cfg.Propagator.Inject(ctx, propagation.HeaderCarrier(r.Header))
 
 	resp, err = rt.RoundTripper.RoundTrip(r)
+	defer span.End()
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		span.End()
 		return
 	}
-
 	span.SetAttributes(semconv.HTTPAttributesFromHTTPStatusCode(resp.StatusCode)...)
 	span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode))
-	resp.Body = &wrappedBody{ctx: ctx, span: span, body: resp.Body}
-
 	return
 }
 
@@ -126,32 +121,4 @@ func name(r *http.Request) string {
 
 	// <db.operation>
 	return op
-}
-
-type wrappedBody struct {
-	ctx  context.Context
-	span trace.Span
-	body io.ReadCloser
-}
-
-var _ io.ReadCloser = (*wrappedBody)(nil)
-
-func (wb *wrappedBody) Read(b []byte) (int, error) {
-	n, err := wb.body.Read(b)
-	switch err {
-	case nil:
-		// nothing to do here but fall through to the return
-	case io.EOF:
-		wb.span.End()
-	default:
-		wb.span.RecordError(err)
-		wb.span.SetStatus(codes.Error, err.Error())
-	}
-
-	return n, err
-}
-
-func (wb *wrappedBody) Close() error {
-	wb.span.End()
-	return wb.body.Close()
 }
