@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splun
 go 1.17
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v0.7.0-00010101000000-000000000000
+	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v0.7.0
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
