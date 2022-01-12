@@ -168,7 +168,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.7.0
 [0.6.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.6.0
 [0.4.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.4.0
 [0.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.3.0
