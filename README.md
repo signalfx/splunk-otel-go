@@ -34,7 +34,7 @@ Table of Contents:
 This Splunk distribution comes with the following defaults:
 
 - [W3C tracecontext](https://www.w3.org/TR/trace-context/) and
-  [baggage](https://www.w3.org/TR/baggage/) context propagation.
+  [W3C baggage](https://www.w3.org/TR/baggage/) context propagation.
 - [Jaeger Thrift over HTTP
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
   configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)

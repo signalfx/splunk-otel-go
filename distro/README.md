@@ -35,7 +35,7 @@ The following sections contain specific information for each option.
 ### `WithAccessToken`
 
 `WithAccessToken` configures the authentication token used to authenticate
-telemetry delivery requests to a Splunk back-end.
+telemetry sent directly to Splunk Observability Cloud.
 
 - Default value: empty (i.e. `""`)
 - Environment variable: `SPLUNK_ACCESS_TOKEN`
@@ -70,7 +70,7 @@ global `TextMapPropagator`. Setting to `nil` will prevent any global
   - `"jaeger"`: Jaeger
   - `"xray"`: AWS X-Ray
   - `"ottrace"`: OpenTracing
-  - `"none"`: None, explicitly do not set a global propagator
+  - `"none"`: None; explicitly do not set any global propagator
 
   Values can be joined with a comma (`","`) to produce a composite
   `TextMapPropagator`.
