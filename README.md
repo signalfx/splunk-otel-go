@@ -33,7 +33,8 @@ Table of Contents:
 
 This Splunk distribution comes with the following defaults:
 
-- [B3 context propagation](https://github.com/openzipkin/b3-propagation).
+- [W3C tracecontext](https://www.w3.org/TR/trace-context/) and
+  [W3C baggage](https://www.w3.org/TR/baggage/) context propagation.
 - [Jaeger Thrift over HTTP
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
   configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
@@ -92,6 +93,8 @@ As well as in Go code before executing `distro.Run()`:
 ```go
 os.Setenv("OTEL_RESOURCE_ATTRIBUTES", "service.name=my-app,service.version=1.2.3,deployment.environment=development")
 ```
+
+For advanced configuration options, refer to the [`distro` package documentation](./distro/README.md#Configuration).
 
 ## Library Instrumentation
 

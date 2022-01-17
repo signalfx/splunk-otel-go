@@ -61,6 +61,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
   instrumentation for the `github.com/gomodule/redigo` package. (#288)
+- Add the `WithPropagator` option to
+  `github.com/signalfx/splunk-otel-go/distro` along with parsing of the
+  `OTEL_PROPAGATORS` environment variable to set the global OpenTelemetry
+  `TextMapPropagator`. (#295)
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
   instrumentation for the `gopkg.in/olivere/elastic` package. (#311)
