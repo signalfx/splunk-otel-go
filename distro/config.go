@@ -192,9 +192,9 @@ func WithEndpoint(endpoint string) Option {
 }
 
 // WithAccessToken configures the authentication token used to authenticate
-// telemetry delivery requests to a Splunk back-end. Passing an empty string
-// results in no authentication token being used, and assumes authentication
-// is handled by another system.
+// telemetry sent directly to Splunk Observability Cloud. Passing an empty
+// string results in no authentication token being used, and assumes
+// authentication is handled by another system.
 //
 // The SPLUNK_ACCESS_TOKEN environment variable value is used if this Option
 // is not provided.
