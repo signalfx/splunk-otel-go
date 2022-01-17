@@ -135,6 +135,7 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 		factory, ok := propagators[part]
 		if !ok {
 			// Skip invalid data.
+			// TODO: log this.
 			continue
 		}
 
