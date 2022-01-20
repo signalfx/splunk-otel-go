@@ -12,30 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package splunksql
-
-import (
-	"database/sql/driver"
-	"io"
-
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
-)
-
-func handleErr(span trace.Span, err error) {
-	if span == nil {
-		return
-	}
-
-	switch err {
-	case nil:
-		// Everything Okay.
-	case io.EOF:
-		// Expected at end of iteration, do not record these.
-	case driver.ErrSkip:
-		// Expected if method not implemented, do not record these.
-	default:
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
-}
+/*
+Package test validates the splunkelastic instrumentation with the default SDK.
+This package is in a separate module from the instrumentation it tests to
+isolate the dependency of the default SDK and not impose this as a transitive
+dependency for users.
+*/
+package test

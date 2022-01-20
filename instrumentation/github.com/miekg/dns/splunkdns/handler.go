@@ -20,27 +20,29 @@ import (
 
 	"github.com/miekg/dns"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // A Handler wraps a DNS Handler so that requests are traced.
 type Handler struct {
 	dns.Handler
 
-	cfg *config
+	cfg *internal.Config
 }
 
 // WrapHandler creates a new, wrapped DNS handler.
 func WrapHandler(handler dns.Handler, opts ...Option) *Handler {
 	return &Handler{
 		Handler: handler,
-		cfg:     newConfig(opts...),
+		cfg:     internal.NewConfig(instrumentationName, localToInternal(opts)...),
 	}
 }
 
 // ServeDNS dispatches requests to the underlying Handler. All requests will
 // be traced.
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
-	_ = h.cfg.withSpan(context.Background(), r, func(context.Context) error {
+	_ = h.cfg.WithSpan(context.Background(), name(r), func(context.Context) error {
 		rw := &responseWriter{ResponseWriter: w}
 		h.Handler.ServeDNS(rw, r)
 		return rw.err

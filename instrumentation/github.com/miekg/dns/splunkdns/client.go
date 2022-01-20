@@ -20,20 +20,25 @@ import (
 
 	"github.com/miekg/dns"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
 
 // A Client wraps a DNS Client so that requests are traced.
 type Client struct {
 	*dns.Client
 
-	cfg *config
+	cfg *internal.Config
 }
 
 // WrapClient returns a wraped DNS client.
 func WrapClient(client *dns.Client, opts ...Option) *Client {
 	return &Client{
 		Client: client,
-		cfg:    newConfig(opts...),
+		cfg: internal.NewConfig(
+			instrumentationName,
+			localToInternal(opts)...,
+		),
 	}
 }
 
@@ -45,7 +50,7 @@ func (c *Client) Exchange(m *dns.Msg, addr string) (*dns.Msg, time.Duration, err
 // ExchangeContext calls the underlying Client.ExchangeContext and traces the
 // request.
 func (c *Client) ExchangeContext(ctx context.Context, m *dns.Msg, addr string) (resp *dns.Msg, rtt time.Duration, err error) {
-	err = c.cfg.withSpan(ctx, m, func(ctx context.Context) error {
+	err = c.cfg.WithSpan(ctx, name(m), func(ctx context.Context) error {
 		var sErr error
 		resp, rtt, sErr = c.Client.ExchangeContext(ctx, m, addr)
 		return sErr

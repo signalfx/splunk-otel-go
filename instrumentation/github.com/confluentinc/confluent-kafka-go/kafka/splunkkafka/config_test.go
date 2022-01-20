@@ -25,52 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
-	"go.opentelemetry.io/otel/trace"
-
-	splunkotel "github.com/signalfx/splunk-otel-go"
 )
-
-type fnTracerProvider struct {
-	tracer func(string, ...trace.TracerOption) trace.Tracer
-}
-
-func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trace.Tracer {
-	return fn.tracer(name, opts...)
-}
-
-type fnTracer struct {
-	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
-}
-
-func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	return fn.start(ctx, name, opts...)
-}
-
-func TestConfigTracerFromGlobal(t *testing.T) {
-	c := newConfig()
-	expected := otel.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
-	assert.Equal(t, expected, c.Tracer)
-}
-
-func TestConfigTracerFromConfig(t *testing.T) {
-	tp := &fnTracerProvider{
-		tracer: func(string, ...trace.TracerOption) trace.Tracer {
-			return &fnTracer{}
-		},
-	}
-	c := newConfig(WithTracerProvider(tp))
-	expected := tp.Tracer(
-		instrumentationName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
-		trace.WithSchemaURL(semconv.SchemaURL),
-	)
-	assert.Equal(t, expected, c.Tracer)
-}
 
 type testTextMapProp struct{}
 

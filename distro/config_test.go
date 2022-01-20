@@ -204,3 +204,14 @@ func TestLoadPropagatorDefault(t *testing.T) {
 		propagation.Baggage{},
 	), loadPropagator(""))
 }
+
+func TestLoadPropagatorCompositeWithNone(t *testing.T) {
+	// Assumes specification as stated:
+	//
+	//   "none": No automatically configured propagator.
+	//
+	// means if "none" is included in the value, no propagator should be
+	// configured. Therefore, loadPropagator needs to return just the
+	// nonePropagator value to signal this behavior.
+	assert.Equal(t, nonePropagator, loadPropagator("tracecontext,baggage,none"))
+}

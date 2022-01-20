@@ -33,7 +33,8 @@ Table of Contents:
 
 This Splunk distribution comes with the following defaults:
 
-- [W3C tracecontext propagation](https://www.w3.org/TR/trace-context/).
+- [W3C tracecontext](https://www.w3.org/TR/trace-context/) and
+  [W3C baggage](https://www.w3.org/TR/baggage/) context propagation.
 - [Jaeger Thrift over HTTP
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
   configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
@@ -106,6 +107,7 @@ Additional recommended Splunk specific instrumentations:
 - [`splunkchi`](./instrumentation/github.com/go-chi/chi/splunkchi)
 - [`splunkclient-go`](./instrumentation/k8s.io/client-go/splunkclient-go)
 - [`splunkdns`](./instrumentation/github.com/miekg/dns/splunkdns)
+- [`splunkelastic`](./instrumentation/gopkg.in/olivere/elastic/splunkelastic)
 - [`splunkgorm`](./instrumentation/github.com/jinzhu/gorm/splunkgorm)
 - [`splunkgraphql`](./instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql)
 - [`splunkhttp`](./instrumentation/net/http/splunkhttp)

@@ -78,6 +78,10 @@ func Run(opts ...Option) (SDK, error) {
 	)
 	otel.SetTracerProvider(traceProvider)
 
+	if c.Propagator != nil && c.Propagator != nonePropagator {
+		otel.SetTextMapPropagator(c.Propagator)
+	}
+
 	return SDK{
 		config: *c,
 		shutdownFunc: func(ctx context.Context) error {
