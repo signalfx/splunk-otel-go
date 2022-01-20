@@ -90,7 +90,7 @@ a batch span processor.
   - `"none"`: None, explicitly do not set an exporter. An error is raised by
     the SDK if no other exporter option is defined.
 
-  Any other value will be ignored and the default will be used instead.
+  Any other value will be ignored and the default used instead.
 
 [`Run`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#Run
 [`SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK
