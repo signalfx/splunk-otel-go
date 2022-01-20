@@ -27,7 +27,6 @@ import (
 	"errors"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -52,15 +51,6 @@ func Run(opts ...Option) (SDK, error) {
 	c, err := newConfig(opts...)
 	if err != nil {
 		return SDK{}, err
-	}
-
-	if c.Propagator != nil {
-		if c.Propagator == nonePropagator {
-			// Set to an empty propagator if none was specified
-			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
-		} else {
-			otel.SetTextMapPropagator(c.Propagator)
-		}
 	}
 
 	if c.TraceExporterFunc == nil {
