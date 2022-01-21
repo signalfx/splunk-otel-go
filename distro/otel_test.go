@@ -239,23 +239,38 @@ func TestRunJaegerExporter(t *testing.T) {
 	}
 }
 
+func clientTLSConfig(t *testing.T) *tls.Config {
+	certs := x509.NewCertPool()
+	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
+
+	return &tls.Config{
+		RootCAs:    certs,
+		MinVersion: tls.VersionTLS13,
+	}
+}
+
+func serverTLSConfig(t *testing.T) *tls.Config {
+	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
+	require.NoError(t, err, "failed to load X509 key pair")
+
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS13,
+	}
+}
+
 func TestRunJaegerExporterTLS(t *testing.T) {
 	reqCh, hFunc := reqHander()
 	srv := httptest.NewUnstartedServer(hFunc)
 	t.Cleanup(srv.Close)
 
-	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
-	require.NoError(t, err)
-	srv.TLS = &tls.Config{Certificates: []tls.Certificate{cert}}
+	srv.TLS = serverTLSConfig(t)
 	srv.StartTLS()
-
-	certs := x509.NewCertPool()
-	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
 
 	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 	sdk, err := distro.Run(
 		distro.WithEndpoint(srv.URL),
-		distro.WithTLSConfig(&tls.Config{RootCAs: certs}),
+		distro.WithTLSConfig(clientTLSConfig(t)),
 	)
 	require.NoError(t, err)
 
@@ -373,11 +388,9 @@ func newTLSCollector(t *testing.T) *collector {
 		},
 	}
 
-	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
-	require.NoError(t, err)
-	creds := credentials.NewServerTLSFromCert(&cert)
-
+	creds := credentials.NewTLS(serverTLSConfig(t))
 	srv := grpc.NewServer(grpc.Creds(creds))
+
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
 	go func() { _ = srv.Serve(ln) }()
 	t.Cleanup(srv.GracefulStop)
@@ -497,12 +510,9 @@ func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func l
 func TestRunOTLPExporterTLS(t *testing.T) {
 	coll := newTLSCollector(t)
 
-	certs := x509.NewCertPool()
-	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
-
 	sdk, err := distro.Run(
 		distro.WithEndpoint(coll.endpoint),
-		distro.WithTLSConfig(&tls.Config{RootCAs: certs}),
+		distro.WithTLSConfig(clientTLSConfig(t)),
 	)
 	require.NoError(t, err)
 
