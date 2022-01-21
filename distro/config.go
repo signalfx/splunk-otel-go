@@ -15,9 +15,7 @@
 package distro
 
 import (
-	"context"
 	"crypto/tls"
-	"net/http"
 	"os"
 	"strings"
 
@@ -25,11 +23,8 @@ import (
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/contrib/propagators/ot"
-	jaegerexporter "go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc/credentials"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -97,9 +92,13 @@ func newConfig(opts ...Option) (*config, error) {
 		)
 	}
 	if c.TraceExporterFunc == nil {
-		c.TraceExporterFunc = loadTraceExporter(
-			envOr(otelTracesExporterKey, defaultTraceExporter),
-		)
+		key := envOr(otelTracesExporterKey, defaultTraceExporter)
+		tef, ok := exporters[key]
+		if !ok {
+			// TODO: log invalid exporter value.
+			tef = exporters[defaultTraceExporter]
+		}
+		c.TraceExporterFunc = tef
 	}
 
 	return c, nil
@@ -181,98 +180,6 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 	}
 }
 
-type traceExporterFunc func(*exporterConfig) (sdktrace.SpanExporter, error)
-
-// exporters maps environment variable values to trace exporter creation
-// functions.
-var exporters = map[string]traceExporterFunc{
-	// OTLP gRPC exporter.
-	"otlp": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
-		var opts []otlptracegrpc.Option
-
-		if c.Endpoint == "" {
-			if endpoint := func() string {
-				// Allow the exporter to use environment variables if set.
-				if _, ok := os.LookupEnv(otelExporterOTLPEndpointKey); ok {
-					return ""
-				}
-				if _, ok := os.LookupEnv(otelExporterOTLPTracesEndpointKey); ok {
-					return ""
-				}
-				return defaultOTLPEndpoint
-			}(); endpoint != "" {
-				opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
-			}
-		} else {
-			opts = append(opts, otlptracegrpc.WithEndpoint(c.Endpoint))
-		}
-
-		if c.UseTLS {
-			// FIXME: test this.
-			tlsCreds := credentials.NewTLS(c.TLSConfig)
-			opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-		} else {
-			opts = append(opts, otlptracegrpc.WithInsecure())
-		}
-
-		if c.AccessToken != "" {
-			opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
-				"X-Sf-Token": c.AccessToken,
-			}))
-		}
-
-		return otlptracegrpc.New(context.Background(), opts...)
-	},
-	// Jaeger thrift exporter.
-	"jaeger-thrift-splunk": func(c *exporterConfig) (sdktrace.SpanExporter, error) {
-		var opts []jaegerexporter.CollectorEndpointOption
-
-		if c.Endpoint == "" {
-			if endpoint := func() string {
-				// Allow the exporter to use environment variables.
-				if _, ok := os.LookupEnv(otelExporterJaegerEndpointKey); ok {
-					return ""
-				}
-				return defaultJaegerEndpoint
-			}(); endpoint != "" {
-				opts = append(opts, jaegerexporter.WithEndpoint(endpoint))
-			}
-		} else {
-			opts = append(opts, jaegerexporter.WithEndpoint(c.Endpoint))
-		}
-
-		if c.AccessToken != "" {
-			opts = append(
-				opts,
-				jaegerexporter.WithUsername("auth"),
-				jaegerexporter.WithPassword(c.AccessToken),
-			)
-		}
-
-		if c.UseTLS {
-			client := &http.Client{
-				Transport: &http.Transport{TLSClientConfig: c.TLSConfig},
-			}
-			// FIXME: test this.
-			opts = append(opts, jaegerexporter.WithHTTPClient(client))
-		}
-
-		return jaegerexporter.New(
-			jaegerexporter.WithCollectorEndpoint(opts...),
-		)
-	},
-	// None, explicitly do not set an exporter.
-	"none": nil,
-}
-
-func loadTraceExporter(name string) traceExporterFunc {
-	tef, ok := exporters[name]
-	if !ok {
-		return exporters[defaultTraceExporter]
-	}
-	return tef
-}
-
 // envOr returns the environment variable value associated with key if it
 // exists, otherwise it returns alt.
 func envOr(key, alt string) string {
@@ -328,9 +235,9 @@ func WithAccessToken(accessToken string) Option {
 //
 // By default, an OTLP exporter is used if this is not provided or the
 // OTEL_TRACES_EXPORTER environment variable is not set.
-func WithTraceExporter(e sdktrace.SpanExporter) Option {
+func WithTraceExporter(e trace.SpanExporter) Option {
 	return optionFunc(func(c *config) {
-		c.TraceExporterFunc = func(*exporterConfig) (sdktrace.SpanExporter, error) {
+		c.TraceExporterFunc = func(*exporterConfig) (trace.SpanExporter, error) {
 			return e, nil
 		}
 	})
