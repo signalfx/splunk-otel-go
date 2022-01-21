@@ -26,7 +26,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	tpb "go.opentelemetry.io/proto/otlp/trace/v1"
 	"go.uber.org/goleak"
@@ -36,104 +37,105 @@ import (
 	"github.com/signalfx/splunk-otel-go/distro"
 )
 
+const (
+	spanName = "test span"
+	token    = "secret token"
+)
+
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
 func TestRunJaegerExporter(t *testing.T) {
+	assertBase := func(t *testing.T, req *http.Request) {
+		assert.Equal(t, "application/x-thrift", req.Header.Get("Content-type"))
+	}
+
 	testCases := []struct {
 		desc     string
 		setupFn  func(t *testing.T, url string) (distro.SDK, error)
 		assertFn func(t *testing.T, req *http.Request)
 	}{
 		{
+			desc: "WithTraceExporter",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				exp, err := jaeger.New(jaeger.WithCollectorEndpoint(
+					jaeger.WithEndpoint(url),
+				))
+				require.NoError(t, err)
+				return distro.Run(distro.WithTraceExporter(exp))
+			},
+			assertFn: assertBase,
+		},
+		{
 			desc: "WithEndpoint",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 				return distro.Run(distro.WithEndpoint(url))
 			},
-			assertFn: func(t *testing.T, got *http.Request) {
-				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
-			},
+			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				clearFn := distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
-				t.Cleanup(clearFn)
+				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 				return distro.Run()
 			},
-			assertFn: func(t *testing.T, got *http.Request) {
-				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
-			},
+			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken("my-token"))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken(token))
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
-				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+				assertBase(t, got)
 				user, pass, ok := got.BasicAuth()
-				if !ok {
-					assert.Fail(t, "should have Basic Authentication headers")
-					return
-				}
+				require.True(t, ok, "should have Basic Authentication headers")
 				assert.Equal(t, "auth", user, "should have proper username")
-				assert.Equal(t, "my-token", pass, "should use the provided token as passowrd")
+				assert.Equal(t, token, pass, "should use the provided token as passowrd")
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT and SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				clearFn := distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
-				t.Cleanup(clearFn)
-				clearFn = distro.Setenv("SPLUNK_ACCESS_TOKEN", "my-token")
-				t.Cleanup(clearFn)
+				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 				return distro.Run()
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
-				assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"), "should send thrift formatted trace")
+				assertBase(t, got)
 				user, pass, ok := got.BasicAuth()
-				if !ok {
-					assert.Fail(t, "should have Basic Authentication headers")
-					return
-				}
+				require.True(t, ok, "should have Basic Authentication headers")
 				assert.Equal(t, "auth", user, "should have proper username")
-				assert.Equal(t, "my-token", pass, "should use the provided token as passowrd")
+				assert.Equal(t, token, pass, "should use the provided token as passowrd")
 			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-
-			// HTTP endpoint where a trace is sent
 			reqCh := make(chan *http.Request, 1)
 			srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 				reqCh <- r
 			}))
-			defer srv.Close()
+			t.Cleanup(srv.Close)
 
-			// setup tracer
-			t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 			sdk, err := tc.setupFn(t, srv.URL)
 			require.NoError(t, err, "should configure tracing")
 
-			// create a sample span
-			_, span := otel.Tracer("distro/otel_test").Start(ctx, "TestRun")
-			span.SetAttributes(attribute.Key("ex.com/foo").String("bar"))
-			span.AddEvent("working")
+			ctx := withTestingDeadline(context.Background(), t)
+			_, span := otel.Tracer(tc.desc).Start(ctx, spanName)
 			span.End()
 
-			// shutdown tracer - this should send the trace
-			err = sdk.Shutdown(ctx)
-			require.NoError(t, err, "should finish tracing")
+			// Flush all spans from BSP.
+			require.NoError(t, sdk.Shutdown(ctx))
 
-			// assert that the span has been received
 			select {
 			case <-ctx.Done():
-				require.Fail(t, "test timeout out")
+				require.Fail(t, "test timeout out", ctx.Err())
 			case got := <-reqCh:
 				tc.assertFn(t, got)
 			}
@@ -165,8 +167,6 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 }
 
 type collector struct {
-	t *testing.T
-
 	endpoint     string
 	traceService *collectorTraceServiceServer
 }
@@ -176,7 +176,6 @@ func newCollector(t *testing.T) *collector {
 	require.NoError(t, err)
 
 	coll := &collector{
-		t:        t,
 		endpoint: ln.Addr().String(),
 		traceService: &collectorTraceServiceServer{
 			requests: make(chan exportRequest, 1),
@@ -193,11 +192,6 @@ func newCollector(t *testing.T) *collector {
 }
 
 func TestRunOTLPExporter(t *testing.T) {
-	const (
-		spanName = "test span"
-		token    = "secret token"
-	)
-
 	assertBase := func(t *testing.T, req exportRequest) {
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
 		require.Len(t, req.Spans, 1)
@@ -210,8 +204,22 @@ func TestRunOTLPExporter(t *testing.T) {
 		assertFn func(t *testing.T, req exportRequest)
 	}{
 		{
+			desc: "WithTraceExporter",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				exp, err := otlptracegrpc.New(
+					context.Background(),
+					otlptracegrpc.WithEndpoint(url),
+					otlptracegrpc.WithInsecure(),
+				)
+				require.NoError(t, err)
+				return distro.Run(distro.WithTraceExporter(exp))
+			},
+			assertFn: assertBase,
+		},
+		{
 			desc: "WithEndpoint",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run(distro.WithEndpoint(url))
 			},
 			assertFn: assertBase,
@@ -223,6 +231,7 @@ func TestRunOTLPExporter(t *testing.T) {
 					url = "http://" + url
 				}
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
 			assertFn: assertBase,
@@ -234,6 +243,7 @@ func TestRunOTLPExporter(t *testing.T) {
 					url = "http://" + url
 				}
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
 			assertFn: assertBase,
@@ -241,6 +251,7 @@ func TestRunOTLPExporter(t *testing.T) {
 		{
 			desc: "WithEndpoint and WithAccessToken",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken(token))
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
@@ -256,6 +267,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				}
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url))
 				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
+				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
@@ -268,8 +280,6 @@ func TestRunOTLPExporter(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			coll := newCollector(t)
 
-			// Explicitly set OTLP exporter.
-			t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 			sdk, err := tc.setupFn(t, coll.endpoint)
 			require.NoError(t, err, "should configure tracing")
 
