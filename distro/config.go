@@ -74,7 +74,7 @@ type config struct {
 }
 
 // newConfig returns a validated config with Splunk defaults.
-func newConfig(opts ...Option) (*config, error) {
+func newConfig(opts ...Option) *config {
 	c := &config{
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
@@ -101,7 +101,7 @@ func newConfig(opts ...Option) (*config, error) {
 		c.TraceExporterFunc = tef
 	}
 
-	return c, nil
+	return c
 }
 
 type nonePropagatorType struct{ propagation.TextMapPropagator }

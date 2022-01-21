@@ -198,6 +198,12 @@ func TestRunOTLPExporter(t *testing.T) {
 		token    = "secret token"
 	)
 
+	assertBase := func(t *testing.T, req exportRequest) {
+		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
+		require.Len(t, req.Spans, 1)
+		assert.Equal(t, spanName, req.Spans[0].Name)
+	}
+
 	testCases := []struct {
 		desc     string
 		setupFn  func(t *testing.T, url string) (distro.SDK, error)
@@ -208,11 +214,7 @@ func TestRunOTLPExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				return distro.Run(distro.WithEndpoint(url))
 			},
-			assertFn: func(t *testing.T, got exportRequest) {
-				assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-				require.Len(t, got.Spans, 1)
-				assert.Equal(t, spanName, got.Spans[0].Name)
-			},
+			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -223,11 +225,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url))
 				return distro.Run()
 			},
-			assertFn: func(t *testing.T, got exportRequest) {
-				assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-				require.Len(t, got.Spans, 1)
-				assert.Equal(t, spanName, got.Spans[0].Name)
-			},
+			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
@@ -238,11 +236,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", url))
 				return distro.Run()
 			},
-			assertFn: func(t *testing.T, got exportRequest) {
-				assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-				require.Len(t, got.Spans, 1)
-				assert.Equal(t, spanName, got.Spans[0].Name)
-			},
+			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
@@ -250,7 +244,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken(token))
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
-				assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+				assertBase(t, got)
 				assert.Equal(t, []string{token}, got.Header.Get("x-sf-token"))
 			},
 		},
@@ -265,7 +259,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				return distro.Run()
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
-				assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+				assertBase(t, got)
 				assert.Equal(t, []string{token}, got.Header.Get("x-sf-token"))
 			},
 		},

@@ -48,10 +48,7 @@ func (s SDK) Shutdown(ctx context.Context) error {
 // complete. This ensures all resources are released and all telemetry
 // flushed.
 func Run(opts ...Option) (SDK, error) {
-	c, err := newConfig(opts...)
-	if err != nil {
-		return SDK{}, err
-	}
+	c := newConfig(opts...)
 
 	if c.TraceExporterFunc == nil {
 		return SDK{}, errors.New(`"none" exporter set`)
