@@ -16,6 +16,8 @@ package distro
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
 	"os"
 	"strings"
 
@@ -27,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc/credentials"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -62,6 +65,9 @@ const (
 type exporterConfig struct {
 	AccessToken string
 	Endpoint    string
+
+	UseTLS    bool
+	TLSConfig *tls.Config
 }
 
 // config is the configuration used to create and operate an SDK.
@@ -201,6 +207,14 @@ var exporters = map[string]traceExporterFunc{
 			opts = append(opts, otlptracegrpc.WithEndpoint(c.Endpoint))
 		}
 
+		if c.UseTLS {
+			// FIXME: test this.
+			tlsCreds := credentials.NewTLS(c.TLSConfig)
+			opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
+		} else {
+			opts = append(opts, otlptracegrpc.WithInsecure())
+		}
+
 		if c.AccessToken != "" {
 			opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
 				"X-Sf-Token": c.AccessToken,
@@ -233,6 +247,14 @@ var exporters = map[string]traceExporterFunc{
 				jaegerexporter.WithUsername("auth"),
 				jaegerexporter.WithPassword(c.AccessToken),
 			)
+		}
+
+		if c.UseTLS {
+			client := &http.Client{
+				Transport: &http.Transport{TLSClientConfig: c.TLSConfig},
+			}
+			// FIXME: test this.
+			opts = append(opts, jaegerexporter.WithHTTPClient(client))
 		}
 
 		return jaegerexporter.New(
@@ -311,6 +333,16 @@ func WithTraceExporter(e sdktrace.SpanExporter) Option {
 		c.TraceExporterFunc = func(*exporterConfig) (sdktrace.SpanExporter, error) {
 			return e, nil
 		}
+	})
+}
+
+// WithTLSConfig sets the TLS configuration used by the exporter.
+//
+// If this option is now provided, the exporter connection will not use TLS.
+func WithTLSConfig(conf *tls.Config) Option {
+	return optionFunc(func(c *config) {
+		c.ExportConfig.UseTLS = true
+		c.ExportConfig.TLSConfig = conf
 	})
 }
 
