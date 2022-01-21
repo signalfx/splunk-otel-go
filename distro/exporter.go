@@ -59,7 +59,6 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	}
 
 	if c.UseTLS {
-		// FIXME: test this.
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
 	} else {
@@ -104,7 +103,6 @@ func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		client := &http.Client{
 			Transport: &http.Transport{TLSClientConfig: c.TLSConfig},
 		}
-		// FIXME: test this.
 		opts = append(opts, jaeger.WithHTTPClient(client))
 	}
 
