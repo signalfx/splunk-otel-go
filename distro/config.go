@@ -336,7 +336,7 @@ func WithTraceExporter(e sdktrace.SpanExporter) Option {
 	})
 }
 
-// WithTLSConfig sets the TLS configuration used by the exporter.
+// WithTLSConfig configures the TLS configuration used by the exporter.
 //
 // If this option is now provided, the exporter connection will not use TLS.
 func WithTLSConfig(conf *tls.Config) Option {

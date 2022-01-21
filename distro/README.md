@@ -20,6 +20,8 @@ The [`SDK`] is configured with the following options.
 | `WithAccessToken` | `""` | `SPLUNK_ACCESS_TOKEN` |
 | `WithEndpoint` | (1) | (2) |
 | `WithPropagator` | `tracecontext,baggage` | `OTEL_PROPAGATORS` |
+| `WithTraceExporter` | `otlp` | `OTEL_TRACES_EXPORTER` |
+| `WithTLSConfig` | none | n/a |
 
 (1): The default value depends on the exporter used. See the
 [`WithEndpoint`](#withendpoint) section for more details.
@@ -91,6 +93,13 @@ a batch span processor.
     the SDK if no other exporter option is defined.
 
   Any other value will be ignored and the default used instead.
+
+### `WithTLSConfig`
+
+`WithTLSConfig` configures the TLS configuration used by the exporter.
+
+- Default value: none; an non-TLS connection is used.
+- Environment variable: n/a (only configurable in code).
 
 [`Run`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#Run
 [`SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK
