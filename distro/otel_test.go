@@ -396,6 +396,12 @@ func TestInvalidTraceExporter(t *testing.T) {
 	}
 }
 
+func TestNoneExporterErrors(t *testing.T) {
+	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "none"))
+	_, err := distro.Run()
+	require.Error(t, err, "setting traces exporter to none should error")
+}
+
 func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
 	d, ok := t.Deadline()
 	if !ok {
