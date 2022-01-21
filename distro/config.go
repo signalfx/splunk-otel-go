@@ -62,7 +62,6 @@ const (
 type exporterConfig struct {
 	AccessToken string
 	Endpoint    string
-	Propagator  propagation.TextMapPropagator
 }
 
 // config is the configuration used to create and operate an SDK.
