@@ -13,5 +13,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.opentelemetry.io/otel/trace v1.3.0
+	go.opentelemetry.io/proto/otlp v0.12.0
 	go.uber.org/goleak v1.1.12
+	google.golang.org/grpc v1.43.0
 )
