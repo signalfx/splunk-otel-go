@@ -236,7 +236,7 @@ func newCollectorAt(address string) (*collector, error) {
 	return coll, nil
 }
 
-func TestRunOTLPExporter(t *testing.T) {
+func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func length irrelevant.
 	assertBase := func(t *testing.T, req exportRequest) {
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
 		require.Len(t, req.Spans, 1)
