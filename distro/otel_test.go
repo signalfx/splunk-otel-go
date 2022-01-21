@@ -290,6 +290,31 @@ func TestRunOTLPExporter(t *testing.T) {
 	}
 }
 
+func TestInvalidTraceExporter(t *testing.T) {
+	coll := newCollector(t)
+
+	// Explicitly set OTLP exporter.
+	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "invalid value"))
+	sdk, err := distro.Run(distro.WithEndpoint(coll.endpoint))
+	require.NoError(t, err, "should configure tracing")
+
+	ctx := withTestingDeadline(context.Background(), t)
+	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, "test span")
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	select {
+	case <-ctx.Done():
+		require.Fail(t, "test timeout out", ctx.Err())
+	case got := <-coll.traceService.requests:
+		// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER
+		// value is invalid.
+		assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	}
+}
+
 func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
 	d, ok := t.Deadline()
 	if !ok {
