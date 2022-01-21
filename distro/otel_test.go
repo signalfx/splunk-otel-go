@@ -46,6 +46,13 @@ func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
+func reqHander() (<-chan *http.Request, http.HandlerFunc) {
+	reqCh := make(chan *http.Request, 1)
+	return reqCh, func(rw http.ResponseWriter, r *http.Request) {
+		reqCh <- r
+	}
+}
+
 func TestRunJaegerExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *http.Request) {
 		assert.Equal(t, "application/x-thrift", req.Header.Get("Content-type"))
@@ -65,7 +72,6 @@ func TestRunJaegerExporter(t *testing.T) {
 				require.NoError(t, err)
 				return distro.Run(distro.WithTraceExporter(exp))
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint",
@@ -73,7 +79,6 @@ func TestRunJaegerExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 				return distro.Run(distro.WithEndpoint(url))
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT",
@@ -82,7 +87,6 @@ func TestRunJaegerExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
 				return distro.Run()
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
@@ -116,11 +120,13 @@ func TestRunJaegerExporter(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		if tc.assertFn == nil {
+			tc.assertFn = assertBase
+		}
+
 		t.Run(tc.desc, func(t *testing.T) {
-			reqCh := make(chan *http.Request, 1)
-			srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-				reqCh <- r
-			}))
+			reqCh, hFunc := reqHander()
+			srv := httptest.NewServer(hFunc)
 			t.Cleanup(srv.Close)
 
 			sdk, err := tc.setupFn(t, srv.URL)
@@ -140,6 +146,36 @@ func TestRunJaegerExporter(t *testing.T) {
 				tc.assertFn(t, got)
 			}
 		})
+	}
+}
+
+func TestRunJaegerExporterDefault(t *testing.T) {
+	reqCh, hFunc := reqHander()
+	srv := httptest.NewUnstartedServer(hFunc)
+	t.Cleanup(srv.Close)
+
+	// Start server at default address.
+	ln, err := net.Listen("tcp", "127.0.0.1:9080")
+	require.NoError(t, err)
+	srv.Listener = ln
+	srv.Start()
+
+	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+	sdk, err := distro.Run()
+	require.NoError(t, err)
+
+	ctx := withTestingDeadline(context.Background(), t)
+	_, span := otel.Tracer("TestRunJaegerExporterDefault").Start(ctx, spanName)
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	select {
+	case <-ctx.Done():
+		require.Fail(t, "test timeout out", ctx.Err())
+	case got := <-reqCh:
+		assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
 	}
 }
 
@@ -168,12 +204,22 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 
 type collector struct {
 	endpoint     string
+	srv          *grpc.Server
 	traceService *collectorTraceServiceServer
 }
 
 func newCollector(t *testing.T) *collector {
-	ln, err := net.Listen("tcp", "localhost:0")
+	coll, err := newCollectorAt("localhost:0")
 	require.NoError(t, err)
+	t.Cleanup(coll.srv.GracefulStop)
+	return coll
+}
+
+func newCollectorAt(address string) (*collector, error) {
+	ln, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, err
+	}
 
 	coll := &collector{
 		endpoint: ln.Addr().String(),
@@ -185,10 +231,9 @@ func newCollector(t *testing.T) *collector {
 	srv := grpc.NewServer()
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
 	go func() { _ = srv.Serve(ln) }()
+	coll.srv = srv
 
-	t.Cleanup(srv.GracefulStop)
-
-	return coll
+	return coll, nil
 }
 
 func TestRunOTLPExporter(t *testing.T) {
@@ -214,7 +259,6 @@ func TestRunOTLPExporter(t *testing.T) {
 				require.NoError(t, err)
 				return distro.Run(distro.WithTraceExporter(exp))
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint",
@@ -222,7 +266,6 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run(distro.WithEndpoint(url))
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -234,7 +277,6 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
@@ -246,7 +288,6 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
-			assertFn: assertBase,
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
@@ -277,6 +318,10 @@ func TestRunOTLPExporter(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		if tc.assertFn == nil {
+			tc.assertFn = assertBase
+		}
+
 		t.Run(tc.desc, func(t *testing.T) {
 			coll := newCollector(t)
 
@@ -297,6 +342,32 @@ func TestRunOTLPExporter(t *testing.T) {
 				tc.assertFn(t, got)
 			}
 		})
+	}
+}
+
+func TestRunExporterDefault(t *testing.T) {
+	// Start collector at default address.
+	coll, err := newCollectorAt("localhost:4317")
+	require.NoError(t, err, "failed to start testing collector")
+	t.Cleanup(coll.srv.GracefulStop)
+
+	sdk, err := distro.Run()
+	require.NoError(t, err)
+
+	ctx := withTestingDeadline(context.Background(), t)
+	_, span := otel.Tracer("TestRunExporterDefault").Start(ctx, spanName)
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	select {
+	case <-ctx.Done():
+		require.Fail(t, "test timeout out", ctx.Err())
+	case got := <-coll.traceService.requests:
+		assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+		require.Len(t, got.Spans, 1)
+		assert.Equal(t, spanName, got.Spans[0].Name)
 	}
 }
 
