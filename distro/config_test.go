@@ -84,15 +84,6 @@ var ConfigurationTests = []*ConfigFieldTest{
 					assert.Equal(t, "https://localhost/", c.ExportConfig.Endpoint)
 				},
 			},
-			{
-				Name: "invalid URL",
-				Options: []Option{
-					WithEndpoint("not://a valid.URL"),
-				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.Error(t, e)
-				},
-			},
 		},
 	},
 	{

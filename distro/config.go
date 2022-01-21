@@ -16,8 +16,6 @@ package distro
 
 import (
 	"context"
-	"fmt"
-	"net/url"
 	"os"
 	"strings"
 
@@ -67,22 +65,6 @@ type exporterConfig struct {
 	Propagator  propagation.TextMapPropagator
 }
 
-// Validate ensures c is valid, otherwise returning an appropriate error.
-func (c *exporterConfig) Validate() error {
-	var errs []string
-
-	if c.Endpoint != "" {
-		if _, err := url.Parse(c.Endpoint); err != nil {
-			errs = append(errs, "invalid endpoint: %s", err.Error())
-		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid exporter config: %v", errs)
-	}
-	return nil
-}
-
 // config is the configuration used to create and operate an SDK.
 type config struct {
 	Propagator propagation.TextMapPropagator
@@ -115,24 +97,7 @@ func newConfig(opts ...Option) (*config, error) {
 		)
 	}
 
-	if err := c.Validate(); err != nil {
-		return nil, err
-	}
 	return c, nil
-}
-
-// Validate ensures c is valid, otherwise returning an appropriate error.
-func (c *config) Validate() error {
-	var errs []string
-
-	if ecErr := c.ExportConfig.Validate(); ecErr != nil {
-		errs = append(errs, ecErr.Error())
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid config: %v", errs)
-	}
-	return nil
 }
 
 type nonePropagatorType struct{ propagation.TextMapPropagator }
