@@ -21,9 +21,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -222,19 +220,13 @@ func TestRunJaegerExporter(t *testing.T) {
 			sdk, err := tc.setupFn(t, srv.URL)
 			require.NoError(t, err, "should configure tracing")
 
-			ctx := withTestingDeadline(context.Background(), t)
+			ctx := context.Background()
 			_, span := otel.Tracer(tc.desc).Start(ctx, spanName)
 			span.End()
 
 			// Flush all spans from BSP.
 			require.NoError(t, sdk.Shutdown(ctx))
-
-			select {
-			case <-ctx.Done():
-				require.Fail(t, "test timeout out", ctx.Err())
-			case got := <-reqCh:
-				tc.assertFn(t, got)
-			}
+			tc.assertFn(t, <-reqCh)
 		})
 	}
 }
@@ -274,20 +266,16 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
+	ctx := context.Background()
 	_, span := otel.Tracer("TestRunJaegerExporterTLS").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
 
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out", ctx.Err())
-	case got := <-reqCh:
-		assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
-		assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
-	}
+	got := <-reqCh
+	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
+	assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
 }
 
 func TestRunJaegerExporterDefault(t *testing.T) {
@@ -305,19 +293,15 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	sdk, err := distro.Run()
 	require.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
+	ctx := context.Background()
 	_, span := otel.Tracer("TestRunJaegerExporterDefault").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
 
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out", ctx.Err())
-	case got := <-reqCh:
-		assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
-	}
+	got := <-reqCh
+	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
 }
 
 type exportRequest struct {
@@ -377,28 +361,7 @@ func newCollectorAt(address string) (*collector, error) {
 	return coll, nil
 }
 
-func newTLSCollector(t *testing.T) *collector {
-	ln, err := net.Listen("tcp", "localhost:0")
-	require.NoError(t, err)
-
-	coll := &collector{
-		endpoint: ln.Addr().String(),
-		traceService: &collectorTraceServiceServer{
-			requests: make(chan exportRequest, 1),
-		},
-	}
-
-	creds := credentials.NewTLS(serverTLSConfig(t))
-	srv := grpc.NewServer(grpc.Creds(creds))
-
-	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
-	go func() { _ = srv.Serve(ln) }()
-	t.Cleanup(srv.GracefulStop)
-	coll.srv = srv
-	return coll
-}
-
-func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func length irrelevant.
+func TestRunOTLPExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req exportRequest) {
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
 		require.Len(t, req.Spans, 1)
@@ -432,10 +395,7 @@ func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func l
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-					url = "http://" + url
-				}
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
@@ -443,10 +403,7 @@ func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func l
 		{
 			desc: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-					url = "http://" + url
-				}
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
 			},
@@ -465,10 +422,7 @@ func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func l
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT and SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-					url = "http://" + url
-				}
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url))
+				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
 				return distro.Run()
@@ -490,25 +444,36 @@ func TestRunOTLPExporter(t *testing.T) { //nolint:funlen  // Tabular test func l
 			sdk, err := tc.setupFn(t, coll.endpoint)
 			require.NoError(t, err, "should configure tracing")
 
-			ctx := withTestingDeadline(context.Background(), t)
+			ctx := context.Background()
 			_, span := otel.Tracer(tc.desc).Start(ctx, spanName)
 			span.End()
 
 			// Flush all spans from BSP.
 			require.NoError(t, sdk.Shutdown(ctx))
-
-			select {
-			case <-ctx.Done():
-				require.Fail(t, "test timeout out", ctx.Err())
-			case got := <-coll.traceService.requests:
-				tc.assertFn(t, got)
-			}
+			tc.assertFn(t, <-coll.traceService.requests)
 		})
 	}
 }
 
 func TestRunOTLPExporterTLS(t *testing.T) {
-	coll := newTLSCollector(t)
+	ln, err := net.Listen("tcp", "localhost:0")
+	require.NoError(t, err)
+
+	coll := &collector{
+		endpoint: ln.Addr().String(),
+		traceService: &collectorTraceServiceServer{
+			requests: make(chan exportRequest, 1),
+		},
+	}
+
+	// Run gRPC server with TLS.
+	creds := credentials.NewTLS(serverTLSConfig(t))
+	srv := grpc.NewServer(grpc.Creds(creds))
+
+	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
+	go func() { _ = srv.Serve(ln) }()
+	t.Cleanup(srv.GracefulStop)
+	coll.srv = srv
 
 	sdk, err := distro.Run(
 		distro.WithEndpoint(coll.endpoint),
@@ -516,21 +481,16 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
+	ctx := context.Background()
 	_, span := otel.Tracer("TestRunOTLPExporterTLS").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
-
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out", ctx.Err())
-	case req := <-coll.traceService.requests:
-		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-		require.Len(t, req.Spans, 1)
-		assert.Equal(t, spanName, req.Spans[0].Name)
-	}
+	req := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
+	require.Len(t, req.Spans, 1)
+	assert.Equal(t, spanName, req.Spans[0].Name)
 }
 
 func TestRunExporterDefault(t *testing.T) {
@@ -542,21 +502,16 @@ func TestRunExporterDefault(t *testing.T) {
 	sdk, err := distro.Run()
 	require.NoError(t, err)
 
-	ctx := withTestingDeadline(context.Background(), t)
+	ctx := context.Background()
 	_, span := otel.Tracer("TestRunExporterDefault").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
-
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out", ctx.Err())
-	case got := <-coll.traceService.requests:
-		assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-		require.Len(t, got.Spans, 1)
-		assert.Equal(t, spanName, got.Spans[0].Name)
-	}
+	got := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	require.Len(t, got.Spans, 1)
+	assert.Equal(t, spanName, got.Spans[0].Name)
 }
 
 func TestInvalidTraceExporter(t *testing.T) {
@@ -567,38 +522,21 @@ func TestInvalidTraceExporter(t *testing.T) {
 	sdk, err := distro.Run(distro.WithEndpoint(coll.endpoint))
 	require.NoError(t, err, "should configure tracing")
 
-	ctx := withTestingDeadline(context.Background(), t)
+	ctx := context.Background()
 	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, "test span")
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
 
-	select {
-	case <-ctx.Done():
-		require.Fail(t, "test timeout out", ctx.Err())
-	case got := <-coll.traceService.requests:
-		// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER
-		// value is invalid.
-		assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-	}
+	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
+	// is invalid.
+	got := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 }
 
 func TestNoneExporterErrors(t *testing.T) {
 	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "none"))
 	_, err := distro.Run()
 	require.Error(t, err, "setting traces exporter to none should error")
-}
-
-func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
-	d, ok := t.Deadline()
-	if !ok {
-		d = time.Now().Add(10 * time.Second)
-	} else {
-		d = d.Add(-time.Millisecond)
-	}
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithDeadline(ctx, d)
-	t.Cleanup(cancel)
-	return ctx
 }
