@@ -22,7 +22,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - The `SDK` from `github.com/signalfx/splunk-otel-go/distro` now uses an OTLP
-  exporter by default instead of a Jaeger thrift one. The original Jaeger
+  exporter by default. The previous default Jaeger
   thrift exporter can still be used by setting the `OTEL_TRACES_EXPORTER`
   environment variable to `jaeger-thrift-splunk`, or by directly passing the
   user configured exporter with a `WithTraceExporter` option. (#300)
