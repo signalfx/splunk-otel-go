@@ -334,16 +334,22 @@ type collector struct {
 }
 
 func newCollector(t *testing.T) *collector {
-	coll, err := newCollectorAt("localhost:0")
+	coll, errCh, err := newCollectorAt("localhost:0")
 	require.NoError(t, err)
-	t.Cleanup(coll.srv.GracefulStop)
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		require.NoError(t, <-errCh)
+	})
 	return coll
 }
 
-func newCollectorAt(address string) (*collector, error) {
+func newCollectorAt(address string) (*collector, chan error, error) {
+	errCh := make(chan error, 1)
+
 	ln, err := net.Listen("tcp", address)
 	if err != nil {
-		return nil, err
+		errCh <- nil
+		return nil, errCh, err
 	}
 
 	coll := &collector{
@@ -355,10 +361,10 @@ func newCollectorAt(address string) (*collector, error) {
 
 	srv := grpc.NewServer()
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
-	go func() { _ = srv.Serve(ln) }()
+	go func() { errCh <- srv.Serve(ln) }()
 	coll.srv = srv
 
-	return coll, nil
+	return coll, errCh, nil
 }
 
 func TestRunOTLPExporter(t *testing.T) {
@@ -471,8 +477,12 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 	srv := grpc.NewServer(grpc.Creds(creds))
 
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
-	go func() { _ = srv.Serve(ln) }()
-	t.Cleanup(srv.GracefulStop)
+	errCh := make(chan error, 1)
+	go func() { errCh <- srv.Serve(ln) }()
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		require.NoError(t, <-errCh)
+	})
 	coll.srv = srv
 
 	sdk, err := distro.Run(
@@ -495,9 +505,12 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 
 func TestRunExporterDefault(t *testing.T) {
 	// Start collector at default address.
-	coll, err := newCollectorAt("localhost:4317")
+	coll, errCh, err := newCollectorAt("localhost:4317")
 	require.NoError(t, err, "failed to start testing collector")
-	t.Cleanup(coll.srv.GracefulStop)
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		require.NoError(t, <-errCh)
+	})
 
 	sdk, err := distro.Run()
 	require.NoError(t, err)
