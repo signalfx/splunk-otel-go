@@ -231,7 +231,7 @@ func WithAccessToken(accessToken string) Option {
 // is not provided. Valid values for this environment variable are "otlp" for
 // an OTLP exporter, and "jaeger-thrift-splunk" for a Splunk specific Jaeger
 // thrift exporter. If this environment variable is set to "none", no exporter
-// is registered and Run will return an error stating this.
+// is registered.
 //
 // By default, an OTLP exporter is used if this is not provided or the
 // OTEL_TRACES_EXPORTER environment variable is not set.

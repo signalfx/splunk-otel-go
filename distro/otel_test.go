@@ -547,9 +547,3 @@ func TestInvalidTraceExporter(t *testing.T) {
 	got := <-coll.traceService.requests
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 }
-
-func TestNoneExporterErrors(t *testing.T) {
-	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "none"))
-	_, err := distro.Run()
-	require.Error(t, err, "setting traces exporter to none should error")
-}

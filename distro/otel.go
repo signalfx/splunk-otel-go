@@ -24,7 +24,6 @@ package distro
 
 import (
 	"context"
-	"errors"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -39,7 +38,10 @@ type SDK struct {
 
 // Shutdown stops the SDK and releases any used resources.
 func (s SDK) Shutdown(ctx context.Context) error {
-	return s.shutdownFunc(ctx)
+	if s.shutdownFunc != nil {
+		return s.shutdownFunc(ctx)
+	}
+	return nil
 }
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
@@ -50,8 +52,13 @@ func (s SDK) Shutdown(ctx context.Context) error {
 func Run(opts ...Option) (SDK, error) {
 	c := newConfig(opts...)
 
+	if c.Propagator != nil && c.Propagator != nonePropagator {
+		otel.SetTextMapPropagator(c.Propagator)
+	}
+
 	if c.TraceExporterFunc == nil {
-		return SDK{}, errors.New(`"none" exporter set`)
+		// "none" exporter configured.
+		return SDK{}, nil
 	}
 	exp, err := c.TraceExporterFunc(c.ExportConfig)
 	if err != nil {
@@ -64,10 +71,6 @@ func Run(opts ...Option) (SDK, error) {
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
 	otel.SetTracerProvider(traceProvider)
-
-	if c.Propagator != nil && c.Propagator != nonePropagator {
-		otel.SetTextMapPropagator(c.Propagator)
-	}
 
 	return SDK{
 		config: *c,
