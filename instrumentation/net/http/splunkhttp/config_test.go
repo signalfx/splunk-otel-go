@@ -74,9 +74,9 @@ func TestConfigs(t *testing.T) {
 			// set env var before the test and bring the old values back after the test
 			for key, val := range tt.envs {
 				if v, ok := os.LookupEnv(key); ok {
-					defer func() { os.Setenv(key, v) }()
+					t.Cleanup(func() { os.Setenv(key, v) })
 				} else {
-					defer func() { os.Unsetenv(key) }()
+					t.Cleanup(func() { os.Unsetenv(key) })
 				}
 				os.Setenv(key, val)
 			}
