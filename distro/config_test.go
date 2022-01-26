@@ -18,7 +18,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
@@ -33,7 +32,7 @@ type KeyValue struct {
 type OptionTest struct {
 	Name          string
 	Options       []Option
-	AssertionFunc func(*testing.T, *config, error)
+	AssertionFunc func(*testing.T, *config)
 }
 
 type ConfigFieldTest struct {
@@ -48,7 +47,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 	{
 		Name: "AccessToken",
 		ValueFunc: func(c *config) interface{} {
-			return c.AccessToken
+			return c.ExportConfig.AccessToken
 		},
 		DefaultValue: "",
 		EnvironmentTests: []KeyValue{
@@ -60,9 +59,8 @@ var ConfigurationTests = []*ConfigFieldTest{
 				Options: []Option{
 					WithAccessToken("secret"),
 				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.NoError(t, e)
-					assert.Equal(t, "secret", c.AccessToken)
+				AssertionFunc: func(t *testing.T, c *config) {
+					assert.Equal(t, "secret", c.ExportConfig.AccessToken)
 				},
 			},
 		},
@@ -70,7 +68,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 	{
 		Name: "Endpoint",
 		ValueFunc: func(c *config) interface{} {
-			return c.Endpoint
+			return c.ExportConfig.Endpoint
 		},
 		DefaultValue: "",
 		OptionTests: []OptionTest{
@@ -79,18 +77,8 @@ var ConfigurationTests = []*ConfigFieldTest{
 				Options: []Option{
 					WithEndpoint("https://localhost/"),
 				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.NoError(t, e)
-					assert.Equal(t, "https://localhost/", c.Endpoint)
-				},
-			},
-			{
-				Name: "invalid URL",
-				Options: []Option{
-					WithEndpoint("not://a valid.URL"),
-				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.Error(t, e)
+				AssertionFunc: func(t *testing.T, c *config) {
+					assert.Equal(t, "https://localhost/", c.ExportConfig.Endpoint)
 				},
 			},
 		},
@@ -113,8 +101,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 				Options: []Option{
 					WithPropagator(nil),
 				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.NoError(t, e)
+				AssertionFunc: func(t *testing.T, c *config) {
 					assert.Equal(t, nonePropagator, c.Propagator)
 				},
 			},
@@ -123,8 +110,7 @@ var ConfigurationTests = []*ConfigFieldTest{
 				Options: []Option{
 					WithPropagator(propagation.TraceContext{}),
 				},
-				AssertionFunc: func(t *testing.T, c *config, e error) {
-					assert.NoError(t, e)
+				AssertionFunc: func(t *testing.T, c *config) {
 					assert.Equal(t, propagation.TraceContext{}, c.Propagator)
 				},
 			},
@@ -137,9 +123,7 @@ func TestConfig(t *testing.T) {
 		func(t *testing.T, tc *ConfigFieldTest) {
 			t.Run(tc.Name, func(t *testing.T) {
 				t.Run("DefaultValue", func(t *testing.T) {
-					c, err := newConfig()
-					require.NoError(t, err)
-					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(c))
+					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(newConfig()))
 				})
 
 				t.Run("EnvironmentVariableOverride", func(t *testing.T) {
@@ -160,15 +144,11 @@ func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
 			revert := Setenv(key, val)
 			defer revert()
 
-			c, err := newConfig()
-			if !assert.NoError(t, err) {
-				return
-			}
 			// The expected type is not known, but we can check that the value
 			// has changed to verify the environment variable influenced the
 			// configuration.
 			assert.NotEqual(
-				t, tc.DefaultValue, tc.ValueFunc(c),
+				t, tc.DefaultValue, tc.ValueFunc(newConfig()),
 				"environment variable %s=%q unused", key, val,
 			)
 		}(ev.Key, ev.Value)
@@ -179,8 +159,7 @@ func testOptions(t *testing.T, tc *ConfigFieldTest) {
 	for _, o := range tc.OptionTests {
 		func(t *testing.T, o OptionTest) {
 			t.Run(o.Name, func(t *testing.T) {
-				c, err := newConfig(o.Options...)
-				o.AssertionFunc(t, c, err)
+				o.AssertionFunc(t, newConfig(o.Options...))
 			})
 		}(t, o)
 	}
