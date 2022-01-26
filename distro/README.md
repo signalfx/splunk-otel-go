@@ -20,6 +20,8 @@ The [`SDK`] is configured with the following options.
 | `WithAccessToken` | `""` | `SPLUNK_ACCESS_TOKEN` |
 | `WithEndpoint` | (1) | (2) |
 | `WithPropagator` | `tracecontext,baggage` | `OTEL_PROPAGATORS` |
+| `WithTraceExporter` | `otlp` | `OTEL_TRACES_EXPORTER` |
+| `WithTLSConfig` | none | n/a |
 
 (1): The default value depends on the exporter used. See the
 [`WithEndpoint`](#withendpoint) section for more details.
@@ -74,6 +76,29 @@ global `TextMapPropagator`. Setting to `nil` will prevent any global
 
   Values can be joined with a comma (`","`) to produce a composite
   `TextMapPropagator`.
+
+### `WithTraceExporter`
+
+`WithTraceExporter` configures the OpenTelemetry trace SpanExporter used to
+deliver telemetry. This exporter is registered with the OpenTelemetry SDK using
+a batch span processor.
+
+- Default value: an OTLP gRPC SpanExporter.
+- Environment variable: `OTEL_TRACES_EXPORTER`
+
+  The environment variable values are restricted to the following.
+  - `"otlp"`: OTLP gRPC exporter.
+  - `"jaeger-thrift-splunk"`: Jaeger thrift exporter.
+  - `"none"`: None, explicitly do not set an exporter.
+
+  Any other value will be ignored and the default used instead.
+
+### `WithTLSConfig`
+
+`WithTLSConfig` configures the TLS configuration used by the exporter.
+
+- Default value: none; an non-TLS connection is used.
+- Environment variable: n/a (only configurable in code).
 
 [`Run`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#Run
 [`SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK

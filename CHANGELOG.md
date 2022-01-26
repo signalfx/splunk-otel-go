@@ -8,6 +8,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add the `WithPropagator` option to
+  `github.com/signalfx/splunk-otel-go/distro` along with parsing of the
+  `OTEL_PROPAGATORS` environment variable to set the global OpenTelemetry
+  `TextMapPropagator`. (#295)
+- Add the `WithTraceExporter` and `WithTLSConfig` options to
+  `github.com/signalfx/splunk-otel-go/distro` along with parsing of hte
+  `OTEL_TRACES_EXPORTER` environment variable to set the global OpenTelemetry
+  `SpanExporter` used by the `SDK` to export traces. (#300)
+
+### Changed
+
+- The `SDK` from `github.com/signalfx/splunk-otel-go/distro` now uses an OTLP
+  exporter by default. The previous default Jaeger
+  thrift exporter can still be used by setting the `OTEL_TRACES_EXPORTER`
+  environment variable to `jaeger-thrift-splunk`, or by directly passing the
+  user configured exporter with a `WithTraceExporter` option. (#300)
+
 ## [0.7.0] - 2022-01-13
 
 ### Added
@@ -61,10 +80,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
   instrumentation for the `github.com/gomodule/redigo` package. (#288)
-- Add the `WithPropagator` option to
-  `github.com/signalfx/splunk-otel-go/distro` along with parsing of the
-  `OTEL_PROPAGATORS` environment variable to set the global OpenTelemetry
-  `TextMapPropagator`. (#295)
 - Add the
   `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
   instrumentation for the `gopkg.in/olivere/elastic` package. (#311)

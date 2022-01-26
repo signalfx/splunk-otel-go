@@ -26,7 +26,6 @@ import (
 	"context"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -39,7 +38,10 @@ type SDK struct {
 
 // Shutdown stops the SDK and releases any used resources.
 func (s SDK) Shutdown(ctx context.Context) error {
-	return s.shutdownFunc(ctx)
+	if s.shutdownFunc != nil {
+		return s.shutdownFunc(ctx)
+	}
+	return nil
 }
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
@@ -48,21 +50,17 @@ func (s SDK) Shutdown(ctx context.Context) error {
 // complete. This ensures all resources are released and all telemetry
 // flushed.
 func Run(opts ...Option) (SDK, error) {
-	c, err := newConfig(opts...)
-	if err != nil {
-		return SDK{}, err
+	c := newConfig(opts...)
+
+	if c.Propagator != nil && c.Propagator != nonePropagator {
+		otel.SetTextMapPropagator(c.Propagator)
 	}
 
-	var jeagerOpts []jaeger.CollectorEndpointOption
-	if c.Endpoint != "" {
-		jeagerOpts = append(jeagerOpts, jaeger.WithEndpoint(c.Endpoint))
+	if c.TraceExporterFunc == nil {
+		// "none" exporter configured.
+		return SDK{}, nil
 	}
-	if c.AccessToken != "" {
-		jeagerOpts = append(jeagerOpts, jaeger.WithUsername("auth"), jaeger.WithPassword(c.AccessToken))
-	}
-
-	opt := jaeger.WithCollectorEndpoint(jeagerOpts...)
-	exp, err := jaeger.New(opt)
+	exp, err := c.TraceExporterFunc(c.ExportConfig)
 	if err != nil {
 		return SDK{}, err
 	}
@@ -73,10 +71,6 @@ func Run(opts ...Option) (SDK, error) {
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
 	otel.SetTracerProvider(traceProvider)
-
-	if c.Propagator != nil && c.Propagator != nonePropagator {
-		otel.SetTextMapPropagator(c.Propagator)
-	}
 
 	return SDK{
 		config: *c,
