@@ -26,8 +26,14 @@ import (
 	"context"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+
+	splunkotel "github.com/signalfx/splunk-otel-go"
 )
+
+var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
 
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
 type SDK struct {
@@ -65,7 +71,17 @@ func Run(opts ...Option) (SDK, error) {
 		return SDK{}, err
 	}
 
+	res, err := resource.Merge(
+		resource.Default(),
+		// Use a schema-less Resource here, uses resource.Default's.
+		resource.NewSchemaless(distroVerAttr),
+	)
+	if err != nil {
+		return SDK{}, err
+	}
+
 	traceProvider := trace.NewTracerProvider(
+		trace.WithResource(res),
 		trace.WithSampler(trace.AlwaysSample()),
 		// TODO: configure batching policy with configured values.
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
