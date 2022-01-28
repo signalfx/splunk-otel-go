@@ -29,12 +29,15 @@ import (
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
+	comm "go.opentelemetry.io/proto/otlp/common/v1"
+	rpb "go.opentelemetry.io/proto/otlp/resource/v1"
 	tpb "go.opentelemetry.io/proto/otlp/trace/v1"
 	"go.uber.org/goleak"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/distro"
 )
 
@@ -305,8 +308,9 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 }
 
 type exportRequest struct {
-	Header metadata.MD
-	Spans  []*tpb.Span
+	Header   metadata.MD
+	Resource *rpb.Resource
+	Spans    []*tpb.Span
 }
 
 type collectorTraceServiceServer struct {
@@ -322,7 +326,11 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 	ils := rs.GetInstrumentationLibrarySpans()[0]
 	headers, _ := metadata.FromIncomingContext(ctx)
 
-	ctss.requests <- exportRequest{Header: headers, Spans: ils.GetSpans()}
+	ctss.requests <- exportRequest{
+		Header:   headers,
+		Resource: rs.GetResource(),
+		Spans:    ils.GetSpans(),
+	}
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
 }
@@ -546,4 +554,27 @@ func TestInvalidTraceExporter(t *testing.T) {
 	// is invalid.
 	got := <-coll.traceService.requests
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+}
+
+func TestSplunkDistroVerionAttrInResource(t *testing.T) {
+	coll := newCollector(t)
+	sdk, err := distro.Run(distro.WithEndpoint(coll.endpoint))
+	require.NoError(t, err, "should configure tracing")
+
+	ctx := context.Background()
+	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, "test span")
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	got := <-coll.traceService.requests
+	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
+		Key: "splunk.distro.version",
+		Value: &comm.AnyValue{
+			Value: &comm.AnyValue_StringValue{
+				StringValue: splunkotel.Version(),
+			},
+		},
+	})
 }
