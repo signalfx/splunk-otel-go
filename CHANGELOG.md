@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/distro` along with parsing of hte
   `OTEL_TRACES_EXPORTER` environment variable to set the global OpenTelemetry
   `SpanExporter` used by the `SDK` to export traces. (#300)
+- Add the `splunk.distro.version` attribute to the SDK resource. (#332)
 
 ### Changed
 
