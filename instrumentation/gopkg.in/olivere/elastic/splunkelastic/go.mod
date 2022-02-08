@@ -3,7 +3,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elast
 go 1.16
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/olivere/elastic/v7 v7.0.31
 	github.com/signalfx/splunk-otel-go v0.7.0

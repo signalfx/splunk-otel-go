@@ -16,15 +16,21 @@ package distro
 
 import (
 	"crypto/tls"
+	"fmt"
 	"os"
 	"strings"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/stdr"
+	"github.com/go-logr/zapr"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -42,6 +48,9 @@ const (
 	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
 	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
 	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+
+	// Logging level to set.
+	otelLogLevelKey = "OTEL_LOG_LEVEL"
 
 	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
 	// FIXME: support OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
@@ -67,6 +76,7 @@ type exporterConfig struct {
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
+	Logger     logr.Logger
 	Propagator propagation.TextMapPropagator
 
 	ExportConfig      *exporterConfig
@@ -76,6 +86,7 @@ type config struct {
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
 	c := &config{
+		Logger: defaultLogger(),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
@@ -87,21 +98,76 @@ func newConfig(opts ...Option) *config {
 
 	// Apply default field values if they were not set.
 	if c.Propagator == nil {
-		c.Propagator = loadPropagator(
-			envOr(otelPropagatorsKey, defaultPropagator),
-		)
+		c.setPropagator(envOr(otelPropagatorsKey, defaultPropagator))
 	}
 	if c.TraceExporterFunc == nil {
 		key := envOr(otelTracesExporterKey, defaultTraceExporter)
 		tef, ok := exporters[key]
 		if !ok {
-			// TODO: log invalid exporter value.
+			err := fmt.Errorf("invalid exporter: %q", key)
+			c.Logger.Error(err, "using default trace exporter: otlp")
+
 			tef = exporters[defaultTraceExporter]
 		}
 		c.TraceExporterFunc = tef
 	}
 
 	return c
+}
+
+// defaultLogger configures and returns the default project logger.
+//
+// The returned logger is configured to match verbosity levels as such for any
+// Info log made:
+//   - warning: 0
+//   - info: 1
+//   - debug: 2+
+func defaultLogger() logr.Logger {
+	zc := zap.NewProductionConfig()
+	zc.Encoding = "console"
+	// Human-readable timestamps for console format of logs.
+	zc.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// Translate our verbosity levels to logged levels.
+	zc.EncoderConfig.EncodeLevel = func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+		switch v := int8(l); {
+		case v > 0:
+			enc.AppendString("error")
+		case v == 0:
+			enc.AppendString("warn")
+		case v == -1:
+			enc.AppendString("info")
+		case v <= -2:
+			enc.AppendString("debug")
+		default:
+			enc.AppendString(fmt.Sprintf("Level(%d)", l))
+		}
+	}
+	// Default log level is "info".
+	zc.Level = zap.NewAtomicLevelAt(zapcore.Level(-1))
+
+	// Check envar for user specified level.
+	if level, ok := os.LookupEnv(otelLogLevelKey); ok {
+		// The only level defined by OTel is "info", make a best guess for
+		// what these should be.
+		switch level {
+		case "debug":
+			// Log everything.
+			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(-127))
+		case "warn":
+			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(0))
+		case "error":
+			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(1))
+		}
+	}
+
+	z, err := zc.Build()
+	if err != nil {
+		// Fallback.
+		l := stdr.New(nil)
+		l.Error(err, "failed to initialize logging")
+		return l
+	}
+	return zapr.NewLogger(z)
 }
 
 type nonePropagatorType struct{ propagation.TextMapPropagator }
@@ -147,13 +213,13 @@ var propagators = map[string]func() propagation.TextMapPropagator{
 	},
 }
 
-func loadPropagator(name string) propagation.TextMapPropagator {
+func (c *config) setPropagator(name string) {
 	var props []propagation.TextMapPropagator
 	for _, part := range strings.Split(name, ",") {
 		factory, ok := propagators[part]
 		if !ok {
 			// Skip invalid data.
-			// TODO: log this.
+			c.Logger.Info("invalid propagator name", "name", part)
 			continue
 		}
 
@@ -161,7 +227,8 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 		if p == nonePropagator {
 			// Make sure the disablement of the global propagator does not get
 			// lost as a composite below.
-			return p
+			c.Propagator = p
+			return
 		}
 		props = append(props, p)
 	}
@@ -169,14 +236,14 @@ func loadPropagator(name string) propagation.TextMapPropagator {
 	switch len(props) {
 	case 0:
 		// Default to "tracecontext,baggage".
-		return propagation.NewCompositeTextMapPropagator(
+		c.Propagator = propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{},
 			propagation.Baggage{},
 		)
 	case 1:
-		return props[0]
+		c.Propagator = props[0]
 	default:
-		return propagation.NewCompositeTextMapPropagator(props...)
+		c.Propagator = propagation.NewCompositeTextMapPropagator(props...)
 	}
 }
 
@@ -272,5 +339,22 @@ func WithPropagator(p propagation.TextMapPropagator) Option {
 			p = nonePropagator
 		}
 		c.Propagator = p
+	})
+}
+
+// WithLogger configures the logger used by this distro.
+//
+// The logr.Logger provided should be configured with a verbosity enabled to
+// emit Info logs of the desired level. The following log level to verbosity
+// value are used.
+//   - warning: 0
+//   - info: 1
+//   - debug: 2+
+//
+// By default, a zapr.Logger configured for info logging will be used if this
+// is not provided.
+func WithLogger(l logr.Logger) Option {
+	return optionFunc(func(c *config) {
+		c.Logger = l
 	})
 }
