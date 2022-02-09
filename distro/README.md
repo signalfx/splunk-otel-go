@@ -13,17 +13,18 @@ a complete example.
 
 ## Logging
 
-By default, the [`SDK`] logs relevant information, warnings, and errors. 
-You can set the default logging level by setting the `OTEL_LOG_LEVEL` 
-environment variable to one of the following values:
+By default, the [`SDK`] logs relevant information, warnings, and errors. You
+can set the default logging level by setting the `OTEL_LOG_LEVEL` environment
+variable to one of the following values:
 
 - `"error"`: Log errors
 - `"warn"`: Log errors and warnings
 - `"info"`: Log information, warnings, and errors
 - `"debug"`: Log debugging and operation information, warnings, and errors
 
-Logging can be explicitly configured in the code that creates the [`SDK`] 
-using the `WithLogger` option.
+Logging can be explicitly configured in the code that creates the [`SDK`] using
+the `WithLogger` option.
+
 ## Configuration
 
 The [`SDK`] is configured with the following options.
@@ -118,9 +119,9 @@ a batch span processor.
 
 `WithLogger` configures the logger used by this distro.
 
-Configure [`logr.Logger`] with a verbosity value that allows to emit
- [`Info`] logs of the desired level. The SDK uses the following log level 
- to verbosity value correspondences:
+Configure [`logr.Logger`] with a verbosity value that allows to emit [`Info`]
+logs of the desired level. The SDK uses the following log level to verbosity
+value correspondences:
 
 | Log level | Verbosity value |
 |---|---|
@@ -128,7 +129,8 @@ Configure [`logr.Logger`] with a verbosity value that allows to emit
 | info | `1` |
 | debug | `2` or higher |
 
-The default value, [`zapr`], is configured for `info` logging. This setting is configurable only in code.
+The default value, [`zapr`], is configured for `info` logging. This setting is
+configurable only in code.
 
 [`Run`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#Run
 [`SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK
