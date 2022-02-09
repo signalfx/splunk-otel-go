@@ -61,6 +61,7 @@ const (
 	defaultAccessToken   = ""
 	defaultPropagator    = "tracecontext,baggage"
 	defaultTraceExporter = "otlp"
+	defaultLogLevel      = "info"
 
 	defaultOTLPEndpoint   = "localhost:4317"
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
@@ -86,7 +87,7 @@ type config struct {
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
 	c := &config{
-		Logger: defaultLogger(),
+		Logger: logger(zapConfig()),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
@@ -115,55 +116,65 @@ func newConfig(opts ...Option) *config {
 	return c
 }
 
-// defaultLogger configures and returns the default project logger.
+// zapLevelEncoder translates our verbosity levels to human-meaningful terms.
+func zapLevelEncoder(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+	switch v := int8(l); {
+	case v > 0:
+		enc.AppendString("error")
+	case v == 0:
+		enc.AppendString("warn")
+	case v == -1:
+		enc.AppendString("info")
+	case v <= -2:
+		enc.AppendString("debug")
+	}
+}
+
+// zapLevel returns the parsed zapcore.Level.
+func zapLevel(level string) zapcore.Level {
+	// The only level defined by OTel is "info", make a best guess for
+	// what these should be.
+	switch level {
+	case "debug":
+		// Debug is any verbosity 2 or higher. The zap levels are capped at
+		// -127 because int8 is the underlying type. Use this as a stand in
+		// for debug so all debug levels are logged.
+		return zapcore.Level(-127)
+	case "warn":
+		return zapcore.Level(0)
+	case "error":
+		return zapcore.Level(1)
+	default:
+		// "info" or unrecognized level, use info level regardless.
+		return zapcore.Level(-1)
+	}
+}
+
+func zapConfig() *zap.Config {
+	zc := zap.NewProductionConfig()
+	zc.Encoding = "console"
+	// Human-readable timestamps for console format of logs.
+	zc.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// Translate our verbosity levels to logged levels.
+	zc.EncoderConfig.EncodeLevel = zapLevelEncoder
+	l := zapLevel(envOr(otelLogLevelKey, defaultLogLevel))
+	zc.Level = zap.NewAtomicLevelAt(l)
+	return &zc
+}
+
+var fallbackLoggerFunc = func() logr.Logger { return stdr.New(nil) }
+
+// logger configures and returns the default project logger.
 //
 // The returned logger is configured to match verbosity levels as such for any
 // Info log made:
 //   - warning: 0
 //   - info: 1
 //   - debug: 2+
-func defaultLogger() logr.Logger {
-	zc := zap.NewProductionConfig()
-	zc.Encoding = "console"
-	// Human-readable timestamps for console format of logs.
-	zc.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	// Translate our verbosity levels to logged levels.
-	zc.EncoderConfig.EncodeLevel = func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-		switch v := int8(l); {
-		case v > 0:
-			enc.AppendString("error")
-		case v == 0:
-			enc.AppendString("warn")
-		case v == -1:
-			enc.AppendString("info")
-		case v <= -2:
-			enc.AppendString("debug")
-		default:
-			enc.AppendString(fmt.Sprintf("Level(%d)", l))
-		}
-	}
-	// Default log level is "info".
-	zc.Level = zap.NewAtomicLevelAt(zapcore.Level(-1))
-
-	// Check envar for user specified level.
-	if level, ok := os.LookupEnv(otelLogLevelKey); ok {
-		// The only level defined by OTel is "info", make a best guess for
-		// what these should be.
-		switch level {
-		case "debug":
-			// Log everything.
-			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(-127))
-		case "warn":
-			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(0))
-		case "error":
-			zc.Level = zap.NewAtomicLevelAt(zapcore.Level(1))
-		}
-	}
-
+func logger(zc *zap.Config) logr.Logger {
 	z, err := zc.Build()
 	if err != nil {
-		// Fallback.
-		l := stdr.New(nil)
+		l := fallbackLoggerFunc()
 		l.Error(err, "failed to initialize logging")
 		return l
 	}
