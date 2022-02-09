@@ -90,8 +90,8 @@ func Run(opts ...Option) (SDK, error) {
 	}
 	if !serviceNameDefined(res) {
 		c.Logger.Info(
-			"service.name attribute is not set, your service is unnamed and will be difficult to identify. " +
-				`Set your service name using the OTEL_SERVICE_NAME environment variable (i.e. OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`,
+			"service.name attribute is not set. Your service is unnamed and might be difficult to identify. " +
+				`Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`,
 		)
 	}
 
