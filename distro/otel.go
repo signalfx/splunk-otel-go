@@ -71,7 +71,7 @@ func Run(opts ...Option) (SDK, error) {
 	}
 
 	if c.TraceExporterFunc == nil {
-		c.Logger.V(1).Info("tracing disabled: no trace exporter")
+		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none/nil: Tracing disabled")
 		// "none" exporter configured.
 		return SDK{}, nil
 	}
