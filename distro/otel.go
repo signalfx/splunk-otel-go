@@ -16,9 +16,9 @@
 Package distro provides functionality to quickly setup the OpenTelemetry Go
 implementation with useful Splunk defaults.
 
-The default configuration sets the default OpenTelemetry SDK to propagate traces
-using B3 propagator and export all spans to a locally running
-Splunk OpenTelemetry Connector (http://localhost:14268/api/traces).
+The default configuration sets the default OpenTelemetry SDK to propagate
+traces using a W3C tracecontext and W3C baggage propagator and export all
+spans to a locally running Splunk OpenTelemetry Connector.
 */
 package distro
 
