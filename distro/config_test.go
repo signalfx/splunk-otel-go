@@ -19,7 +19,6 @@ import (
 
 	"github.com/go-logr/logr"
 	testr "github.com/go-logr/logr/testing"
-	"github.com/go-logr/stdr"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
@@ -269,25 +268,10 @@ func TestZapLevel(t *testing.T) {
 	}
 }
 
-func TestLoggerFallback(t *testing.T) {
-	orig := fallbackLoggerFunc
-	t.Cleanup(func() { fallbackLoggerFunc = orig })
-
-	var called bool
-	fallbackLoggerFunc = func() logr.Logger {
-		called = true
-		return logr.Discard()
-	}
-
+func TestLoggerPanic(t *testing.T) {
 	zc := zapConfig()
-	// Set an invalid level so the zap logger build will error and a fallback
-	// logger is returned.
+	// Set an invalid level so the zap logger build will error. This error
+	// shoule be panic-ed.
 	zc.Level = zap.AtomicLevel{}
-	_ = logger(zc)
-	assert.True(t, called, "fallback logger not created")
-}
-
-func TestFallbackLoggerFunc(t *testing.T) {
-	sink := fallbackLoggerFunc().GetSink()
-	assert.Implementsf(t, (*stdr.Underlier)(nil), sink, "invalid logr.LogSink type %T", sink)
+	assert.Panics(t, func() { _ = logger(zc) })
 }

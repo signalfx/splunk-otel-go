@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/stdr"
 	"github.com/go-logr/zapr"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
@@ -120,34 +119,52 @@ func newConfig(opts ...Option) *config {
 func zapLevelEncoder(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	switch v := int8(l); {
 	case v > 0:
-		enc.AppendString("error")
+		enc.AppendString(errorLevel.String())
 	case v == 0:
-		enc.AppendString("warn")
+		enc.AppendString(warnLevel.String())
 	case v == -1:
-		enc.AppendString("info")
+		enc.AppendString(infoLevel.String())
 	case v <= -2:
-		enc.AppendString("debug")
+		enc.AppendString(debugLevel.String())
 	}
 }
 
+// logLevel is an SDK logging level.
+type logLevel struct {
+	name     string
+	priority int8
+}
+
+// String returns the log level as a string.
+func (l logLevel) String() string { return l.name }
+
+// String returns the log level tranlated to a zap Level.
+func (l logLevel) ZapLevel() zapcore.Level { return zapcore.Level(l.priority) }
+
+var (
+	// debugLevel is any verbosity 2 or higher. The zap levels are capped at
+	// -127 because int8 is the underlying type. Use this as a stand-in for
+	// debug so all debug levels are logged.
+	debugLevel = logLevel{name: "debug", priority: -127}
+	// infoLevel is verbosity equal to 1.
+	infoLevel = logLevel{name: "info", priority: -1}
+	// infoLevel is verbosity equal to 0.
+	warnLevel = logLevel{name: "warn", priority: 0}
+	// errorLevel only prints log messages made with the logr.Error function.
+	errorLevel = logLevel{name: "error", priority: 1}
+
+	logLevels = []logLevel{debugLevel, infoLevel, warnLevel, errorLevel}
+)
+
 // zapLevel returns the parsed zapcore.Level.
 func zapLevel(level string) zapcore.Level {
-	// The only level defined by OTel is "info", make a best guess for
-	// what these should be.
-	switch level {
-	case "debug":
-		// Debug is any verbosity 2 or higher. The zap levels are capped at
-		// -127 because int8 is the underlying type. Use this as a stand in
-		// for debug so all debug levels are logged.
-		return zapcore.Level(-127)
-	case "warn":
-		return zapcore.Level(0)
-	case "error":
-		return zapcore.Level(1)
-	default:
-		// "info" or unrecognized level, use info level regardless.
-		return zapcore.Level(-1)
+	for _, l := range logLevels {
+		if l.String() == level {
+			return l.ZapLevel()
+		}
 	}
+	// unrecognized level, use "info" level.
+	return infoLevel.ZapLevel()
 }
 
 func zapConfig() *zap.Config {
@@ -162,8 +179,6 @@ func zapConfig() *zap.Config {
 	return &zc
 }
 
-var fallbackLoggerFunc = func() logr.Logger { return stdr.New(nil) }
-
 // logger configures and returns the default project logger.
 //
 // The returned logger is configured to match verbosity levels as such for any
@@ -174,9 +189,9 @@ var fallbackLoggerFunc = func() logr.Logger { return stdr.New(nil) }
 func logger(zc *zap.Config) logr.Logger {
 	z, err := zc.Build()
 	if err != nil {
-		l := fallbackLoggerFunc()
-		l.Error(err, "failed to initialize logging")
-		return l
+		// This should never happen because we control zc. Panic to expose the
+		// bug ASAP to the developer.
+		panic(err)
 	}
 	return zapr.NewLogger(z)
 }
