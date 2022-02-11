@@ -24,7 +24,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-logr/logr"
 	testr "github.com/go-logr/logr/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -592,8 +591,7 @@ func TestSplunkDistroVerionAttrInResource(t *testing.T) {
 
 func TestNoServiceWarn(t *testing.T) {
 	var buf bytes.Buffer
-	var l logr.Logger = buflogr.NewWithBuffer(&buf)
-	sdk, err := distro.Run(distro.WithLogger(l))
+	sdk, err := distro.Run(distro.WithLogger(buflogr.NewWithBuffer(&buf)))
 	require.NoError(t, sdk.Shutdown(context.Background()))
 	require.NoError(t, err)
 	// INFO prefix for buflogr is verbosity level 0, our warn level.
