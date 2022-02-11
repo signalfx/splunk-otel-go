@@ -24,16 +24,20 @@ package distro
 
 import (
 	"context"
+	"strings"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
+
+const noServiceWarn = `service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`
 
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
 type SDK struct {
@@ -58,11 +62,18 @@ func (s SDK) Shutdown(ctx context.Context) error {
 func Run(opts ...Option) (SDK, error) {
 	c := newConfig(opts...)
 
+	// Unify the SDK logging with OTel.
+	otel.SetErrorHandler(otel.ErrorHandlerFunc(func(e error) {
+		c.Logger.Error(e, "OpenTelemetry error")
+	}))
+	otel.SetLogger(c.Logger)
+
 	if c.Propagator != nil && c.Propagator != nonePropagator {
 		otel.SetTextMapPropagator(c.Propagator)
 	}
 
 	if c.TraceExporterFunc == nil {
+		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none/nil: Tracing disabled")
 		// "none" exporter configured.
 		return SDK{}, nil
 	}
@@ -78,6 +89,9 @@ func Run(opts ...Option) (SDK, error) {
 	)
 	if err != nil {
 		return SDK{}, err
+	}
+	if !serviceNameDefined(res) {
+		c.Logger.Info(noServiceWarn)
 	}
 
 	traceProvider := trace.NewTracerProvider(
@@ -97,4 +111,9 @@ func Run(opts ...Option) (SDK, error) {
 			return exp.Shutdown(ctx)
 		},
 	}, nil
+}
+
+func serviceNameDefined(r *resource.Resource) bool {
+	val, ok := r.Set().Value(semconv.ServiceNameKey)
+	return ok && val.Type() == attribute.STRING && !strings.HasPrefix(val.AsString(), "unknown_service:")
 }

@@ -11,6 +11,20 @@ function to create an SDK that is ready to be used with OpenTelemetry and
 forward all telemetry to Splunk. See [`example_test.go`](./example_test.go) for
 a complete example.
 
+## Logging
+
+By default, the [`SDK`] logs relevant information, warnings, and errors. You
+can set the default logging level by setting the `OTEL_LOG_LEVEL` environment
+variable to one of the following values:
+
+- `"error"`: Log errors
+- `"warn"`: Log errors and warnings
+- `"info"`: Log information, warnings, and errors
+- `"debug"`: Log debugging and operation information, warnings, and errors
+
+Logging can be explicitly configured in the code that creates the [`SDK`] using
+the `WithLogger` option.
+
 ## Configuration
 
 The [`SDK`] is configured with the following options.
@@ -22,6 +36,7 @@ The [`SDK`] is configured with the following options.
 | `WithPropagator` | `tracecontext,baggage` | `OTEL_PROPAGATORS` |
 | `WithTraceExporter` | `otlp` | `OTEL_TRACES_EXPORTER` |
 | `WithTLSConfig` | none | n/a |
+| `WithLogger` | [`zapr`] | n/a |
 
 (1): The default value depends on the exporter used. See the
 [`WithEndpoint`](#withendpoint) section for more details.
@@ -100,5 +115,25 @@ a batch span processor.
 - Default value: none; an non-TLS connection is used.
 - Environment variable: n/a (only configurable in code).
 
+### `WithLogger`
+
+`WithLogger` configures the logger used by this distro.
+
+Configure [`logr.Logger`] with a verbosity value that allows to emit [`Info`]
+logs of the desired level. The SDK uses the following log level to verbosity
+value correspondences:
+
+| Log level | Verbosity value |
+|---|---|
+| warning | `0` |
+| info | `1` |
+| debug | `2` or higher |
+
+The default value, [`zapr`], is configured for `info` logging. This setting is
+configurable only in code.
+
 [`Run`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#Run
 [`SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK
+[`zapr`]: https://pkg.go.dev/github.com/go-logr/zapr
+[`logr.Logger`]: https://pkg.go.dev/github.com/go-logr/logr#Logger
+[`Info`]: https://pkg.go.dev/github.com/go-logr/logr#Logger.Info

@@ -15,6 +15,7 @@
 package distro_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -23,8 +24,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	testr "github.com/go-logr/logr/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -144,6 +147,11 @@ func reqHander() (<-chan *http.Request, http.HandlerFunc) {
 	}
 }
 
+func distroRun(t *testing.T, opts ...distro.Option) (distro.SDK, error) {
+	l := testr.NewTestLogger(t)
+	return distro.Run(append(opts, distro.WithLogger(l))...)
+}
+
 func TestRunJaegerExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *http.Request) {
 		assert.Equal(t, "application/x-thrift", req.Header.Get("Content-type"))
@@ -161,14 +169,14 @@ func TestRunJaegerExporter(t *testing.T) {
 					jaeger.WithEndpoint(url),
 				))
 				require.NoError(t, err)
-				return distro.Run(distro.WithTraceExporter(exp))
+				return distroRun(t, distro.WithTraceExporter(exp))
 			},
 		},
 		{
 			desc: "WithEndpoint",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-				return distro.Run(distro.WithEndpoint(url))
+				return distroRun(t, distro.WithEndpoint(url))
 			},
 		},
 		{
@@ -176,14 +184,14 @@ func TestRunJaegerExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-				return distro.Run()
+				return distroRun(t)
 			},
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken(token))
+				return distroRun(t, distro.WithEndpoint(url), distro.WithAccessToken(token))
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
 				assertBase(t, got)
@@ -199,7 +207,7 @@ func TestRunJaegerExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
 				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-				return distro.Run()
+				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
 				assertBase(t, got)
@@ -263,7 +271,8 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 	srv.StartTLS()
 
 	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-	sdk, err := distro.Run(
+	sdk, err := distroRun(
+		t,
 		distro.WithEndpoint(srv.URL),
 		distro.WithTLSConfig(clientTLSConfig(t)),
 	)
@@ -293,7 +302,7 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	srv.Start()
 
 	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-	sdk, err := distro.Run()
+	sdk, err := distroRun(t)
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -396,14 +405,14 @@ func TestRunOTLPExporter(t *testing.T) {
 					otlptracegrpc.WithInsecure(),
 				)
 				require.NoError(t, err)
-				return distro.Run(distro.WithTraceExporter(exp))
+				return distroRun(t, distro.WithTraceExporter(exp))
 			},
 		},
 		{
 			desc: "WithEndpoint",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
-				return distro.Run(distro.WithEndpoint(url))
+				return distroRun(t, distro.WithEndpoint(url))
 			},
 		},
 		{
@@ -411,7 +420,7 @@ func TestRunOTLPExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
-				return distro.Run()
+				return distroRun(t)
 			},
 		},
 		{
@@ -419,14 +428,14 @@ func TestRunOTLPExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
-				return distro.Run()
+				return distroRun(t)
 			},
 		},
 		{
 			desc: "WithEndpoint and WithAccessToken",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
-				return distro.Run(distro.WithEndpoint(url), distro.WithAccessToken(token))
+				return distroRun(t, distro.WithEndpoint(url), distro.WithAccessToken(token))
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
 				assertBase(t, got)
@@ -439,7 +448,7 @@ func TestRunOTLPExporter(t *testing.T) {
 				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
 				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
 				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
-				return distro.Run()
+				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got exportRequest) {
 				assertBase(t, got)
@@ -493,7 +502,8 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 	})
 	coll.srv = srv
 
-	sdk, err := distro.Run(
+	sdk, err := distroRun(
+		t,
 		distro.WithEndpoint(coll.endpoint),
 		distro.WithTLSConfig(clientTLSConfig(t)),
 	)
@@ -520,7 +530,7 @@ func TestRunExporterDefault(t *testing.T) {
 		require.NoError(t, <-errCh)
 	})
 
-	sdk, err := distro.Run()
+	sdk, err := distroRun(t)
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -540,7 +550,7 @@ func TestInvalidTraceExporter(t *testing.T) {
 
 	// Explicitly set OTLP exporter.
 	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "invalid value"))
-	sdk, err := distro.Run(distro.WithEndpoint(coll.endpoint))
+	sdk, err := distroRun(t, distro.WithEndpoint(coll.endpoint))
 	require.NoError(t, err, "should configure tracing")
 
 	ctx := context.Background()
@@ -558,7 +568,7 @@ func TestInvalidTraceExporter(t *testing.T) {
 
 func TestSplunkDistroVerionAttrInResource(t *testing.T) {
 	coll := newCollector(t)
-	sdk, err := distro.Run(distro.WithEndpoint(coll.endpoint))
+	sdk, err := distroRun(t, distro.WithEndpoint(coll.endpoint))
 	require.NoError(t, err, "should configure tracing")
 
 	ctx := context.Background()
@@ -577,4 +587,13 @@ func TestSplunkDistroVerionAttrInResource(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestNoServiceWarn(t *testing.T) {
+	var buf bytes.Buffer
+	sdk, err := distro.Run(distro.WithLogger(buflogr.NewWithBuffer(&buf)))
+	require.NoError(t, sdk.Shutdown(context.Background()))
+	require.NoError(t, err)
+	// INFO prefix for buflogr is verbosity level 0, our warn level.
+	assert.Contains(t, buf.String(), `INFO service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`)
 }

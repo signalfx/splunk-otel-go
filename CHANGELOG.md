@@ -15,10 +15,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `OTEL_PROPAGATORS` environment variable to set the global OpenTelemetry
   `TextMapPropagator`. (#295)
 - Add the `WithTraceExporter` and `WithTLSConfig` options to
-  `github.com/signalfx/splunk-otel-go/distro` along with parsing of hte
+  `github.com/signalfx/splunk-otel-go/distro` along with parsing of the
   `OTEL_TRACES_EXPORTER` environment variable to set the global OpenTelemetry
   `SpanExporter` used by the `SDK` to export traces. (#300)
 - Add the `splunk.distro.version` attribute to the SDK resource. (#332)
+- Add the `WithLogger` option to `github.com/signalfx/splunk-otel-go/distro`
+  along with parsing of the `OTEL_LOG_LEVEL` environment variable to set the
+  logging level of the default logger used. (#336)
 
 ### Changed
 

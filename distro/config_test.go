@@ -17,6 +17,8 @@ package distro
 import (
 	"testing"
 
+	"github.com/go-logr/logr"
+	testr "github.com/go-logr/logr/testing"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
@@ -118,12 +120,17 @@ var ConfigurationTests = []*ConfigFieldTest{
 	},
 }
 
+func newTestConfig(t *testing.T, opts ...Option) *config {
+	l := testr.NewTestLogger(t)
+	return newConfig(append(opts, WithLogger(l))...)
+}
+
 func TestConfig(t *testing.T) {
 	for _, tc := range ConfigurationTests {
 		func(t *testing.T, tc *ConfigFieldTest) {
 			t.Run(tc.Name, func(t *testing.T) {
 				t.Run("DefaultValue", func(t *testing.T) {
-					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(newConfig()))
+					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(newTestConfig(t)))
 				})
 
 				t.Run("EnvironmentVariableOverride", func(t *testing.T) {
@@ -148,7 +155,7 @@ func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
 			// has changed to verify the environment variable influenced the
 			// configuration.
 			assert.NotEqual(
-				t, tc.DefaultValue, tc.ValueFunc(newConfig()),
+				t, tc.DefaultValue, tc.ValueFunc(newTestConfig(t)),
 				"environment variable %s=%q unused", key, val,
 			)
 		}(ev.Key, ev.Value)
@@ -159,13 +166,15 @@ func testOptions(t *testing.T, tc *ConfigFieldTest) {
 	for _, o := range tc.OptionTests {
 		func(t *testing.T, o OptionTest) {
 			t.Run(o.Name, func(t *testing.T) {
-				o.AssertionFunc(t, newConfig(o.Options...))
+				o.AssertionFunc(t, newTestConfig(t, o.Options...))
 			})
 		}(t, o)
 	}
 }
 
-func TestLoadPropagatorComposite(t *testing.T) {
+func TestSetPropagatorComposite(t *testing.T) {
+	c := config{Logger: logr.Discard()}
+	c.setPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage")
 	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{},
@@ -174,23 +183,27 @@ func TestLoadPropagatorComposite(t *testing.T) {
 		jaeger.Jaeger{},
 		xray.Propagator{},
 		ot.OT{},
-	), loadPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage"))
+	), c.Propagator)
 }
 
-func TestLoadPropagatorDefault(t *testing.T) {
+func TestSetPropagatorDefault(t *testing.T) {
+	c := config{Logger: logr.Discard()}
+	c.setPropagator("")
 	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{},
-	), loadPropagator(""))
+	), c.Propagator)
 }
 
-func TestLoadPropagatorCompositeWithNone(t *testing.T) {
+func TestSetPropagatorCompositeWithNone(t *testing.T) {
 	// Assumes specification as stated:
 	//
 	//   "none": No automatically configured propagator.
 	//
 	// means if "none" is included in the value, no propagator should be
-	// configured. Therefore, loadPropagator needs to return just the
+	// configured. Therefore, setPropagator needs to return just the
 	// nonePropagator value to signal this behavior.
-	assert.Equal(t, nonePropagator, loadPropagator("tracecontext,baggage,none"))
+	c := config{Logger: logr.Discard()}
+	c.setPropagator("tracecontext,baggage,none")
+	assert.Equal(t, nonePropagator, c.Propagator)
 }
