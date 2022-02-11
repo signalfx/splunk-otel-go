@@ -271,7 +271,7 @@ func TestZapLevel(t *testing.T) {
 func TestLoggerPanic(t *testing.T) {
 	zc := zapConfig()
 	// Set an invalid level so the zap logger build will error. This error
-	// shoule be panic-ed.
+	// should be panic-ed.
 	zc.Level = zap.AtomicLevel{}
 	assert.Panics(t, func() { _ = logger(zc) })
 }
