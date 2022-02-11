@@ -24,6 +24,7 @@ package distro
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"go.opentelemetry.io/otel"
@@ -67,6 +68,11 @@ func Run(opts ...Option) (SDK, error) {
 		c.Logger.Error(e, "OpenTelemetry error")
 	}))
 	otel.SetLogger(c.Logger)
+
+	// SPLUNK_METRICS_ENDPOINT is currently not supported, log this fact.
+	if _, ok := os.LookupEnv(splunkMetricsEndpointKey); ok {
+		c.Logger.Info("SPLUNK_METRICS_ENDPOINT set; not supported by this distro")
+	}
 
 	if c.Propagator != nil && c.Propagator != nonePropagator {
 		otel.SetTextMapPropagator(c.Propagator)
