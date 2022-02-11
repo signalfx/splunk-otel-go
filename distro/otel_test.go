@@ -15,6 +15,7 @@
 package distro_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -23,9 +24,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-logr/logr"
 	testr "github.com/go-logr/logr/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -585,4 +588,14 @@ func TestSplunkDistroVerionAttrInResource(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestNoServiceWarn(t *testing.T) {
+	var buf bytes.Buffer
+	var l logr.Logger = buflogr.NewWithBuffer(&buf)
+	sdk, err := distro.Run(distro.WithLogger(l))
+	require.NoError(t, sdk.Shutdown(context.Background()))
+	require.NoError(t, err)
+	// INFO prefix for buflogr is verbosity level 0, our warn level.
+	assert.Contains(t, buf.String(), `INFO service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`)
 }

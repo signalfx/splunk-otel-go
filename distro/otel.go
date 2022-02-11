@@ -37,6 +37,8 @@ import (
 
 var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
 
+const noServiceWarn = `service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`
+
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
 type SDK struct {
 	config config
@@ -89,10 +91,7 @@ func Run(opts ...Option) (SDK, error) {
 		return SDK{}, err
 	}
 	if !serviceNameDefined(res) {
-		c.Logger.Info(
-			"service.name attribute is not set. Your service is unnamed and might be difficult to identify. " +
-				`Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`,
-		)
+		c.Logger.Info(noServiceWarn)
 	}
 
 	traceProvider := trace.NewTracerProvider(

@@ -6,6 +6,7 @@ require (
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.2
 	github.com/stretchr/testify v1.7.0
+	github.com/tonglil/buflogr v0.0.0-20220114010534-d490b3990d7e
 	go.opentelemetry.io/contrib/propagators/aws v1.3.0
 	go.opentelemetry.io/contrib/propagators/b3 v1.3.0
 	go.opentelemetry.io/contrib/propagators/jaeger v1.3.0
