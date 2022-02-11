@@ -21,15 +21,12 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // Environment variable keys that set values of the configuration.
@@ -86,7 +83,7 @@ type config struct {
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
 	c := &config{
-		Logger: logger(zapConfig()),
+		Logger: logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
@@ -113,87 +110,6 @@ func newConfig(opts ...Option) *config {
 	}
 
 	return c
-}
-
-// zapLevelEncoder translates our verbosity levels to human-meaningful terms.
-func zapLevelEncoder(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	switch v := int8(l); {
-	case v > 0:
-		enc.AppendString(errorLevel.String())
-	case v == 0:
-		enc.AppendString(warnLevel.String())
-	case v == -1:
-		enc.AppendString(infoLevel.String())
-	case v <= -2:
-		enc.AppendString(debugLevel.String())
-	}
-}
-
-// logLevel is an SDK logging level.
-type logLevel struct {
-	name     string
-	priority int8
-}
-
-// String returns the log level as a string.
-func (l logLevel) String() string { return l.name }
-
-// String returns the log level tranlated to a zap Level.
-func (l logLevel) ZapLevel() zapcore.Level { return zapcore.Level(l.priority) }
-
-var (
-	// debugLevel is any verbosity 2 or higher. The zap levels are capped at
-	// -127 because int8 is the underlying type. Use this as a stand-in for
-	// debug so all debug levels are logged.
-	debugLevel = logLevel{name: "debug", priority: -127}
-	// infoLevel is verbosity equal to 1.
-	infoLevel = logLevel{name: "info", priority: -1}
-	// infoLevel is verbosity equal to 0.
-	warnLevel = logLevel{name: "warn", priority: 0}
-	// errorLevel only prints log messages made with the logr.Error function.
-	errorLevel = logLevel{name: "error", priority: 1}
-
-	logLevels = []logLevel{debugLevel, infoLevel, warnLevel, errorLevel}
-)
-
-// zapLevel returns the parsed zapcore.Level.
-func zapLevel(level string) zapcore.Level {
-	for _, l := range logLevels {
-		if l.String() == level {
-			return l.ZapLevel()
-		}
-	}
-	// unrecognized level, use "info" level.
-	return infoLevel.ZapLevel()
-}
-
-func zapConfig() *zap.Config {
-	zc := zap.NewProductionConfig()
-	zc.Encoding = "console"
-	// Human-readable timestamps for console format of logs.
-	zc.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	// Translate our verbosity levels to logged levels.
-	zc.EncoderConfig.EncodeLevel = zapLevelEncoder
-	l := zapLevel(envOr(otelLogLevelKey, defaultLogLevel))
-	zc.Level = zap.NewAtomicLevelAt(l)
-	return &zc
-}
-
-// logger configures and returns the default project logger.
-//
-// The returned logger is configured to match verbosity levels as such for any
-// Info log made:
-//   - warning: 0
-//   - info: 1
-//   - debug: 2+
-func logger(zc *zap.Config) logr.Logger {
-	z, err := zc.Build()
-	if err != nil {
-		// This should never happen because we control zc. Panic to expose the
-		// bug ASAP to the developer.
-		panic(err)
-	}
-	return zapr.NewLogger(z)
 }
 
 type nonePropagatorType struct{ propagation.TextMapPropagator }
