@@ -48,7 +48,7 @@ const (
 	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
 	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
 
-	// Logging level to set.
+	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
 
 	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
