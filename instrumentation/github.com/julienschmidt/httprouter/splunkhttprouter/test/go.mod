@@ -7,8 +7,8 @@ require (
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter v0.7.0
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.28.0
-	go.opentelemetry.io/otel v1.3.0
-	go.opentelemetry.io/otel/sdk v1.3.0
+	go.opentelemetry.io/otel v1.4.0
+	go.opentelemetry.io/otel/sdk v1.4.0
 )
 
 replace (
