@@ -17,9 +17,9 @@ require (
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo v0.7.0
 	github.com/stretchr/testify v1.7.0
-	go.opentelemetry.io/otel v1.4.0
+	go.opentelemetry.io/otel v1.4.1
 	go.opentelemetry.io/otel/sdk v1.4.0
-	go.opentelemetry.io/otel/trace v1.4.0
+	go.opentelemetry.io/otel/trace v1.4.1
 	golang.org/x/net v0.0.0-20211215060638-4ddde0e984e9 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 )
