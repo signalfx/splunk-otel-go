@@ -43,7 +43,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/jackc/pgx"
+	pgx "github.com/jackc/pgx/v4"
 	// Make sure to import this so the instrumented driver is registered.
 	_ "github.com/jackc/pgx/v4/stdlib"
 
