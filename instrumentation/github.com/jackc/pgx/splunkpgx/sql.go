@@ -61,7 +61,7 @@ func init() { // nolint: gochecknoinits
 // Postgres database using the github.com/jackc/pgx client package.
 func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 	var connCfg splunksql.ConnectionConfig
-	c, err := pgx.ParseConnectionString(dataSourceName)
+	c, err := pgx.ParseConfig(dataSourceName)
 	if err != nil {
 		return connCfg, err
 	}
