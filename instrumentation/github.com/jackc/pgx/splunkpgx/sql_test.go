@@ -33,18 +33,7 @@ func TestDSNParser(t *testing.T) {
 		{
 			name:   "invalid dsn",
 			dsn:    "invalid dsn",
-			errStr: "invalid dsn",
-		},
-		{
-			name: "db name with defaults",
-			dsn:  "postgres:///testdb",
-			connCfg: splunksql.ConnectionConfig{
-				Name:             "testdb",
-				ConnectionString: "postgres:///testdb",
-				Host:             "localhost",
-				Port:             5432,
-				NetTransport:     splunksql.NetTransportTCP,
-			},
+			errStr: "cannot parse `invalid dsn`: failed to parse as DSN (invalid dsn)",
 		},
 		{
 			name: "url: tcp address",
