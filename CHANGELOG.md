@@ -36,7 +36,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Consistently import `github.com/jackc/pgx/v4`, instead of
   `github.com/jackc/pgx`, in the
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
-  instrumentation. (#TBD)
+  instrumentation. (#478)
 
 ## [0.7.0] - 2022-01-13
 
