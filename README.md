@@ -176,13 +176,10 @@ distro.Run()
 otel.SetTextMapPropagator(propagation.TraceContext{})
 ```
 
-## Log Correlation
-
-
 ## Correlate Traces and Logs
 
-You can add trace metadata to logs using the OpenTelemetry trace API. Trace metadata lets 
-you explore logs in Splunk Observability Cloud.
+You can add trace metadata to logs using the OpenTelemetry trace API. Trace
+metadata lets you explore logs in Splunk Observability Cloud.
 
 See [Correlating Trace and Logs](./docs/correlating-trace-and-logs.md) for more
 information.
