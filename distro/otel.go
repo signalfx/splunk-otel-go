@@ -103,7 +103,6 @@ func Run(opts ...Option) (SDK, error) {
 	traceProvider := trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithSampler(trace.AlwaysSample()),
-		// TODO: configure batching policy with configured values.
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
 	otel.SetTracerProvider(traceProvider)
