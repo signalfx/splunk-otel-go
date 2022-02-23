@@ -2,12 +2,12 @@
 
 The [OpenTelemetry trace API] can be used to extract trace metadata from a
 context containing a span. That metadata can then be used to annotate log
-events so they will be correlated with the trace.
+events so they are correlated with the trace.
 
 ## Extracting Trace Metadata
 
 To extract trace metadata, use the [`SpanContextFromContext`] function. This
-will extract the trace metadata from an [`context.Context`] and return it in
+extracts the trace metadata from an [`context.Context`] and returns it in
 the form of a [`SpanContext`].
 
 ```go
@@ -21,13 +21,12 @@ if !spanContext.IsValid() {
 
 ## Annotating Log Events
 
-Once you have a [`SpanContext`], you can use the trace metadata it contains to
-annotate log events. How this is done will depend on the logging library used.
+Once you have a [`SpanContext`], you can use the trace metadata to
+annotate log events. How this is done depends on the logging library used.
 
 ### Structured Logging
 
-If you use a structured logger, the trace metadata should be added as logger
-fields.
+If you use a structured logger, add the trace metadata as logger fields.
 
 For example, using the [zap] logging library:
 
@@ -59,11 +58,11 @@ log.Printf(
 )
 ```
 
-Be sure to add the metadata in a predictable manner so it can be parsed later on!
+> Make sure to add the metadata following an order you can parse later on.
 
-## Example HTTP Server
+## HTTP server example
 
-Below is a complete example of an HTTP server using the [chi] framework that
+The following is a complete example of an HTTP server using the [chi] framework that
 extracts trace metadata and annotates log messages for handled requests.
 
 ```go
