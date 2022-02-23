@@ -19,6 +19,12 @@ if !spanContext.IsValid() {
 }
 ```
 
+The OpenTelemetry [`SpanContext`] contains the trace and span ID, trace flags
+that contain sampling information, and tracestate information which holds
+vendor specific tracing-system context. All of this information can be added to
+log events to enrich their context, but the trace and span ID are the metadata
+that must be added to correlate with the trace.
+
 ## Annotating Log Events
 
 Once you have a [`SpanContext`], you can use the trace metadata to
