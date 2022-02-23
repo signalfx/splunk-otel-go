@@ -14,8 +14,8 @@ the form of a [`SpanContext`].
 spanContext := trace.SpanContextFromContext(ctx)
 if !spanContext.IsValid() {
 	// ctx does not contain a valid span.
-    // There is no trace metadata to add.
-    return
+	// There is no trace metadata to add.
+	return
 }
 ```
 
@@ -40,9 +40,9 @@ For example, using the [zap] logging library:
 logger, _ := zap.NewProduction()
 defer logger.Sync()
 logger = logger.With(
-    zap.String("trace_id", spanContext.TraceID().String()),
-    zap.String("span_id", spanContext.SpanID().String()),
-    zap.String("trace_flags", spanContext.TraceFlags().String()),
+	zap.String("trace_id", spanContext.TraceID().String()),
+	zap.String("span_id", spanContext.SpanID().String()),
+	zap.String("trace_flags", spanContext.TraceFlags().String()),
 )
 logger.Info("failed to fetch URL", zap.String("URL", url))
 ```
@@ -56,11 +56,11 @@ For example using the standard library [`log`] package:
 
 ```go
 log.Printf(
-    "(trace_id: %s, span_id: %s, trace_flags: %s): failed to fetch URL: %s",
-    spanContext.TraceID().String(),
-    spanContext.SpanID().String(),
-    spanContext.TraceFlags().String(),
-    url,
+	"(trace_id: %s, span_id: %s, trace_flags: %s): failed to fetch URL: %s",
+	spanContext.TraceID().String(),
+	spanContext.SpanID().String(),
+	spanContext.TraceFlags().String(),
+	url,
 )
 ```
 
