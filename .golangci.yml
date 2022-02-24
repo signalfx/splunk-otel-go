@@ -40,6 +40,7 @@ linters-settings:
   goimports:
     local-prefixes: github.com/signalfx/splunk-otel-go
   revive:
+    confidence: 0.7
     rules:
       - name: blank-imports
       - name: context-as-argument
