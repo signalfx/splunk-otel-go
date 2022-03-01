@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2.4.0
-      - uses: actions/setup-go@v2.2.0
+      - uses: actions/setup-go@v3
         with:
           go-version: '1.17'
       - run: ${{ matrix.run-script }}
@@ -61,7 +61,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2.4.0
-    - uses: actions/setup-go@v2.2.0
+    - uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go-version }}
     - run: make test-short
