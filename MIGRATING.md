@@ -190,7 +190,7 @@ Note:
 
 - [`garyburd/redigo`]: This project is archived. Use `gomodule/redigo` and
   [`splunkredigo`] instead.
-- [`globalsign/mgo`]: This project is an unsported fork of an abandoned
+- [`globalsign/mgo`]: This project is an unsupported fork of an abandoned
   project. Use `mongodb/mongo-go-driver` and `otelmongo` instead.
 - [`go-redis/redis`]: This package now provides native support for
   OpenTelemetry. See [this
@@ -205,7 +205,8 @@ Note:
 
 ## Troubleshooting
 
-TODO
+See [troubleshooting documentation](./docs/troubleshooting.md) for help
+resolving any issues encountered.
 
 [SignalFx Tracing Library for Go]: https://github.com/signalfx/signalfx-go-tracing
 [Splunk Distribution of OpenTelemetry for Go]: https://github.com/signalfx/splunk-otel-go
