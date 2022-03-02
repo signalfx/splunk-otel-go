@@ -153,6 +153,56 @@ OpenTelemetry span's `End` method to do this.
 
 ### Replace all Instrumentation Libraries
 
+| [SignalFx Tracing Library for Go] | OpenTelemetry |
+| --- | --- |
+| [`aws/aws-sdk-go/aws`] | [`otelaws`] |
+| [`bradfitz/gomemcache/memcache`] | [`otelmemcache`] |
+| [`confluentinc/confluent-kafka-go/kafka`] | [`splunkkafka`] |
+| [`database/sql`] | [`splunksql`] ([`splunkmysql`], [`splunkpgx`], [`splunkpq`]) |
+| [`emicklei/go-restful`] | [`otelrestful`] |
+| [`garyburd/redigo`] | N/A (See below) |
+| [`gin-gonic/gin`] | [`otelgin`] |
+| [`globalsign/mgo`] | N/A (See below) |
+| [`go-chi/chi`] | [`splunkchi`] |
+| [`go-redis/redis`] | N/A (See below) |
+| [`gocql/gocql`] | [`otelgocql`] |
+| [`gomodule/redigo`] | [`splunkredigo`] |
+| [`google.golang.org/api`] | N/A (See below) |
+| [`google.golang.org/grpc.v12`] | N/A (See below) |
+| [`google.golang.org/grpc`] | [`otelgrpc`] |
+| [`gorilla/mux`] | [`otelmux`] |
+| [`graph-gophers/graphql-go`] | [`splunkgraphql`] |
+| [`jinzhu/gorm`] | [`splunkgorm`] |
+| [`jmoiron/sqlx`] | [`splunksqlx`] |
+| [`julienschmidt/httprouter`] | [`splunkhttprouter`] |
+| [`k8s.io/client-go/kubernetes`] | [`splunkclient-go`] |
+| [`labstack/echo.v4`] | [`otelecho`] |
+| [`labstack/echo`] | N/A (See below) |
+| [`miekg/dns`] | [`splunkdns`]
+| [`mongodb/mongo-go-driver/mongo`] | [`otelmongo`] |
+| [`net/http`] | [`splunkhttp`], [`otelhttp`] |
+| [`olivere/elastic`] | [`splunkelastic`] |
+| [`Shopify/sarama`] | [`otelsarama`] |
+| [`syndtr/goleveldb/leveldb`] | [`splunkleveldb`] |
+| [`tidwall/buntdb`] | [`splunkbuntdb`] |
+
+Note:
+
+- [`garyburd/redigo`]: This project is archived. Use `gomodule/redigo` and
+  [`splunkredigo`] instead.
+- [`globalsign/mgo`]: This project is an unsported fork of an abandoned
+  project. Use `mongodb/mongo-go-driver` and `otelmongo` instead.
+- [`go-redis/redis`]: This package now provides native support for
+  OpenTelemetry. See [this
+  example](https://github.com/go-redis/redis/tree/master/example/otel) for more
+  information.
+- [`google.golang.org/api`]: Use either [`otelgrpc`] or [`otelhttp`] with a
+  gRPC or HTTP client when calling [`cloudresourcemanager.NewService`].
+- [`google.golang.org/grpc.v12`]: This version is no longer supported. Use the
+  latest version along with [`otelgrpc`].
+- [`labstack/echo`]: Versions prior to v4 are no longer supported. Upgrade to
+  `echo@v4` and use `otelecho`.
+
 ## Troubleshooting
 
 TODO
@@ -193,3 +243,62 @@ TODO
 [`IDGenerator`]: https://pkg.go.dev/go.opentelemetry.io/otel/sdk/trace#IDGenerator
 [`context.Context`]: https://pkg.go.dev/context#Context
 [`trace.ContextWithSpan`]: https://pkg.go.dev/go.opentelemetry.io/otel/trace#ContextWithSpan
+[`Shopify/sarama`]: http://github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama
+[`aws/aws-sdk-go/aws`]: http://github.com/signalfx/signalfx-go-tracing/contrib/aws/aws-sdk-go/aws
+[`bradfitz/gomemcache/memcache`]: http://github.com/signalfx/signalfx-go-tracing/contrib/bradfitz/gomemcache/memcache
+[`confluentinc/confluent-kafka-go/kafka`]: http://github.com/signalfx/signalfx-go-tracing/contrib/confluentinc/confluent-kafka-go/kafka
+[`database/sql`]: http://github.com/signalfx/signalfx-go-tracing/contrib/database/sql
+[`emicklei/go-restful`]: http://github.com/signalfx/signalfx-go-tracing/contrib/emicklei/go-restful
+[`garyburd/redigo`]: http://github.com/signalfx/signalfx-go-tracing/contrib/garyburd/redigo
+[`gin-gonic/gin`]: http://github.com/signalfx/signalfx-go-tracing/contrib/gin-gonic/gin
+[`globalsign/mgo`]: http://github.com/signalfx/signalfx-go-tracing/contrib/globalsign/mgo
+[`go-chi/chi`]: http://github.com/signalfx/signalfx-go-tracing/contrib/go-chi/chi
+[`go-redis/redis`]: http://github.com/signalfx/signalfx-go-tracing/contrib/go-redis/redis
+[`gocql/gocql`]: http://github.com/signalfx/signalfx-go-tracing/contrib/gocql/gocql
+[`gomodule/redigo`]: http://github.com/signalfx/signalfx-go-tracing/contrib/gomodule/redigo
+[`google.golang.org/api`]: http://github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/api
+[`google.golang.org/grpc`]: http://github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc
+[`google.golang.org/grpc.v12`]: http://github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc.v12
+[`gorilla/mux`]: http://github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux
+[`graph-gophers/graphql-go`]: http://github.com/signalfx/signalfx-go-tracing/contrib/graph-gophers/graphql-go
+[`jinzhu/gorm`]: http://github.com/signalfx/signalfx-go-tracing/contrib/jinzhu/gorm
+[`jmoiron/sqlx`]: http://github.com/signalfx/signalfx-go-tracing/contrib/jmoiron/sqlx
+[`julienschmidt/httprouter`]: http://github.com/signalfx/signalfx-go-tracing/contrib/julienschmidt/httprouter
+[`k8s.io/client-go/kubernetes`]: http://github.com/signalfx/signalfx-go-tracing/contrib/k8s.io/client-go/kubernetes
+[`labstack/echo`]: http://github.com/signalfx/signalfx-go-tracing/contrib/labstack/echo
+[`labstack/echo.v4`]: http://github.com/signalfx/signalfx-go-tracing/contrib/labstack/echo.v4
+[`miekg/dns`]: http://github.com/signalfx/signalfx-go-tracing/contrib/miekg/dns
+[`mongodb/mongo-go-driver/mongo`]: http://github.com/signalfx/signalfx-go-tracing/contrib/mongodb/mongo-go-driver/mongo
+[`net/http`]: http://github.com/signalfx/signalfx-go-tracing/contrib/net/http
+[`olivere/elastic`]: http://github.com/signalfx/signalfx-go-tracing/contrib/olivere/elastic
+[`syndtr/goleveldb/leveldb`]: http://github.com/signalfx/signalfx-go-tracing/contrib/syndtr/goleveldb/leveldb
+[`tidwall/buntdb`]: http://github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb
+[`splunksql`]: github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql
+[`splunkkafka`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka
+[`splunkchi`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi
+[`splunkmysql`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql
+[`splunkredigo`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo
+[`splunkgraphql`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql
+[`splunkpgx`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx
+[`splunkgorm`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm
+[`splunksqlx`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx
+[`splunkhttprouter`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter
+[`splunkpq`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq
+[`splunkdns`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
+[`splunkleveldb`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb
+[`splunkbuntdb`]: github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb
+[`splunkelastic`]: github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic
+[`splunkclient-go`]: github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go
+[`splunkhttp`]: github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp
+[`otelaws`]: go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws
+[`otelmemcache`]: go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache
+[`otelrestful`]: go.opentelemetry.io/contrib/instrumentation/github.com/emicklei/go-restful/otelrestful
+[`otelgin`]: go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin
+[`otelgocql`]: go.opentelemetry.io/contrib/instrumentation/github.com/gocql/gocql/otelgocql
+[`otelmux`]: go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux
+[`otelecho`]: go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho
+[`otelsarama`]: go.opentelemetry.io/contrib/instrumentation/github.com/Shopify/sarama/otelsarama
+[`otelmongo`]: go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo
+[`otelgrpc`]: go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc
+[`otelhttp`]: go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+[`cloudresourcemanager.NewService`]: https://pkg.go.dev/google.golang.org/api@v0.70.0/cloudresourcemanager/v3#NewService
