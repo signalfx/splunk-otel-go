@@ -4,6 +4,11 @@ default: true
 # hard-tabs
 MD010: false
 
+# 80 char line-length
+MD013:
+  code_blocks: false
+  tables: false
+
 # no-duplicate-header
 MD024:
   siblings_only: true
