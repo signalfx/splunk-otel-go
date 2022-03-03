@@ -1,6 +1,6 @@
 # Migrate from the SignalFx Tracing Library for Go
 
-The [Splunk Distribution of OpenTelemetry for Go] replaces the [SignalFx Tracing
+The [Splunk Distribution of OpenTelemetry Go] replaces the [SignalFx Tracing
 Library for Go].
 
 Use the following instructions to migrate help migrate to the [Splunk
@@ -14,7 +14,7 @@ OpenTelemetry for Go].
 ## Migration Steps
 
 The following steps identify all actions needed to migrate from [SignalFx
-Tracing Library for Go] to the [Splunk Distribution of OpenTelemetry for Go].
+Tracing Library for Go] to the [Splunk Distribution of OpenTelemetry Go].
 
 After the migration steps are complete, all tracing telemetry will continue to
 be transmitted and you will no longer have any dependency on
@@ -25,7 +25,7 @@ checking your `go.mod` files after they have been tidied.
 
 The [SignalFx Tracing Library for Go] uses the [`tracing`] package to configure
 and start tracing functionality. This is replaced with the [`distro`] package
-from the [Splunk Distribution of OpenTelemetry for Go] in the following way.
+from the [Splunk Distribution of OpenTelemetry Go] in the following way.
 
 The [`tracing.Start`] function needs to be replaced with [`distro.Run`]. The
 following replacements are used for [`tracing.StartOption`] instances.
@@ -40,8 +40,8 @@ following replacements are used for [`tracing.StartOption`] instances.
 | [`tracing.WithoutLibraryTags`] | N/A (see below) |
 
 Note: The [`tracing.WithoutLibraryTags`] [`tracing.StartOption`] does not have
-an equivalent in the [Splunk Distribution of OpenTelemetry for Go]. Metadata
-about the tracing library is contained in the [`Resource`] associated with the
+an equivalent in the [Splunk Distribution of OpenTelemetry Go]. Metadata about
+the tracing library is contained in the [`Resource`] associated with the
 [`distro.SDK`]. See [Defining a Resource](#defining-a-resource) for more
 information on [`Resource`]s.
 
@@ -209,7 +209,7 @@ See [troubleshooting documentation](./docs/troubleshooting.md) for help
 resolving any issues encountered.
 
 [SignalFx Tracing Library for Go]: https://github.com/signalfx/signalfx-go-tracing
-[Splunk Distribution of OpenTelemetry for Go]: https://github.com/signalfx/splunk-otel-go
+[Splunk Distribution of OpenTelemetry Go]: https://github.com/signalfx/splunk-otel-go
 [`tracing`]: https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing/tracing
 [`distro`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro
 [`tracing.Start`]: https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing/tracing#Start
