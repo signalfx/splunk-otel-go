@@ -1,33 +1,33 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report an issue to help us improve
 title: ''
 labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the issue**
+A clear and concise description of what the issue is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-
+**Steps to reproduce the issue:**
+For example:
 1. Use this code '...'
 2. Run '...'
 3. See error
 
-**Attempted Resolutions and Workarounds**
-All things attempted to resolve the issue or any workarounds found.
+**Attempted solutions and workarounds**
+Describe what you've tried to solve the issue or any workarounds you've found.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Environment (please complete the following information):**
+**Environment**
+Complete the following information:
 
-- OS: [e.g. iOS, Windows]
-- Go Version: [e.g. 1.6]
-- splunk-otel-go Version: [e.g. 1295520, v0.1.0]
+- OS version: [for example: iOS Big Sur or Windows 11]
+- Go version: [for example, 1.6]
+- splunk-otel-go version: [for example, 1295520, v0.1.0]
 
 **Additional context**
-Add any other context about the problem here (i.e. debug logs).
+Add additional information about the issue, like debug logs or screenshots. Redact or remove any sensitive information before sharing this information.
