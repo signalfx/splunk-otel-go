@@ -99,21 +99,55 @@ Replace any instance of [`tracing.WithRecordedValueMaxLength`] by setting
 
 ### Rewrite all manual instrumentation
 
-Recreate all spans created with the [`tracer`] package using OpenTelemetry.
-OpenTelemetry uses tracers to encapsulate the tracing function of a single
-instrumentation library. Create a `Tracer` from the global `TracerProvider`
-registered when you started the [`distro.SDK`]. To do this, use the
-[`otel.Tracer`] function and pass the name of your application. For example:
+All spans created with the [`tracer`] package need to be recreated using
+OpenTelemetry. To best understand this, consider the following function
+instrumented with the [`tracer`] package.
 
 ```go
-tracer := otel.Tracer("my-application")
+func BusinessOperation(ctx context.Context, client string) {
+	opts := []tracer.StartSpanOption{
+		tracer.Tag("client", client),
+		tracer.SpanType("internal"),
+	}
+	if parent, ok := tracer.SpanFromContext(ctx); ok {
+		opts = append(opts, tracer.ChildOf(parent.Context()))
+	}
+	span := tracer.StartSpan("BusinessOperation", opts...)
+	defer span.Finish()
+	/* ... */
+}
+```
+
+Recreating all spans using OpenTelemetry, that function becomes:
+
+```go
+func BusinessOperation(ctx context.Context, client string) {
+	tracer := otel.Tracer("app-name")
+	opts := []trace.SpanStartOption{
+		trace.WithAttributes(attribute.String("client", client)),
+		trace.WithSpanKind(trace.SpanKindInternal),
+	}
+	ctx, span := tracer.Start(ctx, "BusinessOperation", opts...)
+	defer span.End()
+	/* ... */
+}
+```
+
+Here's how this recreation is broken down. First, OpenTelemetry uses `Tracer`s
+to encapsulate the tracing function of a single instrumentation library. Create
+a `Tracer` from the global `TracerProvider` registered when you started the
+[`distro.SDK`]. To do this, use the [`otel.Tracer`] function and pass the name
+of your application. For example:
+
+```go
+tracer := otel.Tracer("app-name")
 ```
 
 Use the newly created `Tracer` and its `Start` function to replace all
 [`tracer.StartSpan`] invocations.
 
 ```go
-ctx, span := tracer.Start(ctx, "span name", /* options ... */)
+ctx, span := tracer.Start(ctx, "BusinessOperation", /* options ... */)
 ```
 
 Use the `operationName` parameter from [`tracer.StartSpan`] as the `name`
@@ -135,7 +169,7 @@ Finally, the created span, similar to before, needs to be ended. Use the
 OpenTelemetry span's `End` method to do this.
 
 ```go
-span.End()
+defer span.End()
 ```
 
 ### Replace all Instrumentation Libraries
