@@ -115,12 +115,16 @@ size, the bottleneck is likely the export itself. The `SDK` is taking so long
 to export a batch more spans than the queue can hold are added during this
 time. Most likely this is caused by an underlying network issue. Make sure you
 have a stable network to the target and that you have adequate bandwidth. In
-the meantime you can reduce export timeouts and increase the queue size.
+the meantime you can reduce export timeouts, decrease the export size and
+frequency, and increase the queue size.
 
 ```sh
-# 5ms export timeout.
+# 5s export timeout.
 export OTEL_BSP_EXPORT_TIMEOUT=5000
+# 30s maximum time between exports.
+export OTEL_BSP_SCHEDULE_DELAY=30000
 export OTEL_BSP_MAX_QUEUE_SIZE=5120
+export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=128
 ```
 
 Be sure there is enough memory on your system to accommodate the increase in
@@ -129,7 +133,9 @@ queue size.
 These changes will drop whole export batches that take too long. This means
 there will still be dropped data, but hopefully, if the network issues resolve,
 future exports will have a better chance of success. Failing these exports
-early will prevent future spans from being dropped.
+early will prevent future spans from being dropped. Reducing the overall export
+size and frequency should help reduce the amount of data dropped and decrease
+load on the network when issues arise.
 
 ## `transport: Error while dialing dial tcp: missing address`
 
