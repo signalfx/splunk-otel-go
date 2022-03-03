@@ -3,8 +3,8 @@
 The [Splunk Distribution of OpenTelemetry Go] replaces the [SignalFx Tracing
 Library for Go].
 
-Follow these instructions to migrate to the [Splunk Distribution of
-OpenTelemetry Go].
+The following steps describe all actions required to migrate from the [SignalFx
+Tracing Library for Go] to the [Splunk Distribution of OpenTelemetry Go].
 
 ## Requirements
 
