@@ -18,17 +18,118 @@ might overload systems if left on indefinitely.
 Spans might be dropped, or lost, due to several reasons. Follow these steps to ensure
 spans are not being dropped by the `SDK`.
 
-1. [Enable debug logging](#enable-debug-logging). This logs the `SDK`
-   configuration and all spans sent to registered `SpanProcessor`s. Verify the
-   that spans are exported in the log messages. Check also the`total_dropped` count.
-2. If an incorrect number of spans are being reported as exported, verify you
-   are ending the spans you expect to see.
-3. If spans are reported as dropped, the `BatchSpanProcessor` is dropping
-   spans. Increase the capacity of the `BatchSpanProcessor`'s queue or the
-   frequency it exports via [environment variables].
+### Missing all span from a service
 
-Following the previous steps might help understand if spans are being dropped in the
-`SDK` or downstream.
+If you see no spans in the Splunk Observability Platform for your service
+ensure the following first.
+
+1. Make sure to wait a few minutes. There may be delays in the telemetry
+   pipeline. Wait a few minutes and double check.
+2. Ensure your service is named properly. Check that your service names are not
+   showing up in the Splunk Observability Cloud interface with a prefix of
+   `unknown_service:` (i.e. `unknown_service:go` or
+   `unknown_service:<your-programs-binary-name>`). If so, set the
+   `OTEL_SERVICE_NAME` environment variable to your service's name and restart
+   your application.
+
+If you have taken these steps and still are not able to see spans, [enable
+debug logging](#enable-debug-logging). This should produce a log message like
+the following:
+
+```text
+debug	global/internal_logging.go:62	exporting spans	{"count": 154, "total_dropped": 0}
+```
+
+The `count` in the log message is the number of spans that were exported for a
+batch by the `SDK`.
+
+If `count` is non-zero that means the `SDK` is exporting span. If this is the
+case, spans are being dropped downstream. Refer to [the collector
+troubleshooting documentation].
+
+If `count` is zero, that means the `SDK` is not exporting any spans. If this is
+the case, ensure that all spans your application is creating are ended (i.e.
+`span.End()`).
+
+The `total_dropped` value of the log message is the cumulative number of spans
+the `SDK` has dropped. If this value is non-zero see the [missing some spans
+from a service](#missing-some-spans-from-a-service) section for more
+information on how to resolve this.
+
+### Missing some spans from a service
+
+If you see traces from your service in the Splunk Observability Platform
+missing spans you likely need to configure the `BatchSpanProcessor` batching
+configuration. First verify spans are being dropped by [enabling debug
+logging](#enable-debug-logging). This should produce a log message like the
+following:
+
+```text
+debug	global/internal_logging.go:62	exporting spans	{"count": 364, "total_dropped": 1320}
+```
+
+The `total_dropped` value is the cumulative number of span dropped by the
+`SDK`. If this is non-zero that means the `BatchSpanProcessor` needs to be
+reconfigured.
+
+The `BatchSpanProcessor` has the following configuration parameters.
+
+| Configuration Parameter                        | Default | Environment Variable             |
+| ---------------------------------------------- | ------- | -------------------------------- |
+| Delay interval between two consecutive exports | 5000    | `OTEL_BSP_SCHEDULE_DELAY`        |
+| Maximum allowed time to export data            | 30000   | `OTEL_BSP_EXPORT_TIMEOUT`        |
+| Maximum queue size                             | 2048    | `OTEL_BSP_MAX_QUEUE_SIZE`        |
+| Maximum batch size                             | 512     | `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` |
+
+The `BatchSpanProcessor` attempts and export when the queue contains the batch
+size or more number of spans. It will drop spans when new spans are added but
+the queue is full. Therefore there are two reasons spans are dropped: spans are
+being added faster than they can be exported, or exporting is taking so long
+the queue fills during the export.
+
+If the `count` in the log message continually equal to the maximum batch size,
+it is likely spans are being added faster than they can be exported.
+
+One way to resolve this is throw more computational and network resources at
+it. If you system has resources to spare try increasing the batch size to use
+more network bandwidth per export and increase the queue size to hold a bigger
+buffer. For example:
+
+```sh
+export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=1024
+export OTEL_BSP_MAX_QUEUE_SIZE=20480
+```
+
+If the system has limited memory to spare to not increase the maximum queue
+size. If the network has not bandwidth to spare it might be better to reduce
+your export batch size. For example.
+
+```sh
+export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=128
+```
+
+This should increase the export frequency and hopefully drain the queue faster.
+
+Otherwise, if the `count` value is not continually equal to the maximum batch
+size, the bottleneck is likely the export itself. The `SDK` is taking so long
+to export a batch that more spans than the queue can hold are added during this
+time. Most likely this is caused by an underlying network issue. Make sure you
+have a stable network to the target and that you have adequate bandwidth. In
+the meantime you can reduce export timeouts and increase the queue size.
+
+```sh
+# 5ms export timeout.
+export OTEL_BSP_EXPORT_TIMEOUT=5000
+export OTEL_BSP_MAX_QUEUE_SIZE=5120
+```
+
+Be sure to there are enough memory resources on your system to accommodate the
+increase in queue size.
+
+These changes will drop whole export batches that take too long. This means
+there will still be dropped data, but hopefully, if the network issues resolve,
+future exports will have a better chance of success. Failing these exports
+early will prevent future spans from being dropped.
 
 ## `transport: Error while dialing dial tcp: missing address`
 
@@ -60,3 +161,4 @@ If you have not found a solution after going through this document,
 
 [open an Issue]: https://github.com/signalfx/splunk-otel-go/issues/new/choose
 [environment variables]: https://github.com/open-telemetry/opentelemetry-specification/blob/v1.9.0/specification/sdk-environment-variables.md#batch-span-processor
+[the collector troubleshooting documentation]: https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md
