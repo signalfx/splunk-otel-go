@@ -81,17 +81,15 @@ The `BatchSpanProcessor` has the following configuration parameters.
 | Maximum queue size                             | 2048    | `OTEL_BSP_MAX_QUEUE_SIZE`        |
 | Maximum batch size                             | 512     | `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` |
 
-The `BatchSpanProcessor` attempts an export when the queue contains the batch
-size or more number of spans (or the timeout occurs). It will drop new spans
-when the are added but the queue is full. There are two reasons this will
-occur: spans are being added faster than they can be exported, or exporting is
-taking so long the queue fills during the export.
+The `BatchSpanProcessor` drops new spans when the queue is full. There are two
+reasons this will occur: spans are being added faster than they can be
+exported, or exporting is taking so long the queue fills during the export.
 
 If the `count` in the log messages is continually equal to the maximum batch
 size, it is likely spans are being added faster than they can be exported.
 
 One way to resolve this is throw more computational and network resources at
-it. If you system has resources to spare try increasing the batch size to use
+it. If you system has resources to spare, try increasing the batch size to use
 more network bandwidth per export and increase the queue size to hold a bigger
 buffer. For example:
 
@@ -100,9 +98,10 @@ export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=1024
 export OTEL_BSP_MAX_QUEUE_SIZE=20480
 ```
 
-If the system has limited memory do not increase the maximum queue size. If the
-network has no bandwidth to spare it might be better to reduce your export
-batch size. For example.
+If the system has limited memory do not increase the maximum queue size.
+
+If the network has no bandwidth to spare it might be better to reduce your
+export batch size. For example.
 
 ```sh
 export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=128
