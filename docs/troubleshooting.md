@@ -59,8 +59,8 @@ information on how to resolve this.
 ### Missing some spans from a service
 
 If you see traces from your service in the Splunk Observability Platform
-missing spans you likely need to configure the `BatchSpanProcessor` batching
-configuration. First verify spans are being dropped by [enabling debug
+missing spans, you likely need to configure the `BatchSpanProcessor`. First
+verify spans are being dropped by [enabling debug
 logging](#enable-debug-logging). This should produce a log message like the
 following:
 
@@ -81,14 +81,14 @@ The `BatchSpanProcessor` has the following configuration parameters.
 | Maximum queue size                             | 2048    | `OTEL_BSP_MAX_QUEUE_SIZE`        |
 | Maximum batch size                             | 512     | `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` |
 
-The `BatchSpanProcessor` attempts and export when the queue contains the batch
-size or more number of spans. It will drop spans when new spans are added but
-the queue is full. Therefore there are two reasons spans are dropped: spans are
-being added faster than they can be exported, or exporting is taking so long
-the queue fills during the export.
+The `BatchSpanProcessor` attempts an export when the queue contains the batch
+size or more number of spans (or the timeout occurs). It will drop new spans
+when the are added but the queue is full. There are two reasons this will
+occur: spans are being added faster than they can be exported, or exporting is
+taking so long the queue fills during the export.
 
-If the `count` in the log message continually equal to the maximum batch size,
-it is likely spans are being added faster than they can be exported.
+If the `count` in the log messages is continually equal to the maximum batch
+size, it is likely spans are being added faster than they can be exported.
 
 One way to resolve this is throw more computational and network resources at
 it. If you system has resources to spare try increasing the batch size to use
@@ -100,19 +100,20 @@ export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=1024
 export OTEL_BSP_MAX_QUEUE_SIZE=20480
 ```
 
-If the system has limited memory to spare to not increase the maximum queue
-size. If the network has not bandwidth to spare it might be better to reduce
-your export batch size. For example.
+If the system has limited memory do not increase the maximum queue size. If the
+network has no bandwidth to spare it might be better to reduce your export
+batch size. For example.
 
 ```sh
 export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=128
 ```
 
-This should increase the export frequency and hopefully drain the queue faster.
+This should increase the export frequency and *hopefully* drain the queue
+faster.
 
 Otherwise, if the `count` value is not continually equal to the maximum batch
 size, the bottleneck is likely the export itself. The `SDK` is taking so long
-to export a batch that more spans than the queue can hold are added during this
+to export a batch more spans than the queue can hold are added during this
 time. Most likely this is caused by an underlying network issue. Make sure you
 have a stable network to the target and that you have adequate bandwidth. In
 the meantime you can reduce export timeouts and increase the queue size.
@@ -123,8 +124,8 @@ export OTEL_BSP_EXPORT_TIMEOUT=5000
 export OTEL_BSP_MAX_QUEUE_SIZE=5120
 ```
 
-Be sure to there are enough memory resources on your system to accommodate the
-increase in queue size.
+Be sure there is enough memory on your system to accommodate the increase in
+queue size.
 
 These changes will drop whole export batches that take too long. This means
 there will still be dropped data, but hopefully, if the network issues resolve,
