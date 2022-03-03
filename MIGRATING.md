@@ -3,8 +3,8 @@
 The [Splunk Distribution of OpenTelemetry Go] replaces the [SignalFx Tracing
 Library for Go].
 
-Follow these instructions to migrate to the [Splunk
-Distribution of OpenTelemetry for Go].
+Follow these instructions to migrate to the [Splunk Distribution of
+OpenTelemetry Go].
 
 ## Requirements
 
@@ -15,10 +15,10 @@ Go version 1.16 or higher.
 The following steps identify all actions needed to migrate from [SignalFx
 Tracing Library for Go] to the [Splunk Distribution of OpenTelemetry Go].
 
-After the migration is complete, all tracing data will continue to
-be transmitted to Splunk Observability Cloud, without any dependency
-on `github.com/signalfx/signalfx-go-tracing` packages. Make sure to verify 
-this by checking your `go.mod` files after cleaning them up.
+After the migration is complete, all tracing data will continue to be
+transmitted to Splunk Observability Cloud, without any dependency on
+`github.com/signalfx/signalfx-go-tracing` packages. Make sure to verify this by
+checking your `go.mod` files after cleaning them up.
 
 ### Replace [`tracing`] Setup with [`distro`] Setup
 
@@ -26,8 +26,8 @@ The [SignalFx Tracing Library for Go] uses the [`tracing`] package to configure
 and start tracing functionality. This is replaced with the [`distro`] package
 from the [Splunk Distribution of OpenTelemetry Go] in the following way.
 
-Replace the [`tracing.Start`] function with [`distro.Run`]. The
-following replacements are used for [`tracing.StartOption`] instances.
+Replace the [`tracing.Start`] function with [`distro.Run`]. The following
+replacements are used for [`tracing.StartOption`] instances.
 
 | [`tracing.StartOption`] | Replacement |
 | --- | --- |
@@ -69,16 +69,16 @@ defer func() {
 OpenTelemetry uses a [`Resource`] to describe the common metadata about the
 [`distro.SDK`] that applies to all spans it produces. The [`distro.Run`]
 function creates a default [`Resource`] containing all the required Splunk and
-OpenTelemetry metadata for traces. To provided metadata about your service,
-you must include it in the [`Resource`].
+OpenTelemetry metadata for traces. To provided metadata about your service, you
+must include it in the [`Resource`].
 
-**Note:** You must set the service name of your service. Not doing so results 
-in all trace data being unidentifiable. To do this, set the `OTEL_SERVICE_NAME` 
+**Note:** You must set the service name of your service. Not doing so results
+in all trace data being unidentifiable. To do this, set the `OTEL_SERVICE_NAME`
 environment variable to the name of your service.
 
-To include additional attributes in the metadata for all traces produced by the 
-[`distro.SDK`], use the `OTEL_RESOURCE_ATTRIBUTES` environment variable. 
-For example:
+To include additional attributes in the metadata for all traces produced by the
+[`distro.SDK`], use the `OTEL_RESOURCE_ATTRIBUTES` environment variable.  For
+example:
 
 ```sh
 export OTEL_RESOURCE_ATTRIBUTES="ab-test-value=red,owner=Lisa"
@@ -86,9 +86,9 @@ export OTEL_RESOURCE_ATTRIBUTES="ab-test-value=red,owner=Lisa"
 
 #### Setting span limits
 
-OpenTelemetry includes guards to prevent code from producing excessive usage
-of computational resources. These [span limits] are set using the following environment
-variables:
+OpenTelemetry includes guards to prevent code from producing excessive usage of
+computational resources. These [span limits] are set using the following
+environment variables:
 
 | Name | Description | Default |
 | --- | --- | --- |
@@ -100,22 +100,22 @@ variables:
 | `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT` | Maximum allowed attribute per span event count | unlimited |
 | `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`| Maximum allowed attribute per span link count | unlimited |
 
-Note: Prior use of [`tracing.WithRecordedValueMaxLength`] should be replaced by
-setting `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` to the same value.
+Replace any instance of [`tracing.WithRecordedValueMaxLength`] by setting
+`OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` to the same value.
 
 ### Replace all Manual Instrumentation
 
-Recreate all spans created with the [`tracer`] package using OpenTelemetry. 
-OpenTelemetry uses tracers to encapsulate the tracing function of a single 
-instrumentation library. Create a `Tracer` from the global `TracerProvider` 
-registered when you started the [`distro.SDK`]. To do this, use the [`otel.Tracer`] 
-function and pass the name of your application. For example:
+Recreate all spans created with the [`tracer`] package using OpenTelemetry.
+OpenTelemetry uses tracers to encapsulate the tracing function of a single
+instrumentation library. Create a `Tracer` from the global `TracerProvider`
+registered when you started the [`distro.SDK`]. To do this, use the
+[`otel.Tracer`] function and pass the name of your application. For example:
 
 ```go
 tracer := otel.Tracer("my-application")
 ```
 
-Use this created `tracer` and its `Start` function to replace all
+Use this created `Tracer` and its `Start` function to replace all
 [`tracer.StartSpan`] invocations. The `operationName` parameter can be used as
 the `name` parameter for `Start`. The following replacements are used for
 [`tracer.StartSpanOption`] instances.
@@ -206,8 +206,8 @@ Note:
 
 ## Troubleshooting
 
-See [Troubleshooting](./docs/troubleshooting.md) for help
-resolving any issues encountered.
+See [Troubleshooting](./docs/troubleshooting.md) for help resolving any issues
+encountered.
 
 [SignalFx Tracing Library for Go]: https://github.com/signalfx/signalfx-go-tracing
 [Splunk Distribution of OpenTelemetry Go]: https://github.com/signalfx/splunk-otel-go
