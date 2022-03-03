@@ -109,10 +109,10 @@ registered when you started the [`distro.SDK`]. To do this, use the
 tracer := otel.Tracer("my-application")
 ```
 
-Use this created `Tracer` and its `Start` function to replace all
-[`tracer.StartSpan`] invocations. The `operationName` parameter can be used as
+Use the newly created `Tracer` and its `Start` function to replace all
+[`tracer.StartSpan`] invocations. You can use the `operationName` parameter as
 the `name` parameter for `Start`. The following replacements are used for
-[`tracer.StartSpanOption`] instances.
+[`tracer.StartSpanOption`] instances:
 
 | [`tracer.StartSpanOption`] | Replacement |
 | --- | --- |
