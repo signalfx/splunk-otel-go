@@ -36,7 +36,7 @@ replacements are used for [`tracing.StartOption`] instances.
 | [`tracing.WithGlobalTag`] | See [Defining a Resource](#defining-a-resource) |
 | [`tracing.WithRecordedValueMaxLength`] | See [Setting Span Limits](#setting-span-limits) |
 | [`tracing.WithServiceName`] | See [Defining a Resource](#defining-a-resource) |
-| [`tracing.WithoutLibraryTags`] | N/A. The [`tracing.WithoutLibraryTags`] [`tracing.StartOption`] does not have an equivalent in the [Splunk Distribution of OpenTelemetry Go]. Metadata about the tracing library is contained in the [`Resource`] associated with the [`distro.SDK`]. See [Defining a Resource](#defining-a-resource) for more information on [`Resource`]s. |
+| [`tracing.WithoutLibraryTags`] | N/A. The [`tracing.WithoutLibraryTags`] option does not have an equivalent in the Splunk Distribution of OpenTelemetry Go. Metadata about the tracing library is available in the [`Resource`] associated with the [`distro.SDK`]. See [Defining a Resource](#defining-a-resource) for more information on resources. |
 
 Unlike the [`tracing`] package, the [`distro.SDK`] must shut down when your
 application stops. This ensures that all spans are flushed and any held state
