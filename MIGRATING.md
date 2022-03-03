@@ -117,8 +117,8 @@ the `name` parameter for `Start`. The following replacements are used for
 | [`tracer.StartSpanOption`] | Replacement |
 | --- | --- |
 | [`tracer.ChildOf`] | N/A. The parent-child relationship of spans is defined with a [`context.Context`]. The [`context.Context`] passed to `Start` needs to contain the parent span. This is automatically done if the context was returned from a previous call to `Start`. It can explicitly be done using the [`trace.ContextWithSpan`]. |
-| [`tracer.ResourceName`] | N/A. This value is defined global with a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
-| [`tracer.ServiceName`] | N/A. This value is defined global in a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
+| [`tracer.ResourceName`] | N/A. This value is defined globally with a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
+| [`tracer.ServiceName`] | N/A. This value is defined globally in a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
 | [`tracer.SpanType`] | [`trace.WithSpanKind`] |
 | [`tracer.StartTime`] | [`trace.WithTimestamp`] |
 | [`tracer.Tag`] | [`trace.WithAttributes`] |
