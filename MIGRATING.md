@@ -103,7 +103,7 @@ environment variables:
 Replace any instance of [`tracing.WithRecordedValueMaxLength`] by setting
 `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` to the same value.
 
-### Replace all Manual Instrumentation
+### Rewrite all manual instrumntation
 
 Recreate all spans created with the [`tracer`] package using OpenTelemetry.
 OpenTelemetry uses tracers to encapsulate the tracing function of a single
