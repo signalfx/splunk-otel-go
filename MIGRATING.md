@@ -23,7 +23,7 @@ checking your `go.mod` files after cleaning them up.
 ### Replace [`tracing`] Setup with [`distro`] Setup
 
 The [SignalFx Tracing Library for Go] uses the [`tracing`] package to configure
-and start tracing functionality. This is replaced with the [`distro`] package
+and start tracing functionality. This is replaced by the [`distro`] package
 from the [Splunk Distribution of OpenTelemetry Go] in the following way.
 
 Replace the [`tracing.Start`] function with [`distro.Run`]. The following
