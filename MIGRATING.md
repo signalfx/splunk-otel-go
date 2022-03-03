@@ -97,7 +97,7 @@ environment variables:
 Replace any instance of [`tracing.WithRecordedValueMaxLength`] by setting
 `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` to the same value.
 
-### Rewrite all manual instrumntation
+### Rewrite all manual instrumentation
 
 Recreate all spans created with the [`tracer`] package using OpenTelemetry.
 OpenTelemetry uses tracers to encapsulate the tracing function of a single
@@ -110,8 +110,14 @@ tracer := otel.Tracer("my-application")
 ```
 
 Use the newly created `Tracer` and its `Start` function to replace all
-[`tracer.StartSpan`] invocations. You can use the `operationName` parameter as
-the `name` parameter for `Start`. The following replacements are used for
+[`tracer.StartSpan`] invocations.
+
+```go
+ctx, span := tracer.Start(ctx, "span name", /* options ... */)
+```
+
+Use the `operationName` parameter from [`tracer.StartSpan`] as the `name`
+parameter for `Start`. The following replacements are used for
 [`tracer.StartSpanOption`] instances:
 
 | [`tracer.StartSpanOption`] | Replacement |
@@ -127,6 +133,10 @@ the `name` parameter for `Start`. The following replacements are used for
 
 Finally, the created span, similar to before, needs to be ended. Use the
 OpenTelemetry span's `End` method to do this.
+
+```go
+span.End()
+```
 
 ### Replace all Instrumentation Libraries
 
@@ -154,7 +164,7 @@ OpenTelemetry span's `End` method to do this.
 | [`julienschmidt/httprouter`] | [`splunkhttprouter`] |
 | [`k8s.io/client-go/kubernetes`] | [`splunkclient-go`] |
 | [`labstack/echo.v4`] | [`otelecho`] |
-| [`labstack/echo`] | Versions prior to v4 are no longer supported. Upgrade to `echo@v4` and use `otelecho`. |
+| [`labstack/echo`] | Versions prior to `v4` are no longer supported. Upgrade to `echo@v4` and use `otelecho`. |
 | [`miekg/dns`] | [`splunkdns`]
 | [`mongodb/mongo-go-driver/mongo`] | [`otelmongo`] |
 | [`net/http`] | [`splunkhttp`], [`otelhttp`] |
