@@ -6,7 +6,7 @@ MD010: false
 
 # 80 char line-length
 MD013:
-  ignore_code_blocks: true
+  code_blocks: false
   tables: false
 
 # no-duplicate-header
