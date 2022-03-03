@@ -36,13 +36,7 @@ replacements are used for [`tracing.StartOption`] instances.
 | [`tracing.WithGlobalTag`] | See [Defining a Resource](#defining-a-resource) |
 | [`tracing.WithRecordedValueMaxLength`] | See [Setting Span Limits](#setting-span-limits) |
 | [`tracing.WithServiceName`] | See [Defining a Resource](#defining-a-resource) |
-| [`tracing.WithoutLibraryTags`] | N/A (see below) |
-
-Note: The [`tracing.WithoutLibraryTags`] [`tracing.StartOption`] does not have
-an equivalent in the [Splunk Distribution of OpenTelemetry Go]. Metadata about
-the tracing library is contained in the [`Resource`] associated with the
-[`distro.SDK`]. See [Defining a Resource](#defining-a-resource) for more
-information on [`Resource`]s.
+| [`tracing.WithoutLibraryTags`] | N/A. The [`tracing.WithoutLibraryTags`] [`tracing.StartOption`] does not have an equivalent in the [Splunk Distribution of OpenTelemetry Go]. Metadata about the tracing library is contained in the [`Resource`] associated with the [`distro.SDK`]. See [Defining a Resource](#defining-a-resource) for more information on [`Resource`]s. |
 
 Unlike the [`tracing`] package, the [`distro.SDK`] must shut down when your
 application stops. This ensures that all spans are flushed and any held state
@@ -122,32 +116,14 @@ the `name` parameter for `Start`. The following replacements are used for
 
 | [`tracer.StartSpanOption`] | Replacement |
 | --- | --- |
-| [`tracer.ChildOf`] | N/A (see below) |
-| [`tracer.ResourceName`] | N/A (see below) |
-| [`tracer.ServiceName`] | N/A (see below) |
+| [`tracer.ChildOf`] | N/A. The parent-child relationship of spans is defined with a [`context.Context`]. The [`context.Context`] passed to `Start` needs to contain the parent span. This is automatically done if the context was returned from a previous call to `Start`. It can explicitly be done using the [`trace.ContextWithSpan`]. |
+| [`tracer.ResourceName`] | N/A. This value is defined global with a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
+| [`tracer.ServiceName`] | N/A. This value is defined global in a [`Resource`] that applies to all spans. See [Defining a Resource](#defining-a-resource) for more information. |
 | [`tracer.SpanType`] | [`trace.WithSpanKind`] |
 | [`tracer.StartTime`] | [`trace.WithTimestamp`] |
 | [`tracer.Tag`] | [`trace.WithAttributes`] |
-| [`tracer.WithRecordedValueMaxLength`] | N/A (see below) |
-| [`tracer.WithSpanID`] | N/A (see below) |
-
-Notes:
-
-- [`tracer.ChildOf`]: The parent-child relationship of spans is defined with a
-  [`context.Context`]. The [`context.Context`] passed to `Start` needs to
-  contain the parent span. This is automatically done if the context was
-  returned from a previous call to `Start`. It can explicitly be done using the
-  [`trace.ContextWithSpan`].
-- [`tracer.ResourceName`]: This value is defined global with a [`Resource`]
-  that applies to all spans. See [Defining a Resource](#defining-a-resource)
-  for more information.
-- [`tracer.ServiceName`]: This value is defined global in a [`Resource`] that
-  applies to all spans. See [Defining a Resource](#defining-a-resource) for
-  more information.
-- [`tracer.WithRecordedValueMaxLength`]: This value is set globally. See
-  [Setting Span Limits](#setting-span-limits) for more information.
-- [`tracer.WithSpanID`]: Span IDs are automatically set. If custom span IDs are
-  needed you will need to create a custom [`IDGenerator`].
+| [`tracer.WithRecordedValueMaxLength`] | N/A. This value is set globally. See [Setting Span Limits](#setting-span-limits) for more information. |
+| [`tracer.WithSpanID`] | N/A. Span IDs are automatically set. If custom span IDs are needed you will need to create a custom [`IDGenerator`]. |
 
 Finally, the created span, similar to before, needs to be ended. Use the
 OpenTelemetry span's `End` method to do this.
@@ -161,15 +137,15 @@ OpenTelemetry span's `End` method to do this.
 | [`confluentinc/confluent-kafka-go/kafka`] | [`splunkkafka`] |
 | [`database/sql`] | [`splunksql`] ([`splunkmysql`], [`splunkpgx`], [`splunkpq`]) |
 | [`emicklei/go-restful`] | [`otelrestful`] |
-| [`garyburd/redigo`] | N/A (See below) |
+| [`garyburd/redigo`] | This project is archived. Use `gomodule/redigo` and [`splunkredigo`] instead. |
 | [`gin-gonic/gin`] | [`otelgin`] |
-| [`globalsign/mgo`] | N/A (See below) |
+| [`globalsign/mgo`] | This project is an unsupported fork of an abandoned project. Use `mongodb/mongo-go-driver` and `otelmongo` instead. |
 | [`go-chi/chi`] | [`splunkchi`] |
-| [`go-redis/redis`] | N/A (See below) |
+| [`go-redis/redis`] | This package now provides native support for OpenTelemetry. See [this example](https://github.com/go-redis/redis/tree/master/example/otel) for more information. |
 | [`gocql/gocql`] | [`otelgocql`] |
 | [`gomodule/redigo`] | [`splunkredigo`] |
-| [`google.golang.org/api`] | N/A (See below) |
-| [`google.golang.org/grpc.v12`] | N/A (See below) |
+| [`google.golang.org/api`] | Use either [`otelgrpc`] or [`otelhttp`] with a gRPC or HTTP client when calling [`cloudresourcemanager.NewService`]. |
+| [`google.golang.org/grpc.v12`] | This version is no longer supported. Use the latest version along with [`otelgrpc`]. |
 | [`google.golang.org/grpc`] | [`otelgrpc`] |
 | [`gorilla/mux`] | [`otelmux`] |
 | [`graph-gophers/graphql-go`] | [`splunkgraphql`] |
@@ -178,7 +154,7 @@ OpenTelemetry span's `End` method to do this.
 | [`julienschmidt/httprouter`] | [`splunkhttprouter`] |
 | [`k8s.io/client-go/kubernetes`] | [`splunkclient-go`] |
 | [`labstack/echo.v4`] | [`otelecho`] |
-| [`labstack/echo`] | N/A (See below) |
+| [`labstack/echo`] | Versions prior to v4 are no longer supported. Upgrade to `echo@v4` and use `otelecho`. |
 | [`miekg/dns`] | [`splunkdns`]
 | [`mongodb/mongo-go-driver/mongo`] | [`otelmongo`] |
 | [`net/http`] | [`splunkhttp`], [`otelhttp`] |
@@ -186,23 +162,6 @@ OpenTelemetry span's `End` method to do this.
 | [`Shopify/sarama`] | [`otelsarama`] |
 | [`syndtr/goleveldb/leveldb`] | [`splunkleveldb`] |
 | [`tidwall/buntdb`] | [`splunkbuntdb`] |
-
-Note:
-
-- [`garyburd/redigo`]: This project is archived. Use `gomodule/redigo` and
-  [`splunkredigo`] instead.
-- [`globalsign/mgo`]: This project is an unsupported fork of an abandoned
-  project. Use `mongodb/mongo-go-driver` and `otelmongo` instead.
-- [`go-redis/redis`]: This package now provides native support for
-  OpenTelemetry. See [this
-  example](https://github.com/go-redis/redis/tree/master/example/otel) for more
-  information.
-- [`google.golang.org/api`]: Use either [`otelgrpc`] or [`otelhttp`] with a
-  gRPC or HTTP client when calling [`cloudresourcemanager.NewService`].
-- [`google.golang.org/grpc.v12`]: This version is no longer supported. Use the
-  latest version along with [`otelgrpc`].
-- [`labstack/echo`]: Versions prior to v4 are no longer supported. Upgrade to
-  `echo@v4` and use `otelecho`.
 
 ## Troubleshooting
 
