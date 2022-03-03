@@ -59,7 +59,7 @@ information on how to resolve this.
 ### Missing some spans from a service
 
 If you see traces from your service in the Splunk Observability Platform
-missing spans, you likely need to configure the `BatchSpanProcessor`. First
+missing spans, you likely need to configure the `BatchSpanProcessor`. First,
 verify spans are being dropped by [enabling debug
 logging](#enable-debug-logging). This should produce a log message like the
 following:
