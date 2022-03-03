@@ -18,6 +18,10 @@ application to capture and report distributed traces to Splunk APM.
 > It is **officially supported** by Splunk.
 > However, breaking changes **MAY** be introduced.
 
+If you're currently using the SignalFx Go Agent and want to migrate to the
+Splunk Distribution of OpenTelemetry Go, see [Migrate from the SignalFx Go
+Agent](./MIGRATING.md).
+
 Table of Contents:
 
 - [Getting Started](#getting-started)
