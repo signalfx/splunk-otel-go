@@ -18,22 +18,22 @@ might overload systems if left on indefinitely.
 Spans might be dropped, or lost, due to several reasons. Follow these steps to ensure
 spans are not being dropped by the `SDK`.
 
-### Missing all span from a service
+### Missing all spans from a service
 
 If you see no spans in the Splunk Observability Platform for your service
-ensure the following first.
+ensure the following first:
 
-1. Make sure to wait a few minutes. There may be delays in the telemetry
-   pipeline. Wait a few minutes and double check.
+1. Make sure to wait a few minutes. There might be delays in the telemetry
+   pipeline. Wait a few minutes and check again.
 2. Ensure your service is named properly. Check that your service names are not
    showing up in the Splunk Observability Cloud interface with a prefix of
-   `unknown_service:` (i.e. `unknown_service:go` or
+   `unknown_service:` (for example, `unknown_service:go` or
    `unknown_service:<your-programs-binary-name>`). If so, set the
    `OTEL_SERVICE_NAME` environment variable to your service's name and restart
    your application.
 
 If you have taken these steps and still are not able to see spans, [enable
-debug logging](#enable-debug-logging). This should produce a log message like
+debug logging](#enable-debug-logging). This might produce a log message like
 the following:
 
 ```text
@@ -48,8 +48,8 @@ case, spans are being dropped downstream. Refer to [the collector
 troubleshooting documentation].
 
 If `count` is zero, that means the `SDK` is not exporting any spans. If this is
-the case, ensure that all spans your application is creating are ended (i.e.
-`span.End()`).
+the case, ensure that all spans your application is creating are ended (for example,
+by using `span.End()`).
 
 The `total_dropped` value of the log message is the cumulative number of spans
 the `SDK` has dropped. If this value is non-zero see the [missing some spans
@@ -58,7 +58,7 @@ information on how to resolve this.
 
 ### Missing some spans from a service
 
-If you see traces from your service in the Splunk Observability Platform
+If you see traces from your service in Splunk Observability Cloud that
 missing spans, you likely need to configure the `BatchSpanProcessor`. First,
 verify spans are being dropped by [enabling debug
 logging](#enable-debug-logging). This should produce a log message like the
