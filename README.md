@@ -188,6 +188,11 @@ metadata lets you explore logs in Splunk Observability Cloud.
 See [Correlating Trace and Logs](./docs/correlating-trace-and-logs.md) for more
 information.
 
+## Troubleshooting
+
+For troubleshooting information, see the
+[Troubleshooting](./docs/troubleshooting.md) documentation.
+
 ## License
 
 The Splunk distribution of OpenTelemetry Go is a
