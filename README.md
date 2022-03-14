@@ -18,6 +18,11 @@ application to capture and report distributed traces to Splunk APM.
 > It is **officially supported** by Splunk.
 > However, breaking changes **MAY** be introduced.
 
+If you're currently using the [SignalFx Tracing Library for Go](https://github.com/signalfx/signalfx-go-tracing)
+and want to migrate to the
+Splunk Distribution of OpenTelemetry Go, see [Migrate from the SignalFx Go
+Agent](./MIGRATING.md).
+
 Table of Contents:
 
 - [Getting Started](#getting-started)
@@ -183,6 +188,11 @@ metadata lets you explore logs in Splunk Observability Cloud.
 
 See [Correlating Trace and Logs](./docs/correlating-trace-and-logs.md) for more
 information.
+
+## Troubleshooting
+
+For troubleshooting information, see the
+[Troubleshooting](./docs/troubleshooting.md) documentation.
 
 ## License
 
