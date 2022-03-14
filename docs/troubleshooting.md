@@ -20,7 +20,7 @@ spans are not being dropped by the `SDK`.
 
 ### Missing all spans from a service
 
-If you see no spans in the Splunk Observability Platform for your service
+If you see no spans in the Splunk Observability Cloud for your service
 ensure the following first:
 
 1. Make sure to wait a few minutes. There might be delays in the telemetry
