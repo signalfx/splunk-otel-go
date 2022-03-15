@@ -16,4 +16,5 @@ require (
 replace (
 	github.com/signalfx/splunk-otel-go => ../../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka => ../
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../../internal/
 )

@@ -15,4 +15,5 @@ replace (
 	github.com/signalfx/splunk-otel-go => ../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx => ../
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
 )
