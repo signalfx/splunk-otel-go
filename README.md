@@ -172,7 +172,7 @@ with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v
 
 ### Trace Propagation Configuration
 
-The trace propagtor can be changed by using
+The trace propagator can be changed by using
 [`otel.SetTextMapPropagator`](https://pkg.go.dev/go.opentelemetry.io/otel#SetTextMapPropagator)
 after `distro.Run()` is invoked e.g.:
 
