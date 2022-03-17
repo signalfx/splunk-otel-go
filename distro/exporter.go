@@ -41,24 +41,11 @@ var exporters = map[string]traceExporterFunc{
 func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []otlptracegrpc.Option
 
-	if c.Endpoint == "" {
-		if endpoint := func() string {
-			// Allow the exporter to use environment variables if set.
-			if _, ok := os.LookupEnv(otelExporterOTLPEndpointKey); ok {
-				return ""
-			}
-			if _, ok := os.LookupEnv(otelExporterOTLPTracesEndpointKey); ok {
-				return ""
-			}
-			return defaultOTLPEndpoint
-		}(); endpoint != "" {
-			opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
-		}
-	} else {
+	if c.Endpoint != "" {
 		opts = append(opts, otlptracegrpc.WithEndpoint(c.Endpoint))
 	}
 
-	if c.UseTLS {
+	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
 	} else {
@@ -99,7 +86,7 @@ func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		)
 	}
 
-	if c.UseTLS {
+	if c.TLSConfig != nil {
 		client := &http.Client{
 			Transport: &http.Transport{TLSClientConfig: c.TLSConfig},
 		}

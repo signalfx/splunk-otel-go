@@ -41,9 +41,7 @@ const (
 	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
-	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
-	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
-	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+	otelExporterJaegerEndpointKey = "OTEL_EXPORTER_JAEGER_ENDPOINT"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
@@ -63,16 +61,13 @@ const (
 	defaultTraceExporter = "otlp"
 	defaultLogLevel      = "info"
 
-	defaultOTLPEndpoint   = "localhost:4317"
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
 )
 
 type exporterConfig struct {
 	AccessToken string
 	Endpoint    string
-
-	UseTLS    bool
-	TLSConfig *tls.Config
+	TLSConfig   *tls.Config
 }
 
 // config is the configuration used to create and operate an SDK.
@@ -261,7 +256,6 @@ func WithTraceExporter(e trace.SpanExporter) Option {
 // If this option is not provided, the exporter connection will not use TLS.
 func WithTLSConfig(conf *tls.Config) Option {
 	return optionFunc(func(c *config) {
-		c.ExportConfig.UseTLS = true
 		c.ExportConfig.TLSConfig = conf
 	})
 }
