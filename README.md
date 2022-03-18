@@ -42,10 +42,11 @@ This Splunk distribution comes with the following defaults:
 
 - [W3C tracecontext](https://www.w3.org/TR/trace-context/) and
   [W3C baggage](https://www.w3.org/TR/baggage/) context propagation.
-- [Jaeger Thrift over HTTP
+- [OTLP over gRPC
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)
-  configured to send spans to a locally running [Splunk OpenTelemetry Connector](https://github.com/signalfx/splunk-otel-collector)
-  (`http://localhost:14268/api/traces`).
+  configured to send spans to a locally running [Splunk OpenTelemetry
+  Connector](https://github.com/signalfx/splunk-otel-collector)
+  (`localhost:4317`).
 - Unlimited default limits for configuration options to
   support full-fidelity traces.
 
