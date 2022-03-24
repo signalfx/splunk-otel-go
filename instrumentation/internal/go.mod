@@ -7,6 +7,6 @@ replace github.com/signalfx/splunk-otel-go => ../../
 require (
 	github.com/signalfx/splunk-otel-go v0.7.0
 	github.com/stretchr/testify v1.7.1
-	go.opentelemetry.io/otel v1.5.0
-	go.opentelemetry.io/otel/trace v1.5.0
+	go.opentelemetry.io/otel v1.6.0
+	go.opentelemetry.io/otel/trace v1.6.0
 )
