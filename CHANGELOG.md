@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   environment variable to `jaeger-thrift-splunk`, or by directly passing the
   user configured exporter with a `WithTraceExporter` option. (#300)
 - Update `go.opentelemetry.io/otel*` dependencies from [`v1.3.0`][otel-v1.3.0]
-  to [`v1.6.0`][otel-v1.6.0]. (#TBD)
+  to [`v1.6.0`][otel-v1.6.0]. (#656)
 
 ### Fixed
 
