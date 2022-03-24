@@ -30,6 +30,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   thrift exporter can still be used by setting the `OTEL_TRACES_EXPORTER`
   environment variable to `jaeger-thrift-splunk`, or by directly passing the
   user configured exporter with a `WithTraceExporter` option. (#300)
+- Update `go.opentelemetry.io/otel*` dependencies from [`v1.3.0`][otel-v1.3.0]
+  to [`v1.6.0`][otel-v1.6.0]. (#TBD)
 
 ### Fixed
 
@@ -206,6 +208,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
 [otel-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.3.0
 [otel-v1.0.0-RC3]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC3
 [otel-v1.0.0-RC2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC2
