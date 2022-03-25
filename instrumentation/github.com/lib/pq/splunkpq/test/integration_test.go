@@ -33,7 +33,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq"
