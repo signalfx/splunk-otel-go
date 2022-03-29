@@ -74,7 +74,7 @@ type exporterConfig struct {
 type config struct {
 	Logger     logr.Logger
 	Propagator propagation.TextMapPropagator
-	SpanLimits trace.SpanLimits
+	SpanLimits *trace.SpanLimits
 
 	ExportConfig      *exporterConfig
 	TraceExporterFunc traceExporterFunc
@@ -314,6 +314,6 @@ func WithLogger(l logr.Logger) Option {
 // is limited to 12000, and all other limts are set to be unlimited.
 func WithSpanLimits(limits trace.SpanLimits) Option {
 	return optionFunc(func(c *config) {
-		c.SpanLimits = limits
+		c.SpanLimits = &limits
 	})
 }

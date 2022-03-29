@@ -20,14 +20,22 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+const (
+	attributeValueLengthKey     = "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT"
+	attributeCountKey           = "OTEL_ATTRIBUTE_COUNT_LIMIT"
+	spanAttributeValueLengthKey = "OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT"
+	spanAttributeCountKey       = "OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT"
+	spanEventCountKey           = "OTEL_SPAN_EVENT_COUNT_LIMIT"
+	spanEventAttributeCountKey  = "OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT"
+	spanLinkCountKey            = "OTEL_SPAN_LINK_COUNT_LIMIT"
+	spanLinkAttributeCountKey   = "OTEL_LINK_ATTRIBUTE_COUNT_LIMIT"
+)
+
 // sources are span limit sources with Splunk defaults.
 var sources = spanLimitSources{
 	// Maximum allowed attribute value size for a span.
 	{
-		envs: []string{
-			"OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT",
-			"OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT",
-		},
+		envs: []string{attributeValueLengthKey, spanAttributeValueLengthKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			limits.AttributeValueLengthLimit = 12000
 			return limits
@@ -36,10 +44,7 @@ var sources = spanLimitSources{
 
 	// Maximum allowed attribute count for a span.
 	{
-		envs: []string{
-			"OTEL_ATTRIBUTE_COUNT_LIMIT",
-			"OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT",
-		},
+		envs: []string{attributeCountKey, spanAttributeCountKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			// Unlimited.
 			limits.AttributeCountLimit = -1
@@ -49,7 +54,7 @@ var sources = spanLimitSources{
 
 	// Maximum allowed span event count.
 	{
-		envs: []string{"OTEL_SPAN_EVENT_COUNT_LIMIT"},
+		envs: []string{spanEventCountKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			// Unlimited.
 			limits.EventCountLimit = -1
@@ -59,7 +64,7 @@ var sources = spanLimitSources{
 
 	// Maximum allowed attributes per span event.
 	{
-		envs: []string{"OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT"},
+		envs: []string{spanEventAttributeCountKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			// Unlimited.
 			limits.AttributePerEventCountLimit = -1
@@ -69,7 +74,7 @@ var sources = spanLimitSources{
 
 	// Maximum allowed span link count.
 	{
-		envs: []string{"OTEL_SPAN_LINK_COUNT_LIMIT"},
+		envs: []string{spanLinkCountKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			limits.LinkCountLimit = 1000
 			return limits
@@ -78,7 +83,7 @@ var sources = spanLimitSources{
 
 	// Maximum allowed attributes per span link.
 	{
-		envs: []string{"OTEL_LINK_ATTRIBUTE_COUNT_LIMIT"},
+		envs: []string{spanLinkAttributeCountKey},
 		setDefault: func(limits trace.SpanLimits) trace.SpanLimits {
 			// Unlimited.
 			limits.AttributePerLinkCountLimit = -1
@@ -133,7 +138,7 @@ func (s spanLimitSource) applyDefault(limits trace.SpanLimits) trace.SpanLimits 
 // count is limited to 1000, the attribute value length is limited to 12000,
 // and all other limts are set to be unlimited) or the corresponding OTel
 // environment variable value if it is set.
-func newSpanLimits() trace.SpanLimits {
+func newSpanLimits() *trace.SpanLimits {
 	// Use trace.NewSpanLimits here to ensure any future additions are not set
 	// to zero, which would happen if we delared with &trace.SpanLimits{...}.
 	limits := trace.NewSpanLimits()
@@ -141,5 +146,7 @@ func newSpanLimits() trace.SpanLimits {
 	// limits will use OTel defaults or the applicable environment variable if
 	// they are set. The Splunk defaults need to be applied only if the
 	// environment variables were unset.
-	return sources.applyDefaults(limits)
+	limits = sources.applyDefaults(limits)
+
+	return &limits
 }
