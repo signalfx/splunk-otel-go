@@ -13,8 +13,8 @@
 // limitations under the License.
 
 /*
-Package splunkotel provides version information for
-Splunk distribution of OpenTelemetry Go.
+Package splunkotel provides version information for the Splunk distribution of
+OpenTelemetry Go.
 */
 package splunkotel // import "github.com/signalfx/splunk-otel-go"
 
