@@ -46,9 +46,6 @@ const (
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
 
-	// FIXME: support OTEL_SPAN_LINK_COUNT_LIMIT
-	// FIXME: support OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT
-
 	// splunkMetricsEndpointKey defines the endpoint Splunk specific metrics
 	// are sent. This is not currently supported.
 	splunkMetricsEndpointKey = "SPLUNK_METRICS_ENDPOINT"
