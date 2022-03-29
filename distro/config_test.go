@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type KeyValue struct {
@@ -114,6 +115,48 @@ var ConfigurationTests = []*ConfigFieldTest{
 				},
 				AssertionFunc: func(t *testing.T, c *config) {
 					assert.Equal(t, propagation.TraceContext{}, c.Propagator)
+				},
+			},
+		},
+	},
+	{
+		Name: "WithSpanLimits",
+		ValueFunc: func(c *config) interface{} {
+			return c.SpanLimits
+		},
+		DefaultValue: &trace.SpanLimits{
+			AttributeValueLengthLimit:   12000,
+			AttributeCountLimit:         -1,
+			EventCountLimit:             -1,
+			LinkCountLimit:              1000,
+			AttributePerEventCountLimit: -1,
+			AttributePerLinkCountLimit:  -1,
+		},
+		EnvironmentTests: []KeyValue{
+			{Key: attributeValueLengthKey, Value: "10"},
+			{Key: spanAttributeValueLengthKey, Value: "10"},
+			{Key: attributeCountKey, Value: "10"},
+			{Key: spanAttributeCountKey, Value: "10"},
+			{Key: spanEventCountKey, Value: "10"},
+			{Key: spanEventAttributeCountKey, Value: "10"},
+			{Key: spanLinkCountKey, Value: "10"},
+			{Key: spanLinkAttributeCountKey, Value: "10"},
+		},
+		OptionTests: []OptionTest{
+			{
+				Name: "valid override",
+				Options: []Option{
+					WithSpanLimits(trace.SpanLimits{
+						AttributeValueLengthLimit:   100,
+						AttributeCountLimit:         100,
+						EventCountLimit:             100,
+						LinkCountLimit:              100,
+						AttributePerEventCountLimit: 100,
+						AttributePerLinkCountLimit:  100,
+					}),
+				},
+				AssertionFunc: func(t *testing.T, c *config) {
+					assert.Equal(t, expectedSL(100, 100, 100, 100, 100, 100), c.SpanLimits)
 				},
 			},
 		},
