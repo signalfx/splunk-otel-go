@@ -31,7 +31,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   environment variable to `jaeger-thrift-splunk`, or by directly passing the
   user configured exporter with a `WithTraceExporter` option. (#300)
 - Update `go.opentelemetry.io/otel*` dependencies from [`v1.3.0`][otel-v1.3.0]
-  to [`v1.6.0`][otel-v1.6.0]. (#656)
+  to [`v1.6.1`][otel-v1.6.1]. (#656, #720)
+- Update `go.opentelemetry.io/contrib*` dependencies from
+  [`v1.4.0`/`v0.30.0`][contrib-v1.4.0] to [`v1.6.0`/`v0.31.0`][contrib-v1.6.0].
+  (#720)
 
 ### Fixed
 
@@ -208,6 +211,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
 [otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
 [otel-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.3.0
 [otel-v1.0.0-RC3]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC3
@@ -216,6 +220,8 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0
+[contrib-v1.4.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.4.0
 [contrib-v0.28.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.28.0
 [contrib-v0.23.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.23.0
 [contrib-v0.22.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.22.0
