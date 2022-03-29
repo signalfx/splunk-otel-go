@@ -120,7 +120,6 @@ func (s spanLimitSource) envsSet() bool {
 		}
 	}
 	return false
-
 }
 
 // applyDefaults will apply the default to the corresponding limit in limits
