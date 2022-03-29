@@ -74,6 +74,7 @@ type exporterConfig struct {
 type config struct {
 	Logger     logr.Logger
 	Propagator propagation.TextMapPropagator
+	SpanLimits trace.SpanLimits
 
 	ExportConfig      *exporterConfig
 	TraceExporterFunc traceExporterFunc
@@ -82,7 +83,8 @@ type config struct {
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
 	c := &config{
-		Logger: logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
+		Logger:     logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
+		SpanLimits: newSpanLimits(),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
@@ -296,5 +298,22 @@ func WithPropagator(p propagation.TextMapPropagator) Option {
 func WithLogger(l logr.Logger) Option {
 	return optionFunc(func(c *config) {
 		c.Logger = l
+	})
+}
+
+// WithSpanLimits configures the span limits used by the distro.
+//
+// The OpenTelemetry environment limit variables
+// (OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT, OTEL_ATTRIBUTE_COUNT_LIMIT,
+// OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT, OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT,
+// OTEL_SPAN_EVENT_COUNT_LIMIT, OTEL_SPAN_LINK_COUNT_LIMIT,
+// OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT, OTEL_LINK_ATTRIBUTE_COUNT_LIMIT) are used
+// if this option is not provided.
+//
+// By default, the link count is limited to 1000, the attribute value length
+// is limited to 12000, and all other limts are set to be unlimited.
+func WithSpanLimits(limits trace.SpanLimits) Option {
+	return optionFunc(func(c *config) {
+		c.SpanLimits = limits
 	})
 }

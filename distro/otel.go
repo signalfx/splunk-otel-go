@@ -103,6 +103,7 @@ func Run(opts ...Option) (SDK, error) {
 	traceProvider := trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithSampler(trace.AlwaysSample()),
+		trace.WithRawSpanLimits(c.SpanLimits),
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	)
 	otel.SetTracerProvider(traceProvider)
