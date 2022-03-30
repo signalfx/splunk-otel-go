@@ -22,9 +22,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the `WithLogger` option to `github.com/signalfx/splunk-otel-go/distro`
   along with parsing of the `OTEL_LOG_LEVEL` environment variable to set the
   logging level of the default logger used. (#336)
-- Add the `WithSpanLimits` option to
-  `github.com/signalfx/splunk-otel-go/distro` to set the span limits used.
-  (#723)
 
 ### Changed
 
@@ -40,6 +37,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (#720)
 - The `OTEL_TRACES_SAMPLER` environment variable is now honored instead of only
   defaulting to an always-on sampler. (#724)
+- Set span limits to the Splunk defaults (the link count is limited to 1000,
+  the attribute value length is limited to 12000, and all other limts are set
+  to be unlimited) if they are not set by the user with environment variables.
+  (#723)
 
 ### Fixed
 
