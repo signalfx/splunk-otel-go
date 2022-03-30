@@ -38,6 +38,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Update `go.opentelemetry.io/contrib*` dependencies from
   [`v1.4.0`/`v0.30.0`][contrib-v1.4.0] to [`v1.6.0`/`v0.31.0`][contrib-v1.6.0].
   (#720)
+- The `OTEL_TRACES_SAMPLER` environment variable is now honored instead of only
+  defaulting to an always-on sampler. (#724)
 
 ### Fixed
 

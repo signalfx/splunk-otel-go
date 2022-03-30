@@ -38,6 +38,8 @@ import (
 
 var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
 
+const tracesSamplerKey = "OTEL_TRACES_SAMPLER"
+
 const noServiceWarn = `service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`
 
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
@@ -100,12 +102,16 @@ func Run(opts ...Option) (SDK, error) {
 		c.Logger.Info(noServiceWarn)
 	}
 
-	traceProvider := trace.NewTracerProvider(
+	o := []trace.TracerProviderOption{
 		trace.WithResource(res),
-		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithRawSpanLimits(*c.SpanLimits),
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
-	)
+	}
+	if _, ok := os.LookupEnv(tracesSamplerKey); !ok {
+		o = append(o, trace.WithSampler(trace.AlwaysSample()))
+	}
+
+	traceProvider := trace.NewTracerProvider(o...)
 	otel.SetTracerProvider(traceProvider)
 
 	return SDK{
