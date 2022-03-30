@@ -104,6 +104,7 @@ func Run(opts ...Option) (SDK, error) {
 
 	o := []trace.TracerProviderOption{
 		trace.WithResource(res),
+		trace.WithRawSpanLimits(*c.SpanLimits),
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 	}
 	if _, ok := os.LookupEnv(tracesSamplerKey); !ok {
