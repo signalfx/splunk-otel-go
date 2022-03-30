@@ -21,25 +21,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	invalidRealm = "not-a-valid-realm"
+	fakeEndpoint = "some non-zero value"
+)
+
 func TestOTLPEndpoint(t *testing.T) {
 	t.Run("configured", func(t *testing.T) {
-		e := "configured endpoint"
-		assert.Equal(t, e, otlpEndpoint(e))
+		assert.Equal(t, fakeEndpoint, otlpEndpoint(fakeEndpoint))
 	})
 
 	t.Run("default", func(t *testing.T) {
 		assert.Equal(t, "", otlpEndpoint(""))
 	})
 
-	realm := "not-a-valid-realm"
-	t.Cleanup(Setenv(splunkRealmKey, realm))
+	t.Cleanup(Setenv(splunkRealmKey, invalidRealm))
 	t.Run("realm", func(t *testing.T) {
-		want := fmt.Sprintf(otlpRealmEndpointFormat, realm)
+		want := fmt.Sprintf(otlpRealmEndpointFormat, invalidRealm)
 		assert.Equal(t, want, otlpEndpoint(""))
 	})
 
 	t.Run(otelExporterOTLPEndpointKey, func(t *testing.T) {
-		t.Cleanup(Setenv(otelExporterOTLPEndpointKey, "some non-zero value"))
+		t.Cleanup(Setenv(otelExporterOTLPEndpointKey, fakeEndpoint))
 		// SPLUNK_REALM is still set, make sure it does not take precedence.
 		assert.Equal(t, "", otlpEndpoint(""))
 	})
@@ -53,23 +56,21 @@ func TestOTLPEndpoint(t *testing.T) {
 
 func TestJaegerEndpoint(t *testing.T) {
 	t.Run("configured", func(t *testing.T) {
-		e := "configured endpoint"
-		assert.Equal(t, e, jaegerEndpoint(e))
+		assert.Equal(t, fakeEndpoint, jaegerEndpoint(fakeEndpoint))
 	})
 
 	t.Run("default", func(t *testing.T) {
 		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint(""))
 	})
 
-	realm := "not-a-valid-realm"
-	t.Cleanup(Setenv(splunkRealmKey, realm))
+	t.Cleanup(Setenv(splunkRealmKey, invalidRealm))
 	t.Run("realm", func(t *testing.T) {
-		want := fmt.Sprintf(realmEndpointFormat, realm)
+		want := fmt.Sprintf(realmEndpointFormat, invalidRealm)
 		assert.Equal(t, want, jaegerEndpoint(""))
 	})
 
 	t.Run(otelExporterJaegerEndpointKey, func(t *testing.T) {
-		t.Cleanup(Setenv(otelExporterJaegerEndpointKey, "some non-zero value"))
+		t.Cleanup(Setenv(otelExporterJaegerEndpointKey, fakeEndpoint))
 		// SPLUNK_REALM is still set, make sure it does not take precedence.
 		assert.Equal(t, "", jaegerEndpoint(""))
 	})
