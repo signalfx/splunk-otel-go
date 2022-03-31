@@ -69,6 +69,10 @@ telemetry sent directly to Splunk Observability Cloud.
     - `OTEL_EXPORTER_OTLP_ENDPOINT`
     - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
   - For the `jaeger-thrift-splunk` exporter: `OTEL_EXPORTER_JAEGER_ENDPOINT`
+  - `SPLUNK_REALM`:
+    - If the exporter endpoint is not set with one of the environment variable
+      above, this value will be used to define the remote endpoint. This value
+      needs to be the name of your organization's realm, for example, `us0`.
 
 ### `WithPropagator`
 
