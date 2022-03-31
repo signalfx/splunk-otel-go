@@ -76,7 +76,7 @@ func otlpEndpoint(configured string) string {
 	}
 
 	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
-	if realm, ok := os.LookupEnv(splunkRealmKey); ok {
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
 		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
 	}
 
@@ -122,10 +122,15 @@ func jaegerEndpoint(configured string) string {
 	}
 
 	// Use the realm only if OTEL_EXPORTER_JAGER_ENDPOINT is not defined.
-	if realm, ok := os.LookupEnv(splunkRealmKey); ok {
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
 		return fmt.Sprintf(realmEndpointFormat, realm)
 	}
 
 	// Use Splunk specific default (locally running collector).
 	return defaultJaegerEndpoint
+}
+
+// notNone returns if s is not empty or set to none.
+func notNone(s string) bool {
+	return s != "" && s != "none"
 }

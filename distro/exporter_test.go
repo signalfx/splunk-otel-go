@@ -22,6 +22,7 @@ import (
 )
 
 const (
+	noneRealm    = "none"
 	invalidRealm = "not-a-valid-realm"
 	fakeEndpoint = "some non-zero value"
 )
@@ -32,6 +33,12 @@ func TestOTLPEndpoint(t *testing.T) {
 	})
 
 	t.Run("default", func(t *testing.T) {
+		assert.Equal(t, "", otlpEndpoint(""))
+	})
+
+	t.Cleanup(Setenv(splunkRealmKey, noneRealm))
+	t.Run("none realm", func(t *testing.T) {
+		// Revert to default.
 		assert.Equal(t, "", otlpEndpoint(""))
 	})
 
@@ -60,6 +67,12 @@ func TestJaegerEndpoint(t *testing.T) {
 	})
 
 	t.Run("default", func(t *testing.T) {
+		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint(""))
+	})
+
+	t.Cleanup(Setenv(splunkRealmKey, noneRealm))
+	t.Run("none realm", func(t *testing.T) {
+		// Revert to default.
 		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint(""))
 	})
 
