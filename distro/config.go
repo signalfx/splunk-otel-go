@@ -41,7 +41,9 @@ const (
 	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
-	otelExporterJaegerEndpointKey = "OTEL_EXPORTER_JAEGER_ENDPOINT"
+	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
+	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
@@ -49,6 +51,9 @@ const (
 	// splunkMetricsEndpointKey defines the endpoint Splunk specific metrics
 	// are sent. This is not currently supported.
 	splunkMetricsEndpointKey = "SPLUNK_METRICS_ENDPOINT"
+
+	// splunkRealmKey defines the Splunk realm to build an endpoint from.
+	splunkRealmKey = "SPLUNK_REALM"
 )
 
 // Default configuration values.
@@ -59,6 +64,9 @@ const (
 	defaultLogLevel      = "info"
 
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
+
+	realmEndpointFormat     = "https://ingest.%s.signalfx.com/v2/trace"
+	otlpRealmEndpointFormat = realmEndpointFormat + "/otlp"
 )
 
 type exporterConfig struct {
@@ -209,8 +217,28 @@ func (fn optionFunc) apply(c *config) {
 	fn(c)
 }
 
-// WithEndpoint configures the endpoint telemetry is sent to. Passing an empty
-// string results in the default value being used.
+// WithEndpoint configures the endpoint telemetry is sent to.
+//
+// If the SPLUNK_REALM environment variable is defined and this option is not
+// provided the splunk remote endpoint for that realm will be used. The value
+// depends on what exporter is used. For the otlp exporter it will be
+// https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace/otlp and for the
+// Jaeger thrift exporter it will be
+// https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace.
+//
+// If the OpenTelemetry endpoint environment variables are defined and this
+// option is not provided, those values will be used (for the appropriate
+// exporter). These environment variables will take precedence over the
+// SPLUNK_REALM environment variable. See the OpenTelemetry documentation for
+// more information on these environment variables:
+// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.9.0/specification/sdk-environment-variables.md
+// and
+// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.9.0/specification/protocol/exporter.md
+//
+// Passing an empty string or not providing this option at all will result in
+// the default value being used. That value depends on what exporter is used.
+// For the otlp exporter it will be http://localhost:4317, and for the Jaeger
+// thrift exporter it will be http://127.0.0.1:9080/v1/trace.
 func WithEndpoint(endpoint string) Option {
 	return optionFunc(func(c *config) {
 		c.ExportConfig.Endpoint = endpoint

@@ -22,6 +22,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add the `WithLogger` option to `github.com/signalfx/splunk-otel-go/distro`
   along with parsing of the `OTEL_LOG_LEVEL` environment variable to set the
   logging level of the default logger used. (#336)
+- The `SPLUNK_REALM` environment variable is now supported. If set, the
+  exporter will use the corresponding Splunk ingest endpoint. (#725)
 
 ### Changed
 

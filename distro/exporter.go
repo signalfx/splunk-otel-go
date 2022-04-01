@@ -16,6 +16,7 @@ package distro
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -41,8 +42,8 @@ var exporters = map[string]traceExporterFunc{
 func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []otlptracegrpc.Option
 
-	if c.Endpoint != "" {
-		opts = append(opts, otlptracegrpc.WithEndpoint(c.Endpoint))
+	if e := otlpEndpoint(c.Endpoint); e != "" {
+		opts = append(opts, otlptracegrpc.WithEndpoint(e))
 	}
 
 	if c.TLSConfig != nil {
@@ -61,21 +62,33 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
+func otlpEndpoint(configured string) string {
+	if configured != "" {
+		return configured
+	}
+
+	// Allow the exporter to interpret these environment variables directly.
+	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); ok {
+			return ""
+		}
+	}
+
+	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
+		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
+	}
+
+	// The OTel default is the same as Splunk's.
+	return ""
+}
+
 func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []jaeger.CollectorEndpointOption
 
-	if c.Endpoint == "" {
-		if endpoint := func() string {
-			// Allow the exporter to use environment variables.
-			if _, ok := os.LookupEnv(otelExporterJaegerEndpointKey); ok {
-				return ""
-			}
-			return defaultJaegerEndpoint
-		}(); endpoint != "" {
-			opts = append(opts, jaeger.WithEndpoint(endpoint))
-		}
-	} else {
-		opts = append(opts, jaeger.WithEndpoint(c.Endpoint))
+	if e := jaegerEndpoint(c.Endpoint); e != "" {
+		opts = append(opts, jaeger.WithEndpoint(e))
 	}
 
 	if c.AccessToken != "" {
@@ -96,4 +109,28 @@ func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return jaeger.New(
 		jaeger.WithCollectorEndpoint(opts...),
 	)
+}
+
+func jaegerEndpoint(configured string) string {
+	if configured != "" {
+		return configured
+	}
+
+	// Allow the exporter to interpret this environment variable directly.
+	if _, ok := os.LookupEnv(otelExporterJaegerEndpointKey); ok {
+		return ""
+	}
+
+	// Use the realm only if OTEL_EXPORTER_JAGER_ENDPOINT is not defined.
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
+		return fmt.Sprintf(realmEndpointFormat, realm)
+	}
+
+	// Use Splunk specific default (locally running collector).
+	return defaultJaegerEndpoint
+}
+
+// notNone returns if s is not empty or set to none.
+func notNone(s string) bool {
+	return s != "" && s != "none"
 }
