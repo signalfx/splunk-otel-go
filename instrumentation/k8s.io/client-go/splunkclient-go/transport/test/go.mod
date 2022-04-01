@@ -17,7 +17,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/signalfx/splunk-otel-go v0.8.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v0.8.0-00010101000000-000000000000 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v0.8.0 // indirect
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e // indirect
