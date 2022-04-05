@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.8.0] - 2022-04-01
+## [0.8.0] - 2022-04-05
 
 ### Added
 
@@ -38,10 +38,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   environment variable to `jaeger-thrift-splunk`, or by directly passing the
   user configured exporter with a `WithTraceExporter` option. (#300)
 - Update `go.opentelemetry.io/otel*` dependencies from [`v1.3.0`][otel-v1.3.0]
-  to [`v1.6.1`][otel-v1.6.1]. (#656, #721)
+  to [`v1.6.1`][otel-v1.6.1]. (#406, #471, #656, #721)
 - Update `go.opentelemetry.io/contrib*` dependencies from
   [`v1.3.0`/`v0.28.0`][contrib-v1.3.0] to [`v1.6.0`/`v0.31.0`][contrib-v1.6.0].
-  (#721)
+  (#406, #721)
 - The `OTEL_TRACES_SAMPLER` environment variable is now honored instead of only
   defaulting to an always-on sampler. (#724)
 - Set span limits to the Splunk defaults (the link count is limited to 1000,
