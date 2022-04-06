@@ -14,9 +14,8 @@ Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple packages that automatically instruments your Go
 application to capture and report distributed traces to Splunk APM.
 
-The official documentation for this distribution can be found
-in the 
-[Splunk Observability Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
+Read the official documentation for this distribution in the
+[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
 
 > :construction: This project is currently in **BETA**.
 > It is **officially supported** by Splunk.
