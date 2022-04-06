@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/signalfx/splunk-otel-go/distro"
+	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
 func main() {
@@ -57,7 +58,8 @@ func main() {
 	r.Use(otelmux.Middleware("mux-server"))
 
 	// instrument http.Handler
-	otelHandler := otelhttp.NewHandler(r, "http-server")
+	rumHandler := splunkhttp.NewHandler(r)
+	otelHandler := otelhttp.NewHandler(rumHandler, "http-server")
 
 	r.HandleFunc("/hello", func(rw http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(rw, "Hello there.") // ignore the error
