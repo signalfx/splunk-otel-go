@@ -1,6 +1,6 @@
 # Advanced configuration
 
-> The official Splunk documentation for this page is 
+> The official Splunk documentation for this page is
 [Migrate from the SignalFx Tracing Library for Go](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/configuration/advanced-go-otel-configuration.html#advanced-go-otel-configuration).
 For instructions on how to contribute to the docs, see
 [CONTRIBUTING.md](./CONTRIBUTING.md#documentation).
