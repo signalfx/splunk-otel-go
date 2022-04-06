@@ -1,5 +1,10 @@
 # Troubleshooting
 
+> The official Splunk documentation for this page is
+[Troubleshooting Go instrumentation](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/common-go-troubleshooting.html).
+For instructions on how to contribute to the docs, see
+[CONTRIBUTING.md](../CONTRIBUTING.md#documentation).
+
 ## Enable debug logging
 
 When things are not working, a good first step is to restart the program with

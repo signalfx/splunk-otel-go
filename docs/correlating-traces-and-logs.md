@@ -1,5 +1,10 @@
 # Correlating Trace and Logs
 
+> The official Splunk documentation for this page is
+[Connect Go application trace data with logs](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/instrumentation/connect-traces-logs.html).
+For instructions on how to contribute to the docs, see
+[CONTRIBUTING.md](../CONTRIBUTING.md#documentation).
+
 The [OpenTelemetry trace API] can be used to extract trace metadata from a
 context containing a span. That metadata can then be used to annotate log
 events so they are correlated with the trace.
