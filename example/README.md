@@ -1,10 +1,10 @@
 # Example
 
-The example instrumenting simple HTTP server and client application.
+This example instruments a simple HTTP server and client application.
 
-The applications are setup to send spans to OTel Collector
-which propagates them to both Splunk Observability Cloud
-and a local Jaeger.
+Both applications are configured to send spans to a local instance
+of the OpenTelemetry Collector, which propagates them to both
+Splunk Observability Cloud and to a local Jaeger instance.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ and a local Jaeger.
 ## Usage
 
 ```sh
-SPLUNK_ACCESS_TOKEN=secret ./run.sh
+SPLUNK_ACCESS_TOKEN=<access_token> ./run.sh
 ```
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
