@@ -19,10 +19,11 @@ SPLUNK_ACCESS_TOKEN=<access_token> ./run.sh
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
 [here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
+Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
 
 You can find the collected traces in:
 
 - Console output
 - Jaeger: <http://localhost:16686/search>
 - Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
-  (_processing takes some time_)
+  > Note: Processing might take some time.
