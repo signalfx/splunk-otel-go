@@ -108,6 +108,18 @@ os.Setenv("OTEL_RESOURCE_ATTRIBUTES", "service.name=my-app,service.version=1.2.3
 
 For advanced configuration options, refer to the [`distro` package documentation](./distro/README.md#Configuration).
 
+## Advanced configuration
+
+See [Advanced settings](./docs/advanced-config.md).
+
+## Correlate traces and logs
+
+You can add trace metadata to logs using the OpenTelemetry trace API. Trace
+metadata lets you explore logs in Splunk Observability Cloud.
+
+See [Correlating traces and logs](./docs/correlating-traces-and-logs.md) for more
+information.
+
 ## Library instrumentation
 
 Supported libraries are listed
@@ -138,66 +150,10 @@ Additional recommended Splunk specific instrumentations:
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
-## Advanced configuration
-
-Below you will find all the configuration options supported by this distribution.
-
-### Splunk distribution configuration
-
-<!-- markdownlint-disable MD013 -->
-| Environment variable      | Option             | Default value  | Description |
-| ------------------------- | -------------------| -------------- | ----------- |
-| `SPLUNK_ACCESS_TOKEN`     | [`WithAccessToken`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithAccessToken)  |                | The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html). [[1](#cfg1)] |
-| `OTEL_RESOURCE_ATTRIBUTES` |                    |                | Comma-separated list of resource attributes added to every reported span. |
-<!-- markdownlint-enable MD013 -->
-
-[<a name="cfg1">1</a>]: The [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
-allows exporters sending data directly to the [Splunk Observability Cloud](https://dev.splunk.com/observability/docs/apibasics/api_list/).
-To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` must be set
-or `distro.WithEndpoint` must be passed to `distro.Run`
-with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
-
-### Trace configuration
-
-<!-- markdownlint-disable MD013 -->
-| Environment variable       | Option             | Default value  | Description |
-| -------------------------- | -------------------| -------------- | ----------- |
-| `OTEL_RESOURCE_ATTRIBUTES` |                    |                | Comma-separated list of resource attributes added to every reported span. |
-<!-- markdownlint-enable MD013 -->
-
-### Trace exporter configuration
-
-<!-- markdownlint-disable MD013 -->
-| Environment variable            | Option             | Default value  | Description |
-| ------------------------------- | -------------------| -------------- | ----------- |
-| `OTEL_EXPORTER_JAEGER_ENDPOINT` | [`WithEndpoint`](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithEndpoint)     | `http://localhost:14268/api/traces` | Jaeger Thrift HTTP endpoint for sending spans. |
-| `OTEL_EXPORTER_JAEGER_USER`     |                    |                | Username to be used for HTTP basic authentication. |
-| `OTEL_EXPORTER_JAEGER_PASSWORD` |                    |                | Password to be used for HTTP basic authentication. |
-<!-- markdownlint-enable MD013 -->
-
-### Trace propagation configuration
-
-The trace propagator can be changed by using
-[`otel.SetTextMapPropagator`](https://pkg.go.dev/go.opentelemetry.io/otel#SetTextMapPropagator)
-after `distro.Run()` is invoked e.g.:
-
-```go
-distro.Run()
-otel.SetTextMapPropagator(propagation.TraceContext{})
-```
-
-## Correlate traces and logs
-
-You can add trace metadata to logs using the OpenTelemetry trace API. Trace
-metadata lets you explore logs in Splunk Observability Cloud.
-
-See [Correlating Trace and Logs](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/instrumentation/connect-traces-logs.html) for more
-information.
-
 ## Troubleshooting
 
 For troubleshooting information, see the
-[Troubleshooting](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/common-go-troubleshooting.html) documentation.
+[Troubleshooting](./docs/troubleshooting.md) documentation.
 
 ## License
 
