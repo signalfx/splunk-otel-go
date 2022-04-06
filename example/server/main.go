@@ -54,10 +54,8 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// instrument gorilla/mux
-	r.Use(otelmux.Middleware("mux-server"))
-
 	// instrument http.Handler
+	r.Use(otelmux.Middleware("mux-server"))
 	rumHandler := splunkhttp.NewHandler(r)
 	otelHandler := otelhttp.NewHandler(rumHandler, "http-server")
 
