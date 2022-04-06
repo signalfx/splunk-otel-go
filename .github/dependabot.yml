@@ -15,6 +15,18 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
+    directory: "/distro"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/example/client"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/example/server"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
     directory: "/instrumentation/database/sql/splunksql"
     schedule:
       interval: "daily"
@@ -124,6 +136,10 @@ updates:
       interval: "daily"
   - package-ecosystem: "gomod"
     directory: "/instrumentation/gopkg.in/olivere/elastic/splunkelastic/test"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/instrumentation/internal"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
