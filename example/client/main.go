@@ -66,6 +66,7 @@ func call(ctx context.Context, client *http.Client) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	defer resp.Body.Close()
 	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
