@@ -49,7 +49,8 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else {
+	} else if realm, ok := os.LookupEnv(splunkRealmKey); !ok || none(realm) {
+		// use insecure gRPC when SPLUNK_REALM is not set
 		opts = append(opts, otlptracegrpc.WithInsecure())
 	}
 
@@ -76,7 +77,7 @@ func otlpEndpoint(configured string) string {
 	}
 
 	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
-	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && !none(realm) {
 		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
 	}
 
@@ -122,7 +123,7 @@ func jaegerEndpoint(configured string) string {
 	}
 
 	// Use the realm only if OTEL_EXPORTER_JAGER_ENDPOINT is not defined.
-	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && !none(realm) {
 		return fmt.Sprintf(realmEndpointFormat, realm)
 	}
 
@@ -130,7 +131,7 @@ func jaegerEndpoint(configured string) string {
 	return defaultJaegerEndpoint
 }
 
-// notNone returns if s is not empty or set to none.
-func notNone(s string) bool {
-	return s != "" && s != "none"
+// none returns if s is empty or set to none.
+func none(s string) bool {
+	return s == "" || s == "none"
 }
