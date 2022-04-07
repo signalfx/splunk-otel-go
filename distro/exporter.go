@@ -17,7 +17,9 @@ package distro
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -42,14 +44,16 @@ var exporters = map[string]traceExporterFunc{
 func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []otlptracegrpc.Option
 
-	if e := otlpEndpoint(c.Endpoint); e != "" {
-		opts = append(opts, otlptracegrpc.WithEndpoint(e))
+	endpoint, local := otlpEndpoint(c.Endpoint)
+	if endpoint != "" {
+		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
 	}
 
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else {
+	} else if local {
+		// Local collectors by default do not use TLS/SSL.
 		opts = append(opts, otlptracegrpc.WithInsecure())
 	}
 
@@ -62,26 +66,52 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
-func otlpEndpoint(configured string) string {
+func otlpEndpoint(configured string) (string, bool) {
 	if configured != "" {
-		return configured
+		return configured, isLocalhost(configured)
 	}
 
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
 	for _, env := range envs {
-		if _, ok := os.LookupEnv(env); ok {
-			return ""
+		if v, ok := os.LookupEnv(env); ok {
+			return "", isLocalhost(v)
 		}
 	}
 
 	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
 	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
-		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
+		return fmt.Sprintf(otlpRealmEndpointFormat, realm), false
 	}
 
 	// The OTel default is the same as Splunk's.
-	return ""
+	return "", true
+}
+
+func isLocalhost(endpoint string) bool {
+	host := endpoint
+
+	u, err := url.Parse(endpoint)
+	if err == nil && u.Hostname() != "" {
+		host = u.Hostname()
+	} else {
+		h, _, err := net.SplitHostPort(endpoint)
+		if err == nil {
+			host = h
+		}
+	}
+
+	ips, err := net.LookupIP(host)
+	if err != nil {
+		return false
+	}
+	for _, ip := range ips {
+		if ip.IsLoopback() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
