@@ -13,6 +13,8 @@ Splunk Observability Cloud and to a local Jaeger instance.
 
 ## Usage
 
+Running:
+
 ```sh
 SPLUNK_ACCESS_TOKEN=<access_token> ./run.sh
 ```
@@ -27,3 +29,9 @@ You can find the collected traces in:
 - Jaeger: <http://localhost:16686/search>
 - Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
   > Note: Processing might take some time.
+
+Cleanup:
+
+```sh
+./clean.sh
+```
