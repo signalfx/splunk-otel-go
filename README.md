@@ -11,7 +11,7 @@
 
 The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
-multiple packages that instruments your Go
+multiple packages that instrument your Go
 application to capture and report distributed traces to Splunk APM.
 
 > :construction: This project is currently in **BETA**.
@@ -25,7 +25,7 @@ Read the official documentation for this distribution in the
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+Read [CONTRIBUTING.md](CONTRIBUTING.md)
 before creating an issue or a pull request.
 
 ## License
