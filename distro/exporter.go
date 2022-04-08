@@ -96,8 +96,8 @@ func isLocalhost(endpoint string) bool {
 	if err == nil && u.Hostname() != "" {
 		host = u.Hostname()
 	} else {
-		h, _, err := net.SplitHostPort(endpoint)
-		if err == nil {
+		h, _, e := net.SplitHostPort(endpoint)
+		if e == nil {
 			host = h
 		}
 	}
