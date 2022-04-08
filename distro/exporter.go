@@ -84,10 +84,11 @@ func otlpEndpoint(configured string) (string, bool) {
 		return fmt.Sprintf(otlpRealmEndpointFormat, realm), false
 	}
 
-	// The OTel default is the same as Splunk's.
+	// The OTel default is the same as Splunk's (localhost:4317).
 	return "", true
 }
 
+// isLocalhost returns if endpoint resolves to the current device.
 func isLocalhost(endpoint string) bool {
 	host := endpoint
 

@@ -94,48 +94,28 @@ func TestJaegerEndpoint(t *testing.T) {
 }
 
 func TestIsLocalhost(t *testing.T) {
-	tests := []struct {
-		endpoint string
-		local    bool
-	}{
-		{
-			endpoint: "localhost",
-			local:    true,
-		},
-		{
-			endpoint: "http://localhost",
-			local:    true,
-		},
-		{
-			endpoint: "https://localhost:8080",
-			local:    true,
-		},
-		{
-			endpoint: "https://127.0.0.1:8080",
-			local:    true,
-		},
-		{
-			endpoint: "127.1.2.3",
-			local:    true,
-		},
-		{
-			endpoint: "::1",
-			local:    true,
-		},
-		{
-			endpoint: "0000:0000:0000:0000:0000:0000:0000:0001",
-			local:    true,
-		},
+	local := []string{
+		"localhost",
+		"http://localhost",
+		"https://localhost:8080",
+		"127.0.0.1:8080",
+		"127.1.2.3",
+		"::1",
+		"0000:0000:0000:0000:0000:0000:0000:0001",
 	}
 
-	for _, test := range tests {
-		t.Run(test.endpoint, func(t *testing.T) {
-			if test.local {
-				assert.True(t, isLocalhost(test.endpoint))
-			} else {
-				assert.False(t, isLocalhost(test.endpoint))
-			}
-		})
+	for _, addr := range local {
+		assert.Truef(t, isLocalhost(addr), "%q is a local address", addr)
+	}
 
+	remote := []string{
+		"google.com",
+		"8.8.8.8",
+		"1:2:3",
+		"not valid",
+	}
+
+	for _, addr := range remote {
+		assert.Falsef(t, isLocalhost(addr), "%q is a remote address", addr)
 	}
 }
