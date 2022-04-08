@@ -66,7 +66,7 @@ const (
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
 
 	realmEndpointFormat     = "https://ingest.%s.signalfx.com/v2/trace"
-	otlpRealmEndpointFormat = realmEndpointFormat + "/otlp"
+	otlpRealmEndpointFormat = "ingest.%s.signalfx.com:443"
 )
 
 type exporterConfig struct {

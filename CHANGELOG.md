@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Use the correct Splunk Observabilty Cloud OTLP over gRPC endpoint
+  when `SPLUNK_REALM` is set. (#791)
+
 ## [0.8.0] - 2022-04-05
 
 ### Added
