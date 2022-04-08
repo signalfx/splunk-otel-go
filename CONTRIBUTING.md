@@ -77,7 +77,7 @@ development documentation is hosted on this repository.
 You can send feedback about Splunk Observability docs by clicking the
 "Feedback" button on any of our documentation pages on the official docs site.
 
-The repository's "unoffical" documentation is kept under [docs](./docs)
+The repository's "unofficial" documentation is kept under [docs](./docs)
 directory.
 
 ## Finding contributions to work on
