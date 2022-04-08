@@ -157,10 +157,6 @@ github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6L
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/signalfx/splunk-otel-go v0.8.0 h1:oPTfWh1HqheX/xB1TwR5BmCXp7TH9xg7PJb9z5Xahco=
 github.com/signalfx/splunk-otel-go v0.8.0/go.mod h1:aQ3JRbqt9+mT1NfpzkZp8OEspooRZC35XmUfiSfoooU=
-github.com/signalfx/splunk-otel-go/distro v0.8.0 h1:3lZ9wYdYe5tOIGthXLsKJgfeF7QKF5EtiM1bbwUEfak=
-github.com/signalfx/splunk-otel-go/distro v0.8.0/go.mod h1:XGn6+r2wwVVAZMU7KB/+jtTBS1VfN1sroV98NZuEGwY=
-github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v0.8.0 h1:ph6kxG/ZqVo8ASTQjBPiceepX9FbHZaVAiZ6tHzb32A=
-github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v0.8.0/go.mod h1:3tKTVwymf6GFi60cUsXLBsZs6S8izRqnSyhHN+D5n24=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

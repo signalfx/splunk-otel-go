@@ -1,9 +1,10 @@
 version: "3.9"
 services:
   server:
-    build:
-      context: ./server
-      dockerfile: ../Dockerfile
+    image: golang:1.18
+    volumes: [ ../:/repo ]
+    working_dir: /repo/example/server
+    entrypoint: go run .
     environment:
       - OTEL_SERVICE_NAME=server
       - OTEL_RESOURCE_ATTRIBUTES
@@ -12,9 +13,10 @@ services:
       - otel-collector
 
   client:
-    build:
-      context: ./client
-      dockerfile: ../Dockerfile
+    image: golang:1.18
+    volumes: [ ../:/repo ]
+    working_dir: /repo/example/client
+    entrypoint: go run .
     environment:
       - OTEL_SERVICE_NAME=client
       - OTEL_RESOURCE_ATTRIBUTES
