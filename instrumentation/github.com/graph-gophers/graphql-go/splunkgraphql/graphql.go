@@ -22,7 +22,7 @@ import (
 
 	"github.com/graph-gophers/graphql-go/errors"
 	"github.com/graph-gophers/graphql-go/introspection"
-	"github.com/graph-gophers/graphql-go/trace"
+	"github.com/graph-gophers/graphql-go/trace/tracer"
 	"go.opentelemetry.io/otel/codes"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
@@ -39,17 +39,17 @@ type otelTracer struct {
 }
 
 var (
-	_ trace.Tracer                  = (*otelTracer)(nil)
-	_ trace.ValidationTracerContext = (*otelTracer)(nil)
+	_ tracer.Tracer           = (*otelTracer)(nil)
+	_ tracer.ValidationTracer = (*otelTracer)(nil)
 )
 
-// NewTracer returns a new trace.Tracer backed by OpenTelemetry.
-func NewTracer(opts ...Option) trace.Tracer {
+// NewTracer returns a new graphql Tracer backed by OpenTelemetry.
+func NewTracer(opts ...Option) tracer.Tracer {
 	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
 	return &otelTracer{cfg: *cfg}
 }
 
-func traceQueryFinishFunc(span oteltrace.Span) trace.TraceQueryFinishFunc {
+func traceQueryFinishFunc(span oteltrace.Span) tracer.ValidationFinishFunc {
 	return func(errs []*errors.QueryError) {
 		for _, err := range errs {
 			span.RecordError(err)
@@ -68,7 +68,7 @@ func traceQueryFinishFunc(span oteltrace.Span) trace.TraceQueryFinishFunc {
 }
 
 // TraceQuery traces a GraphQL query.
-func (t *otelTracer) TraceQuery(ctx context.Context, queryString, _ string, _ map[string]interface{}, _ map[string]*introspection.Type) (context.Context, trace.TraceQueryFinishFunc) {
+func (t *otelTracer) TraceQuery(ctx context.Context, queryString, _ string, _ map[string]interface{}, _ map[string]*introspection.Type) (context.Context, tracer.QueryFinishFunc) { //nolint: gocritic  // un-named returned values.
 	spanCtx, span := t.cfg.ResolveTracer(ctx).Start(
 		ctx,
 		"GraphQL request",
@@ -80,7 +80,7 @@ func (t *otelTracer) TraceQuery(ctx context.Context, queryString, _ string, _ ma
 }
 
 // TraceField traces a GraphQL field access.
-func (t *otelTracer) TraceField(ctx context.Context, _, typeName, fieldName string, trivial bool, _ map[string]interface{}) (context.Context, trace.TraceFieldFinishFunc) {
+func (t *otelTracer) TraceField(ctx context.Context, _, typeName, fieldName string, trivial bool, _ map[string]interface{}) (context.Context, tracer.FieldFinishFunc) { //nolint: gocritic  // un-named returned values.
 	if trivial {
 		return ctx, func(*errors.QueryError) {}
 	}
@@ -105,7 +105,7 @@ func (t *otelTracer) TraceField(ctx context.Context, _, typeName, fieldName stri
 }
 
 // TraceValidation traces the schema validation step preceding an operation.
-func (t *otelTracer) TraceValidation(ctx context.Context) trace.TraceValidationFinishFunc {
+func (t *otelTracer) TraceValidation(ctx context.Context) tracer.ValidationFinishFunc {
 	_, span := t.cfg.ResolveTracer(ctx).Start(
 		ctx,
 		"GraphQL validation",

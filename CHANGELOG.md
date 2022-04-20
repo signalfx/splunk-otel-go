@@ -8,6 +8,28 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- The `NewTracer` function from
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graphql-gophers/graphql-go/splunkgraphql`
+  now returns a `tracer.Tracer` instead of the deprecated `trace.Tracer` from
+  `github.com/graph-gophers/graphql-go`. (#855)
+- The `TraceQuery` method of the `Tracer` from
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graphql-gophers/graphql-go/splunkgraphql`
+  now returns a `tracer.QueryFinishFunc` instead of the deprecated
+  `trace.TraceQueryFinishFunc` from `github.com/graph-gophers/graphql-go`.
+  (#855)
+- The `TraceField` method of the `Tracer` from
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graphql-gophers/graphql-go/splunkgraphql`
+  now returns a `tracer.FieldFinishFunc` instead of the deprecated
+  `trace.TraceFieldFinishFunc` from `github.com/graph-gophers/graphql-go`.
+  (#855)
+- The `TraceValidation` method of the `Tracer` from
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graphql-gophers/graphql-go/splunkgraphql`
+  now returns a `tracer.ValidationFinishFunc` instead of the deprecated
+  `trace.TraceValidationFinishFunc` from `github.com/graph-gophers/graphql-go`.
+  (#855)
+
 ### Fixed
 
 - Use the correct Splunk Observabilty Cloud OTLP over gRPC endpoint
