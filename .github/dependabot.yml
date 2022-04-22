@@ -19,11 +19,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
-    directory: "/example/client"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "gomod"
-    directory: "/example/server"
+    directory: "/example"
     schedule:
       interval: "daily"
   - package-ecosystem: "gomod"
