@@ -61,16 +61,7 @@ func main() {
 	router.Use(otelmux.Middleware("mux-server"))
 	router.Use(func(h http.Handler) http.Handler { return splunkhttp.NewHandler(h) })
 
-	router.HandleFunc("/hello", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println() // add a blank line between requests
-		fmt.Println("HTTP request:")
-		dump, err := httputil.DumpRequest(req, false)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Print(string(dump))
-	}).Methods("GET")
+	router.HandleFunc("/hello", handle).Methods("GET")
 
 	srv := &http.Server{
 		Addr:         ":8080",
@@ -78,6 +69,7 @@ func main() {
 		WriteTimeout: time.Second,
 		ReadTimeout:  time.Second,
 	}
+
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
@@ -116,6 +108,16 @@ func main() {
 	}
 }
 
+func handle(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("HTTP request:")
+	dump, err := httputil.DumpRequest(req, false)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Print(string(dump))
+}
+
 func call(ctx context.Context, client *http.Client) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:8080/hello", http.NoBody)
 	if err != nil {
@@ -127,8 +129,8 @@ func call(ctx context.Context, client *http.Client) {
 		return
 	}
 	defer resp.Body.Close()
-	fmt.Println("HTTP response:")
 
+	fmt.Println("HTTP response:")
 	dump, err := httputil.DumpResponse(resp, false)
 	if err != nil {
 		log.Println(err)
