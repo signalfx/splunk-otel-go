@@ -95,7 +95,7 @@ func main() {
 			select {
 			case <-ctx.Done():
 				return nil
-			case <-time.After(10 * time.Second):
+			case <-time.After(10 * time.Second): // nolint: gomnd
 				call(ctx, client)
 			}
 		}
