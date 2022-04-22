@@ -51,6 +51,7 @@ func main() {
 	for {
 		select {
 		case <-ctx.Done():
+			stop() // stop receiving signal notifications; next interrupt signal should kill the application
 			return
 		case <-time.After(time.Second):
 			call(ctx, client)
@@ -72,5 +73,5 @@ func call(ctx context.Context, client *http.Client) {
 	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
 		log.Println(err)
 	}
-	fmt.Println(resp.Header)
+	fmt.Printf(" HTTP Headers: %v\n", resp.Header)
 }
