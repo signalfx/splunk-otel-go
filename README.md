@@ -29,8 +29,8 @@ Agent](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/trou
 Table of Contents:
 
 - [Getting started](#getting-started)
-	- [Basic configuration](#basic-configuration)
-	- [Examples](#examples)
+  - [Basic configuration](#basic-configuration)
+- [Examples](#examples)
 - [Advanced configuration](#advanced-configuration)
 - [Correlate traces and logs](#correlate-traces-and-logs)
 - [Library instrumentation](#library-instrumentation)
@@ -106,7 +106,7 @@ os.Setenv("OTEL_RESOURCE_ATTRIBUTES", "service.name=my-app,service.version=1.2.3
 
 For advanced configuration options, refer to the [`distro` package documentation](./distro/README.md#Configuration).
 
-### Examples
+## Examples
 
 You can find our official "user-facing" examples
 [here](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
