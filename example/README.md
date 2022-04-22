@@ -1,8 +1,8 @@
 # Example
 
-This example instruments a simple HTTP server and client application.
+This example instruments a simple HTTP server-client application.
 
-Both applications are configured to send spans to a local instance
+The application is configured to send spans to a local instance
 of the OpenTelemetry Collector, which propagates them to both
 Splunk Observability Cloud and to a local Jaeger instance.
 
@@ -13,15 +13,23 @@ Splunk Observability Cloud and to a local Jaeger instance.
 
 ## Usage
 
-Running:
+Run the OpenTelemetry Collector and Jaeger instance:
 
 ```sh
-SPLUNK_ACCESS_TOKEN=<access_token> ./run.sh
+SPLUNK_ACCESS_TOKEN=<access_token> docker-compose up
 ```
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
 [here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
 Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
+
+Run the instrumented application:
+
+```sh
+export OTEL_SERVICE_NAME="splunk-otel-go-example"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
+go run .
+```
 
 You can find the collected traces in:
 
@@ -33,5 +41,5 @@ You can find the collected traces in:
 Cleanup:
 
 ```sh
-./clean.sh
+docker-compose down
 ```
