@@ -7,7 +7,7 @@ require (
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql v0.8.0
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/otel/sdk v1.6.3
-	go.opentelemetry.io/otel/trace v1.6.3
+	go.opentelemetry.io/otel/trace v1.7.0
 )
 
 replace (
