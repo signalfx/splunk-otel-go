@@ -17,9 +17,9 @@ require (
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic v0.8.0
 	github.com/stretchr/testify v1.7.1
-	go.opentelemetry.io/otel v1.6.3
-	go.opentelemetry.io/otel/sdk v1.6.3
-	go.opentelemetry.io/otel/trace v1.6.3
+	go.opentelemetry.io/otel v1.7.0
+	go.opentelemetry.io/otel/sdk v1.7.0
+	go.opentelemetry.io/otel/trace v1.7.0
 	gotest.tools v2.2.0+incompatible // indirect
 )
 
