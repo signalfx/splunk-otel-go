@@ -23,6 +23,14 @@ application to capture and report distributed traces to Splunk APM.
 Read the official documentation for this distribution in the
 [Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
 
+### Examples
+
+You can find our official "user-facing" examples
+[here](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
+
+The [example directory](./example) contains smaller, developer focused, examples.
+It is meant to be used for experimenting and exploratory end-to-end testing.
+
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md)
