@@ -332,13 +332,13 @@ var _ ctpb.TraceServiceServer = (*collectorTraceServiceServer)(nil)
 
 func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.ExportTraceServiceRequest) (*ctpb.ExportTraceServiceResponse, error) {
 	rs := exp.ResourceSpans[0]
-	ils := rs.GetInstrumentationLibrarySpans()[0]
+	scopeSpans := rs.ScopeSpans[0]
 	headers, _ := metadata.FromIncomingContext(ctx)
 
 	ctss.requests <- exportRequest{
 		Header:   headers,
 		Resource: rs.GetResource(),
-		Spans:    ils.GetSpans(),
+		Spans:    scopeSpans.GetSpans(),
 	}
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
