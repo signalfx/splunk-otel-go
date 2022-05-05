@@ -107,7 +107,7 @@ a batch span processor.
 
   The environment variable values are restricted to the following.
   - `"otlp"`: OTLP gRPC exporter.
-  - `"jaeger-thrift-splunk"`: Jaeger Thrift over HTTP exporter.
+  - `"jaeger-thrift-splunk"`: Splunk specific Jaeger Thrift over HTTP exporter.
   - `"none"`: None, explicitly do not set an exporter.
 
   Any other value will be ignored and the default used instead.
