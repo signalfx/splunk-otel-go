@@ -62,10 +62,10 @@ telemetry sent directly to Splunk Observability Cloud.
 `WithEndpoint` configures the Splunk endpoint that telemetry is sent to.
 
 - Default value: depends on the exporter used.
-  - For the `otlp` over gRPC exporter: `"localhost:4317"`
+  - For the `otlp` exporter: `"localhost:4317"`
   - For the `jaeger-thrift-splunk` exporter: `"http://127.0.0.1:9080/v1/trace"`
 - Environment variable: depends on the exporter used.
-  - For the `otlp` over gRPC exporter:
+  - For the `otlp` exporter:
     - `OTEL_EXPORTER_OTLP_ENDPOINT`
     - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
   - For the `jaeger-thrift-splunk` exporter: `OTEL_EXPORTER_JAEGER_ENDPOINT`
@@ -107,7 +107,7 @@ a batch span processor.
 
   The environment variable values are restricted to the following.
   - `"otlp"`: OTLP gRPC exporter.
-  - `"jaeger-thrift-splunk"`: Jaeger thrift exporter.
+  - `"jaeger-thrift-splunk"`: Jaeger Thrift over HTTP exporter.
   - `"none"`: None, explicitly do not set an exporter.
 
   Any other value will be ignored and the default used instead.
