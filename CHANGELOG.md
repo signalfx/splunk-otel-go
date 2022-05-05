@@ -29,6 +29,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   now returns a `tracer.ValidationFinishFunc` instead of the deprecated
   `trace.TraceValidationFinishFunc` from `github.com/graph-gophers/graphql-go`.
   (#855)
+- Configure TLS using the system CA for OTLP gRPC exporter connections when
+  configured to connect to external endpoints. (#792)
 
 ### Fixed
 

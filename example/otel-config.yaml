@@ -1,8 +1,10 @@
 receivers:
   otlp:
     protocols:
-      grpc:
-      http:
+      grpc:        # used by default
+  jaeger:
+    protocols:
+      thrift_http: # usage: OTEL_TRACES_EXPORTER=jaeger-thrift-splunk OTEL_EXPORTER_JAEGER_ENDPOINT=http://localhost:14268/api/traces
 
 processors:
   batch:
@@ -26,7 +28,7 @@ extensions:
 service:
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlp, jaeger]
       processors: [batch]
       exporters: [logging, jaeger, sapm]
 
