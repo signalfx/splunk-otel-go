@@ -237,8 +237,8 @@ func (fn optionFunc) apply(c *config) {
 //
 // Passing an empty string or not providing this option at all will result in
 // the default value being used. That value depends on what exporter is used.
-// For the otlp exporter it will be http://localhost:4317, and for the Jaeger
-// thrift exporter it will be http://127.0.0.1:9080/v1/trace.
+// For the "otlp" exporter it will be localhost:4317, and for the
+// "jaeger-thrift-splunk" exporter it will be http://127.0.0.1:9080/v1/trace.
 func WithEndpoint(endpoint string) Option {
 	return optionFunc(func(c *config) {
 		c.ExportConfig.Endpoint = endpoint
@@ -264,11 +264,11 @@ func WithAccessToken(accessToken string) Option {
 //
 // The OTEL_TRACES_EXPORTER environment variable value is used if this Option
 // is not provided. Valid values for this environment variable are "otlp" for
-// an OTLP exporter, and "jaeger-thrift-splunk" for a Splunk specific Jaeger
-// thrift exporter. If this environment variable is set to "none", no exporter
-// is registered.
+// an OTLP gRPC exporter, and "jaeger-thrift-splunk" for a Splunk specific
+// Jaeger Thrift over HTTP exporter. If this environment variable is set to
+// "none", no exporter is registered.
 //
-// By default, an OTLP exporter is used if this is not provided or the
+// By default, an OTLP gRPC exporter is used if this is not provided or the
 // OTEL_TRACES_EXPORTER environment variable is not set.
 func WithTraceExporter(e trace.SpanExporter) Option {
 	return optionFunc(func(c *config) {
