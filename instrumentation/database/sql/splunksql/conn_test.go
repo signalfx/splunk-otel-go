@@ -149,14 +149,14 @@ func (s *ConnSuite) TestCloseReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestBeginCallsWrapped() {
-	_, err := s.OTelConn.Begin() // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_, err := s.OTelConn.Begin()
 	s.NoError(err)
 	s.Equal(1, s.MockConn.beginN)
 }
 
 func (s *ConnSuite) TestBeginReturnsWrappedError() {
 	s.MockConn.err = errTest
-	_, err := s.OTelConn.Begin() // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_, err := s.OTelConn.Begin()
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.beginN)
 }

@@ -102,14 +102,14 @@ func (s *StmtSuite) TestNumInputCallsWrapped() {
 }
 
 func (s *StmtSuite) TestExecCallsWrapped() {
-	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_, err := s.OTelStmt.Exec(nil)
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.execN)
 }
 
 func (s *StmtSuite) TestExecReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.Exec(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_, err := s.OTelStmt.Exec(nil)
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.execN)
 }
@@ -137,14 +137,14 @@ func (s *StmtSuite) TestExecContextReturnsWrappedError() {
 }
 
 func (s *StmtSuite) TestQueryCallsWrapped() {
-	_, err := s.OTelStmt.Query(nil) // nolint: staticcheck, gocritic // test Query not Exec
+	_, err := s.OTelStmt.Query(nil) // nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.queryN)
 }
 
 func (s *StmtSuite) TestQueryReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.Query(nil) // nolint: staticcheck, gocritic // test Query not Exec
+	_, err := s.OTelStmt.Query(nil) // nolint: gocritic // there is no connection leak for this test structure.
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.queryN)
 }
