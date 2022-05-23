@@ -27,62 +27,26 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 )
 
-type KeyValue struct {
+type keyValue struct {
 	Key, Value string
 }
 
-type OptionTest struct {
-	Name          string
-	Options       []Option
-	AssertionFunc func(*testing.T, *config)
-}
-
-type ConfigFieldTest struct {
+type configFieldTest struct {
 	Name             string
 	ValueFunc        func(*config) interface{}
 	DefaultValue     interface{}
-	EnvironmentTests []KeyValue
-	OptionTests      []OptionTest
+	EnvironmentTests []keyValue
 }
 
-var ConfigurationTests = []*ConfigFieldTest{
+var configurationTests = []*configFieldTest{
 	{
 		Name: "AccessToken",
 		ValueFunc: func(c *config) interface{} {
 			return c.ExportConfig.AccessToken
 		},
 		DefaultValue: "",
-		EnvironmentTests: []KeyValue{
+		EnvironmentTests: []keyValue{
 			{Key: accessTokenKey, Value: "secret"},
-		},
-		OptionTests: []OptionTest{
-			{
-				Name: "valid name",
-				Options: []Option{
-					WithAccessToken("secret"),
-				},
-				AssertionFunc: func(t *testing.T, c *config) {
-					assert.Equal(t, "secret", c.ExportConfig.AccessToken)
-				},
-			},
-		},
-	},
-	{
-		Name: "Endpoint",
-		ValueFunc: func(c *config) interface{} {
-			return c.ExportConfig.Endpoint
-		},
-		DefaultValue: "",
-		OptionTests: []OptionTest{
-			{
-				Name: "valid URL",
-				Options: []Option{
-					WithEndpoint("https://localhost/"),
-				},
-				AssertionFunc: func(t *testing.T, c *config) {
-					assert.Equal(t, "https://localhost/", c.ExportConfig.Endpoint)
-				},
-			},
 		},
 	},
 	{
@@ -94,28 +58,8 @@ var ConfigurationTests = []*ConfigFieldTest{
 			propagation.TraceContext{},
 			propagation.Baggage{},
 		),
-		EnvironmentTests: []KeyValue{
+		EnvironmentTests: []keyValue{
 			{Key: otelPropagatorsKey, Value: "tracecontext"},
-		},
-		OptionTests: []OptionTest{
-			{
-				Name: "nil propagator",
-				Options: []Option{
-					WithPropagator(nil),
-				},
-				AssertionFunc: func(t *testing.T, c *config) {
-					assert.Equal(t, nonePropagator, c.Propagator)
-				},
-			},
-			{
-				Name: "set to tracecontext",
-				Options: []Option{
-					WithPropagator(propagation.TraceContext{}),
-				},
-				AssertionFunc: func(t *testing.T, c *config) {
-					assert.Equal(t, propagation.TraceContext{}, c.Propagator)
-				},
-			},
 		},
 	},
 }
@@ -126,8 +70,8 @@ func newTestConfig(t *testing.T, opts ...Option) *config {
 }
 
 func TestConfig(t *testing.T) {
-	for _, tc := range ConfigurationTests {
-		func(t *testing.T, tc *ConfigFieldTest) {
+	for _, tc := range configurationTests {
+		func(t *testing.T, tc *configFieldTest) {
 			t.Run(tc.Name, func(t *testing.T) {
 				t.Run("DefaultValue", func(t *testing.T) {
 					assert.Equal(t, tc.DefaultValue, tc.ValueFunc(newTestConfig(t)))
@@ -136,16 +80,12 @@ func TestConfig(t *testing.T) {
 				t.Run("EnvironmentVariableOverride", func(t *testing.T) {
 					testEnvironmentOverrides(t, tc)
 				})
-
-				t.Run("OptionTests", func(t *testing.T) {
-					testOptions(t, tc)
-				})
 			})
 		}(t, tc)
 	}
 }
 
-func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
+func testEnvironmentOverrides(t *testing.T, tc *configFieldTest) {
 	for _, ev := range tc.EnvironmentTests {
 		func(key, val string) {
 			revert := Setenv(key, val)
@@ -159,16 +99,6 @@ func testEnvironmentOverrides(t *testing.T, tc *ConfigFieldTest) {
 				"environment variable %s=%q unused", key, val,
 			)
 		}(ev.Key, ev.Value)
-	}
-}
-
-func testOptions(t *testing.T, tc *ConfigFieldTest) {
-	for _, o := range tc.OptionTests {
-		func(t *testing.T, o OptionTest) {
-			t.Run(o.Name, func(t *testing.T) {
-				o.AssertionFunc(t, newTestConfig(t, o.Options...))
-			})
-		}(t, o)
 	}
 }
 
