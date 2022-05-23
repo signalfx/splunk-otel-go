@@ -17,13 +17,14 @@ package distro
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
+	"net/http"
 	"os"
 
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type traceExporterFunc func(*exporterConfig) (trace.SpanExporter, error)
@@ -47,15 +48,32 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
 	}
 
-	opts = append(opts, otlptracegrpc.WithInsecure())
-
 	if c.AccessToken != "" {
 		opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
 			"X-Sf-Token": c.AccessToken,
 		}))
 	}
 
+	if c.TLSConfig != nil {
+		tlsCreds := credentials.NewTLS(c.TLSConfig)
+		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
+	} else
+
+	// workaround for not working default OTLP over gRPC in OTel Go SDK
+	if c.TLSConfig == nil && noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
+		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
+	}
+
 	return otlptracegrpc.New(context.Background(), opts...)
+}
+
+func noneEnvVarSet(envs ...string) bool {
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); ok {
+			return false
+		}
+	}
+	return true
 }
 
 // otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter
@@ -80,33 +98,6 @@ func otlpEndpoint() string {
 	return ""
 }
 
-// isLocalhost returns if endpoint resolves to the current device.
-func isLocalhost(endpoint string) bool {
-	host := endpoint
-
-	u, err := url.Parse(endpoint)
-	if err == nil && u.Hostname() != "" {
-		host = u.Hostname()
-	} else {
-		h, _, e := net.SplitHostPort(endpoint)
-		if e == nil {
-			host = h
-		}
-	}
-
-	ips, err := net.LookupIP(host)
-	if err != nil {
-		return false
-	}
-	for _, ip := range ips {
-		if ip.IsLoopback() {
-			return true
-		}
-	}
-
-	return false
-}
-
 func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []jaeger.CollectorEndpointOption
 
@@ -120,6 +111,13 @@ func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 			jaeger.WithUsername("auth"),
 			jaeger.WithPassword(c.AccessToken),
 		)
+	}
+
+	if c.TLSConfig != nil {
+		client := &http.Client{
+			Transport: &http.Transport{TLSClientConfig: c.TLSConfig},
+		}
+		opts = append(opts, jaeger.WithHTTPClient(client))
 	}
 
 	return jaeger.New(

@@ -15,6 +15,7 @@
 package distro
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 	"strings"
@@ -70,6 +71,7 @@ const (
 
 type exporterConfig struct {
 	AccessToken string
+	TLSConfig   *tls.Config
 }
 
 // config is the configuration used to create and operate an SDK.
@@ -212,6 +214,15 @@ type optionFunc func(*config)
 
 func (fn optionFunc) apply(c *config) {
 	fn(c)
+}
+
+// WithTLSConfig configures the TLS configuration used by the exporter.
+//
+// If this option is not provided, the exporter connection will use TLS config.
+func WithTLSConfig(conf *tls.Config) Option {
+	return optionFunc(func(c *config) {
+		c.ExportConfig.TLSConfig = conf
+	})
 }
 
 // WithLogger configures the logger used by this distro.

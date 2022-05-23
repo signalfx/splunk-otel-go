@@ -17,6 +17,8 @@ package distro_test
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -33,6 +35,7 @@ import (
 	tpb "go.opentelemetry.io/proto/otlp/trace/v1"
 	"go.uber.org/goleak"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -46,6 +49,93 @@ func TestMain(m *testing.M) {
 const (
 	spanName = "test span"
 	token    = "secret token"
+
+	testCert = `
+-----BEGIN CERTIFICATE-----
+MIIECTCCAnGgAwIBAgIQAXpqCAQzApLabw951TqZiTANBgkqhkiG9w0BAQsFADBN
+MR4wHAYDVQQKExVta2NlcnQgZGV2ZWxvcG1lbnQgQ0ExETAPBgNVBAsMCHR5bGVy
+QHhpMRgwFgYDVQQDDA9ta2NlcnQgdHlsZXJAeGkwHhcNMjIwMTIxMjI0NzM1WhcN
+MjQwNDIxMjE0NzM1WjA8MScwJQYDVQQKEx5ta2NlcnQgZGV2ZWxvcG1lbnQgY2Vy
+dGlmaWNhdGUxETAPBgNVBAsMCHR5bGVyQHhpMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAqxRz2pUB1N2eAev6p91aDxFmaBF9LECmCjGBTqhWyfW+L82m
+IyyKLq2d/DLuRga3yX1ICOvUP1KUdrUO5XqkbYOv+vumISX4gKU41u6xo2hbATdh
+/IkqvDG733p+eJ0GSXo2wI/4iNlj8II57dLlKfF9aPMtyxitvr709rRdkjWSGzYm
+gNZws4y64GS4gp+OT5jW6SlR129QhkTMqkFBhTAW41+GgFGFJx9hMgjlQ+KGwqOF
+3E8KJH/+/qTgwccd8UPT0GLo9uG+Gkmqqmk9QugEJVfxjn0Q3jtAJpxw2f33frSi
+Xo2b/g7XSTv/vOEVIhluvAGkcOQL2Ire2/ZbrwIDAQABo3YwdDAOBgNVHQ8BAf8E
+BAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwHwYDVR0jBBgwFoAUPYnE0BOCm4bs
+89Xe6YmN4FKXkqcwLAYDVR0RBCUwI4IJbG9jYWxob3N0hwR/AAABhxAAAAAAAAAA
+AAAAAAAAAAABMA0GCSqGSIb3DQEBCwUAA4IBgQCM5NKkfO2s/FJKOtoPtvLzzHld
+U49H9QvMCCY3glCydsePZLUOa0eAcV//hZlJkIiXOXsWs1Xs6SdO8rgbg30/Ta3Z
+9J+T57+fBQN4lNn6s4HGlMn7KcZj1yJVHhlHk7Pn672yuYIUFpTXX+FQY1SXtyD1
+f3j842e0wIC87O5Ge8DZg1kKD2SykWsoISeNvce1+6i6DrHMaQx/uq7rIYwqFSvn
+uD6IQi/JxkJ7KjHiuSVLkahS4cfffVCI6udTZ8o03fo2eXxOLxQvnVlahHad/fKz
+NeyUVdkXD61tCjvmkvkPSKSwOCxoR3lJYvsxGWtt5obs1f/Bs9MREHW+f2nsZO/L
+wCy9c9zo5DR1W0NIv1vt/EF5zmMabb8EZBQlMj72tfkPCNkEiVCoEadDHQ3Cs7Yl
+CmLIiGGhpDnL12DVgZ1HXFVtYlUzzAEVHhC12CnDZX/UhJgbjcnzOYGywpbtLcQE
+tGJRLnLqRMHsAVjQuTrI5IoVW46o1UZmxdqMowE=
+-----END CERTIFICATE-----
+`
+
+	testCertKey = `
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrFHPalQHU3Z4B
+6/qn3VoPEWZoEX0sQKYKMYFOqFbJ9b4vzaYjLIourZ38Mu5GBrfJfUgI69Q/UpR2
+tQ7leqRtg6/6+6YhJfiApTjW7rGjaFsBN2H8iSq8Mbvfen54nQZJejbAj/iI2WPw
+gjnt0uUp8X1o8y3LGK2+vvT2tF2SNZIbNiaA1nCzjLrgZLiCn45PmNbpKVHXb1CG
+RMyqQUGFMBbjX4aAUYUnH2EyCOVD4obCo4XcTwokf/7+pODBxx3xQ9PQYuj24b4a
+SaqqaT1C6AQlV/GOfRDeO0AmnHDZ/fd+tKJejZv+DtdJO/+84RUiGW68AaRw5AvY
+it7b9luvAgMBAAECggEAXx8dF4DYJtoeG6Vwlds+Urhy/xQSTAOaDnreEbUJpHtN
+htjKMi52mmOQPwS2dRsRHyfYYJV3SsoIoEQlhzR8riOVOnCnOzEYjbbP9rl67Yd9
+ahy4D6jYqRDiC+zY2wk70KjyPnkOUFDG/5f4y6ICJyMNfsgPQyhymmckXvOEP2E+
+7bESmRm5zHT7YPTeP8SHEb3uTGoPw6LB9xw8j/ugV03vm/SdewQcg7uOxrVybtda
+X8q42GoQCvRxmLfde0SuQN1dJjz0Ug74A1An+IcFk96gLNOg7a+y2UnzMWOgxmBX
+MYFUdoGl3mAjrgBBlYb4e++jx7YWcPNXDIIJc1yCGQKBgQDakE97hz5UPscRXR6Y
+rmuFOejdi0s7YyAdQ3rMXmwVtx2t4jGZP9sBbQBA+DVKGPvl7z889qDxRZ4wMTAc
+XY6sXxIOS54Fc4dGdKGtN9ItXhHyEtH9IQNaihO4LOu88VYbaspX0Ngduozricko
+BX8xcOKb3OpIu6iF7Ys5oBjoUwKBgQDIYgxQrsyQVRwpGF+DSJoxjKKXIKUzk7A3
+o3/2XFdWED/mh2YbLDRWlSkFajkoaXpdXAPJLkZLBm6PAquraHhAhcwV0nvZK+t1
+OKmPzcX4X5yCxz8+1sEYDXynr5DrJI3FLQqhKhD9ar6ZZtSFLtiZI5D9fgklCu/4
+tve0/TZjtQKBgQC4L9cblaycGE9wPZY0OwDXRCcO1H0w7ec5Yg2RPp09a5SyXaVI
+rXxlZjNJjSJzcDyP2B/lwz18NhwKJtmRffJnJrMzotvnYiWE5XL+Y8VWgCkFZIDc
+Hb8SxLu7gPekwYi8EDG28YO/AeAR+oqvlHpM8wG1MeWqJ6LsQnQKuvViiwKBgH+h
+q/RsEhHQlBo80wFc6hGrYRhfi7n5VOFre6LgmCRSP1FHZqriEgggA7vWN8fcvzrd
+0+99UPqSgzMF4XBRH18BmcdAhPADwHqud5oH2BPmWlsWK9uLj/wRAxgPhH+xjbdM
+hBu5Ho87QWGWFMEr4HxSIhTEBXEZsVW6vLYEHnONAoGAdhHYICaM7YARqZVTOtV4
+aT77hP/FDSN1ihmjWaf5R6pwzZHJWkY9+kFAm/M6XQmG7hlwtpbrf1ABno6KSuJ4
+zj3TcsxZnqCaWx/fraIq39AnTxpl4C5bHEqZL3DM/6ATf+jjT1COSmcdtvOicYD+
+vNEFg92FS2/s4hVfZmZcf4I=
+-----END PRIVATE KEY-----
+`
+
+	testCA = `
+-----BEGIN CERTIFICATE-----
+MIIEaTCCAtGgAwIBAgIQN9JQ+3LGmMYFeIQYvoId/DANBgkqhkiG9w0BAQsFADBN
+MR4wHAYDVQQKExVta2NlcnQgZGV2ZWxvcG1lbnQgQ0ExETAPBgNVBAsMCHR5bGVy
+QHhpMRgwFgYDVQQDDA9ta2NlcnQgdHlsZXJAeGkwHhcNMjIwMTIxMjI0NjU3WhcN
+MzIwMTIxMjI0NjU3WjBNMR4wHAYDVQQKExVta2NlcnQgZGV2ZWxvcG1lbnQgQ0Ex
+ETAPBgNVBAsMCHR5bGVyQHhpMRgwFgYDVQQDDA9ta2NlcnQgdHlsZXJAeGkwggGi
+MA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDYroHUMpGNy6/9RLd7ax6bDihD
+6Bp4VyDecRQ5S2ClhZ/CEhTR1Hppu7PsRywM6R94TKVp15d9pwTnCUf/sqSvm+s4
+/jarHrvq3QzMyCoRcI8E/WkxjFE78utShpKTzIbX95c99Ydqkxb1Ade1KvYGkFe5
+Et6zELNngz1re9Bqr4ZV7PY4MCiQJOcfpzKTFYqWHz6I6wl4FmbuRpkfciOnEX2y
+6t4rWSb4BPANkS17kywruoaLzrTQxEv8TOibmpVnhv+bJ8F17QCWob0p/5PPpRMY
+Qsjn7daos/Oz3og5roRk3Ue6dm/GZ0aG77L6ED+IgfzxhdKoOQcsPINUHgDWrCMH
+G85dQUDuM8yktrfSkalstc82dEt5Jwwvt82r5shDWrTmeQsPCtXeFYJlqwIJQTlK
+dqjRUdhxZnEq085HQkOkq3me3RWcxTidqE5iJE99D0GirjjJ4xqFg041C6wqj822
+ZN5TWIJ8jtTEzvl8a3gavxO4V8N/zOBgrZLvmpECAwEAAaNFMEMwDgYDVR0PAQH/
+BAQDAgIEMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFD2JxNATgpuG7PPV
+3umJjeBSl5KnMA0GCSqGSIb3DQEBCwUAA4IBgQBRDpP5rSCIJmr5cE5mnW649bVg
+ZHte6qYpwEkWyJjGmp4bWBlIEbr4qMIcP2QqD/YhEn+/xKlKkR2IKQY4kpgSdt1l
+hcTvc0zqa3tkC5BIfm7MCJcADUKWco2jYLASxDsc9piUYchXAy5g+j3+o2v7VJ4P
+kGfLQq7lO6h+ZSn3AeaZmQHAZkHniBWZlL2pb4FdwrTtoTe9L/YoRygOfCw9RQVd
+f50P3TGbWz1cGq2Ub/bKcX3R7cgIjeB+0iTf1fzrH5LT7Kp1kTu8f+iIWu5McaxO
+Ykd4m0s/VFSi8gXZ811ilKPcjp0dHs3PN/XSKTERFa5tZLBcJlJtuIphAd3H1Hag
+u3FYwV0w7+kQ7WUICi0CT4CIqPX9tcw0X6/PXOqNS7VwTgJW6XX+RAUHZhfnSWRu
+q/4T2d6HhGLhRO0UFKkhSpjNevWSdvMRFjkh7VDIAsMAwxZiRBE6Hcs6yucho5Us
+JeIxndiEik2efMFw+lME99JEArjHzIEOlM47coc=
+-----END CERTIFICATE-----
+`
 )
 
 func reqHander() (<-chan *http.Request, http.HandlerFunc) {
@@ -55,9 +145,57 @@ func reqHander() (<-chan *http.Request, http.HandlerFunc) {
 	}
 }
 
-func distroRun(t *testing.T) (distro.SDK, error) {
+func distroRun(t *testing.T, opts ...distro.Option) (distro.SDK, error) {
 	l := testr.NewTestLogger(t)
-	return distro.Run(distro.WithLogger(l))
+	return distro.Run(append(opts, distro.WithLogger(l))...)
+}
+
+func clientTLSConfig(t *testing.T) *tls.Config {
+	certs := x509.NewCertPool()
+	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
+
+	return &tls.Config{
+		RootCAs:    certs,
+		MinVersion: tls.VersionTLS13,
+	}
+}
+
+func serverTLSConfig(t *testing.T) *tls.Config {
+	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
+	require.NoError(t, err, "failed to load X509 key pair")
+
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS13,
+	}
+}
+
+func TestRunJaegerExporterTLS(t *testing.T) {
+	reqCh, hFunc := reqHander()
+	srv := httptest.NewUnstartedServer(hFunc)
+	t.Cleanup(srv.Close)
+
+	srv.TLS = serverTLSConfig(t)
+	srv.StartTLS()
+
+	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+	t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL))
+	sdk, err := distroRun(
+		t,
+		distro.WithTLSConfig(clientTLSConfig(t)),
+	)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	_, span := otel.Tracer("TestRunJaegerExporterTLS").Start(ctx, spanName)
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	got := <-reqCh
+	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
+	assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
 }
 
 func TestRunJaegerExporter(t *testing.T) {
@@ -117,6 +255,49 @@ func TestRunJaegerExporter(t *testing.T) {
 			tc.assertFn(t, <-reqCh)
 		})
 	}
+}
+
+func TestRunOTLPExporterTLS(t *testing.T) {
+	ln, err := net.Listen("tcp", "localhost:0")
+	require.NoError(t, err)
+
+	coll := &collector{
+		endpoint: ln.Addr().String(),
+		traceService: &collectorTraceServiceServer{
+			requests: make(chan exportRequest, 1),
+		},
+	}
+
+	// Run gRPC server with TLS.
+	creds := credentials.NewTLS(serverTLSConfig(t))
+	srv := grpc.NewServer(grpc.Creds(creds))
+
+	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
+	errCh := make(chan error, 1)
+	go func() { errCh <- srv.Serve(ln) }()
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		require.NoError(t, <-errCh)
+	})
+	coll.srv = srv
+
+	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.endpoint))
+	sdk, err := distroRun(
+		t,
+		distro.WithTLSConfig(clientTLSConfig(t)),
+	)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	_, span := otel.Tracer("TestRunOTLPExporterTLS").Start(ctx, spanName)
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+	req := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
+	require.Len(t, req.Spans, 1)
+	assert.Equal(t, spanName, req.Spans[0].Name)
 }
 
 func TestRunJaegerExporterDefault(t *testing.T) {
