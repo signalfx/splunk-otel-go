@@ -57,10 +57,8 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	}
-
-	// we assume that the default endpoint (local collector) is non-TLS
-	if c.TLSConfig == nil && noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
+	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
+		// we assume that the default endpoint (local collector) is non-TLS
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
 
