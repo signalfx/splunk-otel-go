@@ -67,6 +67,7 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
+// noneEnvVarSet returns true if none of provided env vars is set.
 func noneEnvVarSet(envs ...string) bool {
 	for _, env := range envs {
 		if _, ok := os.LookupEnv(env); ok {
