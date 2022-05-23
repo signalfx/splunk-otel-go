@@ -57,9 +57,9 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else
+	}
 
-	// workaround for not working default OTLP over gRPC in OTel Go SDK
+	// we assume that the default endpoint (local collector) is non-TLS
 	if c.TLSConfig == nil && noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
