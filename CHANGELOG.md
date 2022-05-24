@@ -31,9 +31,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (#855)
 - Configure TLS using the system CA for OTLP gRPC exporter connections when
   configured to connect to external endpoints. (#792)
+  
+### Removed
+
 - Minimize `github.com/signalfx/splunk-otel-go/distro` API to
-  contain only necessary option functions.
-  (#941)
+  contain only necessary option functions. (#941)
   - Remove `WithAccessToken` function,
     use `SPLUNK_ACCESS_TOKEN` environment variable instead.
   - Remove `WithEndpoint` function,
