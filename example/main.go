@@ -27,7 +27,6 @@ import (
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
@@ -70,38 +69,26 @@ func main() {
 		ReadTimeout:  time.Second,
 	}
 
-	g, ctx := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
+	errCh := make(chan error, 1)
+	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			return err
+			errCh <- err
+		} else {
+			errCh <- nil
 		}
-		return nil
-	})
+	}()
 
-	g.Go(func() error {
-		// instrument http.Client
-		client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+	// instrument http.Client
+	client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
-		for {
-			select {
-			case <-ctx.Done():
-				return nil
-			case <-time.After(10 * time.Second): // nolint: gomnd
-				call(ctx, client)
-			}
-		}
-	})
-
-	<-ctx.Done() // wait for CTRL+C or server crash
-	stop()       // stop receiving signal notifications; next interrupt signal should kill the application
+	call(ctx, client)
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Println(err)
 		exitCode = 1
 		return
 	}
-	if err := g.Wait(); err != nil {
+	if err := <-errCh; err != nil {
 		log.Println(err)
 		exitCode = 1
 		return
