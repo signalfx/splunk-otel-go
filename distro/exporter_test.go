@@ -27,95 +27,56 @@ const (
 	fakeEndpoint = "some non-zero value"
 )
 
-func endpointOnly(endpoint string, _ bool) string {
-	return endpoint
-}
-
 func TestOTLPEndpoint(t *testing.T) {
-	t.Run("configured", func(t *testing.T) {
-		assert.Equal(t, fakeEndpoint, endpointOnly(otlpEndpoint(fakeEndpoint)))
-	})
-
 	t.Run("default", func(t *testing.T) {
-		assert.Equal(t, "", endpointOnly(otlpEndpoint("")))
+		assert.Equal(t, "", otlpEndpoint())
 	})
 
 	t.Cleanup(Setenv(splunkRealmKey, noneRealm))
 	t.Run("none realm", func(t *testing.T) {
 		// Revert to default.
-		assert.Equal(t, "", endpointOnly(otlpEndpoint("")))
+		assert.Equal(t, "", otlpEndpoint())
 	})
 
 	t.Cleanup(Setenv(splunkRealmKey, invalidRealm))
 	t.Run("realm", func(t *testing.T) {
 		want := fmt.Sprintf(otlpRealmEndpointFormat, invalidRealm)
-		assert.Equal(t, want, endpointOnly(otlpEndpoint("")))
+		assert.Equal(t, want, otlpEndpoint())
 	})
 
 	t.Run(otelExporterOTLPEndpointKey, func(t *testing.T) {
 		t.Cleanup(Setenv(otelExporterOTLPEndpointKey, fakeEndpoint))
 		// SPLUNK_REALM is still set, make sure it does not take precedence.
-		assert.Equal(t, "", endpointOnly(otlpEndpoint("")))
+		assert.Equal(t, "", otlpEndpoint())
 	})
 
 	t.Run(otelExporterOTLPTracesEndpointKey, func(t *testing.T) {
 		t.Cleanup(Setenv(otelExporterOTLPTracesEndpointKey, "some non-zero value"))
 		// SPLUNK_REALM is still set, make sure it does not take precedence.
-		assert.Equal(t, "", endpointOnly(otlpEndpoint("")))
+		assert.Equal(t, "", otlpEndpoint())
 	})
 }
 
 func TestJaegerEndpoint(t *testing.T) {
-	t.Run("configured", func(t *testing.T) {
-		assert.Equal(t, fakeEndpoint, jaegerEndpoint(fakeEndpoint))
-	})
-
 	t.Run("default", func(t *testing.T) {
-		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint(""))
+		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint())
 	})
 
 	t.Cleanup(Setenv(splunkRealmKey, noneRealm))
 	t.Run("none realm", func(t *testing.T) {
 		// Revert to default.
-		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint(""))
+		assert.Equal(t, defaultJaegerEndpoint, jaegerEndpoint())
 	})
 
 	t.Cleanup(Setenv(splunkRealmKey, invalidRealm))
 	t.Run("realm", func(t *testing.T) {
 		want := fmt.Sprintf(realmEndpointFormat, invalidRealm)
-		assert.Equal(t, want, jaegerEndpoint(""))
+		assert.Equal(t, want, jaegerEndpoint())
 	})
 
 	t.Run(otelExporterJaegerEndpointKey, func(t *testing.T) {
 		t.Cleanup(Setenv(otelExporterJaegerEndpointKey, fakeEndpoint))
 		// SPLUNK_REALM is still set, make sure it does not take precedence.
-		assert.Equal(t, "", jaegerEndpoint(""))
+		assert.Equal(t, "", jaegerEndpoint())
 	})
-}
-
-func TestIsLocalhost(t *testing.T) {
-	local := []string{
-		"localhost",
-		"http://localhost",
-		"https://localhost:8080",
-		"127.0.0.1:8080",
-		"127.1.2.3",
-		"::1",
-		"0000:0000:0000:0000:0000:0000:0000:0001",
-	}
-
-	for _, addr := range local {
-		assert.Truef(t, isLocalhost(addr), "%q is a local address", addr)
-	}
-
-	remote := []string{
-		"google.com",
-		"8.8.8.8",
-		"1:2:3",
-		"not valid",
-	}
-
-	for _, addr := range remote {
-		assert.Falsef(t, isLocalhost(addr), "%q is a remote address", addr)
-	}
 }

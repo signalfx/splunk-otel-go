@@ -17,15 +17,14 @@ package distro
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
-	"net/url"
 	"os"
 
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type traceExporterFunc func(*exporterConfig) (trace.SpanExporter, error)
@@ -44,39 +43,9 @@ var exporters = map[string]traceExporterFunc{
 func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []otlptracegrpc.Option
 
-	// Determine from the many source of endpoint configuration what to use as
-	// the endpoint and if that endpoint is to a local target. This handles
-	// the case where the endpoint is configured directly with an Option or
-	// via environment variables. In the latter case, if the environment
-	// variable used is one of OTEL_EXPORTER_OTLP_*ENDPOINT, the endpoint
-	// returned here will be empty and it will default to the OTLP exporter
-	// itself to correctly interpret the value and configure TLS.
-	endpoint, local := otlpEndpoint(c.Endpoint)
+	endpoint := otlpEndpoint()
 	if endpoint != "" {
 		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
-	}
-
-	// Use the determination of the endpoint being for a local target or not
-	// to correctly set default TLS settings for the connection.
-	//
-	// With its default configuration, the collector does not use TLS nor
-	// authenticate connections with a certificate. This means that if the
-	// endpoint is local, the default setup, do not expect this
-	// authentication.
-	//
-	// However, if the endpoint is not local, and has the potential to
-	// traverse the public internet, make sure to authenticate and encrypt the
-	// connection.
-	//
-	// This logic does not handle when the endpoint is defined by
-	// OTEL_EXPORTER_OTLP_*ENDPOINT environment variables. It is left to the
-	// OTLP gRPC exporter to handle that.
-	if c.TLSConfig != nil {
-		tlsCreds := credentials.NewTLS(c.TLSConfig)
-		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else if local {
-		// Local collectors by default do not use TLS/SSL.
-		opts = append(opts, otlptracegrpc.WithInsecure())
 	}
 
 	if c.AccessToken != "" {
@@ -85,26 +54,34 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		}))
 	}
 
+	if c.TLSConfig != nil {
+		tlsCreds := credentials.NewTLS(c.TLSConfig)
+		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
+	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
+		// Assume that the default endpoint (local collector) is non-TLS.
+		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
+	}
+
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
-// otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter and if
-// that endpoint is to a local target based on the configured value.
-func otlpEndpoint(configured string) (endpoint string, local bool) {
-	if configured != "" {
-		return configured, isLocalhost(configured)
+// noneEnvVarSet returns true if none of provided env vars is set.
+func noneEnvVarSet(envs ...string) bool {
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); ok {
+			return false
+		}
 	}
+	return true
+}
 
+// otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter.
+func otlpEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
 	for _, env := range envs {
 		if _, ok := os.LookupEnv(env); ok {
-			// The OTLP exporter logic uses an http/https prefix to set the
-			// TLS configuration of the connection. Continue using that by
-			// returning false for local so the configuration is left to the
-			// exporter and there is no difference between this distro and
-			// that.
-			return "", false
+			return ""
 		}
 	}
 
@@ -113,46 +90,17 @@ func otlpEndpoint(configured string) (endpoint string, local bool) {
 	// the OTLP gRPC exporter (using the system CA for authentication and
 	// encryption) is used.
 	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
-		return fmt.Sprintf(otlpRealmEndpointFormat, realm), false
+		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
 	}
 
-	// The OTel default is the same as Splunk's (localhost:4317). Return an
-	// empty endpoint to signal the exporter default should be used and true
-	// local to ensure no TLS authentication or encryption is used.
-	return "", true
-}
-
-// isLocalhost returns if endpoint resolves to the current device.
-func isLocalhost(endpoint string) bool {
-	host := endpoint
-
-	u, err := url.Parse(endpoint)
-	if err == nil && u.Hostname() != "" {
-		host = u.Hostname()
-	} else {
-		h, _, e := net.SplitHostPort(endpoint)
-		if e == nil {
-			host = h
-		}
-	}
-
-	ips, err := net.LookupIP(host)
-	if err != nil {
-		return false
-	}
-	for _, ip := range ips {
-		if ip.IsLoopback() {
-			return true
-		}
-	}
-
-	return false
+	// The OTel default is the same as Splunk's (localhost:4317)
+	return ""
 }
 
 func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []jaeger.CollectorEndpointOption
 
-	if e := jaegerEndpoint(c.Endpoint); e != "" {
+	if e := jaegerEndpoint(); e != "" {
 		opts = append(opts, jaeger.WithEndpoint(e))
 	}
 
@@ -176,11 +124,7 @@ func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	)
 }
 
-func jaegerEndpoint(configured string) string {
-	if configured != "" {
-		return configured
-	}
-
+func jaegerEndpoint() string {
 	// Allow the exporter to interpret this environment variable directly.
 	if _, ok := os.LookupEnv(otelExporterJaegerEndpointKey); ok {
 		return ""
