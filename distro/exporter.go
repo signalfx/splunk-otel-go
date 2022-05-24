@@ -58,7 +58,7 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
 	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
-		// we assume that the default endpoint (local collector) is non-TLS
+		// Assume that the default endpoint (local collector) is non-TLS.
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
 
@@ -75,7 +75,7 @@ func noneEnvVarSet(envs ...string) bool {
 	return true
 }
 
-// otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter
+// otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter.
 func otlpEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
