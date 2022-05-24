@@ -150,54 +150,6 @@ func distroRun(t *testing.T, opts ...distro.Option) (distro.SDK, error) {
 	return distro.Run(append(opts, distro.WithLogger(l))...)
 }
 
-func clientTLSConfig(t *testing.T) *tls.Config {
-	certs := x509.NewCertPool()
-	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
-
-	return &tls.Config{
-		RootCAs:    certs,
-		MinVersion: tls.VersionTLS13,
-	}
-}
-
-func serverTLSConfig(t *testing.T) *tls.Config {
-	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
-	require.NoError(t, err, "failed to load X509 key pair")
-
-	return &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		MinVersion:   tls.VersionTLS13,
-	}
-}
-
-func TestRunJaegerExporterTLS(t *testing.T) {
-	reqCh, hFunc := reqHander()
-	srv := httptest.NewUnstartedServer(hFunc)
-	t.Cleanup(srv.Close)
-
-	srv.TLS = serverTLSConfig(t)
-	srv.StartTLS()
-
-	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL))
-	sdk, err := distroRun(
-		t,
-		distro.WithTLSConfig(clientTLSConfig(t)),
-	)
-	require.NoError(t, err)
-
-	ctx := context.Background()
-	_, span := otel.Tracer("TestRunJaegerExporterTLS").Start(ctx, spanName)
-	span.End()
-
-	// Flush all spans from BSP.
-	require.NoError(t, sdk.Shutdown(ctx))
-
-	got := <-reqCh
-	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
-	assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
-}
-
 func TestRunJaegerExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *http.Request) {
 		assert.Equal(t, "application/x-thrift", req.Header.Get("Content-type"))
@@ -257,31 +209,36 @@ func TestRunJaegerExporter(t *testing.T) {
 	}
 }
 
-func TestRunOTLPExporterTLS(t *testing.T) {
-	ln, err := net.Listen("tcp", "localhost:0")
-	require.NoError(t, err)
+func clientTLSConfig(t *testing.T) *tls.Config {
+	certs := x509.NewCertPool()
+	require.True(t, certs.AppendCertsFromPEM([]byte(testCA)), "failed to add CA")
 
-	coll := &collector{
-		endpoint: ln.Addr().String(),
-		traceService: &collectorTraceServiceServer{
-			requests: make(chan exportRequest, 1),
-		},
+	return &tls.Config{
+		RootCAs:    certs,
+		MinVersion: tls.VersionTLS13,
 	}
+}
 
-	// Run gRPC server with TLS.
-	creds := credentials.NewTLS(serverTLSConfig(t))
-	srv := grpc.NewServer(grpc.Creds(creds))
+func serverTLSConfig(t *testing.T) *tls.Config {
+	cert, err := tls.X509KeyPair([]byte(testCert), []byte(testCertKey))
+	require.NoError(t, err, "failed to load X509 key pair")
 
-	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
-	errCh := make(chan error, 1)
-	go func() { errCh <- srv.Serve(ln) }()
-	t.Cleanup(func() {
-		coll.srv.GracefulStop()
-		require.NoError(t, <-errCh)
-	})
-	coll.srv = srv
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS13,
+	}
+}
 
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.endpoint))
+func TestRunJaegerExporterTLS(t *testing.T) {
+	reqCh, hFunc := reqHander()
+	srv := httptest.NewUnstartedServer(hFunc)
+	t.Cleanup(srv.Close)
+
+	srv.TLS = serverTLSConfig(t)
+	srv.StartTLS()
+
+	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+	t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL))
 	sdk, err := distroRun(
 		t,
 		distro.WithTLSConfig(clientTLSConfig(t)),
@@ -289,15 +246,15 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	_, span := otel.Tracer("TestRunOTLPExporterTLS").Start(ctx, spanName)
+	_, span := otel.Tracer("TestRunJaegerExporterTLS").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
-	req := <-coll.traceService.requests
-	assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-	require.Len(t, req.Spans, 1)
-	assert.Equal(t, spanName, req.Spans[0].Name)
+
+	got := <-reqCh
+	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
+	assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
 }
 
 func TestRunJaegerExporterDefault(t *testing.T) {
@@ -456,6 +413,49 @@ func TestRunOTLPExporter(t *testing.T) {
 			tc.assertFn(t, <-coll.traceService.requests)
 		})
 	}
+}
+
+func TestRunOTLPExporterTLS(t *testing.T) {
+	ln, err := net.Listen("tcp", "localhost:0")
+	require.NoError(t, err)
+
+	coll := &collector{
+		endpoint: ln.Addr().String(),
+		traceService: &collectorTraceServiceServer{
+			requests: make(chan exportRequest, 1),
+		},
+	}
+
+	// Run gRPC server with TLS.
+	creds := credentials.NewTLS(serverTLSConfig(t))
+	srv := grpc.NewServer(grpc.Creds(creds))
+
+	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
+	errCh := make(chan error, 1)
+	go func() { errCh <- srv.Serve(ln) }()
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		require.NoError(t, <-errCh)
+	})
+	coll.srv = srv
+
+	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.endpoint))
+	sdk, err := distroRun(
+		t,
+		distro.WithTLSConfig(clientTLSConfig(t)),
+	)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	_, span := otel.Tracer("TestRunOTLPExporterTLS").Start(ctx, spanName)
+	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
+	req := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
+	require.Len(t, req.Spans, 1)
+	assert.Equal(t, spanName, req.Spans[0].Name)
 }
 
 func TestRunExporterDefault(t *testing.T) {
