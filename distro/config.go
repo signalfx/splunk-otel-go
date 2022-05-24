@@ -218,7 +218,8 @@ func (fn optionFunc) apply(c *config) {
 
 // WithTLSConfig configures the TLS configuration used by the exporter.
 //
-// If this option is not provided, the exporter connection will use TLS config.
+// If this option is not provided, the exporter connection will use the default
+// TLS config.
 func WithTLSConfig(conf *tls.Config) Option {
 	return optionFunc(func(c *config) {
 		c.ExportConfig.TLSConfig = conf
