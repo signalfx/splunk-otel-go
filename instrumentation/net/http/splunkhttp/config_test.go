@@ -24,7 +24,6 @@ import (
 func TestConfigs(t *testing.T) {
 	tests := []struct {
 		name   string
-		opts   []Option
 		envs   map[string]string
 		assert func(t *testing.T, c *config)
 	}{
@@ -37,33 +36,12 @@ func TestConfigs(t *testing.T) {
 		},
 		// TraceResponseHeader
 		{
-			name: "TraceResponseHeader WithTraceResponseHeader(false)",
-			opts: []Option{
-				WithTraceResponseHeader(false),
-			},
-			assert: func(t *testing.T, c *config) {
-				assert.False(t, c.TraceResponseHeaderEnabled, "should disable TraceResponseHeader")
-			},
-		},
-		{
 			name: "TraceResponseHeader SPLUNK_TRACE_RESPONSE_HEADER_ENABLED=False",
 			envs: map[string]string{
 				"SPLUNK_TRACE_RESPONSE_HEADER_ENABLED": "False",
 			},
 			assert: func(t *testing.T, c *config) {
 				assert.False(t, c.TraceResponseHeaderEnabled, "should disable TraceResponseHeader")
-			},
-		},
-		{
-			name: "TraceResponseHeader WithTraceResponseHeader(true) SPLUNK_TRACE_RESPONSE_HEADER_ENABLED=True",
-			envs: map[string]string{
-				"SPLUNK_TRACE_RESPONSE_HEADER_ENABLED": "False",
-			},
-			opts: []Option{
-				WithTraceResponseHeader(true),
-			},
-			assert: func(t *testing.T, c *config) {
-				assert.True(t, c.TraceResponseHeaderEnabled, "should enable TraceResponseHeader, because option has higher priority than env var")
 			},
 		},
 	}
@@ -81,7 +59,7 @@ func TestConfigs(t *testing.T) {
 				os.Setenv(key, val)
 			}
 
-			cfg := newConfig(tt.opts...)
+			cfg := newConfig()
 			tt.assert(t, cfg)
 		})
 	}

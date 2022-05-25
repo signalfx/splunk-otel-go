@@ -31,10 +31,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (#855)
 - Configure TLS using the system CA for OTLP gRPC exporter connections when
   configured to connect to external endpoints. (#792)
+- Remove `opts ...Option` parameter from `NewHandler` function
+  from `github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp`
+  package. (#947)
   
 ### Removed
 
-- Minimize `github.com/signalfx/splunk-otel-go/distro` API to
+- Minimize `github.com/signalfx/splunk-otel-go/distro` package to
   contain only necessary option functions. (#941)
   - Remove `WithAccessToken` function,
     use `SPLUNK_ACCESS_TOKEN` environment variable instead.
@@ -46,6 +49,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
     use `OTEL_PROPAGATORS` environment variable instead.
   - Remove `WithTraceExporter` function,
     use `OTEL_TRACES_EXPORTER` environment variable instead.
+- Minimize `github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp`
+  package to contain only necessary functions and types. (#947)
+  - Remove `WithTraceResponseHeader` function,
+    use `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` environment variable instead.
+  - Remove `TraceResponseHeaderMiddleware` function,
+    use `NewHandler` function instead.
+  - Remove `Option` type.
 
 ### Fixed
 

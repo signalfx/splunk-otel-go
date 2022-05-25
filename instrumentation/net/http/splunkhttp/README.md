@@ -35,16 +35,16 @@ func main() {
 ### Splunk distribution configuration
 
 <!-- markdownlint-disable MD013 -->
-| Code                                                       | Environment variable                   | Default value  | Purpose                                         |
-| ---------------------------------------------------------- | -------------------------------------- | -------------- | ----------------------------------------------- |
-| `WithTraceResponseHeader`, `TraceResponseHeaderMiddleware` | `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses. [More](#Trace-linkage-between-the-APM-and-RUM-products) |
+| Environment variable                   | Default value  | Purpose                                         |
+| -------------------------------------- | -------------- | ----------------------------------------------- |
+| `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses. [More](#Trace-linkage-between-the-APM-and-RUM-products) |
 <!-- markdownlint-enable MD013 -->
 
 ## Features
 
 ### Trace linkage between the APM and RUM products
 
-`TraceResponseHeaderMiddleware` wraps the passed handler, functioning like middleware.
+`NewHandler` wraps the passed handler, functioning like middleware.
 It adds trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header)
 as [Server-Timing header](https://www.w3.org/TR/server-timing/) to the HTTP response:
 
