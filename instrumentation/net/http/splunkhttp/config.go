@@ -34,14 +34,6 @@ type config struct {
 	TraceResponseHeaderEnabled bool
 }
 
-// optionFunc provides a convenience wrapper for simple Options
-// that can be represented as functions.
-type optionFunc func(*config)
-
-func (o optionFunc) apply(c *config) {
-	o(c)
-}
-
 // newConfig creates a new config struct and applies opts to it.
 func newConfig(opts ...Option) *config {
 	traceResponseHeaderEnabled := true
