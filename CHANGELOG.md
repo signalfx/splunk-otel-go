@@ -46,6 +46,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
     use `OTEL_PROPAGATORS` environment variable instead.
   - Remove `WithTraceExporter` function,
     use `OTEL_TRACES_EXPORTER` environment variable instead.
+- Minimize `instrumentation/net/http/splunkhttp` API to
+  contain only necessary functions. (#947)
+  - Remove `WithTraceResponseHeader` function,
+    use `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` environment variable instead.
+  - Remove `TraceResponseHeaderMiddleware` function,
+    use `NewHandler` function instead.
 
 ### Fixed
 
