@@ -3,7 +3,7 @@
 > The official Splunk documentation for this page is
 [Migrate from the SignalFx Tracing Library for Go](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/migrate-signalfx-go-to-otel.html).
 For instructions on how to contribute to the docs, see
-[CONTRIBUTING.md](./CONTRIBUTING.md#documentation).
+[CONTRIBUTING.md](../CONTRIBUTING.md#documentation).
 
 The [Splunk Distribution of OpenTelemetry Go] replaces the [SignalFx Tracing
 Library for Go].
