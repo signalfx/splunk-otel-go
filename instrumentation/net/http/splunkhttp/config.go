@@ -24,18 +24,6 @@ const (
 	envVarTraceResponseHeaderEnabled = "SPLUNK_TRACE_RESPONSE_HEADER_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
-// WithTraceResponseHeader enables or disables the TraceResponseHeaderMiddleware.
-//
-// The default is to enable the TraceResponseHeaderMiddleware if this option is not passed.
-// Additionally, the SPLUNK_TRACE_RESPONSE_HEADER_ENABLED environment variable
-// can be set to TRUE or FALSE to specify this option. This option value will be
-// given precedence if both it and the environment variable are set.
-func WithTraceResponseHeader(v bool) Option {
-	return optionFunc(func(cfg *config) {
-		cfg.TraceResponseHeaderEnabled = v
-	})
-}
-
 // Option is used for setting optional config properties.
 type Option interface {
 	apply(*config)
