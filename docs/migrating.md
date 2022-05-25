@@ -3,7 +3,7 @@
 > The official Splunk documentation for this page is
 [Migrate from the SignalFx Tracing Library for Go](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/migrate-signalfx-go-to-otel.html).
 For instructions on how to contribute to the docs, see
-[CONTRIBUTING.md](./CONTRIBUTING.md#documentation).
+[CONTRIBUTING.md](../CONTRIBUTING.md#documentation).
 
 The [Splunk Distribution of OpenTelemetry Go] replaces the [SignalFx Tracing
 Library for Go].
@@ -25,7 +25,7 @@ transmitted to Splunk Observability Cloud, without any dependency on
 `github.com/signalfx/signalfx-go-tracing` packages. Make sure to verify this by
 checking your `go.mod` files after cleaning them up.
 
-### Replace [`tracing`] Setup with [`distro`] Setup
+### Replace [`tracing`] setup with [`distro`] setup
 
 The [SignalFx Tracing Library for Go] uses the [`tracing`] package to configure
 and start tracing functionality. This is replaced by the [`distro`] package
@@ -36,8 +36,8 @@ replacements are used for [`tracing.StartOption`] instances.
 
 | [`tracing.StartOption`] | Replacement |
 | --- | --- |
-| [`tracing.WithAccessToken`] | [`distro.WithAccessToken`] |
-| [`tracing.WithEndpointURL`] | [`distro.WithEndpoint`] |
+| [`tracing.WithAccessToken`] | Use `SPLUNK_ACCESS_TOKEN` environment variable. |
+| [`tracing.WithEndpointURL`] | Use `SPLUNK_REALM` or other environment variables to configure the exporter. |
 | [`tracing.WithGlobalTag`] | See [Defining a Resource](#defining-a-resource) |
 | [`tracing.WithRecordedValueMaxLength`] | See [Setting Span Limits](#setting-span-limits) |
 | [`tracing.WithServiceName`] | See [Defining a Resource](#defining-a-resource) |
@@ -230,8 +230,6 @@ encountered.
 [`tracing.WithRecordedValueMaxLength`]: https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing/tracing#WithRecordedValueMaxLength
 [`tracing.WithServiceName`]: https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing/tracing#WithServiceName
 [`tracing.WithoutLibraryTags`]: https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing/tracing#WithoutLibraryTags
-[`distro.WithAccessToken`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithAccessToken
-[`distro.WithEndpoint`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#WithEndpoint
 [`Resource`]: https://pkg.go.dev/go.opentelemetry.io/otel/sdk/resource#Resource
 [`distro.SDK`]: https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro#SDK
 [span limits]: https://github.com/open-telemetry/opentelemetry-specification/blob/v1.9.0/specification/sdk-environment-variables.md#span-limits-
