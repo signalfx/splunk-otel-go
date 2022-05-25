@@ -2,19 +2,21 @@
 
 ## Pre-Release
 
-Update go.mod for submodules to depend on the new release
-which will happen in the next step.
+1. Verify if [wizard](https://app.signalfx.com/#/integrations/go-tracing/description)
+   and [official docs](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html)
+   needs any adjustments. Contact @signalfx/gdi-docs team if needed.
 
-1. Run the pre-release script. It creates a branch `pre_release_<new tag>`
+2. Run the pre-release script which updates go.mod for submodules to depend on
+   the new release. It creates a branch `pre_release_<new tag>`
    that will contain all release changes.
 
     ```sh
     ./pre_release.sh -t <new tag>
     ```
 
-2. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
+3. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
-3. Push the changes to upstream and create a Pull Request on GitHub.
+4. Push the changes to upstream and create a Pull Request on GitHub.
 
 ## Tag
 
@@ -47,3 +49,7 @@ It is critical you make sure the version you push upstream is correct.
 Create a Release for the new `<new tag>` on GitHub.
 The release body should include all the release notes
 for this release taken from [CHANGELOG.md](CHANGELOG.md).
+
+## Post-Release
+
+Bump versions in [tracing-examples](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
