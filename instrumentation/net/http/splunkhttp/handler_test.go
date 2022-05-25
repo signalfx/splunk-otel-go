@@ -26,9 +26,7 @@ import (
 )
 
 func TestNewHandlerDefault(t *testing.T) {
-	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
-		return NewHandler(handler)
-	})
+	resp := responseForHandler() // nolint:bodyclose // Body is not used
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")
 	assert.Contains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should set Access-Control-Expose-Headers header")
@@ -39,21 +37,19 @@ func TestNewHandlerTraceResponseHeaderDisabled(t *testing.T) {
 	os.Setenv("SPLUNK_TRACE_RESPONSE_HEADER_ENABLED", "false")
 	defer os.Unsetenv("SPLUNK_TRACE_RESPONSE_HEADER_ENABLED")
 
-	resp := responseForHandler(func(handler http.Handler) http.Handler { // nolint:bodyclose // Body is not used
-		return NewHandler(handler)
-	})
+	resp := responseForHandler() // nolint:bodyclose // Body is not used
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")
 	assert.NotContains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should NOT set Access-Control-Expose-Headers header")
 	assert.NotRegexp(t, "^traceparent;desc=\"00-[0-9a-f]{32}-[0-9a-f]{16}-01\"$", resp.Header.Get("Server-Timing"), "should not add traceID to Server-Timing header")
 }
 
-func responseForHandler(wrapFn func(http.Handler) http.Handler) *http.Response {
+func responseForHandler() *http.Response {
 	content := []byte("Any content")
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(content) //nolint:errcheck
 	})
-	handler = wrapFn(handler)
+	handler = NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
 
 	w := httptest.NewRecorder()
