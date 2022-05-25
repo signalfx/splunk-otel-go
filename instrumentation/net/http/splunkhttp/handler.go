@@ -23,8 +23,8 @@ import (
 
 // NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
 // This will also enable all the Splunk specific defaults for HTTP tracing.
-func NewHandler(handler http.Handler, opts ...Option) http.Handler {
-	cfg := newConfig(opts...)
+func NewHandler(handler http.Handler) http.Handler {
+	cfg := newConfig()
 	if cfg.TraceResponseHeaderEnabled {
 		handler = traceResponseHeaderMiddleware(handler)
 	}

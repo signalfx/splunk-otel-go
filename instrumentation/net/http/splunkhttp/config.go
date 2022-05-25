@@ -24,28 +24,19 @@ const (
 	envVarTraceResponseHeaderEnabled = "SPLUNK_TRACE_RESPONSE_HEADER_ENABLED" // Adds `Server-Timing` header to HTTP responses
 )
 
-// Option is used for setting optional config properties.
-type Option interface {
-	apply(*config)
-}
-
 // config represents the available configuration options.
 type config struct {
 	TraceResponseHeaderEnabled bool
 }
 
-// newConfig creates a new config struct and applies opts to it.
-func newConfig(opts ...Option) *config {
+// newConfig creates a new config struct.
+func newConfig() *config {
 	traceResponseHeaderEnabled := true
 	if v := os.Getenv(envVarTraceResponseHeaderEnabled); strings.EqualFold(v, "false") {
 		traceResponseHeaderEnabled = false
 	}
 
-	c := &config{
+	return &config{
 		TraceResponseHeaderEnabled: traceResponseHeaderEnabled,
 	}
-	for _, opt := range opts {
-		opt.apply(c)
-	}
-	return c
 }

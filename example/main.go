@@ -58,7 +58,7 @@ func main() {
 
 	// instrument http.Handler
 	router.Use(otelmux.Middleware("mux-server"))
-	router.Use(func(h http.Handler) http.Handler { return splunkhttp.NewHandler(h) })
+	router.Use(splunkhttp.NewHandler)
 
 	router.HandleFunc("/hello", handle).Methods("GET")
 
