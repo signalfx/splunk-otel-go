@@ -15,7 +15,10 @@
 package splunkhttp
 
 import (
+	"encoding/hex"
 	"net/http"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 // NewHandler wraps the passed handler in a span named after the operation and with any provided Options.
@@ -23,7 +26,28 @@ import (
 func NewHandler(handler http.Handler, opts ...Option) http.Handler {
 	cfg := newConfig(opts...)
 	if cfg.TraceResponseHeaderEnabled {
-		handler = TraceResponseHeaderMiddleware(handler)
+		handler = traceResponseHeaderMiddleware(handler)
 	}
 	return handler
+}
+
+// traceResponseHeaderMiddleware wraps the passed handler, functioning like middleware.
+// It adds trace context in traceparent form (https://www.w3.org/TR/trace-context/#traceparent-header)
+// as Server-Timing header (https://www.w3.org/TR/server-timing/)
+// to the HTTP response.
+func traceResponseHeaderMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if spanCtx := trace.SpanContextFromContext(r.Context()); spanCtx.IsValid() {
+			w.Header().Add("Access-Control-Expose-Headers", "Server-Timing")
+
+			traceID := spanCtx.TraceID()
+			hexTraceID := hex.EncodeToString(traceID[:])
+			spanID := spanCtx.SpanID()
+			hexSpanID := hex.EncodeToString(spanID[:])
+			traceParent := "traceparent;desc=\"00-" + hexTraceID + "-" + hexSpanID + "-01\""
+			w.Header().Add("Server-Timing", traceParent)
+		}
+
+		handler.ServeHTTP(w, r)
+	})
 }
