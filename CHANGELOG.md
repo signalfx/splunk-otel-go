@@ -8,6 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.9.0] - 2022-05-26
+
+This release contains configuration fixes and simplifies the API before
+a stable release is published.
+
+`go.opentelemetry.io/otel*` dependencies are updated to [`v1.7.0`][otel-v1.7.0]
+and `go.opentelemetry.io/contrib*` dependencies are updated to [`v1.7.0`/`v0.32.0`][contrib-v1.7.0].
+
 ### Changed
 
 - The `NewTracer` function from
@@ -34,6 +42,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Remove `opts ...Option` parameter from `NewHandler` function
   from `github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp`
   package. (#947)
+- Update `go.opentelemetry.io/otel*` dependencies from [`v1.6.1`][otel-v1.6.1]
+  to [`v1.7.0`][otel-v1.7.0]. (#926)
+- Update `go.opentelemetry.io/contrib*` dependencies from
+  [`v1.6.0`/`v0.31.0`][contrib-v1.6.0] to [`v1.7.0`/`v0.32.0`][contrib-v1.7.0].
+  (#926)
   
 ### Removed
 
@@ -59,7 +72,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Use the correct Splunk Observabilty Cloud OTLP over gRPC endpoint
+- Use the correct Splunk Observability Cloud OTLP over gRPC endpoint
   when `SPLUNK_REALM` is set. (#791)
 
 ## [0.8.0] - 2022-04-05
@@ -270,7 +283,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.9.0
 [0.8.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.8.0
 [0.7.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.7.0
 [0.6.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.6.0
@@ -279,6 +293,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.7.0
 [otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
 [otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
 [otel-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.3.0
@@ -288,6 +303,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.7.0
 [contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0
 [contrib-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.3.0
 [contrib-v0.28.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.28.0

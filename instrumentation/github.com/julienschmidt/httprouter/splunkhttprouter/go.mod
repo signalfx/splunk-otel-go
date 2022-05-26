@@ -6,5 +6,3 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0
 )
-
-replace github.com/signalfx/splunk-otel-go => ../../../../..
