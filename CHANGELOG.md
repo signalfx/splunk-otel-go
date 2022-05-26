@@ -72,7 +72,7 @@ and `go.opentelemetry.io/contrib*` dependencies are updated to [`v1.7.0`/`v0.32.
 
 ### Fixed
 
-- Use the correct Splunk Observabilty Cloud OTLP over gRPC endpoint
+- Use the correct Splunk Observability Cloud OTLP over gRPC endpoint
   when `SPLUNK_REALM` is set. (#791)
 
 ## [0.8.0] - 2022-04-05
