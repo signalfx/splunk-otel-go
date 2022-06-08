@@ -31,7 +31,7 @@ Explore how to get started with the project [here](./docs/README.md#getting-star
 For troubleshooting information, see the
 [Troubleshooting](./docs/troubleshooting.md) documentation.
 
-### Examples
+## Examples
 
 You can find our official "user-facing" examples
 [here](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
