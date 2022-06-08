@@ -14,11 +14,11 @@ This is the first stable release of the Splunk Distribution of OpenTelemetry Go
 which is compliant with [Splunk's GDI Specification v1.3.0](https://github.com/signalfx/gdi-specification/tree/v1.3.0).
 
 Please note that although the distribution is marked as stable,
-some of its dependant components (e.g. `otelhttp` instrumentation library)
+some of its dependent components (e.g. `otelhttp` instrumentation library)
 are still experimental.
 
-This release uses [`OpenTelemetry Go v1.7.0`][otel-v1.7.0] and
-[`OpenTelemetry Go Contrib v1.7.0`/`v0.32.0`][contrib-v1.7.0].
+This release uses [OpenTelemetry Go v1.7.0][otel-v1.7.0] and
+[OpenTelemetry Go Contrib v1.7.0/v0.32.0][contrib-v1.7.0].
 
 ## [0.9.0] - 2022-05-26
 
