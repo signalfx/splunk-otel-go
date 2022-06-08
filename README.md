@@ -5,7 +5,9 @@
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go?include_prereleases)](https://github.com/signalfx/splunk-otel-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
 [![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/splunk-otel-go)](go.mod)
+[![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog-%23E05735)](CHANGELOG.md)
 [![LICENSE](https://img.shields.io/github/license/signalfx/splunk-otel-go)](LICENSE)
+
 [![Build Status](https://img.shields.io/github/workflow/status/signalfx/splunk-otel-go/ci)](https://github.com/signalfx/splunk-otel-go/actions?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/signalfx/splunk-otel-go/branch/main/graph/badge.svg)](https://codecov.io/gh/signalfx/splunk-otel-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/signalfx/splunk-otel-go)](https://goreportcard.com/report/github.com/signalfx/splunk-otel-go)
