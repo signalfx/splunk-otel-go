@@ -1,6 +1,6 @@
 # Splunk Distribution of OpenTelemetry Go
 
-[![Splunk GDI Specification](https://img.shields.io/badge/GDI-1.2.0-blue)](https://github.com/signalfx/gdi-specification/releases/tag/v1.2.0)
+[![Splunk GDI Specification](https://img.shields.io/badge/GDI-1.3.0-blueviolet)](https://github.com/signalfx/gdi-specification/releases/tag/v1.3.0)
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go?include_prereleases)](https://github.com/signalfx/splunk-otel-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
 [![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/splunk-otel-go)](go.mod)
@@ -13,10 +13,6 @@ The Splunk distribution of [OpenTelemetry
 Go](https://github.com/open-telemetry/opentelemetry-go) provides
 multiple packages that instrument your Go
 application to capture and report distributed traces to Splunk APM.
-
-> :construction: This project is currently in **BETA**.
-> It is **officially supported** by Splunk.
-> However, breaking changes **MAY** be introduced.
 
 ## Documentation
 
