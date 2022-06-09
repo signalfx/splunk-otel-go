@@ -8,6 +8,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.0] - 2022-06-09
+
+This is the first stable release of the Splunk Distribution of OpenTelemetry Go
+which is compliant with [Splunk's GDI Specification v1.3.0](https://github.com/signalfx/gdi-specification/tree/v1.3.0).
+
+Please note that although the distribution is marked as stable,
+some of its dependent components (e.g. `otelhttp` instrumentation library)
+are still experimental.
+
+This release uses [OpenTelemetry Go v1.7.0][otel-v1.7.0] and
+[OpenTelemetry Go Contrib v1.7.0/v0.32.0][contrib-v1.7.0].
+
 ## [0.9.0] - 2022-05-26
 
 This release contains configuration fixes and simplifies the API before
@@ -283,7 +295,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.0.0
 [0.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.9.0
 [0.8.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.8.0
 [0.7.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.7.0
