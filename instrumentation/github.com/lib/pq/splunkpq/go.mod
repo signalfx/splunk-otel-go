@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/lib/pq v1.10.6
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.0.0
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.7.4
 )
 
 replace (
