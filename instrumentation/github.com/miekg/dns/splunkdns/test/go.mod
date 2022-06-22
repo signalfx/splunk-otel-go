@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/s
 go 1.16
 
 require (
-	github.com/miekg/dns v1.1.49
+	github.com/miekg/dns v1.1.50
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns v1.0.0
 	github.com/stretchr/testify v1.7.4
 	go.opentelemetry.io/otel v1.7.0
