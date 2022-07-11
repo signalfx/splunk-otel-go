@@ -7,7 +7,7 @@ require (
 	github.com/signalfx/splunk-otel-go/distro v1.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.0.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.32.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.33.0
 )
 
 replace github.com/signalfx/splunk-otel-go => ../
