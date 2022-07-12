@@ -76,9 +76,7 @@ func Run(opts ...Option) (SDK, error) {
 		c.Logger.Info("SPLUNK_METRICS_ENDPOINT set; not supported by this distro")
 	}
 
-	if c.Propagator != nil && c.Propagator != nonePropagator {
-		otel.SetTextMapPropagator(c.Propagator)
-	}
+	otel.SetTextMapPropagator(c.Propagator)
 
 	if c.TraceExporterFunc == nil {
 		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none/nil: Tracing disabled")
