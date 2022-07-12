@@ -8,6 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
+[OpenTelemetry Go Contrib v1.8.0/v0.33.0][contrib-v1.8.0].
+
+### Changed
+
+- Update `go.opentelemetry.io/otel*` dependencies from [`v1.7.0`][otel-v1.7.0]
+  to [`v1.8.0`][otel-v1.8.0]. (#1169)
+- Update `go.opentelemetry.io/contrib*` dependencies from
+  [`v1.7.0`/`v0.32.0`][contrib-v1.7.0] to [`v1.8.0`/`v0.33.0`][contrib-v1.8.0].
+  (#1169)
+
 ## [1.0.0] - 2022-06-09
 
 This is the first stable release of the Splunk Distribution of OpenTelemetry Go
@@ -306,6 +317,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.8.0
 [otel-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.7.0
 [otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
 [otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
@@ -316,6 +328,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.8.0
 [contrib-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.7.0
 [contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0
 [contrib-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.3.0
