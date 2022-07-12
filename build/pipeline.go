@@ -121,7 +121,8 @@ func taskModTidy() goyek.Task {
 		Usage: "go mod tidy",
 		Action: func(tf *goyek.TF) {
 			ForGoModules(tf, func(tf *goyek.TF) {
-				if err := tf.Cmd("go", "mod", "tidy").Run(); err != nil {
+				// reference: https://go.dev/ref/mod#graph-pruning
+				if err := tf.Cmd("go", "mod", "tidy", "-compat=1.17").Run(); err != nil {
 					tf.Error(err)
 				}
 			})
