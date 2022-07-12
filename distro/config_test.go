@@ -17,13 +17,8 @@ package distro
 import (
 	"testing"
 
-	"github.com/go-logr/logr"
 	testr "github.com/go-logr/logr/testing"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/contrib/propagators/aws/xray"
-	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/contrib/propagators/jaeger"
-	"go.opentelemetry.io/contrib/propagators/ot"
 	"go.opentelemetry.io/otel/propagation"
 )
 
@@ -100,40 +95,4 @@ func testEnvironmentOverrides(t *testing.T, tc *configFieldTest) {
 			)
 		}(ev.Key, ev.Value)
 	}
-}
-
-func TestSetPropagatorComposite(t *testing.T) {
-	c := config{Logger: logr.Discard()}
-	c.setPropagator("tracecontext,baggage,b3,b3multi,jaeger,xray,ottrace,garbage")
-	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-		b3.New(b3.WithInjectEncoding(b3.B3SingleHeader)),
-		b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)),
-		jaeger.Jaeger{},
-		xray.Propagator{},
-		ot.OT{},
-	), c.Propagator)
-}
-
-func TestSetPropagatorDefault(t *testing.T) {
-	c := config{Logger: logr.Discard()}
-	c.setPropagator("")
-	assert.Equal(t, propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	), c.Propagator)
-}
-
-func TestSetPropagatorCompositeWithNone(t *testing.T) {
-	// Assumes specification as stated:
-	//
-	//   "none": No automatically configured propagator.
-	//
-	// means if "none" is included in the value, no propagator should be
-	// configured. Therefore, setPropagator needs to return just the
-	// nonePropagator value to signal this behavior.
-	c := config{Logger: logr.Discard()}
-	c.setPropagator("tracecontext,baggage,none")
-	assert.Equal(t, nonePropagator, c.Propagator)
 }
