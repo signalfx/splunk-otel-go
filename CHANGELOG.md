@@ -19,6 +19,10 @@ This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
   [`v1.7.0`/`v0.32.0`][contrib-v1.7.0] to [`v1.8.0`/`v0.33.0`][contrib-v1.8.0].
   (#1169)
 
+## Removed
+
+- Drop support for Go 1.16 as `go.opentelemetry.io` did the same. (#1172)
+
 ## [1.0.0] - 2022-06-09
 
 This is the first stable release of the Splunk Distribution of OpenTelemetry Go
