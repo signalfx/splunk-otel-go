@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splun
 go 1.17
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.0.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.1.0
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/otel v1.8.0
 	go.opentelemetry.io/otel/trace v1.8.0
@@ -32,7 +32,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.0.0 // indirect
+	github.com/signalfx/splunk-otel-go v1.1.0 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect

@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.0] - 2022-07-14
+
 This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
 [OpenTelemetry Go Contrib v1.8.0/v0.33.0][contrib-v1.8.0].
 
@@ -19,7 +21,7 @@ This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
   [`v1.7.0`/`v0.32.0`][contrib-v1.7.0] to [`v1.8.0`/`v0.33.0`][contrib-v1.8.0].
   (#1169)
 
-## Removed
+### Removed
 
 - Drop support for Go 1.16 as `go.opentelemetry.io` did the same in
   [`v1.7.0`][otel-v1.7.0]. (#1172)
@@ -311,7 +313,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.1.0
 [1.0.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.0.0
 [0.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.9.0
 [0.8.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.8.0
