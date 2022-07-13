@@ -21,7 +21,7 @@ This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
   [`v1.7.0`/`v0.32.0`][contrib-v1.7.0] to [`v1.8.0`/`v0.33.0`][contrib-v1.8.0].
   (#1169)
 
-## Removed
+### Removed
 
 - Drop support for Go 1.16 as `go.opentelemetry.io` did the same in
   [`v1.7.0`][otel-v1.7.0]. (#1172)
