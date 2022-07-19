@@ -37,7 +37,7 @@ func main() {
 <!-- markdownlint-disable MD013 -->
 | Environment variable                   | Default value  | Purpose                                         |
 | -------------------------------------- | -------------- | ----------------------------------------------- |
-| `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses. [More](#Trace-linkage-between-the-APM-and-RUM-products) |
+| `SPLUNK_TRACE_RESPONSE_HEADER_ENABLED` | `true`         | Adds `Server-Timing` header to HTTP responses. [More](#trace-linkage-between-the-apm-and-rum-products) |
 <!-- markdownlint-enable MD013 -->
 
 ## Features
