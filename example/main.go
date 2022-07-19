@@ -63,10 +63,11 @@ func main() {
 	router.HandleFunc("/hello", handle).Methods("GET")
 
 	srv := &http.Server{
-		Addr:         ":8080",
-		Handler:      router,
-		WriteTimeout: time.Second,
-		ReadTimeout:  time.Second,
+		Addr:              ":8080",
+		Handler:           router,
+		WriteTimeout:      time.Second,
+		ReadTimeout:       time.Second,
+		ReadHeaderTimeout: time.Second,
 	}
 
 	errCh := make(chan error, 1)
