@@ -166,5 +166,4 @@ If you have not found a solution after going through this document,
 [open an Issue]. Be sure to include all the required information.
 
 [open an Issue]: https://github.com/signalfx/splunk-otel-go/issues/new/choose
-[environment variables]: https://github.com/open-telemetry/opentelemetry-specification/blob/v1.9.0/specification/sdk-environment-variables.md#batch-span-processor
 [the collector troubleshooting documentation]: https://github.com/signalfx/splunk-otel-collector/blob/main/docs/troubleshooting.md

@@ -328,7 +328,6 @@ an impedance mismatch with this duplicate batching.
 [otel-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.8.0
 [otel-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.7.0
 [otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
-[otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
 [otel-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.3.0
 [otel-v1.0.0-RC3]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC3
 [otel-v1.0.0-RC2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC2
