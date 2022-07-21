@@ -99,6 +99,7 @@ gendependabot: # generate dependabot.yml
 	@printf "version: 2\n" >> ${DEPENDABOT_PATH}
 	@printf "updates:\n" >> ${DEPENDABOT_PATH}
 	@printf "  - package-ecosystem: \"github-actions\"\n    directory: \"/\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH}
+	@printf "  - package-ecosystem: \"docker\"\n    directory: \"/build\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH}
 	@echo "Add entry for \"/\""
 	@printf "  - package-ecosystem: \"gomod\"\n    directory: \"/\"\n    schedule:\n      interval: \"daily\"\n" >> ${DEPENDABOT_PATH}
 	@set -e; for dir in $(filter-out ., $(ALL_MODULES)); do \
