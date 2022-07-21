@@ -168,8 +168,13 @@ func taskMarkdownLint(skipDocker goyek.RegisteredBoolParam) goyek.Task {
 				tf.Skip("skipping as Docker is needed")
 			}
 
-			if err := tf.Cmd("docker", "run", "--rm", "-v", WorkDir(tf)+":/workdir", "ghcr.io/igorshubovych/markdownlint-cli:v0.32.0", "**/*.md").Run(); err != nil {
-				tf.Error(err)
+			dockerTag := "markdownlint-cli"
+			if err := tf.Cmd("docker", "build", "-t", dockerTag, "-f", "build/markdownlint-cli.dockerfile", ".").Run(); err != nil {
+				tf.Fatal(err)
+			}
+
+			if err := tf.Cmd("docker", "run", "--rm", "-v", WorkDir(tf)+":/workdir", dockerTag, "**/*.md").Run(); err != nil {
+				tf.Fatal(err)
 			}
 		},
 	}
