@@ -39,6 +39,7 @@ type Pipeline struct {
 		Fmt          goyek.RegisteredTask
 		Markdownlint goyek.RegisteredTask
 		Misspell     goyek.RegisteredTask
+		Cspell       goyek.RegisteredTask
 		GolangciLint goyek.RegisteredTask
 		Test         goyek.RegisteredTask
 		ModTidy      goyek.RegisteredTask
@@ -78,6 +79,7 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 	result.Tasks.Fmt = flow.Register(taskFmt(cfg.RepoPackagePrefix))
 	result.Tasks.Markdownlint = flow.Register(taskMarkdownLint(result.Params.SkipDocker))
 	result.Tasks.Misspell = flow.Register(taskMisspell())
+	result.Tasks.Cspell = flow.Register(taskCspell(result.Params.SkipDocker))
 	result.Tasks.GolangciLint = flow.Register(taskGolangciLint())
 	result.Tasks.Test = flow.Register(taskTest(cfg.RepoPackagePrefix, flow.VerboseParam(), result.Params.TestShrot))
 	result.Tasks.ModTidy = flow.Register(taskModTidy())
@@ -87,6 +89,7 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 	result.Tasks.Lint = flow.Register(taskLint(goyek.Deps{
 		result.Tasks.Misspell,
 		result.Tasks.Markdownlint,
+		result.Tasks.Cspell,
 		result.Tasks.GolangciLint,
 	}))
 	result.Tasks.All = flow.Register(taskAll(goyek.Deps{
@@ -193,6 +196,28 @@ func taskMisspell() goyek.Task {
 
 			lint := tf.Cmd("misspell", "-error", "-locale=US", "-i=importas", ".")
 			if err := lint.Run(); err != nil {
+				tf.Fatal(err)
+			}
+		},
+	}
+}
+
+func taskCspell(skipDocker goyek.RegisteredBoolParam) goyek.Task {
+	return goyek.Task{
+		Name:   "cspell",
+		Usage:  "cspell (requires docker)",
+		Params: goyek.Params{skipDocker},
+		Action: func(tf *goyek.TF) {
+			if skipDocker.Get(tf) {
+				tf.Skip("skipping as Docker is needed")
+			}
+
+			dockerTag := "cspell"
+			if err := tf.Cmd("docker", "build", "-t", dockerTag, "-f", "build/cspell.dockerfile", ".").Run(); err != nil {
+				tf.Fatal(err)
+			}
+
+			if err := tf.Cmd("docker", "run", "--rm", "-v", WorkDir(tf)+":/workdir", dockerTag, "**/*.md").Run(); err != nil {
 				tf.Fatal(err)
 			}
 		},
