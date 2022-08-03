@@ -6,9 +6,9 @@ require (
 	github.com/miekg/dns v1.1.50
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns v1.1.0
 	github.com/stretchr/testify v1.8.0
-	go.opentelemetry.io/otel v1.8.0
+	go.opentelemetry.io/otel v1.9.0
 	go.opentelemetry.io/otel/sdk v1.8.0
-	go.opentelemetry.io/otel/trace v1.8.0
+	go.opentelemetry.io/otel/trace v1.9.0
 )
 
 require (
