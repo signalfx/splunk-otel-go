@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentin
 go 1.17
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.9.1
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.1.0
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/otel v1.9.0
