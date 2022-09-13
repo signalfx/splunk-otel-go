@@ -20,23 +20,23 @@
 // use the splunksql.Open function as a replacement for any sql.Open function
 // use. For example, if your code looks like this to start.
 //
-//     import (
-//     	"database/sql"
-//     	_ "github.com/lib/pq"
-//     )
-//     // ...
-//     db, err := sql.Open("postgres", "postgres://localhost:5432/dbname")
-//     // ...
+//	import (
+//		"database/sql"
+//		_ "github.com/lib/pq"
+//	)
+//	// ...
+//	db, err := sql.Open("postgres", "postgres://localhost:5432/dbname")
+//	// ...
 //
 // Update to this.
 //
-//     import (
-//     	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq"
-//     	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-//     )
-//     // ...
-//     db, err := splunksql.Open("postgres", "postgres://localhost:5432/dbname")
-//     // ...
+//	import (
+//		_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq"
+//		"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+//	)
+//	// ...
+//	db, err := splunksql.Open("postgres", "postgres://localhost:5432/dbname")
+//	// ...
 package splunkpq
 
 import (
