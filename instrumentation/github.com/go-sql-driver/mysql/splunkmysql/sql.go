@@ -20,23 +20,23 @@
 // use the splunksql.Open function as a replacement for any sql.Open function
 // use. For example, if your code looks like this to start.
 //
-//     import (
-//     	"database/sql"
-//     	_ "github.com/go-sql-driver/mysql"
-//     )
-//     // ...
-//     db, err := sql.Open("mysql", "user:password@/dbname")
-//     // ...
+//	import (
+//		"database/sql"
+//		_ "github.com/go-sql-driver/mysql"
+//	)
+//	// ...
+//	db, err := sql.Open("mysql", "user:password@/dbname")
+//	// ...
 //
 // Update to this.
 //
-//     import (
-//     	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
-//     	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-//     )
-//     // ...
-//     db, err := splunksql.Open("mysql", "user:password@/dbname")
-//     // ...
+//	import (
+//		_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
+//		"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+//	)
+//	// ...
+//	db, err := splunksql.Open("mysql", "user:password@/dbname")
+//	// ...
 package splunkmysql
 
 import (
