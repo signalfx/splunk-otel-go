@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/otel v1.10.0
 	go.opentelemetry.io/otel/sdk v1.10.0
 	go.opentelemetry.io/otel/trace v1.10.0
-	go.uber.org/goleak v1.1.12
+	go.uber.org/goleak v1.2.0
 )
 
 require (
