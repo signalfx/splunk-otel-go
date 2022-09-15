@@ -198,7 +198,8 @@ func (c *Consumer) Events() chan kafka.Event {
 // Will block for at most timeoutMs milliseconds.
 //
 // The following callbacks may be triggered:
-//   Subscribe()'s rebalanceCb
+//
+//	Subscribe()'s rebalanceCb
 //
 // Returns nil on timeout, else an Event
 func (c *Consumer) Poll(timeoutMS int) (event kafka.Event) {
