@@ -39,7 +39,7 @@ jobs:
         with:
           go-version: '1.17'
       - run: ${{ matrix.run-script }}
-      - uses: codecov/codecov-action@v3.1.0
+      - uses: codecov/codecov-action@v3.1.1
         with:
           files: ./test-results/coverage.out
           flags: ${{ runner.os }}
