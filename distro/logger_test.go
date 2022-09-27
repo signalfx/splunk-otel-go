@@ -70,7 +70,8 @@ func TestZapLevel(t *testing.T) {
 		{in: "info", want: -1},
 		{in: "warn", want: 0},
 		{in: "error", want: 1},
-		{in: "invalid", want: -1},
+		{in: "invalid", want: -1}, // default for unrecognized value
+		{in: "DEBUG", want: -127}, // values are case insensitive
 	}
 
 	for _, tc := range testcases {
