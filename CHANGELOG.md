@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- `OTEL_LOG_LEVEL` environment variable accepts case insensitive values. (#1374)
+
 ## [1.1.0] - 2022-07-14
 
 This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
