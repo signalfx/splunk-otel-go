@@ -6,7 +6,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/signalfx/splunk-otel-go/distro v1.1.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.1.0
-	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.35.0
+	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.36.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.35.0
 )
 
@@ -19,7 +19,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/signalfx/splunk-otel-go v1.1.0 // indirect
-	go.opentelemetry.io/contrib/propagators/autoprop v0.35.0 // indirect
+	go.opentelemetry.io/contrib/propagators/autoprop v0.36.1 // indirect
 	go.opentelemetry.io/contrib/propagators/aws v1.10.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.10.0 // indirect
 	go.opentelemetry.io/contrib/propagators/jaeger v1.10.0 // indirect
