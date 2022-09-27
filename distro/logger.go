@@ -15,6 +15,8 @@
 package distro
 
 import (
+	"strings"
+
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -50,6 +52,7 @@ var (
 
 // zapLevel returns the parsed zapcore.Level.
 func zapLevel(level string) zapcore.Level {
+	level = strings.ToLower(level)
 	for _, l := range logLevels {
 		if l.String() == level {
 			return l.ZapLevel()
