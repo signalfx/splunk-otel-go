@@ -19,17 +19,16 @@ application to capture and report distributed traces to Splunk APM.
 
 ## Documentation
 
-Read the official documentation for this distribution in the
-[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
-
 ### Getting Started
 
-Explore how to get started with the project [here](./docs/README.md#getting-started).
+Read the official documentation for this distribution in the
+[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
 
 ### Troubleshooting
 
 For troubleshooting information, see the
-[Troubleshooting](./docs/troubleshooting.md) documentation.
+[Troubleshooting](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/common-go-troubleshooting.html)
+documentation.
 
 ## Examples
 
