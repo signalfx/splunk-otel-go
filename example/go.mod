@@ -1,4 +1,4 @@
-module example
+module github.com/signalfx/splunk-otel-go/example
 
 go 1.17
 
