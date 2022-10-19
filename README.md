@@ -46,8 +46,7 @@ before creating an issue or a pull request.
 ## License
 
 The Splunk distribution of OpenTelemetry Go is a
-distribution of the [OpenTelemetry Go
-project](https://github.com/open-telemetry/opentelemetry-go). It is
+distribution of [OpenTelemetry Go](https://github.com/open-telemetry/opentelemetry-go). It is
 released under the terms of the Apache Software License version 2.0. See [the
 license file](./LICENSE) for more details.
 
