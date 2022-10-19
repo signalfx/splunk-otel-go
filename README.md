@@ -46,9 +46,9 @@ before creating an issue or a pull request.
 ## License
 
 The Splunk distribution of OpenTelemetry Go is a
-distribution of [OpenTelemetry Go](https://github.com/open-telemetry/opentelemetry-go). It is
-licensed under the terms of the Apache Software License version 2.0. See [the
-license file](./LICENSE) for more details.
+distribution of [OpenTelemetry Go](https://github.com/open-telemetry/opentelemetry-go).
+It is licensed under the terms of the Apache Software License version 2.0.
+See [the license file](./LICENSE) for more details.
 
 >ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk
 SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html)
