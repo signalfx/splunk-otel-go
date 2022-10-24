@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.1.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/otel v1.11.0
 	go.opentelemetry.io/otel/trace v1.11.0
 	k8s.io/apimachinery v0.25.3
