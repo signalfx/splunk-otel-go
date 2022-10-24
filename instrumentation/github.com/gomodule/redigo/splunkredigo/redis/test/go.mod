@@ -6,7 +6,7 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo v1.1.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/otel v1.11.0
 	go.opentelemetry.io/otel/sdk v1.11.0
 	go.opentelemetry.io/otel/trace v1.11.0
