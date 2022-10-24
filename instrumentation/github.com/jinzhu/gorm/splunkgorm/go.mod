@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.1.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 )
 
 require (
