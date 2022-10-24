@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb v1.1.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/syndtr/goleveldb v1.0.0
 	go.opentelemetry.io/otel v1.11.0
 	go.opentelemetry.io/otel/sdk v1.11.0
