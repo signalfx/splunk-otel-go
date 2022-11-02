@@ -175,11 +175,11 @@ func parseURL(dsn string) (string, error) {
 // Environment-set connection information is intended to have a higher
 // precedence than a library default but lower than any explicitly
 // passed information (such as in the URL or connection string).
-func parseEnviron(env []string) (out map[string]string) { // nolint: funlen, gocyclo
+func parseEnviron(env []string) (out map[string]string) { //nolint: funlen, gocyclo // big switch
 	out = make(map[string]string)
 
 	for _, v := range env {
-		parts := strings.SplitN(v, "=", 2) // nolint: gomnd
+		parts := strings.SplitN(v, "=", 2) //nolint: gomnd // split count
 
 		accrue := func(keyname string) {
 			out[keyname] = parts[1]
@@ -280,7 +280,7 @@ func (s *scanner) SkipSpaces() (rune, bool) {
 // parseOpts parses the options from name and adds them to the values.
 //
 // The parsing code is based on conninfo_parse from libpq's fe-connect.c
-func parseOpts(name string, o Values) error { // nolint: gocyclo
+func parseOpts(name string, o Values) error { //nolint: gocyclo // parsing is more readable in one function
 	s := newScanner(name)
 
 	for {

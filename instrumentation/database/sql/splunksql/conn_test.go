@@ -43,9 +43,9 @@ type mockConn struct {
 
 var (
 	_ driver.Pinger             = (*mockConn)(nil)
-	_ driver.Execer             = (*mockConn)(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_ driver.Execer             = (*mockConn)(nil) //nolint: staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.ExecerContext      = (*mockConn)(nil)
-	_ driver.Queryer            = (*mockConn)(nil) // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	_ driver.Queryer            = (*mockConn)(nil) //nolint: staticcheck // Ensure backwards support of deprecated interface.
 	_ driver.QueryerContext     = (*mockConn)(nil)
 	_ driver.Conn               = (*mockConn)(nil)
 	_ driver.ConnPrepareContext = (*mockConn)(nil)
@@ -230,7 +230,7 @@ func (s *ConnSuite) TestExecContextCallsWrapped() {
 
 type connExecer interface {
 	driver.Conn
-	driver.Execer // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	driver.Execer //nolint: staticcheck // Ensure backwards support of deprecated interface.
 }
 
 func (s *ConnSuite) TestExecContextFallsbackToExec() {
@@ -259,41 +259,41 @@ func (s *ConnSuite) TestExecContextReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestQueryCallsWrapped() {
-	_, err := s.OTelConn.Query("", nil) // nolint: gocritic // Test Query not Exec
+	_, err := s.OTelConn.Query("", nil) //nolint: gocritic // Test Query not Exec
 	s.NoError(err)
 	s.Equal(1, s.MockConn.queryN)
 }
 
 func (s *ConnSuite) TestQueryReturnsWrappedError() {
 	s.MockConn.err = errTest
-	_, err := s.OTelConn.Query("", nil) // nolint: gocritic // Test Query not Exec
+	_, err := s.OTelConn.Query("", nil) //nolint: gocritic // Test Query not Exec
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.queryN)
 }
 
 func (s *ConnSuite) TestQueryReturnsErrSkipIfNotImplemented() {
 	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
-	_, err := s.OTelConn.Query("", nil) // nolint: gocritic // Test Query not Exec
+	_, err := s.OTelConn.Query("", nil) //nolint: gocritic // Test Query not Exec
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryN)
 }
 
 func (s *ConnSuite) TestQueryContextCallsWrapped() {
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockConn.queryContextN)
 }
 
 func (s *ConnSuite) TestQueryContextReturnsWrappedError() {
 	s.MockConn.err = errTest
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockConn.queryContextN)
 }
 
 type connQuery interface {
 	driver.Conn
-	driver.Queryer // nolint: staticcheck // Ensure backwards support of deprecated interface.
+	driver.Queryer //nolint: staticcheck // Ensure backwards support of deprecated interface.
 }
 
 func (s *ConnSuite) TestQueryContextFallsbackToExec() {
@@ -301,7 +301,7 @@ func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 		connQuery
 	}{s.MockConn}, newTraceConfig())
 
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(0, s.MockConn.queryContextN)
 	s.Equal(1, s.MockConn.queryN)
@@ -309,7 +309,7 @@ func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 
 func (s *ConnSuite) TestQueryContextReturnsErrSkipIfNotImplemented() {
 	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
-	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryContextN)
 }

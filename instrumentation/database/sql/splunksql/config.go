@@ -178,7 +178,7 @@ type ConnectionConfig struct {
 // OpenTelemetry semantic coventions. If the settings do not conform to
 // OpenTelemetry requirements an error is returned with a partial list of
 // attributes that do conform.
-func (c ConnectionConfig) Attributes() ([]attribute.KeyValue, error) { // nolint: gocritic // This is short lived, pass the type.
+func (c ConnectionConfig) Attributes() ([]attribute.KeyValue, error) { //nolint: gocritic // This is short lived, pass the type.
 	var attrs []attribute.KeyValue
 	var errs []string
 	if c.Name != "" {
