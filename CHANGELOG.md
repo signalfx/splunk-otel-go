@@ -12,6 +12,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - `OTEL_LOG_LEVEL` environment variable accepts case insensitive values. (#1374)
 
+### Removed
+
+- Drop support for Go 1.17 as `go.opentelemetry.io` did the same in
+  [`v1.11.0`][otel-v1.11.0]. (#TODO)
+
 ## [1.1.0] - 2022-07-14
 
 This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
@@ -329,6 +334,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.11.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.11.0
 [otel-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.8.0
 [otel-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.7.0
 [otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
