@@ -28,7 +28,7 @@ import (
 
 // Config is used to configure the registered pipeline.
 type Config struct {
-	RepoPackagePrefix string // used in "fmt" and "test" tasks
+	RepoPackagePrefix string // used in "test" task
 }
 
 // Pipeline contains the tasks and parameters
@@ -36,7 +36,6 @@ type Config struct {
 type Pipeline struct {
 	Tasks struct {
 		Clean        goyek.RegisteredTask
-		Fmt          goyek.RegisteredTask
 		Markdownlint goyek.RegisteredTask
 		Misspell     goyek.RegisteredTask
 		GolangciLint goyek.RegisteredTask
@@ -75,7 +74,6 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 
 	// tasks
 	result.Tasks.Clean = flow.Register(taskClean())
-	result.Tasks.Fmt = flow.Register(taskFmt(cfg.RepoPackagePrefix))
 	result.Tasks.Markdownlint = flow.Register(taskMarkdownLint(result.Params.SkipDocker))
 	result.Tasks.Misspell = flow.Register(taskMisspell())
 	result.Tasks.GolangciLint = flow.Register(taskGolangciLint())
@@ -91,7 +89,6 @@ func Register(flow *goyek.Flow, cfg Config) Pipeline {
 	}))
 	result.Tasks.All = flow.Register(taskAll(goyek.Deps{
 		result.Tasks.ModTidy,
-		result.Tasks.Fmt,
 		result.Tasks.Lint,
 		result.Tasks.Test,
 		result.Tasks.Diff,
@@ -121,37 +118,9 @@ func taskModTidy() goyek.Task {
 		Usage: "go mod tidy",
 		Action: func(tf *goyek.TF) {
 			ForGoModules(tf, func(tf *goyek.TF) {
-				if err := tf.Cmd("go", "mod", "tidy", "-compat=1.18").Run(); err != nil {
+				if err := tf.Cmd("go", "mod", "tidy").Run(); err != nil {
 					tf.Error(err)
 				}
-			})
-		},
-	}
-}
-
-func taskFmt(repoPrefix string) goyek.Task {
-	return goyek.Task{
-		Name:  "fmt",
-		Usage: "gofumports",
-		Action: func(tf *goyek.TF) {
-			installFmt := tf.Cmd("go", "install", "mvdan.cc/gofumpt")
-			installFmt.Dir = buildDir
-			if err := installFmt.Run(); err != nil {
-				tf.Fatal(err)
-			}
-
-			ForGoModules(tf, func(tf *goyek.TF) {
-				tf.Cmd("gofumpt", "-l", "-w", ".").Run() //nolint // it is OK if it returns error
-			})
-
-			installGoImports := tf.Cmd("go", "install", "golang.org/x/tools/cmd/goimports")
-			installGoImports.Dir = buildDir
-			if err := installGoImports.Run(); err != nil {
-				tf.Fatal(err)
-			}
-
-			ForGoModules(tf, func(tf *goyek.TF) {
-				tf.Cmd("goimports", "-l", "-w", "-local", repoPrefix, ".").Run() //nolint // it is OK if it returns error
 			})
 		},
 	}
@@ -210,7 +179,7 @@ func taskGolangciLint() goyek.Task {
 			}
 
 			ForGoModules(tf, func(tf *goyek.TF) {
-				lint := tf.Cmd("golangci-lint", "run", "--timeout", "4m0s")
+				lint := tf.Cmd("golangci-lint", "run", "--fix", "--timeout", "4m0s")
 				if err := lint.Run(); err != nil {
 					tf.Error(err)
 				}
@@ -231,7 +200,7 @@ func taskTest(repoPrefix string, verbose, testShort goyek.RegisteredBoolParam) g
 			if err := os.RemoveAll(testResultDir); err != nil {
 				tf.Fatal(err)
 			}
-			if err := os.Mkdir(testResultDir, 0o750); err != nil { // nolint:gomnd
+			if err := os.Mkdir(testResultDir, 0o750); err != nil { //nolint:gomnd // dir permissions
 				tf.Fatal(err)
 			}
 
@@ -348,7 +317,7 @@ func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF)) {
 		}
 
 		goModDir := filepath.Dir(path)
-		tf.Log("Go Module:", goModDir)
+		tf.Log("Go Module: ", goModDir)
 		if err := os.Chdir(goModDir); err != nil {
 			tf.Fatal(err)
 		}

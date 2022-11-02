@@ -50,7 +50,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
-func init() { // nolint: gochecknoinits
+func init() { //nolint: gochecknoinits // register db driver
 	splunksql.Register("pgx", splunksql.InstrumentationConfig{
 		DBSystem:  splunksql.DBSystemPostgreSQL,
 		DSNParser: DSNParser,

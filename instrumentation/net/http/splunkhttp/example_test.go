@@ -26,16 +26,22 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
+//nolint:errcheck,noctx // example usage
 func Example() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello world") //nolint:errcheck
+		io.WriteString(w, "Hello world")
 	})
 	handler = splunkhttp.NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
 
 	ts := httptest.NewServer(handler)
 	defer ts.Close()
-	resp, _ := ts.Client().Get(ts.URL) //nolint
+	resp, err := ts.Client().Get(ts.URL)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
 
 	fmt.Println("Access-Control-Expose-Headers:", resp.Header.Get("Access-Control-Expose-Headers"))
 	fmt.Println("Server-Timing:", resp.Header.Get("Server-Timing"))

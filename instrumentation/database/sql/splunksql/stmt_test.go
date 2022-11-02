@@ -137,20 +137,20 @@ func (s *StmtSuite) TestExecContextReturnsWrappedError() {
 }
 
 func (s *StmtSuite) TestQueryCallsWrapped() {
-	_, err := s.OTelStmt.Query(nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelStmt.Query(nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.queryN)
 }
 
 func (s *StmtSuite) TestQueryReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.Query(nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelStmt.Query(nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.queryN)
 }
 
 func (s *StmtSuite) TestQueryContextCallsWrapped() {
-	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(1, s.MockStmt.queryContextN)
 }
@@ -158,7 +158,7 @@ func (s *StmtSuite) TestQueryContextCallsWrapped() {
 func (s *StmtSuite) TestQueryContextFallsbackToQuery() {
 	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newTraceConfig(), "")
 
-	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // there is no connection leak for this test structure.
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
 	s.Equal(0, s.MockStmt.queryContextN)
 	s.Equal(1, s.MockStmt.queryN)
@@ -166,7 +166,7 @@ func (s *StmtSuite) TestQueryContextFallsbackToQuery() {
 
 func (s *StmtSuite) TestQueryContextReturnsWrappedError() {
 	s.MockStmt.err = errTest
-	_, err := s.OTelStmt.QueryContext(context.Background(), nil) // nolint: gocritic // test Query not Exec
+	_, err := s.OTelStmt.QueryContext(context.Background(), nil) //nolint: gocritic // test Query not Exec
 	s.ErrorIs(err, errTest)
 	s.Equal(1, s.MockStmt.queryContextN)
 }

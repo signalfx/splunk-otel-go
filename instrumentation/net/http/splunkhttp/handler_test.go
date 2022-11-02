@@ -26,7 +26,7 @@ import (
 )
 
 func TestNewHandlerDefault(t *testing.T) {
-	resp := responseForHandler() // nolint:bodyclose // Body is not used
+	resp := responseForHandler() //nolint:bodyclose // Body is not used
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")
 	assert.Contains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should set Access-Control-Expose-Headers header")
@@ -37,7 +37,7 @@ func TestNewHandlerTraceResponseHeaderDisabled(t *testing.T) {
 	os.Setenv("SPLUNK_TRACE_RESPONSE_HEADER_ENABLED", "false")
 	defer os.Unsetenv("SPLUNK_TRACE_RESPONSE_HEADER_ENABLED")
 
-	resp := responseForHandler() // nolint:bodyclose // Body is not used
+	resp := responseForHandler() //nolint:bodyclose // Body is not used
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "should return OK status code")
 	assert.NotContains(t, resp.Header["Access-Control-Expose-Headers"], "Server-Timing", "should NOT set Access-Control-Expose-Headers header")
@@ -47,7 +47,7 @@ func TestNewHandlerTraceResponseHeaderDisabled(t *testing.T) {
 func responseForHandler() *http.Response {
 	content := []byte("Any content")
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(content) //nolint:errcheck
+		w.Write(content) //nolint:errcheck // no need to check the error
 	})
 	handler = NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
