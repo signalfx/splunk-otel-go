@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This example instruments a simple HTTP server-client application.
+// Package example instruments a simple HTTP server-client application.
 //
 // The application is configured to send spans to a local instance
 // of the OpenTelemetry Collector, which propagates them to both
