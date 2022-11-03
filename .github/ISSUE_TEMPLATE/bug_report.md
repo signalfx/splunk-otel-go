@@ -12,6 +12,7 @@ A clear and concise description of what the issue is.
 
 **Steps to reproduce the issue:**
 For example:
+
 1. Use this code '...'
 2. Run '...'
 3. See error
@@ -30,4 +31,5 @@ Complete the following information:
 - splunk-otel-go version: [for example, 1295520, v0.1.0]
 
 **Additional context**
-Add additional information about the issue, like debug logs or screenshots. Redact or remove any sensitive information before sharing this information.
+Add additional information about the issue, like debug logs or screenshots.
+Redact or remove any sensitive information before sharing this information.
