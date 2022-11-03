@@ -25,6 +25,6 @@ var _ = goyek.Define(goyek.Task{
 	Action: func(tf *goyek.TF) {
 		ForGoModules(tf, func(tf *goyek.TF) {
 			cmd.Exec(tf, "go get -u -t ./...")
-		}, dirBuild) // '/build' should be bumped without transitive dependencies as golangci-lint often has breaking changes
+		}, dirBuild) // '/build' should be bumped without transitive dependencies as golangci-lint often have breaking changes
 	},
 })
