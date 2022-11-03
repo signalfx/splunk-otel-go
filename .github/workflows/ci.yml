@@ -27,11 +27,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            run-script: ./goyek.sh -v -ci
+            run-script: ./goyek.sh -v ci
           - os: windows-2019
-            run-script: .\goyek.ps1 -v -ci -skip-docker -test-short
+            run-script: .\goyek.ps1 -v -skip-docker ci
           - os: macos-10.15
-            run-script: ./goyek.sh -v -ci -skip-docker -test-short
+            run-script: ./goyek.sh -v -skip-docker ci
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3.1.0

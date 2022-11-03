@@ -15,23 +15,16 @@
 package main
 
 import (
-	"strconv"
-	"testing"
+	"github.com/goyek/goyek/v2"
+	"github.com/goyek/x/cmd"
 )
 
-func TestRandString(t *testing.T) {
-	testCases := []int{
-		0,
-		1,
-		2,
-		5,
-		16,
-	}
-	for _, length := range testCases {
-		t.Run(strconv.Itoa(length), func(t *testing.T) {
-			if got := RandString(nil, length); len(got) != length {
-				t.Errorf("got length %v, want %v", len(got), length)
-			}
+var mod = goyek.Define(goyek.Task{
+	Name:  "mod",
+	Usage: "go mod tidy",
+	Action: func(tf *goyek.TF) {
+		ForGoModules(tf, func(tf *goyek.TF) {
+			cmd.Exec(tf, "go mod tidy")
 		})
-	}
-}
+	},
+})

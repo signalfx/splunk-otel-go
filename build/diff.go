@@ -12,18 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Build is the build pipeline for this repository.
 package main
 
 import (
-	"github.com/goyek/goyek"
+	"io"
+	"strings"
+
+	"github.com/goyek/goyek/v2"
+	"github.com/goyek/x/cmd"
 )
 
-func main() {
-	flow := &goyek.Flow{}
-	cfg := Config{
-		RepoPackagePrefix: "github.com/signalfx/splunk-otel-go",
-	}
-	Register(flow, cfg)
-	flow.Main()
-}
+var diff = goyek.Define(goyek.Task{
+	Name:  "diff",
+	Usage: "git diff",
+	Action: func(tf *goyek.TF) {
+		cmd.Exec(tf, "git diff --exit-code")
+
+		sb := &strings.Builder{}
+		out := io.MultiWriter(tf.Output(), sb)
+		cmd.Exec(tf, "git status --porcelain", cmd.Stdout(out))
+		if sb.Len() > 0 {
+			tf.Error("git status --porcelain returned output")
+		}
+	},
+})
