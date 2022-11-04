@@ -26,7 +26,7 @@ import (
 
 // ForGoModules is a helper that executes given function
 // in each directory containing go.mod file.
-func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF)) {
+func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF), ignoredPaths ...string) {
 	tf.Helper()
 
 	var goModDirs []string
@@ -34,10 +34,19 @@ func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF)) {
 		if err != nil {
 			return err
 		}
+
+		path = filepath.ToSlash(path)
+		for _, ignored := range ignoredPaths {
+			if path == ignored {
+				return filepath.SkipDir
+			}
+		}
+
 		if dir.Name() != "go.mod" {
 			return nil
 		}
-		goModDirs = append(goModDirs, filepath.Dir(path))
+		goModDir := filepath.ToSlash(filepath.Dir(path))
+		goModDirs = append(goModDirs, goModDir)
 		return nil
 	})
 

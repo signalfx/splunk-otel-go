@@ -1,5 +1,13 @@
 # Release Process
 
+## Bump dependencies
+
+To bump all (execpt the `/build` module's) dependencies run:
+
+```sh
+./goyek.sh bump mod
+```
+
 ## Pre-Release
 
 1. Verify if [wizard](https://app.signalfx.com/#/integrations/go-tracing/description)
