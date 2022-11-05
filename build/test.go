@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 
 	"github.com/goyek/goyek/v2"
+	"github.com/goyek/x/cmd"
 )
 
 var test = goyek.Define(goyek.Task{
@@ -35,13 +36,16 @@ var test = goyek.Define(goyek.Task{
 			tf.Fatal(err)
 		}
 
+		short := ""
+		if *flagSkipDocker {
+			short = "-short "
+		}
+
 		// run go test race with code covarage for each Go Module
 		ForGoModules(tf, func(tf *goyek.TF) {
 			const fileNameLen = 12
 			covOut := filepath.Join(testResultDir, RandString(tf, fileNameLen)+".out")
-			if err := tf.Cmd("go", goTestArgs(repoPackagePrefix, *flagSkipDocker, covOut)...).Run(); err != nil {
-				tf.Error(err)
-			}
+			cmd.Exec(tf, "go test "+short+"-v -race -covermode=atomic -coverprofile='"+covOut+"' -coverpkg="+repoPackagePrefix+"/... ./...")
 		})
 
 		// merge the coverage output files into a single coverage.out file
@@ -78,15 +82,3 @@ var test = goyek.Define(goyek.Task{
 		}
 	},
 })
-
-func goTestArgs(repoPrefix string, short bool, covOut string) []string {
-	result := []string{"test", "-race", "-v", "-covermode=atomic"}
-	if short {
-		result = append(result, "-short")
-	}
-	if repoPrefix != "" {
-		result = append(result, "-coverpkg="+repoPrefix+"/...")
-	}
-	result = append(result, "-coverprofile="+covOut, "./...")
-	return result
-}
