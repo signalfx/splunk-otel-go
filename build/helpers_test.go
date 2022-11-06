@@ -30,9 +30,9 @@ func TestRandString(t *testing.T) {
 	}
 	for _, length := range testCases {
 		t.Run(strconv.Itoa(length), func(t *testing.T) {
-			action := func(tf *goyek.TF) {
-				if got := RandString(tf, length); len(got) != length {
-					t.Errorf("got length %v, want %v", len(got), length) // for invalid input this line is not even executed as RandString calls tf.Fatal
+			action := func(a *goyek.A) {
+				if got := RandString(a, length); len(got) != length {
+					t.Errorf("got length %v, want %v", len(got), length) // for invalid input this line is not even executed as RandString calls a.Fatal
 				}
 			}
 
@@ -51,8 +51,8 @@ func TestRandString_invalid(t *testing.T) {
 	}
 	for _, length := range testCases {
 		t.Run(strconv.Itoa(length), func(t *testing.T) {
-			action := func(tf *goyek.TF) {
-				RandString(tf, length)
+			action := func(a *goyek.A) {
+				RandString(a, length)
 				t.Error("should not return for invalid input")
 			}
 

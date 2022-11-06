@@ -22,12 +22,12 @@ import (
 var golint = goyek.Define(goyek.Task{
 	Name:  "golint",
 	Usage: "golangci-lint --fix",
-	Action: func(tf *goyek.TF) {
-		if !cmd.Exec(tf, "go install github.com/golangci/golangci-lint/cmd/golangci-lint", cmd.Dir(dirBuild)) {
+	Action: func(a *goyek.A) {
+		if !cmd.Exec(a, "go install github.com/golangci/golangci-lint/cmd/golangci-lint", cmd.Dir(dirBuild)) {
 			return
 		}
-		ForGoModules(tf, func(tf *goyek.TF) {
-			cmd.Exec(tf, "golangci-lint run --fix")
+		ForGoModules(a, func(a *goyek.A) {
+			cmd.Exec(a, "golangci-lint run --fix")
 		})
 	},
 })
