@@ -271,8 +271,9 @@ github.com/gostaticanalysis/nilerr v0.1.1 h1:ThE+hJP0fEp4zWLkWHWcRyI2Od0p7DlgYG3
 github.com/gostaticanalysis/nilerr v0.1.1/go.mod h1:wZYb6YI5YAxxq0i1+VJbY0s2YONW0HU0GPE3+5PWN4A=
 github.com/gostaticanalysis/testutil v0.3.1-0.20210208050101-bfb5c8eec0e4/go.mod h1:D+FIZ+7OahH3ePw/izIEeH5I06eKs1IKI4Xr64/Am3M=
 github.com/gostaticanalysis/testutil v0.4.0 h1:nhdCmubdmDF6VEatUNjgUZBJKWRqugoISdUv3PPQgHY=
-github.com/goyek/goyek/v2 v2.0.0-rc.9 h1:hiwI1Wv4+vkONjzogJiNIwI/VyTSj2HfzgPSlPcTlNI=
 github.com/goyek/goyek/v2 v2.0.0-rc.9/go.mod h1:qtHlK7t/dYs1Dw7mLXjEVmgE3nccNa7mQW/RmasOoYg=
+github.com/goyek/goyek/v2 v2.0.0-rc.10 h1:cpNa6jLQPq30a7LkAlsAoXL0FxB4yg/zy4eWULNh8wI=
+github.com/goyek/goyek/v2 v2.0.0-rc.10/go.mod h1:qtHlK7t/dYs1Dw7mLXjEVmgE3nccNa7mQW/RmasOoYg=
 github.com/goyek/x v0.1.1 h1:0zHFG9klerC/W7MDxMBqh24vixJIJB6SOEOQfKLThG8=
 github.com/goyek/x v0.1.1/go.mod h1:QMOv+BBvRk0PWQpBoxOjD1gHiXHqORNyOLClJb4WKiA=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
