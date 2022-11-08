@@ -22,9 +22,9 @@ import (
 var _ = goyek.Define(goyek.Task{
 	Name:  "bump",
 	Usage: "go get -u -t ./...",
-	Action: func(tf *goyek.TF) {
-		ForGoModules(tf, func(tf *goyek.TF) {
-			cmd.Exec(tf, "go get -u -t ./...")
+	Action: func(a *goyek.A) {
+		ForGoModules(a, func(a *goyek.A) {
+			cmd.Exec(a, "go get -u -t ./...")
 		}, dirBuild) // '/build' should be bumped manually as golangci-lint's deps often have breaking changes
 	},
 })

@@ -25,15 +25,15 @@ import (
 var test = goyek.Define(goyek.Task{
 	Name:  "test",
 	Usage: "go test",
-	Action: func(tf *goyek.TF) {
+	Action: func(a *goyek.A) {
 		// prepare test-results
-		curDir := WorkDir(tf)
+		curDir := WorkDir(a)
 		testResultDir := filepath.Join(curDir, "test-results")
 		if err := os.RemoveAll(testResultDir); err != nil {
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 		if err := os.Mkdir(testResultDir, 0o750); err != nil { //nolint:gomnd // dir permissions
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 
 		short := ""
@@ -42,23 +42,23 @@ var test = goyek.Define(goyek.Task{
 		}
 
 		// run go test race with code covarage for each Go Module
-		ForGoModules(tf, func(tf *goyek.TF) {
+		ForGoModules(a, func(a *goyek.A) {
 			const fileNameLen = 12
-			covOut := filepath.Join(testResultDir, RandString(tf, fileNameLen)+".out")
-			cmd.Exec(tf, "go test "+short+"-v -race -covermode=atomic -coverprofile='"+covOut+"' -coverpkg="+repoPackagePrefix+"/... ./...")
+			covOut := filepath.Join(testResultDir, RandString(a, fileNameLen)+".out")
+			cmd.Exec(a, "go test "+short+"-v -race -covermode=atomic -coverprofile='"+covOut+"' -coverpkg="+repoPackagePrefix+"/... ./...")
 		})
 
 		// merge the coverage output files into a single coverage.out file
-		installGocovmerge := tf.Cmd("go", "install", "github.com/wadey/gocovmerge")
+		installGocovmerge := a.Cmd("go", "install", "github.com/wadey/gocovmerge")
 		installGocovmerge.Dir = dirBuild
 		if err := installGocovmerge.Run(); err != nil {
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 
 		var covFiles []string
 		files, err := os.ReadDir(testResultDir)
 		if err != nil {
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 		for _, file := range files {
 			covFiles = append(covFiles, file.Name())
@@ -66,19 +66,19 @@ var test = goyek.Define(goyek.Task{
 
 		mergedCovFile, err := os.Create(filepath.Join(testResultDir, "coverage.out"))
 		if err != nil {
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 		defer func() {
 			if err := mergedCovFile.Close(); err != nil {
-				tf.Fatal(err)
+				a.Fatal(err)
 			}
 		}()
 
-		gocovmerge := tf.Cmd("gocovmerge", covFiles...)
+		gocovmerge := a.Cmd("gocovmerge", covFiles...)
 		gocovmerge.Dir = testResultDir
 		gocovmerge.Stdout = mergedCovFile
 		if err := gocovmerge.Run(); err != nil {
-			tf.Fatal(err)
+			a.Fatal(err)
 		}
 	},
 })

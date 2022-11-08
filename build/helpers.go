@@ -26,8 +26,8 @@ import (
 
 // ForGoModules is a helper that executes given function
 // in each directory containing go.mod file.
-func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF), ignoredPaths ...string) {
-	tf.Helper()
+func ForGoModules(a *goyek.A, fn func(a *goyek.A), ignoredPaths ...string) {
+	a.Helper()
 
 	var goModDirs []string
 	_ = filepath.WalkDir(".", func(path string, dir fs.DirEntry, err error) error {
@@ -52,41 +52,41 @@ func ForGoModules(tf *goyek.TF, fn func(tf *goyek.TF), ignoredPaths ...string) {
 
 	for _, goModDir := range goModDirs {
 		func() {
-			tf.Helper()
-			curDir := WorkDir(tf)
-			defer ChDir(tf, curDir)
+			a.Helper()
+			curDir := WorkDir(a)
+			defer ChDir(a, curDir)
 
-			tf.Log("Go Module: ", goModDir)
-			ChDir(tf, goModDir)
+			a.Log("Go Module: ", goModDir)
+			ChDir(a, goModDir)
 
-			fn(tf) // execute function in file containing go.mod
+			fn(a) // execute function in file containing go.mod
 		}()
 	}
 }
 
 // WorkDir returns current working directory.
-func WorkDir(tf *goyek.TF) string {
-	tf.Helper()
+func WorkDir(a *goyek.A) string {
+	a.Helper()
 
 	curDir, err := os.Getwd()
 	if err != nil {
-		tf.Fatal(err)
+		a.Fatal(err)
 	}
 	return curDir
 }
 
 // ChDir changes the working directory.
-func ChDir(tf *goyek.TF, path string) {
-	tf.Helper()
+func ChDir(a *goyek.A, path string) {
+	a.Helper()
 
 	if err := os.Chdir(path); err != nil {
-		tf.Fatal(err)
+		a.Fatal(err)
 	}
 }
 
 // Find returns all files with given extension.
-func Find(tf *goyek.TF, ext string) []string {
-	tf.Helper()
+func Find(a *goyek.A, ext string) []string {
+	a.Helper()
 
 	var files []string
 	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
@@ -99,17 +99,17 @@ func Find(tf *goyek.TF, ext string) []string {
 		return nil
 	})
 	if err != nil {
-		tf.Fatal(err)
+		a.Fatal(err)
 	}
 	return files
 }
 
 // RandString returns securely generated hex-string.
-func RandString(tf *goyek.TF, length int) string {
-	tf.Helper()
+func RandString(a *goyek.A, length int) string {
+	a.Helper()
 
 	if length < 1 {
-		tf.Fatal("length must be greater than 0")
+		a.Fatal("length must be greater than 0")
 	}
 
 	n := length / 2
@@ -119,7 +119,7 @@ func RandString(tf *goyek.TF, length int) string {
 
 	b := make([]byte, n)
 	if _, err := rand.Read(b); err != nil {
-		tf.Fatal(err)
+		a.Fatal(err)
 	}
 	return hex.EncodeToString(b)[:length]
 }

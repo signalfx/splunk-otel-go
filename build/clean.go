@@ -22,7 +22,7 @@ import (
 var _ = goyek.Define(goyek.Task{
 	Name:  "clean",
 	Usage: "remove git ignored files",
-	Action: func(tf *goyek.TF) {
-		cmd.Exec(tf, "git clean -fXd")
+	Action: func(a *goyek.A) {
+		cmd.Exec(a, "git clean -fXd")
 	},
 })

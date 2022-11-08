@@ -24,19 +24,19 @@ import (
 var mdlint = goyek.Define(goyek.Task{
 	Name:  "mdlint",
 	Usage: "markdownlint-cli (uses docker)",
-	Action: func(tf *goyek.TF) {
+	Action: func(a *goyek.A) {
 		if *flagSkipDocker {
-			tf.Skip("skipping as Docker is needed")
+			a.Skip("skipping as Docker is needed")
 		}
 
-		mdFiles := Find(tf, ".md")
+		mdFiles := Find(a, ".md")
 		if len(mdFiles) == 0 {
-			tf.Skip("no .md files")
+			a.Skip("no .md files")
 		}
 
-		if !cmd.Exec(tf, "docker build -t markdownlint-cli -f build/markdownlint-cli.dockerfile .") {
+		if !cmd.Exec(a, "docker build -t markdownlint-cli -f build/markdownlint-cli.dockerfile .") {
 			return
 		}
-		cmd.Exec(tf, "docker run --rm -v '"+WorkDir(tf)+":/workdir' markdownlint-cli "+strings.Join(mdFiles, " "))
+		cmd.Exec(a, "docker run --rm -v '"+WorkDir(a)+":/workdir' markdownlint-cli "+strings.Join(mdFiles, " "))
 	},
 })
