@@ -17,6 +17,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/goyek/goyek/v2"
 	"github.com/goyek/x/boot"
@@ -30,6 +31,9 @@ const (
 var flagSkipDocker = flag.Bool("skip-docker", false, "skip tasks and tests using Docker")
 
 func main() {
+	if err := os.Chdir(".."); err != nil {
+		panic(err)
+	}
 	goyek.SetDefault(all)
 	boot.Main()
 }
