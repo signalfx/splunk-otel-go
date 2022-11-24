@@ -30,7 +30,7 @@ var diff = goyek.Define(goyek.Task{
 
 		sb := &strings.Builder{}
 		out := io.MultiWriter(a.Output(), sb)
-		cmd.Exec(a, "git status --porcelain", cmd.Stdout(out))
+		cmd.Exec(a, "git status --porcelain", cmd.Stdout(out), cmd.Stderr(out))
 		if sb.Len() > 0 {
 			a.Error("git status --porcelain returned output")
 		}
