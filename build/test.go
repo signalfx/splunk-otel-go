@@ -16,6 +16,7 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/goyek/goyek/v2"
@@ -26,15 +27,7 @@ var test = goyek.Define(goyek.Task{
 	Name:  "test",
 	Usage: "go test",
 	Action: func(a *goyek.A) {
-		// prepare test-results
-		curDir := WorkDir(a)
-		testResultDir := filepath.Join(curDir, "test-results")
-		if err := os.RemoveAll(testResultDir); err != nil {
-			a.Fatal(err)
-		}
-		if err := os.Mkdir(testResultDir, 0o750); err != nil { //nolint:gomnd // dir permissions
-			a.Fatal(err)
-		}
+		testResultDir := a.TempDir()
 
 		short := ""
 		if *flagSkipDocker {
@@ -49,10 +42,8 @@ var test = goyek.Define(goyek.Task{
 		})
 
 		// merge the coverage output files into a single coverage.out file
-		installGocovmerge := a.Cmd("go", "install", "github.com/wadey/gocovmerge")
-		installGocovmerge.Dir = dirBuild
-		if err := installGocovmerge.Run(); err != nil {
-			a.Fatal(err)
+		if !cmd.Exec(a, "go install github.com/wadey/gocovmerge", cmd.Dir(dirBuild)) {
+			return
 		}
 
 		var covFiles []string
@@ -64,7 +55,7 @@ var test = goyek.Define(goyek.Task{
 			covFiles = append(covFiles, file.Name())
 		}
 
-		mergedCovFile, err := os.Create(filepath.Join(testResultDir, "coverage.out"))
+		mergedCovFile, err := os.Create("coverage.out")
 		if err != nil {
 			a.Fatal(err)
 		}
@@ -74,9 +65,10 @@ var test = goyek.Define(goyek.Task{
 			}
 		}()
 
-		gocovmerge := a.Cmd("gocovmerge", covFiles...)
+		gocovmerge := exec.CommandContext(a.Context(), "gocovmerge", covFiles...)
 		gocovmerge.Dir = testResultDir
 		gocovmerge.Stdout = mergedCovFile
+		gocovmerge.Stderr = a.Output()
 		if err := gocovmerge.Run(); err != nil {
 			a.Fatal(err)
 		}
