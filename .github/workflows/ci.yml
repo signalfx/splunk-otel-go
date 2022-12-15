@@ -10,7 +10,7 @@ jobs:
   check-links:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.2.0
         with:
           fetch-depth: 0
       - uses: lycheeverse/lychee-action@v1.5.4
@@ -34,7 +34,7 @@ jobs:
             run-script: ./goyek.sh -v -skip-docker ci
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.2.0
       - uses: actions/setup-go@v3.4.0
         with:
           go-version: '1.19'
@@ -62,7 +62,7 @@ jobs:
           arch: "386"
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v3.2.0
     - uses: actions/setup-go@v3.4.0
       with:
         go-version: ${{ matrix.go-version }}
