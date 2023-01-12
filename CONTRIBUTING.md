@@ -33,8 +33,7 @@ When filing an issue, please do *NOT* include:
 ## Reporting Security Issues
 
 Please *DO NOT* report security vulnerabilities with public GitHub issue
-reports. Please [report security issues here](
-https://www.splunk.com/en_us/product-security/report.html).
+reports. Please [report security issues here].
 
 ## Contributing via Pull Requests
 
@@ -94,3 +93,5 @@ confirm the licensing of your contribution.
 We may ask you to sign a [Contributor License Agreement
 (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger
 changes.
+
+[report security issues here]: https://www.splunk.com/en_us/product-security/report.html
