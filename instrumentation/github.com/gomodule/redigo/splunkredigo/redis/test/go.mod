@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/ory/dockertest v3.3.5+incompatible
-	github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo v1.1.0
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo v1.2.0
 	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/otel v1.11.2
 	go.opentelemetry.io/otel/sdk v1.11.2
@@ -30,8 +30,8 @@ require (
 	github.com/opencontainers/runc v1.1.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.1.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.1.0 // indirect
+	github.com/signalfx/splunk-otel-go v1.2.0 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
