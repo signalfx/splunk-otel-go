@@ -22,6 +22,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"io"
 	"sync"
 )
 
@@ -82,7 +83,7 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 		}
 		return sql.OpenDB(connector), nil
 	}
-	return sql.OpenDB(dsnConnector{dsn: dataSourceName, driver: d}), nil
+	return sql.OpenDB(newDSNConnector(d, dataSourceName)), nil
 }
 
 // dsnConnector wraps a driver to be used as a DriverContext.
@@ -91,10 +92,24 @@ type dsnConnector struct {
 	driver driver.Driver
 }
 
+func newDSNConnector(d driver.Driver, dsn string) driver.Connector {
+	c := dsnConnector{dsn: dsn, driver: d}
+	if _, ok := d.(io.Closer); ok {
+		return c
+	}
+	// Remove the implementation of the io.Closer.
+	return struct{ driver.Connector }{c}
+}
+
 func (t dsnConnector) Connect(context.Context) (driver.Conn, error) {
 	return t.driver.Open(t.dsn)
 }
 
 func (t dsnConnector) Driver() driver.Driver {
 	return t.driver
+}
+
+func (t dsnConnector) Close() error {
+	// This should not panic given the guard in newDSNConnector.
+	return t.driver.(io.Closer).Close()
 }
