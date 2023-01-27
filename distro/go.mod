@@ -16,7 +16,7 @@ require (
 	go.opentelemetry.io/proto/otlp v0.19.0
 	go.uber.org/goleak v1.2.0
 	go.uber.org/zap v1.24.0
-	google.golang.org/grpc v1.52.0
+	google.golang.org/grpc v1.52.3
 )
 
 require (
