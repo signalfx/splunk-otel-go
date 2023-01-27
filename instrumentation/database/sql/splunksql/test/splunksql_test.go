@@ -18,9 +18,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 )
 
 func TestSplunkSQLFullImplementation(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	driverName := "splunktest-full"
 	driver := newFullMockDriver()
 	s, err := NewSplunkSQLSuite(driverName, driver)
@@ -31,6 +33,7 @@ func TestSplunkSQLFullImplementation(t *testing.T) {
 }
 
 func TestSplunkSQLSimpleImplementation(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	driverName := "splunktest-simple"
 	driver := newSimpleMockDriver()
 	s, err := NewSplunkSQLSuite(driverName, driver)

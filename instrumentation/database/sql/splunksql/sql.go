@@ -61,6 +61,7 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	// Setup any instrumentation that is registered for this driverName. If no
 	// instrumentation was registered for the driver, this will give a "best

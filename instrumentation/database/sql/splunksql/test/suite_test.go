@@ -105,6 +105,10 @@ func (s *SplunkSQLSuite) SetupTest() {
 	s.TracerProvider.RegisterSpanProcessor(s.SpanRecorder)
 }
 
+func (s *SplunkSQLSuite) TearDownSuite() {
+	s.NoError(s.DB.Close())
+}
+
 func (s *SplunkSQLSuite) TestDBPing() {
 	err := s.DB.Ping()
 	if s.ConnImplementsPinger {
