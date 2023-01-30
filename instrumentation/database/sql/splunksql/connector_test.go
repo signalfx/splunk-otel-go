@@ -45,9 +45,9 @@ func (c *mockConnector) Driver() driver.Driver {
 	return c.driver
 }
 
-type closableConnector struct{ driver.Connector }
+type errCloserConnector struct{ driver.Connector }
 
-func (c *closableConnector) Close() error { return assert.AnError }
+func (c *errCloserConnector) Close() error { return assert.AnError }
 
 func TestUnderlyingConnectorCloser(t *testing.T) {
 	c := newConnector(nil, nil)
@@ -55,7 +55,7 @@ func TestUnderlyingConnectorCloser(t *testing.T) {
 	assert.NotPanics(t, func() { err = c.Close() })
 	assert.NoError(t, err)
 
-	underlying := new(closableConnector)
+	underlying := new(errCloserConnector)
 	c = newConnector(underlying, nil)
 	assert.ErrorIs(t, c.Close(), assert.AnError)
 }

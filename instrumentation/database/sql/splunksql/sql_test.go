@@ -15,13 +15,10 @@
 package splunksql
 
 import (
-	"database/sql/driver"
-	"io"
 	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -59,19 +56,4 @@ func TestRegisterPanic(t *testing.T) {
 	instCfg := InstrumentationConfig{}
 	Register("TestRegisterPanic", instCfg)
 	assert.Panics(t, func() { Register("TestRegisterPanic", instCfg) })
-}
-
-type closableDriver struct{ driver.Driver }
-
-func (c *closableDriver) Close() error { return assert.AnError }
-
-func TestUnderlyingDriverCloser(t *testing.T) {
-	c := newDSNConnector(nil, "")
-	_, ok := c.(io.Closer)
-	assert.False(t, ok, "Non-Closer driver wrapped with Closer")
-
-	underlying := new(closableDriver)
-	c = newDSNConnector(underlying, "")
-	require.Implements(t, (*io.Closer)(nil), c)
-	assert.ErrorIs(t, c.(io.Closer).Close(), assert.AnError)
 }

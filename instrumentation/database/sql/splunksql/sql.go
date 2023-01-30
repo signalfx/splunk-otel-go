@@ -62,7 +62,8 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	// Do not defer a call to db.Close. The underlying Connector used below
+	// needs to remains open. Closing db may also close the Driver.
 
 	// Setup any instrumentation that is registered for this driverName. If no
 	// instrumentation was registered for the driver, this will give a "best
@@ -75,15 +76,17 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	opts = append([]Option{regOpt}, opts...)
 	d := newDriver(db.Driver(), newTraceConfig(opts...))
 
+	var connector driver.Connector
 	// Use the instrumented driver to open a connection to the database.
 	if driverCtx, ok := d.(driver.DriverContext); ok {
-		connector, err := driverCtx.OpenConnector(dataSourceName)
+		connector, err = driverCtx.OpenConnector(dataSourceName)
 		if err != nil {
 			return nil, err
 		}
-		return sql.OpenDB(connector), nil
+	} else {
+		connector = newDSNConnector(d, dataSourceName)
 	}
-	return sql.OpenDB(newDSNConnector(d, dataSourceName)), nil
+	return sql.OpenDB(newCloserConnector(connector, db)), nil
 }
 
 // dsnConnector wraps a driver to be used as a DriverContext.
@@ -93,12 +96,7 @@ type dsnConnector struct {
 }
 
 func newDSNConnector(d driver.Driver, dsn string) driver.Connector {
-	c := dsnConnector{dsn: dsn, driver: d}
-	if _, ok := d.(io.Closer); ok {
-		return c
-	}
-	// Remove the implementation of the io.Closer.
-	return struct{ driver.Connector }{c}
+	return dsnConnector{dsn: dsn, driver: d}
 }
 
 func (t dsnConnector) Connect(context.Context) (driver.Conn, error) {
@@ -109,7 +107,28 @@ func (t dsnConnector) Driver() driver.Driver {
 	return t.driver
 }
 
-func (t dsnConnector) Close() error {
-	// This should not panic given the guard in newDSNConnector.
-	return t.driver.(io.Closer).Close()
+type closerConnector struct {
+	driver.Connector
+
+	initDB *sql.DB
+}
+
+func newCloserConnector(c driver.Connector, initDB *sql.DB) driver.Connector {
+	return closerConnector{Connector: c, initDB: initDB}
+}
+
+func (c closerConnector) Close() error {
+	if err := c.initDB.Close(); err != nil {
+		return err
+	}
+	if closer, ok := c.Connector.(io.Closer); ok {
+		// This may call the same underlying Connector's close method twice,
+		// the first call coming from the initDB.Close. However, if this isn't
+		// called here and the underlying Connector's close method is different
+		// than the one from initDB we would leave things in an open state.
+		// Better to ensure the operation is performed and assume the
+		// underlying Close is idempotent.
+		return closer.Close()
+	}
+	return nil
 }
