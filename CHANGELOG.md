@@ -28,7 +28,7 @@ This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
 
 - Add the `NetSockFamily` field to the `ConnectionConfig` in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
-  This is used to define the protocol address family used for communication to
+  This is used to define the protocol address family used for communication with
   the database. (#1749)
 - Update `go.opentelemetry.io/otel/semconv` to `v1.17.0` in the following
   packages. (#1749)
@@ -49,8 +49,8 @@ This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
 
 - The `NetTransportIP` and `NetTransportUnix` variables from
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
-  are deprecated as they are no longer supported in upstream semantic
-  conventions. Use an appropriate `NetSockFamily*` variable instead. (#1749)
+  are deprecated as they are no longer available in `go.opentelemetry.io/otel/semconv/v1.17.0`.
+  Use an appropriate `NetSockFamily*` variable instead. (#1749)
 
 ## [1.2.0] - 2023-01-11
 
