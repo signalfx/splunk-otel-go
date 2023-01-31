@@ -22,10 +22,14 @@ import (
 // NetTransport is a communication transport protocol.
 type NetTransport attribute.KeyValue
 
-// Attribute returns t as an attribute KeyValue. If t is empty the returned
-// attribute will default to a NetTransportOther.
+// Attribute returns t as an attribute KeyValue. If t is empty or a deprecated
+// value, the returned attribute will default to a NetTransportOther.
 func (t NetTransport) Attribute() attribute.KeyValue {
 	if !t.Key.Defined() {
+		return semconv.NetTransportOther
+	}
+	switch t {
+	case NetTransportIP, NetTransportUnix:
 		return semconv.NetTransportOther
 	}
 	return attribute.KeyValue(t)
