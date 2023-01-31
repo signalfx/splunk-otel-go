@@ -38,6 +38,11 @@ var (
 	NetTransportPipe   = NetTransport(semconv.NetTransportPipe)
 	NetTransportInProc = NetTransport(semconv.NetTransportInProc)
 	NetTransportOther  = NetTransport(semconv.NetTransportOther)
+
+	// Deprecated: Use appropriate NetSockFamily* instead.
+	NetTransportIP = NetTransport(semconv.NetTransportKey.String("ip"))
+	// Deprecated: Use appropriate NetSockFamily* instead.
+	NetTransportUnix = NetTransport(semconv.NetTransportKey.String("unix"))
 )
 
 // NetSockFamily is a protocol address family used for communication.
@@ -49,7 +54,7 @@ func (s NetSockFamily) Attribute() attribute.KeyValue {
 	return attribute.KeyValue(s)
 }
 
-// Valid protocol address famlies.
+// Valid protocol address families.
 var (
 	NetSockFamilyInet  = NetSockFamily(semconv.NetSockFamilyInet)
 	NetSockFamilyInet6 = NetSockFamily(semconv.NetSockFamilyInet6)
