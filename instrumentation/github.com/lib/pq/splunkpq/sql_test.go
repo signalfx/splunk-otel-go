@@ -56,7 +56,8 @@ func TestDSNParser(t *testing.T) {
 				User:             "user",
 				Host:             "/tmp/pgdb",
 				Port:             5432,
-				NetTransport:     splunksql.NetTransportUnix,
+				NetTransport:     splunksql.NetTransportPipe,
+				NetSockFamily:    splunksql.NetSockFamilyUnix,
 			},
 		},
 	}

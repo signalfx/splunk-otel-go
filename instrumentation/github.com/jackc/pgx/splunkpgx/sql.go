@@ -40,6 +40,7 @@
 package splunkpgx
 
 import (
+	"net"
 	"net/url"
 	"strings"
 
@@ -78,9 +79,17 @@ func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 		connCfg.Host = "localhost"
 	}
 	if strings.HasPrefix(connCfg.Host, "/") {
-		connCfg.NetTransport = splunksql.NetTransportUnix
+		connCfg.NetTransport = splunksql.NetTransportPipe
+		connCfg.NetSockFamily = splunksql.NetSockFamilyUnix
 	} else {
 		connCfg.NetTransport = splunksql.NetTransportTCP
+		if ip := net.ParseIP(connCfg.Host); ip != nil {
+			if ip.To4() != nil {
+				connCfg.NetSockFamily = splunksql.NetSockFamilyInet
+			} else {
+				connCfg.NetSockFamily = splunksql.NetSockFamilyInet6
+			}
+		}
 		if c.Port > 0 {
 			connCfg.Port = int(c.Port)
 		} else {

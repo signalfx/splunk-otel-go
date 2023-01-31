@@ -24,7 +24,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
@@ -172,6 +172,9 @@ type ConnectionConfig struct {
 	Port int
 	// NetTransport is the transport protocol used to connect to the database.
 	NetTransport NetTransport
+	// NetSockFamily is the protocol address family used for communication to
+	// the database.
+	NetSockFamily NetSockFamily
 }
 
 // Attributes returns the connection settings as attributes compliant with
@@ -192,17 +195,23 @@ func (c ConnectionConfig) Attributes() ([]attribute.KeyValue, error) { //nolint:
 	}
 	if c.Host != "" {
 		if ip := net.ParseIP(c.Host); ip != nil {
-			attrs = append(attrs, semconv.NetPeerIPKey.String(ip.String()))
+			attrs = append(attrs, semconv.NetSockPeerAddrKey.String(ip.String()))
+			if c.Port > 0 {
+				attrs = append(attrs, semconv.NetSockPeerPortKey.Int(c.Port))
+			}
 		} else {
 			attrs = append(attrs, semconv.NetPeerNameKey.String(c.Host))
+			if c.Port > 0 {
+				attrs = append(attrs, semconv.NetPeerPortKey.Int(c.Port))
+			}
 		}
 	} else {
 		errs = append(errs, "missing required peer IP or hostname")
 	}
-	if c.Port > 0 {
-		attrs = append(attrs, semconv.NetPeerPortKey.Int(c.Port))
-	}
 	attrs = append(attrs, c.NetTransport.Attribute())
+	if a := c.NetSockFamily.Attribute(); a.Key.Defined() {
+		attrs = append(attrs, a)
+	}
 
 	var err error
 	if len(errs) > 0 {

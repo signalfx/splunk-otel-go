@@ -28,7 +28,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -110,10 +110,10 @@ func TestProducerChannelSpan(t *testing.T) {
 		attrs := record.SpanConfig.Attributes()
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
-		assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
+		assert.Contains(t, attrs, semconv.MessagingDestinationNameKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("1"))
 		assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(keys[i]))
-		assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(1))
+		assert.Contains(t, attrs, semconv.MessagingKafkaDestinationPartitionKey.Int64(1))
 	}
 }
 
@@ -169,9 +169,9 @@ func TestProduceSpan(t *testing.T) {
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 		assert.Contains(t, attrs, commonAttr)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
-		assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
+		assert.Contains(t, attrs, semconv.MessagingDestinationNameKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("1"))
 		assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(keys[i]))
-		assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(1))
+		assert.Contains(t, attrs, semconv.MessagingKafkaDestinationPartitionKey.Int64(1))
 	}
 }

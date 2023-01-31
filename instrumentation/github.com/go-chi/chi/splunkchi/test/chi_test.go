@@ -35,7 +35,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
@@ -121,7 +121,6 @@ func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T,
 		assert.Contains(t, attrs, semconv.HTTPSchemeHTTP)
 		assert.Contains(t, attrs, semconv.HTTPStatusCodeKey.Int(httpCode))
 		assert.Contains(t, attrs, semconv.HTTPFlavorHTTP11)
-		assert.Contains(t, attrs, semconv.NetTransportTCP)
 
 		keys := make(map[attribute.Key]struct{}, len(attrs))
 		for _, a := range attrs {
@@ -131,10 +130,9 @@ func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T,
 		// These key values are potentially dynamic. Test an attribute
 		// with this key is set regardless of its value.
 		wantKeys := []attribute.Key{
-			semconv.HTTPHostKey,
-			semconv.NetPeerIPKey,
-			semconv.NetPeerPortKey,
 			semconv.NetHostNameKey,
+			semconv.NetSockPeerAddrKey,
+			semconv.NetSockPeerPortKey,
 		}
 		for _, k := range wantKeys {
 			assert.Contains(t, keys, k)

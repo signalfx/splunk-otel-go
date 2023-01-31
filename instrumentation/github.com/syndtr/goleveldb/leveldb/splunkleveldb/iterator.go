@@ -17,7 +17,7 @@ package splunkleveldb
 import (
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"go.opentelemetry.io/otel/codes"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 

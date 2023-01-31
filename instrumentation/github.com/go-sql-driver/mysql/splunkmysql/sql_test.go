@@ -44,6 +44,7 @@ func TestDSNParser(t *testing.T) {
 				Host:             "127.0.0.1",
 				Port:             3306,
 				NetTransport:     splunksql.NetTransportTCP,
+				NetSockFamily:    splunksql.NetSockFamilyInet,
 			},
 		},
 		{
@@ -65,7 +66,8 @@ func TestDSNParser(t *testing.T) {
 				Name:             "testdb",
 				ConnectionString: "user@unix(/tmp)/testdb",
 				User:             "user",
-				NetTransport:     splunksql.NetTransportUnix,
+				NetTransport:     splunksql.NetTransportPipe,
+				NetSockFamily:    splunksql.NetSockFamilyUnix,
 			},
 		},
 	}

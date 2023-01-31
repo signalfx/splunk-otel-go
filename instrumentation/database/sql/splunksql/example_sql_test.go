@@ -38,7 +38,8 @@ func ExampleRegister() {
 				User:             user,
 				Host:             host,
 				Port:             9876,
-				NetTransport:     splunksql.NetTransportIP,
+				NetTransport:     splunksql.NetTransportTCP,
+				NetSockFamily:    splunksql.NetSockFamilyInet,
 			}, nil
 		},
 	})

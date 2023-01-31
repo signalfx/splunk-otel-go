@@ -16,7 +16,7 @@ package splunksql
 
 import (
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
 // NetTransport is a communication transport protocol.
@@ -35,9 +35,23 @@ func (t NetTransport) Attribute() attribute.KeyValue {
 var (
 	NetTransportTCP    = NetTransport(semconv.NetTransportTCP)
 	NetTransportUDP    = NetTransport(semconv.NetTransportUDP)
-	NetTransportIP     = NetTransport(semconv.NetTransportIP)
-	NetTransportUnix   = NetTransport(semconv.NetTransportUnix)
 	NetTransportPipe   = NetTransport(semconv.NetTransportPipe)
 	NetTransportInProc = NetTransport(semconv.NetTransportInProc)
 	NetTransportOther  = NetTransport(semconv.NetTransportOther)
+)
+
+// NetSockFamily is a protocol address family used for communication.
+type NetSockFamily attribute.KeyValue
+
+// Attribute returns t as an attribute KeyValue. If s is empty the returned
+// attribute will also be an empty, undefined, KeyValue.
+func (s NetSockFamily) Attribute() attribute.KeyValue {
+	return attribute.KeyValue(s)
+}
+
+// Valid protocol address famlies.
+var (
+	NetSockFamilyInet  = NetSockFamily(semconv.NetSockFamilyInet)
+	NetSockFamilyInet6 = NetSockFamily(semconv.NetSockFamilyInet6)
+	NetSockFamilyUnix  = NetSockFamily(semconv.NetSockFamilyUnix)
 )

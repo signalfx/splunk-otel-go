@@ -25,7 +25,8 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/semconv/v1.17.0/httpconv"
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/transport"
 
@@ -80,7 +81,7 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 	opts = append(
 		opts,
 		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(semconv.HTTPClientAttributesFromHTTPRequest(r)...),
+		trace.WithAttributes(httpconv.ClientRequest(r)...),
 	)
 
 	tracer := rt.cfg.ResolveTracer(r.Context())
@@ -98,8 +99,8 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 		return
 	}
 
-	span.SetAttributes(semconv.HTTPAttributesFromHTTPStatusCode(resp.StatusCode)...)
-	span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode))
+	span.SetAttributes(httpconv.ClientResponse(resp)...)
+	span.SetStatus(httpconv.ClientStatus(resp.StatusCode))
 	resp.Body = &wrappedBody{ctx: ctx, span: span, body: resp.Body}
 
 	return

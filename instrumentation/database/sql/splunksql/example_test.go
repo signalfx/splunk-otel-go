@@ -19,7 +19,7 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
@@ -43,7 +43,7 @@ var (
 		// Do not include passwords!
 		semconv.DBConnectionStringKey.String(sanitized),
 		semconv.DBUserKey.String(user),
-		// Use semconv.NetPeerIPKey if connecting via an IP address. If
+		// Use semconv.NetSockPeerAddrKey if connecting via an IP address. If
 		// connecting via a Unix socket, use this attribute key.
 		semconv.NetPeerNameKey.String(host),
 		semconv.NetPeerPortKey.Int(port),

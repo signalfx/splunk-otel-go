@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -165,12 +165,12 @@ func TestConsumerSpan(t *testing.T) {
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 		assert.Contains(t, attrs, commonAttr)
 		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
-		assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
+		assert.Contains(t, attrs, semconv.MessagingSourceNameKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingOperationReceive)
 		assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("1"))
 		assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(keys[i]))
 		assert.Contains(t, attrs, semconv.MessagingKafkaConsumerGroupKey.String(grpID))
-		assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(1))
+		assert.Contains(t, attrs, semconv.MessagingKafkaSourcePartitionKey.Int64(1))
 	}
 }
 
