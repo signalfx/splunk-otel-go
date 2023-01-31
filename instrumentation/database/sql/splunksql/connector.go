@@ -17,6 +17,7 @@ package splunksql
 import (
 	"context"
 	"database/sql/driver"
+	"io"
 )
 
 type otelConnector struct {
@@ -41,4 +42,11 @@ func (c *otelConnector) Connect(ctx context.Context) (driver.Conn, error) {
 
 func (c *otelConnector) Driver() driver.Driver {
 	return c.driver
+}
+
+func (c *otelConnector) Close() error {
+	if cl, ok := c.Connector.(io.Closer); ok {
+		return cl.Close()
+	}
+	return nil
 }

@@ -17,6 +17,9 @@ package splunksql
 import (
 	"context"
 	"database/sql/driver"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type mockConnector struct {
@@ -40,4 +43,19 @@ func (c *mockConnector) Connect(context.Context) (driver.Conn, error) {
 func (c *mockConnector) Driver() driver.Driver {
 	c.driverN++
 	return c.driver
+}
+
+type errCloserConnector struct{ driver.Connector }
+
+func (c *errCloserConnector) Close() error { return assert.AnError }
+
+func TestUnderlyingConnectorCloser(t *testing.T) {
+	c := newConnector(nil, nil)
+	var err error
+	assert.NotPanics(t, func() { err = c.Close() })
+	assert.NoError(t, err)
+
+	underlying := new(errCloserConnector)
+	c = newConnector(underlying, nil)
+	assert.ErrorIs(t, c.Close(), assert.AnError)
 }
