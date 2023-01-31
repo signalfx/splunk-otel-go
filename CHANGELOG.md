@@ -13,7 +13,7 @@ This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
 
 ### Fixed
 
-- The goroutine in created in by the `Open` function in
+- The goroutine created by the `Open` function in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
   is no longer orphaned. (#1682)
 
