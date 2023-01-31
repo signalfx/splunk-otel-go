@@ -11,6 +11,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
 [OpenTelemetry Go Contrib to v1.13.0/v0.38.0/v0.7.0][contrib-v1.13.0].
 
+### Fixed
+
+- The goroutine in created in by the `Open` function in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  is no longer orphaned. (#1682)
+
 ## [1.2.0] - 2023-01-11
 
 This upgrades [OpenTelemetry Go to v1.11.2/v0.34.0][otel-v1.11.2] and
