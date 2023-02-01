@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/bun
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.2.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/buntdb v1.2.10
 	go.opentelemetry.io/otel v1.12.0
@@ -15,7 +15,7 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.2.0 // indirect
+	github.com/signalfx/splunk-otel-go v1.3.0 // indirect
 	github.com/tidwall/btree v1.5.0 // indirect
 	github.com/tidwall/gjson v1.14.3 // indirect
 	github.com/tidwall/grect v0.1.4 // indirect
