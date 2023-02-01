@@ -36,7 +36,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
@@ -233,7 +233,7 @@ func assertSpans(t *testing.T, n int, parentSpanName string, spans []trace.ReadO
 		assert.Contains(t, attrs, semconv.NetTransportTCP)
 		assert.Contains(t, attrs, semconv.NetPeerPortKey.Int(port))
 		if ip := net.ParseIP(host); ip != nil {
-			assert.Containsf(t, attrs, semconv.NetPeerIPKey.String(ip.String()), "address %q", addr)
+			assert.Containsf(t, attrs, semconv.NetSockPeerAddrKey.String(ip.String()), "address %q", addr)
 		} else {
 			assert.Containsf(t, attrs, semconv.NetPeerNameKey.String(host), "address %q", addr)
 		}

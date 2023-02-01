@@ -29,7 +29,7 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.opentelemetry.io/otel/codes"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
@@ -149,10 +149,10 @@ func (c *Consumer) startSpan(msg *kafka.Message) consumerSpan {
 	offset := strconv.FormatInt(int64(msg.TopicPartition.Offset), base10)
 	opts := c.cfg.MergedSpanStartOptions(
 		trace.WithAttributes(
-			semconv.MessagingDestinationKey.String(*msg.TopicPartition.Topic),
+			semconv.MessagingSourceNameKey.String(*msg.TopicPartition.Topic),
 			semconv.MessagingMessageIDKey.String(offset),
 			semconv.MessagingKafkaMessageKeyKey.String(string(msg.Key)),
-			semconv.MessagingKafkaPartitionKey.Int64(int64(msg.TopicPartition.Partition)),
+			semconv.MessagingKafkaSourcePartitionKey.Int64(int64(msg.TopicPartition.Partition)),
 		),
 		trace.WithSpanKind(trace.SpanKindConsumer),
 	)

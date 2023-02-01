@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/tidwall/buntdb"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 

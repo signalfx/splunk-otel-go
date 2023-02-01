@@ -22,7 +22,8 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/semconv/v1.17.0/httpconv"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
@@ -62,8 +63,7 @@ var _ http.RoundTripper = (*roundTripper)(nil)
 
 func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err error) {
 	opts := rt.cfg.MergedSpanStartOptions(
-		trace.WithAttributes(semconv.HTTPClientAttributesFromHTTPRequest(r)...),
-		trace.WithAttributes(semconv.NetAttributesFromHTTPRequest("tcp", r)...),
+		trace.WithAttributes(httpconv.ClientRequest(r)...),
 	)
 
 	tracer := rt.cfg.ResolveTracer(r.Context())
@@ -80,8 +80,8 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 		span.SetStatus(codes.Error, err.Error())
 		return
 	}
-	span.SetAttributes(semconv.HTTPAttributesFromHTTPStatusCode(resp.StatusCode)...)
-	span.SetStatus(semconv.SpanStatusFromHTTPStatusCode(resp.StatusCode))
+	span.SetAttributes(httpconv.ClientResponse(resp)...)
+	span.SetStatus(httpconv.ClientStatus(resp.StatusCode))
 	return
 }
 

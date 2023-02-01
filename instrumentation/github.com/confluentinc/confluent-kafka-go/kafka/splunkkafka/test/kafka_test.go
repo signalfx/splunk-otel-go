@@ -33,7 +33,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/goleak"
 
@@ -308,10 +308,10 @@ func assertProducerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
-	assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
+	assert.Contains(t, attrs, semconv.MessagingDestinationNameKey.String(testTopic))
 	assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("0"))
 	assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(string(key)))
-	assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(0))
+	assert.Contains(t, attrs, semconv.MessagingKafkaDestinationPartitionKey.Int64(0))
 }
 
 func assertConsumerSpan(t *testing.T, span trace.ReadOnlySpan) {
@@ -320,11 +320,11 @@ func assertConsumerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
-	assert.Contains(t, attrs, semconv.MessagingDestinationKey.String(testTopic))
+	assert.Contains(t, attrs, semconv.MessagingSourceNameKey.String(testTopic))
 	assert.Contains(t, attrs, semconv.MessagingOperationReceive)
 	assert.Contains(t, attrs, semconv.MessagingKafkaConsumerGroupKey.String(testGroupID))
 	assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(string(key)))
-	assert.Contains(t, attrs, semconv.MessagingKafkaPartitionKey.Int64(0))
+	assert.Contains(t, attrs, semconv.MessagingKafkaSourcePartitionKey.Int64(0))
 }
 
 func requireEventIsMessage(t *testing.T, e kafka.Event) *kafka.Message {

@@ -24,7 +24,8 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/semconv/v1.17.0/netconv"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 )
@@ -152,26 +153,17 @@ func netAttributes(network, address string) []attribute.KeyValue {
 	}
 	attrs := make([]attribute.KeyValue, 0, n)
 
-	switch network {
-	case "tcp", "tcp4", "tcp6":
-		attrs = append(attrs, semconv.NetTransportTCP)
-	case "udp", "udp4", "udp6":
-		attrs = append(attrs, semconv.NetTransportUDP)
-	case "ip", "ip4", "ip6":
-		attrs = append(attrs, semconv.NetTransportIP)
-	case "unix", "unixgram", "unixpacket":
-		attrs = append(attrs, semconv.NetTransportUnix)
-	default:
-		attrs = append(attrs, semconv.NetTransportOther)
-	}
-	if ip != "" {
-		attrs = append(attrs, semconv.NetPeerIPKey.String(ip))
-	}
+	attrs = append(attrs, netconv.Transport(network))
 	if hostname != "" {
 		attrs = append(attrs, semconv.NetPeerNameKey.String(hostname))
-	}
-	if port != 0 {
-		attrs = append(attrs, semconv.NetPeerPortKey.Int(port))
+		if port != 0 {
+			attrs = append(attrs, semconv.NetPeerPortKey.Int(port))
+		}
+	} else if ip != "" {
+		attrs = append(attrs, semconv.NetSockPeerAddrKey.String(ip))
+		if port != 0 {
+			attrs = append(attrs, semconv.NetSockPeerPortKey.Int(port))
+		}
 	}
 
 	return attrs

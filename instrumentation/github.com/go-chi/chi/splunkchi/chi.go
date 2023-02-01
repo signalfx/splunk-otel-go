@@ -22,7 +22,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/semconv/v1.17.0/httpconv"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
@@ -53,25 +54,26 @@ func Middleware(options ...Option) func(http.Handler) http.Handler {
 			// what path is being requested. Delay full naming and annotation
 			// until then.
 			name := "HTTP " + r.Method
-			ctx, span := tracer.Start(ctx, name, cfg.DefaultStartOpts...)
+			attr := httpconv.ServerRequest("", r)
+			opt := cfg.DefaultStartOpts
+			opt = append(opt, trace.WithAttributes(attr...))
+			ctx, span := tracer.Start(ctx, name, opt...)
 			defer span.End()
 			r = r.WithContext(ctx)
 
 			next.ServeHTTP(ww, r)
 
 			path := chi.RouteContext(r.Context()).RoutePattern()
-			attrs := semconv.HTTPServerAttributesFromHTTPRequest("", path, r)
-			attrs = append(attrs, semconv.HTTPAttributesFromHTTPStatusCode(ww.Status())...)
-			attrs = append(attrs, semconv.NetAttributesFromHTTPRequest("tcp", r)...)
-			attrs = append(attrs, semconv.EndUserAttributesFromHTTPRequest(r)...)
-			span.SetAttributes(attrs...)
-
 			if path != "" {
+				span.SetAttributes(semconv.HTTPRouteKey.String(path))
 				span.SetName(name + " " + path)
 			}
 
-			code, desc := semconv.SpanStatusFromHTTPStatusCode(ww.Status())
-			span.SetStatus(code, desc)
+			status := ww.Status()
+			if status > 0 {
+				span.SetAttributes(semconv.HTTPStatusCodeKey.Int(status))
+			}
+			span.SetStatus(httpconv.ServerStatus(status))
 		})
 	}
 }

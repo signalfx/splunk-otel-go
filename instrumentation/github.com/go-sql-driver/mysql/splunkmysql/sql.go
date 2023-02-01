@@ -75,19 +75,27 @@ func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 	connCfg.User = cfg.User
 
 	if cfg.Net != "" {
-		// These are the only two cases the instrumented package knows about.
-		switch cfg.Net {
-		case "unix":
-			connCfg.NetTransport = splunksql.NetTransportUnix
-		case "tcp":
-			connCfg.NetTransport = splunksql.NetTransportTCP
-		}
-
 		host, port, err := net.SplitHostPort(cfg.Addr)
 		if err == nil {
 			connCfg.Host = host
 			if p, err := strconv.Atoi(port); err == nil {
 				connCfg.Port = p
+			}
+		}
+
+		// These are the only two cases the instrumented package knows about.
+		switch cfg.Net {
+		case "unix":
+			connCfg.NetTransport = splunksql.NetTransportPipe
+			connCfg.NetSockFamily = splunksql.NetSockFamilyUnix
+		case "tcp":
+			connCfg.NetTransport = splunksql.NetTransportTCP
+			if ip := net.ParseIP(connCfg.Host); ip != nil {
+				if ip.To4() != nil {
+					connCfg.NetSockFamily = splunksql.NetSockFamilyInet
+				} else {
+					connCfg.NetSockFamily = splunksql.NetSockFamilyInet6
+				}
 			}
 		}
 	}

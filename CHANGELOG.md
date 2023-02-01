@@ -17,6 +17,41 @@ This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
   is no longer orphaned. (#1682)
 
+### Added
+
+- The `NetSockFamily` type and related variables to be use in the
+  `ConnectionConfig` from
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  (#1749)
+
+### Changed
+
+- Add the `NetSockFamily` field to the `ConnectionConfig` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This is used to define the protocol address family used for communication with
+  the database. (#1749)
+- Update `go.opentelemetry.io/otel/semconv` to `v1.17.0` in the following
+  packages. (#1749)
+  - `github.com/signalfx/splunk-otel-go/distro`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
+
+### Deprecated
+
+- The `NetTransportIP` and `NetTransportUnix` variables from
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  are deprecated as they are no longer available in `go.opentelemetry.io/otel/semconv/v1.17.0`.
+  Use an appropriate `NetSockFamily*` variable instead. (#1749)
+
 ## [1.2.0] - 2023-01-11
 
 This upgrades [OpenTelemetry Go to v1.11.2/v0.34.0][otel-v1.11.2] and

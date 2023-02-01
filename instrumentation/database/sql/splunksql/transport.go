@@ -16,16 +16,20 @@ package splunksql
 
 import (
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
 // NetTransport is a communication transport protocol.
 type NetTransport attribute.KeyValue
 
-// Attribute returns t as an attribute KeyValue. If t is empty the returned
-// attribute will default to a NetTransportOther.
+// Attribute returns t as an attribute KeyValue. If t is empty or a deprecated
+// value, the returned attribute will default to a NetTransportOther.
 func (t NetTransport) Attribute() attribute.KeyValue {
 	if !t.Key.Defined() {
+		return semconv.NetTransportOther
+	}
+	switch t {
+	case NetTransportIP, NetTransportUnix:
 		return semconv.NetTransportOther
 	}
 	return attribute.KeyValue(t)
@@ -35,9 +39,28 @@ func (t NetTransport) Attribute() attribute.KeyValue {
 var (
 	NetTransportTCP    = NetTransport(semconv.NetTransportTCP)
 	NetTransportUDP    = NetTransport(semconv.NetTransportUDP)
-	NetTransportIP     = NetTransport(semconv.NetTransportIP)
-	NetTransportUnix   = NetTransport(semconv.NetTransportUnix)
 	NetTransportPipe   = NetTransport(semconv.NetTransportPipe)
 	NetTransportInProc = NetTransport(semconv.NetTransportInProc)
 	NetTransportOther  = NetTransport(semconv.NetTransportOther)
+
+	// Deprecated: Use appropriate NetSockFamily* instead.
+	NetTransportIP = NetTransport(semconv.NetTransportKey.String("ip"))
+	// Deprecated: Use appropriate NetSockFamily* instead.
+	NetTransportUnix = NetTransport(semconv.NetTransportKey.String("unix"))
+)
+
+// NetSockFamily is a protocol address family used for communication.
+type NetSockFamily attribute.KeyValue
+
+// Attribute returns t as an attribute KeyValue. If s is empty the returned
+// attribute will also be an empty, undefined, KeyValue.
+func (s NetSockFamily) Attribute() attribute.KeyValue {
+	return attribute.KeyValue(s)
+}
+
+// Valid protocol address families.
+var (
+	NetSockFamilyInet  = NetSockFamily(semconv.NetSockFamilyInet)
+	NetSockFamilyInet6 = NetSockFamily(semconv.NetSockFamilyInet6)
+	NetSockFamilyUnix  = NetSockFamily(semconv.NetSockFamilyUnix)
 )

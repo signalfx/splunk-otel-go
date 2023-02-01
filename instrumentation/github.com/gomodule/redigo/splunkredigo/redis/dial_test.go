@@ -22,7 +22,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -34,12 +34,12 @@ func TestNetAttributes(t *testing.T) {
 		"udp":        semconv.NetTransportUDP,
 		"udp4":       semconv.NetTransportUDP,
 		"udp6":       semconv.NetTransportUDP,
-		"ip":         semconv.NetTransportIP,
-		"ip4":        semconv.NetTransportIP,
-		"ip6":        semconv.NetTransportIP,
-		"unix":       semconv.NetTransportUnix,
-		"unixgram":   semconv.NetTransportUnix,
-		"unixpacket": semconv.NetTransportUnix,
+		"ip":         semconv.NetTransportOther,
+		"ip4":        semconv.NetTransportOther,
+		"ip6":        semconv.NetTransportOther,
+		"unix":       semconv.NetTransportInProc,
+		"unixgram":   semconv.NetTransportInProc,
+		"unixpacket": semconv.NetTransportInProc,
 		"redis":      semconv.NetTransportOther,
 		"rediss":     semconv.NetTransportOther,
 		"":           semconv.NetTransportOther,
@@ -55,11 +55,11 @@ func TestNetAttributes(t *testing.T) {
 			semconv.NetPeerPortKey.Int(80),
 		},
 		"127.0.0.1": {
-			semconv.NetPeerIPKey.String("127.0.0.1"),
+			semconv.NetSockPeerAddrKey.String("127.0.0.1"),
 		},
 		"127.0.0.1:80": {
-			semconv.NetPeerIPKey.String("127.0.0.1"),
-			semconv.NetPeerPortKey.Int(80),
+			semconv.NetSockPeerAddrKey.String("127.0.0.1"),
+			semconv.NetSockPeerPortKey.Int(80),
 		},
 	}
 
