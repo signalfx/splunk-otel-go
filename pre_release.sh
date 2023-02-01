@@ -89,7 +89,7 @@ for dir in $PACKAGE_DIRS; do
 done
 
 printf "Updating go.sum files\n"
-./goyek.sh mod-tidy
+./goyek.sh mod
 
 # Add changes and commit.
 git add .
