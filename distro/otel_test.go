@@ -435,7 +435,7 @@ func TestRunOTLPExporterTLS(t *testing.T) {
 	go func() { errCh <- srv.Serve(ln) }()
 	t.Cleanup(func() {
 		coll.srv.GracefulStop()
-		require.NoError(t, <-errCh)
+		assert.NoError(t, <-errCh)
 	})
 	coll.srv = srv
 
@@ -464,7 +464,7 @@ func TestRunExporterDefault(t *testing.T) {
 	require.NoError(t, err, "failed to start testing collector")
 	t.Cleanup(func() {
 		coll.srv.GracefulStop()
-		require.NoError(t, <-errCh)
+		assert.NoError(t, <-errCh)
 	})
 
 	sdk, err := distroRun(t)

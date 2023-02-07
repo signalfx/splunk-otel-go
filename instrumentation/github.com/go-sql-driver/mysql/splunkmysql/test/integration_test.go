@@ -64,8 +64,8 @@ func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, 
 	db, err := splunksql.Open("mysql", dsn, splunksql.WithTracerProvider(tp))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		require.NoError(t, db.Close())
-		require.NoError(t, tp.Shutdown(context.Background()))
+		assert.NoError(t, db.Close())
+		assert.NoError(t, tp.Shutdown(context.Background()))
 	})
 	return sr, tp, db
 }
@@ -81,15 +81,18 @@ func TestNoContextSpans(t *testing.T) {
 	tx, err := db.Begin()
 	require.NoError(t, err)
 	stmtIns, err := tx.Prepare(insertStmt)
+	t.Cleanup(func() { assert.NoError(t, stmtIns.Close()) })
 	require.NoError(t, err)
 	for i := 0; i < 25; i++ {
 		_, err = stmtIns.Exec(i, (i * i))
 		require.NoError(t, err)
 	}
 	require.NoError(t, tx.Commit())
+	require.NoError(t, stmtIns.Close())
 
 	var sqNum int
 	stmtOut, err := db.Prepare(queryStmt)
+	t.Cleanup(func() { assert.NoError(t, stmtOut.Close()) })
 	require.NoError(t, err)
 	require.NoError(t, stmtOut.QueryRow(13).Scan(&sqNum))
 	assert.Equal(t, 13*13, sqNum, "failed to query square of 13")
@@ -122,6 +125,7 @@ func TestContextSpans(t *testing.T) {
 	tx, err := db.BeginTx(ctx, nil)
 	require.NoError(t, err)
 	stmtIns, err := tx.PrepareContext(ctx, insertStmt)
+	t.Cleanup(func() { assert.NoError(t, stmtIns.Close()) })
 	require.NoError(t, err)
 	for i := 0; i < 25; i++ {
 		_, err = stmtIns.ExecContext(ctx, i, (i * i))
@@ -131,6 +135,7 @@ func TestContextSpans(t *testing.T) {
 
 	var sqNum int
 	stmtOut, err := db.PrepareContext(ctx, queryStmt)
+	t.Cleanup(func() { assert.NoError(t, stmtOut.Close()) })
 	require.NoError(t, err)
 	require.NoError(t, stmtOut.QueryRowContext(ctx, 13).Scan(&sqNum))
 	assert.Equal(t, 13*13, sqNum, "failed to query square of 13")

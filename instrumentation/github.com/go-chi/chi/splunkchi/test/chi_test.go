@@ -65,7 +65,7 @@ func newTestServer(tp *trace.TracerProvider) *chi.Mux {
 func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *chi.Mux) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
-	t.Cleanup(func() { require.NoError(t, tp.Shutdown(context.Background())) })
+	t.Cleanup(func() { assert.NoError(t, tp.Shutdown(context.Background())) })
 	return sr, newTestServer(tp)
 }
 

@@ -392,7 +392,7 @@ func testUpdate(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	ctx := withTestingDeadline(context.Background(), t)
 
@@ -411,7 +411,7 @@ func testView(t *testing.T, name string, f func(tx *splunkbuntdb.Tx) error) {
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	ctx := withTestingDeadline(context.Background(), t)
 
@@ -430,7 +430,7 @@ func TestCommit(t *testing.T) {
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	tx, err := db.Begin(true)
 	assert.NoError(t, err)
@@ -466,7 +466,7 @@ func TestRollback(t *testing.T) {
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
 
 	db := getDatabase(t, splunkbuntdb.WithTracerProvider(tp))
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	tx, err := db.Begin(true)
 	assert.NoError(t, err)
