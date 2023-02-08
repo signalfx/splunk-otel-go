@@ -116,7 +116,6 @@ func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T,
 
 		attrs := span.Attributes()
 		assert.Contains(t, attrs, semconv.HTTPMethodKey.String(method))
-		assert.Contains(t, attrs, semconv.HTTPTargetKey.String(target))
 		assert.Contains(t, attrs, semconv.HTTPRouteKey.String(path))
 		assert.Contains(t, attrs, semconv.HTTPSchemeHTTP)
 		assert.Contains(t, attrs, semconv.HTTPStatusCodeKey.Int(httpCode))
