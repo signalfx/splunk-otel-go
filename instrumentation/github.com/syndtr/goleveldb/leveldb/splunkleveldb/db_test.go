@@ -76,7 +76,7 @@ func TestRecover(t *testing.T) {
 func TestDBOpenTransaction(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	// Closing the DB will discard this transaction.
 	transaction, err := db.OpenTransaction()
@@ -99,7 +99,7 @@ func TestDBOpenTransactionForwardsError(t *testing.T) {
 func TestDBNewIterator(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	i := db.NewIterator(nil, nil)
 	assert.IsType(t, &iter{}, i)
@@ -110,7 +110,7 @@ func TestDBNewIterator(t *testing.T) {
 func TestDBGetSnapshot(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	snap, err := db.GetSnapshot()
 	assert.NoError(t, err)

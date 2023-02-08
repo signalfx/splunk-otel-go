@@ -62,7 +62,7 @@ func (*testResolver) HelloNonTrivial() (string, error) { return helloWorld, nil 
 func fixtures(t *testing.T) (*tracetest.SpanRecorder, *httptest.Server) {
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
-	t.Cleanup(func() { require.NoError(t, tp.Shutdown(context.Background())) })
+	t.Cleanup(func() { assert.NoError(t, tp.Shutdown(context.Background())) })
 
 	tracer := graphql.Tracer(splunkgraphql.NewTracer(splunkgraphql.WithTracerProvider(tp)))
 	schema := graphql.MustParseSchema(testSchema, new(testResolver), tracer)
@@ -82,7 +82,7 @@ func TestTracerNonTrivial(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, resp.Body.Close()) })
+	t.Cleanup(func() { assert.NoError(t, resp.Body.Close()) })
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Equal(t, `{"data":{"hello":"Hello, world!","helloNonTrivial":"Hello, world!"}}`, string(body))
@@ -118,7 +118,7 @@ func TestTracerTrivial(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, resp.Body.Close()) })
+	t.Cleanup(func() { assert.NoError(t, resp.Body.Close()) })
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Equal(t, `{"data":{"hello":"Hello, world!"}}`, string(body))

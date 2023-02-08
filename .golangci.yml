@@ -137,6 +137,7 @@ linters:
     # - rowserrcheck # rowserrcheck is disabled because of generics. You can track the evolution of the generics support by following the https://github.com/golangci/golangci-lint/issues/2649."
     - staticcheck
     - stylecheck
+    - sqlclosecheck
     - typecheck
     - unconvert
     - unparam

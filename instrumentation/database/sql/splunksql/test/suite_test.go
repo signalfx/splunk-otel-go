@@ -150,7 +150,8 @@ func (s *SplunkSQLSuite) TestDBExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBQuery() {
-	_, err := s.DB.Query("test") //nolint: gocritic // there is no connection leak for this test structure.
+	rows, err := s.DB.Query("test")
+	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -160,7 +161,8 @@ func (s *SplunkSQLSuite) TestDBQuery() {
 }
 
 func (s *SplunkSQLSuite) TestDBQueryContext() {
-	_, err := s.DB.QueryContext(context.Background(), "test") //nolint: gocritic // there is no connection leak for this test structure.
+	rows, err := s.DB.QueryContext(context.Background(), "test")
+	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -190,7 +192,8 @@ func (s *SplunkSQLSuite) TestDBQueryRowContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBPrepare() {
-	_, err := s.DB.Prepare("test")
+	stmt, err := s.DB.Prepare("test")
+	s.T().Cleanup(func() { s.Assert().NoError(stmt.Close()) })
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Prepare, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
 }
@@ -198,7 +201,8 @@ func (s *SplunkSQLSuite) TestDBPrepare() {
 func (s *SplunkSQLSuite) TestDBPrepareContext() {
 	// If the database does not support PrepareContext, the instrumentation
 	// should fallback to wrapping Prepare directly.
-	_, err := s.DB.PrepareContext(context.Background(), "test")
+	stmt, err := s.DB.PrepareContext(context.Background(), "test")
+	s.T().Cleanup(func() { s.Assert().NoError(stmt.Close()) })
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Prepare, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
 }
@@ -221,46 +225,45 @@ func (s *SplunkSQLSuite) TestDBBeginTx() {
 
 func (s *SplunkSQLSuite) newStmt() *sql.Stmt {
 	stmt, err := s.DB.Prepare("test query")
+	s.T().Cleanup(func() { s.Assert().NoError(stmt.Close()) })
 	s.Require().NoError(err)
 	return stmt
 }
 
 func (s *SplunkSQLSuite) TestStmtExec() {
-	_, err := s.newStmt().Exec()
+	_, err := s.newStmt().Exec() //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Exec, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
 func (s *SplunkSQLSuite) TestStmtExecContext() {
-	_, err := s.newStmt().ExecContext(context.Background())
+	_, err := s.newStmt().ExecContext(context.Background()) //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Exec, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
 func (s *SplunkSQLSuite) TestStmtQuery() {
-	r, err := s.newStmt().Query()
+	rows, err := s.newStmt().Query() //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
+	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
-	// Avoid connection leak
-	_ = r.Close()
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryContext() {
-	r, err := s.newStmt().QueryContext(context.Background())
+	rows, err := s.newStmt().QueryContext(context.Background()) //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
+	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
-	// Avoid connection leak
-	_ = r.Close()
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryRow() {
-	r := s.newStmt().QueryRow()
+	r := s.newStmt().QueryRow() //nolint:sqlclosecheck // newStmt adds the (*sql.Stmt).Close() to test cleanup
 	s.Require().NoError(r.Err())
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
 func (s *SplunkSQLSuite) TestStmtQueryRowContext() {
-	r := s.newStmt().QueryRowContext(context.Background())
+	r := s.newStmt().QueryRowContext(context.Background()) //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
 	s.Require().NoError(r.Err())
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }

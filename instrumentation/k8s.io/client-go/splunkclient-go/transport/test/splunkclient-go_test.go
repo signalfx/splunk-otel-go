@@ -67,7 +67,7 @@ func request(t *testing.T, handle func(http.ResponseWriter, *http.Request)) (*tr
 	resp, err := c.Do(r)
 	require.NoError(t, err)
 
-	t.Cleanup(func() { require.NoError(t, tp.Shutdown(context.Background())) })
+	t.Cleanup(func() { assert.NoError(t, tp.Shutdown(context.Background())) })
 
 	return sr, resp, ts.URL
 }

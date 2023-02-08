@@ -25,7 +25,7 @@ import (
 func TestSnapshotNewIterator(t *testing.T) {
 	db, err := Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	snap, err := db.GetSnapshot()
 	require.NoError(t, err)

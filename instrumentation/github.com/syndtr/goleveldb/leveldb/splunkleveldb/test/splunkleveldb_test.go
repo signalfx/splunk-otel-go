@@ -273,7 +273,7 @@ func (errIterator) Error() error {
 func TestIteratorErrors(t *testing.T) {
 	db, err := leveldb.Open(storage.NewMemStorage(), nil)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, db.Close()) })
+	t.Cleanup(func() { assert.NoError(t, db.Close()) })
 
 	sr := tracetest.NewSpanRecorder()
 	tp := trace.NewTracerProvider(trace.WithSpanProcessor(sr))
