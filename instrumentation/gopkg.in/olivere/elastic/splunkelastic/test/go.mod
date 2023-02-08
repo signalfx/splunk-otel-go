@@ -5,11 +5,11 @@ go 1.18
 require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/ory/dockertest v3.3.5+incompatible
-	github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic v1.3.0
+	github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic v1.3.1
 	github.com/stretchr/testify v1.8.1
-	go.opentelemetry.io/otel v1.12.0
-	go.opentelemetry.io/otel/sdk v1.12.0
-	go.opentelemetry.io/otel/trace v1.12.0
+	go.opentelemetry.io/otel v1.13.0
+	go.opentelemetry.io/otel/sdk v1.13.0
+	go.opentelemetry.io/otel/trace v1.13.0
 )
 
 require (
@@ -32,8 +32,8 @@ require (
 	github.com/opencontainers/runc v1.1.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.3.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.3.0 // indirect
+	github.com/signalfx/splunk-otel-go v1.3.1 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
