@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splun
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v1.3.0
+	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v1.3.1
 	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/otel v1.13.0
 	go.opentelemetry.io/otel/sdk v1.13.0
@@ -16,8 +16,8 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.3.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.3.0 // indirect
+	github.com/signalfx/splunk-otel-go v1.3.1 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.3.1 // indirect
 	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
