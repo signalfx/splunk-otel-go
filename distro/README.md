@@ -1,5 +1,7 @@
 # Package `github.com/signalfx/splunk-otel-go/distro`
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/distro.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/distro)
+
 This package provides a Splunk distribution of the OpenTelemetry Go SDK. It is
 designed to provide an SDK properly configured to be used with the Splunk
 platform out-of-the-box.
