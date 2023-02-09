@@ -11,16 +11,5 @@ function to create an SDK that is ready to be used with OpenTelemetry and
 forward all telemetry to Splunk. See [`example_test.go`](./example_test.go) for
 a complete example.
 
-## Logging
-
-By default, the [`SDK`] logs relevant information, warnings, and errors. You
-can set the default logging level by setting the `OTEL_LOG_LEVEL` environment
-variable to one of the following values:
-
-- `"error"`: Log errors
-- `"warn"`: Log errors and warnings
-- `"info"`: Log information, warnings, and errors
-- `"debug"`: Log debugging and operation information, warnings, and errors
-
-Logging can be explicitly configured in the code that creates the [`SDK`] using
-the `WithLogger` option.
+Read the official documentation for this distribution in the
+[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
