@@ -15,7 +15,7 @@ This Splunk distribution comes with the following defaults:
 - [OTLP over gRPC
   exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp)
   configured to send spans to a locally running [Splunk OpenTelemetry
-  Connector](https://github.com/signalfx/splunk-otel-collector)
+  Collector](https://github.com/signalfx/splunk-otel-collector)
   (`http://localhost:4317`).
 - Unlimited default limits for configuration options to
   support full-fidelity traces.
@@ -72,17 +72,12 @@ As well as in Go code before executing `distro.Run()`:
 os.Setenv("OTEL_RESOURCE_ATTRIBUTES", "service.name=my-app,service.version=1.2.3,deployment.environment=development")
 ```
 
-## Advanced configuration
-
-For advanced configuration options,
-refer to the [`distro` package documentation](../distro/README.md#Configuration).
-
 ## Correlate traces and logs
 
 You can add trace metadata to logs using the OpenTelemetry trace API. Trace
 metadata lets you explore logs in Splunk Observability Cloud.
 
-See [Correlating traces and logs](./correlating-traces-and-logs.md) for more
+See [Correlating traces and logs](correlating-traces-and-logs.md) for more
 information.
 
 ## Library instrumentation
@@ -125,4 +120,4 @@ Agent](./migrating.md).
 ## Troubleshooting
 
 For troubleshooting information, see the
-[Troubleshooting](./troubleshooting.md) documentation.
+[Troubleshooting](troubleshooting.md) documentation.
