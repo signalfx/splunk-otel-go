@@ -103,7 +103,7 @@ func TestNewSpanLimits(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			for key, val := range test.envs {
-				t.Cleanup(Setenv(key, val))
+				t.Setenv(key, val)
 			}
 			assert.Equal(t, test.want, newSpanLimits())
 		})
