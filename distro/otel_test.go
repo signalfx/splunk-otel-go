@@ -151,17 +151,17 @@ func TestRunJaegerExporter(t *testing.T) {
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
-				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
+				t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
 				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT and SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url))
-				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
-				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
+				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
+				t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
 				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
@@ -205,8 +205,8 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 	srv.TLS = serverTLSConfig(t)
 	srv.StartTLS()
 
-	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL))
+	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
+	t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL)
 	sdk, err := distroRun(
 		t,
 		distro.WithTLSConfig(clientTLSConfig(t)),
@@ -236,7 +236,7 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	srv.Listener = ln
 	srv.Start()
 
-	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk"))
+	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
 	sdk, err := distroRun(t)
 	require.NoError(t, err)
 
@@ -266,25 +266,25 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
-				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
 				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://"+url))
-				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
+				t.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
 				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT and SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
-				t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url))
-				t.Cleanup(distro.Setenv("SPLUNK_ACCESS_TOKEN", token))
-				t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "otlp"))
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
 				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got spansExportRequest) {
@@ -339,7 +339,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	})
 	coll.srv = srv
 
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.endpoint))
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.endpoint)
 	sdk, err := distroRun(
 		t,
 		distro.WithTLSConfig(clientTLSConfig(t)),
@@ -386,8 +386,8 @@ func TestInvalidTracesExporter(t *testing.T) {
 	coll := newTracesCollector(t)
 
 	// Explicitly set OTLP exporter.
-	t.Cleanup(distro.Setenv("OTEL_TRACES_EXPORTER", "invalid value"))
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.endpoint))
+	t.Setenv("OTEL_TRACES_EXPORTER", "invalid value")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.endpoint)
 	sdk, err := distroRun(t)
 	require.NoError(t, err, "should configure tracing")
 
@@ -406,7 +406,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 
 func TestSplunkDistroVersionAttrInResource(t *testing.T) {
 	coll := newTracesCollector(t)
-	t.Cleanup(distro.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.endpoint))
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.endpoint)
 	sdk, err := distroRun(t)
 	require.NoError(t, err, "should configure tracing")
 
