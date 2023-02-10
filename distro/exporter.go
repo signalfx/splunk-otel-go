@@ -33,17 +33,17 @@ type traceExporterFunc func(*exporterConfig) (trace.SpanExporter, error)
 // functions.
 var exporters = map[string]traceExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPExporter,
+	"otlp": newOTLPTracesExporter,
 	// Jaeger thrift exporter.
 	"jaeger-thrift-splunk": newJaegerThriftExporter,
 	// None, explicitly do not set an exporter.
 	"none": nil,
 }
 
-func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
+func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	var opts []otlptracegrpc.Option
 
-	endpoint := otlpEndpoint()
+	endpoint := otlpTracesEndpoint()
 	if endpoint != "" {
 		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
 	}
@@ -65,18 +65,8 @@ func newOTLPExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
-// noneEnvVarSet returns true if none of provided env vars is set.
-func noneEnvVarSet(envs ...string) bool {
-	for _, env := range envs {
-		if _, ok := os.LookupEnv(env); ok {
-			return false
-		}
-	}
-	return true
-}
-
-// otlpEndpoint returns the endpoint to use for the OTLP gRPC exporter.
-func otlpEndpoint() string {
+// otlpTracesEndpoint returns the endpoint to use for the OTLP gRPC exporter.
+func otlpTracesEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
 	for _, env := range envs {
@@ -137,6 +127,16 @@ func jaegerEndpoint() string {
 
 	// Use Splunk specific default (locally running collector).
 	return defaultJaegerEndpoint
+}
+
+// noneEnvVarSet returns true if none of provided env vars is set.
+func noneEnvVarSet(envs ...string) bool {
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); ok {
+			return false
+		}
+	}
+	return true
 }
 
 // notNone returns if s is not empty or set to none.

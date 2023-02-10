@@ -82,17 +82,16 @@ func TestConfig(t *testing.T) {
 
 func testEnvironmentOverrides(t *testing.T, tc *configFieldTest) {
 	for _, ev := range tc.EnvironmentTests {
-		func(key, val string) {
-			revert := Setenv(key, val)
-			defer revert()
+		t.Run(ev.Key, func(t *testing.T) {
+			t.Setenv(ev.Key, ev.Value)
 
 			// The expected type is not known, but we can check that the value
 			// has changed to verify the environment variable influenced the
 			// configuration.
 			assert.NotEqual(
 				t, tc.DefaultValue, tc.ValueFunc(newTestConfig(t)),
-				"environment variable %s=%q unused", key, val,
+				"environment variable %s=%q unused", ev.Key, ev.Value,
 			)
-		}(ev.Key, ev.Value)
+		})
 	}
 }
