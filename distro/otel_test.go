@@ -149,24 +149,22 @@ func TestRunJaegerExporter(t *testing.T) {
 
 	testCases := []struct {
 		desc     string
-		setupFn  func(t *testing.T, url string) (distro.SDK, error)
+		setupFn  func(t *testing.T, url string)
 		assertFn func(t *testing.T, req *http.Request)
 	}{
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
 				t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
-				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT and SPLUNK_ACCESS_TOKEN",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
 				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
 				t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
-				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got *http.Request) {
 				assertBase(t, got)
@@ -186,14 +184,9 @@ func TestRunJaegerExporter(t *testing.T) {
 			reqCh, hFunc := reqHander()
 			srv := httptest.NewServer(hFunc)
 			t.Cleanup(srv.Close)
-
-			sdk, err := tc.setupFn(t, srv.URL)
-			require.NoError(t, err, "should configure tracing")
+			tc.setupFn(t, srv.URL)
 
 			emitSpan(t)
-			// Flush all spans from BSP.
-			ctx := context.Background()
-			require.NoError(t, sdk.Shutdown(ctx))
 
 			tc.assertFn(t, <-reqCh)
 		})
@@ -204,22 +197,12 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 	reqCh, hFunc := reqHander()
 	srv := httptest.NewUnstartedServer(hFunc)
 	t.Cleanup(srv.Close)
-
 	srv.TLS = serverTLSConfig(t)
 	srv.StartTLS()
-
 	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
 	t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL)
-	sdk, err := distroRun(
-		t,
-		distro.WithTLSConfig(clientTLSConfig(t)),
-	)
-	require.NoError(t, err)
 
-	emitSpan(t)
-	// Flush all spans from BSP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
+	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := <-reqCh
 	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
@@ -238,13 +221,8 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	srv.Start()
 
 	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
-	sdk, err := distroRun(t)
-	require.NoError(t, err)
 
 	emitSpan(t)
-	// Flush all spans from BSP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := <-reqCh
 	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
@@ -260,32 +238,29 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 
 	testCases := []struct {
 		desc     string
-		setupFn  func(t *testing.T, url string) (distro.SDK, error)
+		setupFn  func(t *testing.T, url string)
 		assertFn func(t *testing.T, req *spansExportRequest)
 	}{
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT and SPLUNK_ACCESS_TOKEN",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got *spansExportRequest) {
 				assertBase(t, got)
@@ -301,14 +276,9 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			coll := &collector{}
 			coll.Start(t)
-
-			sdk, err := tc.setupFn(t, coll.Endpoint)
-			require.NoError(t, err, "should configure tracing")
+			tc.setupFn(t, coll.Endpoint)
 
 			emitSpan(t)
-			// Flush all spans from BSP.
-			ctx := context.Background()
-			require.NoError(t, sdk.Shutdown(ctx))
 
 			tc.assertFn(t, coll.SpansExportRequest())
 		})
@@ -318,18 +288,9 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
-
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
-	sdk, err := distroRun(
-		t,
-		distro.WithTLSConfig(clientTLSConfig(t)),
-	)
-	require.NoError(t, err)
 
-	emitSpan(t)
-	// Flush all spans from BSP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
+	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.SpansExportRequest()
 	require.NotNil(t, got)
@@ -343,13 +304,7 @@ func TestRunTracesExporterDefault(t *testing.T) {
 	coll := &collector{Endpoint: "localhost:4317"}
 	coll.Start(t)
 
-	sdk, err := distroRun(t)
-	require.NoError(t, err)
-
 	emitSpan(t)
-	// Flush all spans from BSP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := coll.SpansExportRequest()
 	require.NotNil(t, got)
@@ -361,19 +316,11 @@ func TestRunTracesExporterDefault(t *testing.T) {
 func TestInvalidTracesExporter(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
-
 	// Explicitly set OTLP exporter.
 	t.Setenv("OTEL_TRACES_EXPORTER", "invalid value")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
-	sdk, err := distroRun(t)
-	require.NoError(t, err, "should configure tracing")
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, spanName)
-	span.End()
-
-	// Flush all spans from BSP.
-	require.NoError(t, sdk.Shutdown(ctx))
+	emitSpan(t)
 
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
@@ -386,13 +333,8 @@ func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
-	sdk, err := distroRun(t)
-	require.NoError(t, err, "should configure tracing")
 
 	emitSpan(t)
-	// Flush all spans from BSP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := coll.SpansExportRequest()
 	require.NotNil(t, got)
@@ -418,32 +360,29 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 
 	testCases := []struct {
 		desc     string
-		setupFn  func(t *testing.T, url string) (distro.SDK, error)
+		setupFn  func(t *testing.T, url string)
 		assertFn func(t *testing.T, req *metricsExportRequest)
 	}{
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 		},
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT and SPLUNK_ACCESS_TOKEN",
-			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
-				return distroRun(t)
 			},
 			assertFn: func(t *testing.T, got *metricsExportRequest) {
 				assertBase(t, got)
@@ -459,14 +398,9 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			coll := &collector{}
 			coll.Start(t)
-
-			sdk, err := tc.setupFn(t, coll.Endpoint)
-			require.NoError(t, err, "should configure tracing")
+			tc.setupFn(t, coll.Endpoint)
 
 			emitMetric(t)
-			// Flush all spans from BMP.
-			ctx := context.Background()
-			require.NoError(t, sdk.Shutdown(ctx))
 
 			tc.assertFn(t, coll.MetricsExportRequest())
 		})
@@ -478,19 +412,10 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 
 	coll := &collector{TLS: true}
 	coll.Start(t)
-
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
-	sdk, err := distroRun(
-		t,
-		distro.WithTLSConfig(clientTLSConfig(t)),
-	)
-	require.NoError(t, err)
 
-	emitMetric(t)
-	// Flush all spans from BMP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
+	emitMetric(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.MetricsExportRequest()
 	require.NotNil(t, got)
@@ -505,13 +430,7 @@ func TestRunMetricsExporterDefault(t *testing.T) {
 	coll := &collector{Endpoint: "localhost:4317"}
 	coll.Start(t)
 
-	sdk, err := distroRun(t)
-	require.NoError(t, err)
-
 	emitMetric(t)
-	// Flush all spans from BMP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := coll.MetricsExportRequest()
 	assert.Nil(t, got)
@@ -524,13 +443,8 @@ func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
-	sdk, err := distroRun(t)
-	require.NoError(t, err, "should configure tracing")
 
 	emitMetric(t)
-	// Flush all spans from BMP.
-	ctx := context.Background()
-	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := coll.MetricsExportRequest()
 	require.NotNil(t, got)
@@ -546,7 +460,9 @@ func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
 
 func TestNoServiceWarn(t *testing.T) {
 	var buf bytes.Buffer
+
 	sdk, err := distro.Run(distro.WithLogger(buflogr.NewWithBuffer(&buf)))
+
 	require.NoError(t, sdk.Shutdown(context.Background()))
 	require.NoError(t, err)
 	// INFO prefix for buflogr is verbosity level 0, our warn level.
@@ -585,17 +501,29 @@ func serverTLSConfig(t *testing.T) *tls.Config {
 	}
 }
 
-func emitSpan(t *testing.T) {
+func emitSpan(t *testing.T, opts ...distro.Option) {
+	sdk, err := distroRun(t, opts...)
+	require.NoError(t, err)
+
 	ctx := context.Background()
 	_, span := otel.Tracer(t.Name()).Start(ctx, spanName)
 	span.End()
+
+	// Flush all spans from BSP.
+	require.NoError(t, sdk.Shutdown(ctx))
 }
 
-func emitMetric(t *testing.T) {
+func emitMetric(t *testing.T, opts ...distro.Option) {
+	sdk, err := distroRun(t, opts...)
+	require.NoError(t, err)
+
 	ctx := context.Background()
 	cnt, err := global.MeterProvider().Meter(t.Name()).Int64Counter(metricName)
 	require.NoError(t, err)
 	cnt.Add(ctx, 123)
+
+	// Flush all spans from BMP.
+	require.NoError(t, sdk.Shutdown(ctx))
 }
 
 type (
