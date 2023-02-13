@@ -2,9 +2,9 @@
 
 This example instruments a simple HTTP server-client application.
 
-The application is configured to send spans to a local instance
-of the OpenTelemetry Collector, which propagates them to both
-Splunk Observability Cloud and to a local Jaeger instance.
+The application is configured to send spans and metrics
+to a local instance of the OpenTelemetry Collector,
+which propagates them to Splunk Observability Cloud.
 
 ## Prerequisites
 
@@ -31,10 +31,11 @@ export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
 ```
 
-You can find the collected traces in:
+You can find the collected telemetry in:
 
-- Console output
+- OpenTelemetry Collector output
 - Jaeger: <http://localhost:16686/search>
+- Prometheus scrape handler: <http://localhost:8889/metrics>
 - Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
   > Note: Processing might take some time.
 
