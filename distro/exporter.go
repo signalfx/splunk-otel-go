@@ -78,10 +78,32 @@ func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(context.Background(), opts...)
 }
 
-// otlpTracesEndpoint returns the endpoint to use for the OTLP gRPC exporter.
+// otlpTracesEndpoint returns the endpoint to use for the OTLP gRPC traces exporter.
 func otlpTracesEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); ok {
+			return ""
+		}
+	}
+
+	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
+	// Also, be sure to communicate local is false so the default behavior of
+	// the OTLP gRPC exporter (using the system CA for authentication and
+	// encryption) is used.
+	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
+		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
+	}
+
+	// The OTel default is the same as Splunk's (localhost:4317)
+	return ""
+}
+
+// otlpMetricsEndpoint returns the endpoint to use for the OTLP gRPC metrics exporter.
+func otlpMetricsEndpoint() string {
+	// Allow the exporter to interpret these environment variables directly.
+	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey}
 	for _, env := range envs {
 		if _, ok := os.LookupEnv(env); ok {
 			return ""

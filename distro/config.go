@@ -36,9 +36,10 @@ const (
 	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
-	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
-	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
-	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+	otelExporterJaegerEndpointKey      = "OTEL_EXPORTER_JAEGER_ENDPOINT"
+	otelExporterOTLPEndpointKey        = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	otelExporterOTLPTracesEndpointKey  = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+	otelExporterOTLPMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
