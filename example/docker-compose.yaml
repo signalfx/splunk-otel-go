@@ -1,12 +1,12 @@
 version: "3.9"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.49.0
+    image: otel/opentelemetry-collector-contrib:0.71.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
     command: --config /etc/otel/config.yaml
     environment:
-      - JAEGER_ENDPOINT=jaeger:14250
+      - JAEGER_ENDPOINT=jaeger:4317
       - SPLUNK_ACCESS_TOKEN
       - SPLUNK_REALM=us0
     ports:
@@ -16,11 +16,13 @@ services:
       - "55679:55679" # zpages extension
       - "4317:4317"   # OTLP gRPC receiver
       - "14268:14268" # Jaeger Thrift over HTTP receiver
+      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
     depends_on:
       - jaeger
 
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.42.0
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
       - "16686:16686"
-      - "14250:14250"
