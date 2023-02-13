@@ -29,8 +29,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric/global"
+	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	comm "go.opentelemetry.io/proto/otlp/common/v1"
+	mpb "go.opentelemetry.io/proto/otlp/metrics/v1"
 	rpb "go.opentelemetry.io/proto/otlp/resource/v1"
 	tpb "go.opentelemetry.io/proto/otlp/trace/v1"
 	"go.uber.org/goleak"
@@ -299,7 +302,7 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 		}
 
 		t.Run(tc.desc, func(t *testing.T) {
-			coll := newTracesCollector(t)
+			coll := newCollector(t)
 
 			sdk, err := tc.setupFn(t, coll.endpoint)
 			require.NoError(t, err, "should configure tracing")
@@ -319,7 +322,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	ln, err := net.Listen("tcp", "localhost:0")
 	require.NoError(t, err)
 
-	coll := &tracesCollector{
+	coll := &collector{
 		endpoint: ln.Addr().String(),
 		traceService: &collectorTraceServiceServer{
 			requests: make(chan spansExportRequest, 1),
@@ -352,15 +355,15 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 
 	// Flush all spans from BSP.
 	require.NoError(t, sdk.Shutdown(ctx))
-	req := <-coll.traceService.requests
-	assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-	require.Len(t, req.Spans, 1)
-	assert.Equal(t, spanName, req.Spans[0].Name)
+	got := <-coll.traceService.requests
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	require.Len(t, got.Spans, 1)
+	assert.Equal(t, spanName, got.Spans[0].Name)
 }
 
-func TestRunExporterDefault(t *testing.T) {
+func TestRunTracesExporterDefault(t *testing.T) {
 	// Start collector at default address.
-	coll, errCh, err := newTracesCollectorAt("localhost:4317")
+	coll, errCh, err := newCollectorAt("localhost:4317")
 	require.NoError(t, err, "failed to start testing collector")
 	t.Cleanup(func() {
 		coll.srv.GracefulStop()
@@ -371,7 +374,7 @@ func TestRunExporterDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	_, span := otel.Tracer("TestRunExporterDefault").Start(ctx, spanName)
+	_, span := otel.Tracer("TestRunTracesExporterDefault").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
@@ -382,8 +385,36 @@ func TestRunExporterDefault(t *testing.T) {
 	assert.Equal(t, spanName, got.Spans[0].Name)
 }
 
+func TestRunMetricsExporterDefault(t *testing.T) {
+	// Start collector at default address.
+	// By default the metrics exporter is NONE
+	coll, errCh, err := newCollectorAt("localhost:4317")
+	require.NoError(t, err, "failed to start testing collector")
+	t.Cleanup(func() {
+		coll.srv.GracefulStop()
+		assert.NoError(t, <-errCh)
+	})
+
+	sdk, err := distroRun(t)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	cnt, err := global.MeterProvider().Meter("TestRunMetricsExporterDefault").Int64Counter("ticks")
+	require.NoError(t, err)
+	cnt.Add(ctx, 123)
+
+	// Flush all metrics from BMP.
+	require.NoError(t, sdk.Shutdown(ctx))
+	select {
+	case got := <-coll.metricsService.requests:
+		t.Errorf("should not export any metric, but got %d", len(got.Metrics))
+	default: // test passed, none metric received
+	}
+
+}
+
 func TestInvalidTracesExporter(t *testing.T) {
-	coll := newTracesCollector(t)
+	coll := newCollector(t)
 
 	// Explicitly set OTLP exporter.
 	t.Setenv("OTEL_TRACES_EXPORTER", "invalid value")
@@ -405,7 +436,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 }
 
 func TestSplunkDistroVersionAttrInResource(t *testing.T) {
-	coll := newTracesCollector(t)
+	coll := newCollector(t)
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.endpoint)
 	sdk, err := distroRun(t)
 	require.NoError(t, err, "should configure tracing")
@@ -470,10 +501,11 @@ func serverTLSConfig(t *testing.T) *tls.Config {
 }
 
 type (
-	tracesCollector struct {
-		endpoint     string
-		srv          *grpc.Server
-		traceService *collectorTraceServiceServer
+	collector struct {
+		endpoint       string
+		srv            *grpc.Server
+		traceService   *collectorTraceServiceServer
+		metricsService *collectorMetricsServiceServer
 	}
 
 	collectorTraceServiceServer struct {
@@ -487,12 +519,22 @@ type (
 		Resource *rpb.Resource
 		Spans    []*tpb.Span
 	}
+
+	collectorMetricsServiceServer struct {
+		cmpb.UnimplementedMetricsServiceServer
+
+		requests chan metricsExportRequest
+	}
+
+	metricsExportRequest struct {
+		Header   metadata.MD
+		Resource *rpb.Resource
+		Metrics  []*mpb.Metric
+	}
 )
 
-var _ ctpb.TraceServiceServer = (*collectorTraceServiceServer)(nil)
-
-func newTracesCollector(t *testing.T) *tracesCollector {
-	coll, errCh, err := newTracesCollectorAt("localhost:0")
+func newCollector(t *testing.T) *collector {
+	coll, errCh, err := newCollectorAt("localhost:0")
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		coll.srv.GracefulStop()
@@ -501,7 +543,7 @@ func newTracesCollector(t *testing.T) *tracesCollector {
 	return coll
 }
 
-func newTracesCollectorAt(address string) (*tracesCollector, chan error, error) {
+func newCollectorAt(address string) (*collector, chan error, error) {
 	errCh := make(chan error, 1)
 
 	ln, err := net.Listen("tcp", address)
@@ -510,15 +552,19 @@ func newTracesCollectorAt(address string) (*tracesCollector, chan error, error) 
 		return nil, errCh, err
 	}
 
-	coll := &tracesCollector{
+	coll := &collector{
 		endpoint: ln.Addr().String(),
 		traceService: &collectorTraceServiceServer{
 			requests: make(chan spansExportRequest, 1),
+		},
+		metricsService: &collectorMetricsServiceServer{
+			requests: make(chan metricsExportRequest, 1),
 		},
 	}
 
 	srv := grpc.NewServer()
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
+	cmpb.RegisterMetricsServiceServer(srv, coll.metricsService)
 	go func() { errCh <- srv.Serve(ln) }()
 	coll.srv = srv
 
@@ -537,4 +583,18 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 	}
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
+}
+
+func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb.ExportMetricsServiceRequest) (*cmpb.ExportMetricsServiceResponse, error) {
+	rs := exp.ResourceMetrics[0]
+	scopeMetrics := rs.ScopeMetrics[0]
+	headers, _ := metadata.FromIncomingContext(ctx)
+
+	cmss.requests <- metricsExportRequest{
+		Header:   headers,
+		Resource: rs.GetResource(),
+		Metrics:  scopeMetrics.GetMetrics(),
+	}
+
+	return &cmpb.ExportMetricsServiceResponse{}, nil
 }

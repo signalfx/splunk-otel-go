@@ -78,12 +78,12 @@ func Run(opts ...Option) (SDK, error) {
 
 	otel.SetTextMapPropagator(c.Propagator)
 
-	if c.TraceExporterFunc == nil {
+	if c.TracesExporterFunc == nil {
 		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none/nil: Tracing disabled")
 		// "none" exporter configured.
 		return SDK{}, nil
 	}
-	exp, err := c.TraceExporterFunc(c.ExportConfig)
+	exp, err := c.TracesExporterFunc(c.ExportConfig)
 	if err != nil {
 		return SDK{}, err
 	}

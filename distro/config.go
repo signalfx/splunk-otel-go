@@ -75,8 +75,8 @@ type config struct {
 	Propagator propagation.TextMapPropagator
 	SpanLimits *trace.SpanLimits
 
-	ExportConfig      *exporterConfig
-	TraceExporterFunc traceExporterFunc
+	ExportConfig       *exporterConfig
+	TracesExporterFunc traceExporterFunc
 }
 
 // newConfig returns a validated config with Splunk defaults.
@@ -97,16 +97,16 @@ func newConfig(opts ...Option) *config {
 	if c.Propagator == nil {
 		c.Propagator = autoprop.NewTextMapPropagator()
 	}
-	if c.TraceExporterFunc == nil {
+	if c.TracesExporterFunc == nil {
 		key := envOr(otelTracesExporterKey, defaultTraceExporter)
-		tef, ok := exporters[key]
+		tef, ok := traceExporters[key]
 		if !ok {
 			err := fmt.Errorf("invalid exporter: %q", key)
 			c.Logger.Error(err, "using default trace exporter: otlp")
 
-			tef = exporters[defaultTraceExporter]
+			tef = traceExporters[defaultTraceExporter]
 		}
-		c.TraceExporterFunc = tef
+		c.TracesExporterFunc = tef
 	}
 
 	return c
