@@ -29,9 +29,9 @@ import (
 
 type traceExporterFunc func(*exporterConfig) (trace.SpanExporter, error)
 
-// exporters maps environment variable values to trace exporter creation
+// traceExporters maps environment variable values to trace exporter creation
 // functions.
-var exporters = map[string]traceExporterFunc{
+var traceExporters = map[string]traceExporterFunc{
 	// OTLP gRPC exporter.
 	"otlp": newOTLPTracesExporter,
 	// Jaeger thrift exporter.
