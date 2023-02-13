@@ -46,8 +46,9 @@ import (
 )
 
 const (
-	spanName = "test span"
-	token    = "secret token"
+	spanName   = "test span"
+	metricName = "test meter"
+	token      = "secret token"
 
 	testCert = `
 -----BEGIN CERTIFICATE-----
@@ -189,12 +190,11 @@ func TestRunJaegerExporter(t *testing.T) {
 			sdk, err := tc.setupFn(t, srv.URL)
 			require.NoError(t, err, "should configure tracing")
 
-			ctx := context.Background()
-			_, span := otel.Tracer(tc.desc).Start(ctx, spanName)
-			span.End()
-
+			emitSpan(t)
 			// Flush all spans from BSP.
+			ctx := context.Background()
 			require.NoError(t, sdk.Shutdown(ctx))
+
 			tc.assertFn(t, <-reqCh)
 		})
 	}
@@ -216,11 +216,9 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestRunJaegerExporterTLS").Start(ctx, spanName)
-	span.End()
-
+	emitSpan(t)
 	// Flush all spans from BSP.
+	ctx := context.Background()
 	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := <-reqCh
@@ -243,11 +241,9 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	sdk, err := distroRun(t)
 	require.NoError(t, err)
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestRunJaegerExporterDefault").Start(ctx, spanName)
-	span.End()
-
+	emitSpan(t)
 	// Flush all spans from BSP.
+	ctx := context.Background()
 	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := <-reqCh
@@ -256,6 +252,7 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 
 func TestRunOTLPTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *spansExportRequest) {
+		require.NotNil(t, req)
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
 		require.Len(t, req.Spans, 1)
 		assert.Equal(t, spanName, req.Spans[0].Name)
@@ -308,12 +305,11 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 			sdk, err := tc.setupFn(t, coll.Endpoint)
 			require.NoError(t, err, "should configure tracing")
 
-			ctx := context.Background()
-			_, span := otel.Tracer(tc.desc).Start(ctx, spanName)
-			span.End()
-
+			emitSpan(t)
 			// Flush all spans from BSP.
+			ctx := context.Background()
 			require.NoError(t, sdk.Shutdown(ctx))
+
 			tc.assertFn(t, coll.SpansExportRequest())
 		})
 	}
@@ -330,13 +326,13 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestRunOTLPExporterTLS").Start(ctx, spanName)
-	span.End()
-
+	emitSpan(t)
 	// Flush all spans from BSP.
+	ctx := context.Background()
 	require.NoError(t, sdk.Shutdown(ctx))
+
 	got := coll.SpansExportRequest()
+	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	require.Len(t, got.Spans, 1)
 	assert.Equal(t, spanName, got.Spans[0].Name)
@@ -350,36 +346,16 @@ func TestRunTracesExporterDefault(t *testing.T) {
 	sdk, err := distroRun(t)
 	require.NoError(t, err)
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestRunTracesExporterDefault").Start(ctx, spanName)
-	span.End()
-
+	emitSpan(t)
 	// Flush all spans from BSP.
+	ctx := context.Background()
 	require.NoError(t, sdk.Shutdown(ctx))
+
 	got := coll.SpansExportRequest()
+	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	require.Len(t, got.Spans, 1)
 	assert.Equal(t, spanName, got.Spans[0].Name)
-}
-
-func TestRunMetricsExporterDefault(t *testing.T) {
-	// Start collector at default address.
-	// By default the metrics exporter is NONE
-	coll := &collector{Endpoint: "localhost:4317"}
-	coll.Start(t)
-
-	sdk, err := distroRun(t)
-	require.NoError(t, err)
-
-	ctx := context.Background()
-	cnt, err := global.MeterProvider().Meter("TestRunMetricsExporterDefault").Int64Counter("ticks")
-	require.NoError(t, err)
-	cnt.Add(ctx, 123)
-
-	// Flush all metrics from BMP.
-	require.NoError(t, sdk.Shutdown(ctx))
-	got := coll.MetricsExportRequest()
-	assert.Nil(t, got)
 }
 
 func TestInvalidTracesExporter(t *testing.T) {
@@ -393,7 +369,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 	require.NoError(t, err, "should configure tracing")
 
 	ctx := context.Background()
-	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, "test span")
+	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, spanName)
 	span.End()
 
 	// Flush all spans from BSP.
@@ -402,24 +378,162 @@ func TestInvalidTracesExporter(t *testing.T) {
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
 	got := coll.SpansExportRequest()
+	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 }
 
-func TestSplunkDistroVersionAttrInResource(t *testing.T) {
+func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 	sdk, err := distroRun(t)
 	require.NoError(t, err, "should configure tracing")
 
-	ctx := context.Background()
-	_, span := otel.Tracer("TestInvalidTraceExporter").Start(ctx, "test span")
-	span.End()
-
+	emitSpan(t)
 	// Flush all spans from BSP.
+	ctx := context.Background()
 	require.NoError(t, sdk.Shutdown(ctx))
 
 	got := coll.SpansExportRequest()
+	require.NotNil(t, got)
+	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
+		Key: "splunk.distro.version",
+		Value: &comm.AnyValue{
+			Value: &comm.AnyValue_StringValue{
+				StringValue: splunkotel.Version(),
+			},
+		},
+	})
+}
+
+func TestRunOTLPMetricsExporter(t *testing.T) {
+	t.Skip("TODO: not implemented")
+
+	assertBase := func(t *testing.T, req *metricsExportRequest) {
+		require.NotNil(t, req)
+		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
+		require.Len(t, req.Metrics, 1)
+		assert.Equal(t, spanName, req.Metrics[0].Name)
+	}
+
+	testCases := []struct {
+		desc     string
+		setupFn  func(t *testing.T, url string) (distro.SDK, error)
+		assertFn func(t *testing.T, req *metricsExportRequest)
+	}{
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+				return distroRun(t)
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Setenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+				return distroRun(t)
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT and SPLUNK_ACCESS_TOKEN",
+			setupFn: func(t *testing.T, url string) (distro.SDK, error) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+				return distroRun(t)
+			},
+			assertFn: func(t *testing.T, got *metricsExportRequest) {
+				assertBase(t, got)
+				assert.Equal(t, []string{token}, got.Header.Get("x-sf-token"))
+			},
+		},
+	}
+	for _, tc := range testCases {
+		if tc.assertFn == nil {
+			tc.assertFn = assertBase
+		}
+
+		t.Run(tc.desc, func(t *testing.T) {
+			coll := &collector{}
+			coll.Start(t)
+
+			sdk, err := tc.setupFn(t, coll.Endpoint)
+			require.NoError(t, err, "should configure tracing")
+
+			emitMetric(t)
+			// Flush all spans from BMP.
+			ctx := context.Background()
+			require.NoError(t, sdk.Shutdown(ctx))
+
+			tc.assertFn(t, coll.MetricsExportRequest())
+		})
+	}
+}
+
+func TestRunOTLPMetricsExporterTLS(t *testing.T) {
+	t.Skip("TODO: not implemented")
+
+	coll := &collector{TLS: true}
+	coll.Start(t)
+
+	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
+	sdk, err := distroRun(
+		t,
+		distro.WithTLSConfig(clientTLSConfig(t)),
+	)
+	require.NoError(t, err)
+
+	emitMetric(t)
+	// Flush all spans from BMP.
+	ctx := context.Background()
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	got := coll.MetricsExportRequest()
+	require.NotNil(t, got)
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	require.Len(t, got.Metrics, 1)
+	assert.Equal(t, spanName, got.Metrics[0].Name)
+}
+
+func TestRunMetricsExporterDefault(t *testing.T) {
+	// Start collector at default address.
+	// By default the metrics exporter is NONE
+	coll := &collector{Endpoint: "localhost:4317"}
+	coll.Start(t)
+
+	sdk, err := distroRun(t)
+	require.NoError(t, err)
+
+	emitMetric(t)
+	// Flush all spans from BMP.
+	ctx := context.Background()
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	got := coll.MetricsExportRequest()
+	assert.Nil(t, got)
+}
+
+func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
+	t.Skip("TODO: not implemented")
+
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+	sdk, err := distroRun(t)
+	require.NoError(t, err, "should configure tracing")
+
+	emitMetric(t)
+	// Flush all spans from BMP.
+	ctx := context.Background()
+	require.NoError(t, sdk.Shutdown(ctx))
+
+	got := coll.MetricsExportRequest()
+	require.NotNil(t, got)
 	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
 		Key: "splunk.distro.version",
 		Value: &comm.AnyValue{
@@ -469,6 +583,19 @@ func serverTLSConfig(t *testing.T) *tls.Config {
 		Certificates: []tls.Certificate{cert},
 		MinVersion:   tls.VersionTLS13,
 	}
+}
+
+func emitSpan(t *testing.T) {
+	ctx := context.Background()
+	_, span := otel.Tracer(t.Name()).Start(ctx, spanName)
+	span.End()
+}
+
+func emitMetric(t *testing.T) {
+	ctx := context.Background()
+	cnt, err := global.MeterProvider().Meter(t.Name()).Int64Counter(metricName)
+	require.NoError(t, err)
+	cnt.Add(ctx, 123)
 }
 
 type (
