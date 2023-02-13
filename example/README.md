@@ -31,7 +31,7 @@ export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
 ```
 
-You can find the collected telemtry in:
+You can find the collected telemetry in:
 
 - OpenTelemetry Collector output
 - Jaeger: <http://localhost:16686/search>
