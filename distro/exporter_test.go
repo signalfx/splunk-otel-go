@@ -60,6 +60,15 @@ func TestOTLPTracesEndpoint(t *testing.T) {
 		// SPLUNK_REALM is set, make sure it does not take precedence.
 		assert.Equal(t, "", otlpTracesEndpoint())
 	})
+
+	t.Run(otelExporterOTLPMetricsEndpointKey, func(t *testing.T) {
+		t.Setenv(splunkRealmKey, invalidRealm)
+		t.Setenv(otelExporterOTLPMetricsEndpointKey, "some non-zero value")
+
+		// OTEL_EXPORTER_OTLP_METRICS_ENDPOINT is ignored for traces exporter.
+		want := fmt.Sprintf(otlpRealmEndpointFormat, invalidRealm)
+		assert.Equal(t, want, otlpTracesEndpoint())
+	})
 }
 
 func TestOTLPMetricsEndpoint(t *testing.T) {
@@ -94,6 +103,15 @@ func TestOTLPMetricsEndpoint(t *testing.T) {
 
 		// SPLUNK_REALM is set, make sure it does not take precedence.
 		assert.Equal(t, "", otlpMetricsEndpoint())
+	})
+
+	t.Run(otelExporterOTLPTracesEndpointKey, func(t *testing.T) {
+		t.Setenv(splunkRealmKey, invalidRealm)
+		t.Setenv(otelExporterOTLPTracesEndpointKey, "some non-zero value")
+
+		// OTEL_EXPORTER_OTLP_TRACES_ENDPOINT is ignored for metrics exporter.
+		want := fmt.Sprintf(otlpRealmEndpointFormat, invalidRealm)
+		assert.Equal(t, want, otlpMetricsEndpoint())
 	})
 }
 
