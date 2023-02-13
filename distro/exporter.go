@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -38,6 +39,18 @@ var traceExporters = map[string]traceExporterFunc{
 	"jaeger-thrift-splunk": newJaegerThriftExporter,
 	// None, explicitly do not set an exporter.
 	"none": nil,
+}
+
+func traceExporter(log logr.Logger) traceExporterFunc {
+	key := envOr(otelTracesExporterKey, defaultTraceExporter)
+	tef, ok := traceExporters[key]
+	if !ok {
+		err := fmt.Errorf("invalid exporter: %q", key)
+		log.Error(err, "using default trace exporter: otlp")
+
+		return traceExporters[defaultTraceExporter]
+	}
+	return tef
 }
 
 func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {

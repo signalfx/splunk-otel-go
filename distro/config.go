@@ -16,7 +16,6 @@ package distro
 
 import (
 	"crypto/tls"
-	"fmt"
 	"os"
 
 	"github.com/go-logr/logr"
@@ -81,34 +80,19 @@ type config struct {
 
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
+	log := logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel)))
 	c := &config{
-		Logger:     logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
+		Logger:     log,
+		Propagator: autoprop.NewTextMapPropagator(),
 		SpanLimits: newSpanLimits(),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
+		TracesExporterFunc: traceExporter(log),
 	}
-
 	for _, o := range opts {
 		o.apply(c)
 	}
-
-	// Apply default field values if they were not set.
-	if c.Propagator == nil {
-		c.Propagator = autoprop.NewTextMapPropagator()
-	}
-	if c.TracesExporterFunc == nil {
-		key := envOr(otelTracesExporterKey, defaultTraceExporter)
-		tef, ok := traceExporters[key]
-		if !ok {
-			err := fmt.Errorf("invalid exporter: %q", key)
-			c.Logger.Error(err, "using default trace exporter: otlp")
-
-			tef = traceExporters[defaultTraceExporter]
-		}
-		c.TracesExporterFunc = tef
-	}
-
 	return c
 }
 
