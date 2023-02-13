@@ -41,7 +41,7 @@ var traceExporters = map[string]traceExporterFunc{
 	"none": nil,
 }
 
-func traceExporter(log logr.Logger) traceExporterFunc {
+func tracesExporter(log logr.Logger) traceExporterFunc {
 	key := envOr(otelTracesExporterKey, defaultTraceExporter)
 	tef, ok := traceExporters[key]
 	if !ok {

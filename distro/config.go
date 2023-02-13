@@ -89,7 +89,7 @@ func newConfig(opts ...Option) *config {
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
-		TracesExporterFunc: traceExporter(log),
+		TracesExporterFunc: tracesExporter(log),
 	}
 	for _, o := range opts {
 		o.apply(c)
