@@ -410,7 +410,6 @@ func TestRunMetricsExporterDefault(t *testing.T) {
 		t.Errorf("should not export any metric, but got %d", len(got.Metrics))
 	default: // test passed, none metric received
 	}
-
 }
 
 func TestInvalidTracesExporter(t *testing.T) {
