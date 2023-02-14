@@ -39,6 +39,7 @@ import (
 	"go.uber.org/goleak"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
@@ -579,11 +580,24 @@ func (coll *collector) Start(t *testing.T) {
 	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
 	cmpb.RegisterMetricsServiceServer(srv, coll.metricsService)
 	errCh := make(chan error, 1)
+
+	// start and stop during cleanup
 	t.Cleanup(func() {
 		srv.GracefulStop()
 		assert.NoError(t, <-errCh)
 	})
 	go func() { errCh <- srv.Serve(ln) }()
+
+	// wait until gRPC server is up
+	dialOpts := []grpc.DialOption{grpc.WithBlock()}
+	if coll.TLS {
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig(t))))
+	} else {
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+	conn, err := grpc.Dial(coll.Endpoint, dialOpts...)
+	require.NoError(t, err)
+	require.NoError(t, conn.Close())
 }
 
 func (coll *collector) SpansExportRequest() *spansExportRequest {
