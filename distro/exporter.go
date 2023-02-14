@@ -22,7 +22,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -45,8 +47,8 @@ func tracesExporter(log logr.Logger) traceExporterFunc {
 	key := envOr(otelTracesExporterKey, defaultTraceExporter)
 	tef, ok := traceExporters[key]
 	if !ok {
-		err := fmt.Errorf("invalid exporter: %q", key)
-		log.Error(err, "using default trace exporter: otlp")
+		err := fmt.Errorf("invalid %s: %q", otelTracesExporterKey, key)
+		log.Error(err, "using default %s: %q", otelTracesExporterKey, defaultTraceExporter)
 
 		return traceExporters[defaultTraceExporter]
 	}
@@ -162,6 +164,54 @@ func jaegerEndpoint() string {
 
 	// Use Splunk specific default (locally running collector).
 	return defaultJaegerEndpoint
+}
+
+type metricsExporterFunc func(*exporterConfig) (metric.Exporter, error)
+
+// metricsExporters maps environment variable values to metrics exporter creation
+// functions.
+var metricsExporters = map[string]metricsExporterFunc{
+	// OTLP gRPC exporter.
+	"otlp": newOTLPMetricsExporter,
+	// None, explicitly do not set an exporter.
+	"none": nil,
+}
+
+func metricsExporter(log logr.Logger) metricsExporterFunc {
+	key := envOr(otelMetricsExporterKey, defaultMetricsExporter)
+	mef, ok := metricsExporters[key]
+	if !ok {
+		err := fmt.Errorf("invalid %s: %q", otelMetricsExporterKey, key)
+		log.Error(err, "using default %s: %q", otelMetricsExporterKey, defaultMetricsExporter)
+
+		return metricsExporters[defaultMetricsExporter]
+	}
+	return mef
+}
+
+func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
+	var opts []otlpmetricgrpc.Option
+
+	endpoint := otlpMetricsEndpoint()
+	if endpoint != "" {
+		opts = append(opts, otlpmetricgrpc.WithEndpoint(endpoint))
+	}
+
+	if c.AccessToken != "" {
+		opts = append(opts, otlpmetricgrpc.WithHeaders(map[string]string{
+			"X-Sf-Token": c.AccessToken,
+		}))
+	}
+
+	if c.TLSConfig != nil {
+		tlsCreds := credentials.NewTLS(c.TLSConfig)
+		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(tlsCreds))
+	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey, splunkRealmKey) {
+		// Assume that the default endpoint (local collector) is non-TLS.
+		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(insecure.NewCredentials()))
+	}
+
+	return otlpmetricgrpc.New(context.Background(), opts...)
 }
 
 // noneEnvVarSet returns true if none of provided env vars is set.

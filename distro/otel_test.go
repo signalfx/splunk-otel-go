@@ -24,7 +24,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	testr "github.com/go-logr/logr/testing"
+	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
@@ -349,13 +349,11 @@ func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
 }
 
 func TestRunOTLPMetricsExporter(t *testing.T) {
-	t.Skip("TODO: not implemented")
-
 	assertBase := func(t *testing.T, req *metricsExportRequest) {
 		require.NotNil(t, req)
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
 		require.Len(t, req.Metrics, 1)
-		assert.Equal(t, spanName, req.Metrics[0].Name)
+		assert.Equal(t, metricName, req.Metrics[0].Name)
 	}
 
 	testCases := []struct {
@@ -382,7 +380,7 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
-				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
 			},
 			assertFn: func(t *testing.T, got *metricsExportRequest) {
 				assertBase(t, got)
@@ -408,8 +406,6 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 }
 
 func TestRunOTLPMetricsExporterTLS(t *testing.T) {
-	t.Skip("TODO: not implemented")
-
 	coll := &collector{TLS: true}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
@@ -421,7 +417,7 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	require.Len(t, got.Metrics, 1)
-	assert.Equal(t, spanName, got.Metrics[0].Name)
+	assert.Equal(t, metricName, got.Metrics[0].Name)
 }
 
 func TestRunMetricsExporterDefault(t *testing.T) {
@@ -437,8 +433,6 @@ func TestRunMetricsExporterDefault(t *testing.T) {
 }
 
 func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
-	t.Skip("TODO: not implemented")
-
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
@@ -470,7 +464,7 @@ func TestNoServiceWarn(t *testing.T) {
 }
 
 func distroRun(t *testing.T, opts ...distro.Option) (distro.SDK, error) {
-	l := testr.NewTestLogger(t)
+	l := testr.New(t)
 	return distro.Run(append(opts, distro.WithLogger(l))...)
 }
 

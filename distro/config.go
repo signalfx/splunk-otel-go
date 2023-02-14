@@ -32,8 +32,9 @@ const (
 	// OpenTelemetry TextMapPropagator to set as global.
 	otelPropagatorsKey = "OTEL_PROPAGATORS"
 
-	// OpenTelemetry trace exporter to use.
-	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
+	// OpenTelemetry exporter to use.
+	otelTracesExporterKey  = "OTEL_TRACES_EXPORTER"
+	otelMetricsExporterKey = "OTEL_METRICS_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
 	otelExporterJaegerEndpointKey      = "OTEL_EXPORTER_JAEGER_ENDPOINT"
@@ -54,9 +55,10 @@ const (
 
 // Default configuration values.
 const (
-	defaultAccessToken   = ""
-	defaultTraceExporter = "otlp"
-	defaultLogLevel      = "info"
+	defaultAccessToken     = ""
+	defaultTraceExporter   = "otlp"
+	defaultMetricsExporter = "none"
+	defaultLogLevel        = "info"
 
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
 
@@ -75,25 +77,26 @@ type config struct {
 	Propagator propagation.TextMapPropagator
 	SpanLimits *trace.SpanLimits
 
-	ExportConfig       *exporterConfig
-	TracesExporterFunc traceExporterFunc
+	ExportConfig        *exporterConfig
+	TracesExporterFunc  traceExporterFunc
+	MetricsExporterFunc metricsExporterFunc
 }
 
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
-	log := logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel)))
 	c := &config{
-		Logger:     log,
+		Logger:     logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
 		Propagator: autoprop.NewTextMapPropagator(),
 		SpanLimits: newSpanLimits(),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
-		TracesExporterFunc: tracesExporter(log),
 	}
 	for _, o := range opts {
 		o.apply(c)
 	}
+	c.TracesExporterFunc = tracesExporter(c.Logger)
+	c.MetricsExporterFunc = metricsExporter(c.Logger)
 	return c
 }
 
