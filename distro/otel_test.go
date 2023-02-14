@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -601,19 +602,23 @@ func (coll *collector) Start(t *testing.T) {
 }
 
 func (coll *collector) SpansExportRequest() *spansExportRequest {
+	timeout := time.NewTimer(100 * time.Millisecond)
+	defer timeout.Stop()
 	select {
 	case got := <-coll.traceService.requests:
 		return &got
-	default:
+	case <-timeout.C:
 		return nil
 	}
 }
 
 func (coll *collector) MetricsExportRequest() *metricsExportRequest {
+	timeout := time.NewTimer(100 * time.Millisecond)
+	defer timeout.Stop()
 	select {
 	case got := <-coll.metricsService.requests:
 		return &got
-	default:
+	case <-timeout.C:
 		return nil
 	}
 }
