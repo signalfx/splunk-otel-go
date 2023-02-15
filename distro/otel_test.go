@@ -602,7 +602,7 @@ func (coll *collector) Start(t *testing.T) {
 }
 
 func (coll *collector) SpansExportRequest() *spansExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond)
+	timeout := time.NewTimer(100 * time.Millisecond) // give same time for the gRPC server to process the request
 	defer timeout.Stop()
 	select {
 	case got := <-coll.traceService.requests:
@@ -613,7 +613,7 @@ func (coll *collector) SpansExportRequest() *spansExportRequest {
 }
 
 func (coll *collector) MetricsExportRequest() *metricsExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond)
+	timeout := time.NewTimer(100 * time.Millisecond) // give same time for the gRPC server to process the request
 	defer timeout.Stop()
 	select {
 	case got := <-coll.metricsService.requests:
