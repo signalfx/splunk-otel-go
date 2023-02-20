@@ -8,6 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add metrics support and `OTEL_METRICS_EXPORTER` environment variable.
+  `OTEL_METRICS_EXPORTER` accepts:
+  `none` - metrics disabled,
+  `otlp` - OTLP gRPC exporter.
+  Currently `OTEL_METRICS_EXPORTER` defaults to `none`
+  as OpenTelemetry Go metrics API and SDK are not stable yet.
+  Set `OTEL_METRICS_EXPORTER=otlp` to enable
+  metrics support.
+
 ## [1.3.1] - 2023-02-08
 
 This upgrades [OpenTelemetry Go to v1.13.0/v0.36.0][otel-v1.13.0] and

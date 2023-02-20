@@ -24,17 +24,22 @@ package distro
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strings"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 )
+
+var errShutdown = errors.New("SDK shutdown failure")
 
 var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
 
@@ -44,17 +49,24 @@ const noServiceWarn = `service.name attribute is not set. Your service is unname
 
 // SDK contains all OpenTelemetry SDK state and provides access to this state.
 type SDK struct {
-	config config
-
-	shutdownFunc func(context.Context) error
+	shutdownFuncs []shutdownFunc
 }
+
+type shutdownFunc func(context.Context) error
 
 // Shutdown stops the SDK and releases any used resources.
 func (s SDK) Shutdown(ctx context.Context) error {
-	if s.shutdownFunc != nil {
-		return s.shutdownFunc(ctx)
+	var retErr error
+	// Calling shutdownFuncs sequentially for sake of simplicity.
+	for _, fn := range s.shutdownFuncs {
+		if err := fn(ctx); err != nil {
+			// Each error can have different cause therefore we are logging them via otel.Handle.
+			otel.Handle(err)
+			// We are returning a sentinel error when any shutdown error happens.
+			retErr = errShutdown
+		}
 	}
-	return nil
+	return retErr
 }
 
 // Run configures the default OpenTelemetry SDK and installs it globally.
@@ -78,16 +90,6 @@ func Run(opts ...Option) (SDK, error) {
 
 	otel.SetTextMapPropagator(c.Propagator)
 
-	if c.TracesExporterFunc == nil {
-		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none/nil: Tracing disabled")
-		// "none" exporter configured.
-		return SDK{}, nil
-	}
-	exp, err := c.TracesExporterFunc(c.ExportConfig)
-	if err != nil {
-		return SDK{}, err
-	}
-
 	res, err := resource.Merge(
 		resource.Default(),
 		// Use a schema-less Resource here, uses resource.Default's.
@@ -100,6 +102,41 @@ func Run(opts ...Option) (SDK, error) {
 		c.Logger.Info(noServiceWarn)
 	}
 
+	ctx := context.Background()
+	sdk := SDK{}
+
+	shutdownFn, err := runTraces(c, res)
+	if err != nil {
+		sdk.Shutdown(ctx) //nolint:errcheck // the Shutdown errors are logged
+		return SDK{}, err
+	}
+	if shutdownFn != nil {
+		sdk.shutdownFuncs = append(sdk.shutdownFuncs, shutdownFn)
+	}
+
+	shutdownFn, err = runMetrics(c, res)
+	if err != nil {
+		sdk.Shutdown(ctx) //nolint:errcheck // the Shutdown errors are logged
+		return SDK{}, err
+	}
+	if shutdownFn != nil {
+		sdk.shutdownFuncs = append(sdk.shutdownFuncs, shutdownFn)
+	}
+
+	return sdk, nil
+}
+
+func runTraces(c *config, res *resource.Resource) (shutdownFunc, error) {
+	if c.TracesExporterFunc == nil {
+		c.Logger.V(1).Info("OTEL_TRACES_EXPORTER set to none: Tracing disabled")
+		// "none" exporter configured.
+		return nil, nil
+	}
+
+	exp, err := c.TracesExporterFunc(c.ExportConfig)
+	if err != nil {
+		return nil, err
+	}
 	o := []trace.TracerProviderOption{
 		trace.WithResource(res),
 		trace.WithRawSpanLimits(*c.SpanLimits),
@@ -112,15 +149,36 @@ func Run(opts ...Option) (SDK, error) {
 	traceProvider := trace.NewTracerProvider(o...)
 	otel.SetTracerProvider(traceProvider)
 
-	return SDK{
-		config: *c,
-		shutdownFunc: func(ctx context.Context) error {
-			if err := traceProvider.Shutdown(ctx); err != nil {
-				return err
-			}
-			return exp.Shutdown(ctx)
-		},
-	}, nil
+	shutdownFn := func(ctx context.Context) error {
+		if err := traceProvider.Shutdown(ctx); err != nil {
+			return err
+		}
+		return exp.Shutdown(ctx)
+	}
+	return shutdownFn, nil
+}
+
+func runMetrics(c *config, res *resource.Resource) (shutdownFunc, error) {
+	if c.MetricsExporterFunc == nil {
+		c.Logger.V(1).Info("OTEL_METRICS_EXPORTER set to none: Metrics disabled")
+		// "none" exporter configured.
+		return nil, nil
+	}
+
+	exp, err := c.MetricsExporterFunc(c.ExportConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	o := []metric.Option{
+		metric.WithResource(res),
+		metric.WithReader(metric.NewPeriodicReader(exp)),
+	}
+
+	provider := metric.NewMeterProvider(o...)
+	global.SetMeterProvider(provider)
+
+	return provider.Shutdown, nil
 }
 
 func serviceNameDefined(r *resource.Resource) bool {

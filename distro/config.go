@@ -16,7 +16,6 @@ package distro
 
 import (
 	"crypto/tls"
-	"fmt"
 	"os"
 
 	"github.com/go-logr/logr"
@@ -33,13 +32,15 @@ const (
 	// OpenTelemetry TextMapPropagator to set as global.
 	otelPropagatorsKey = "OTEL_PROPAGATORS"
 
-	// OpenTelemetry trace exporter to use.
-	otelTracesExporterKey = "OTEL_TRACES_EXPORTER"
+	// OpenTelemetry exporter to use.
+	otelTracesExporterKey  = "OTEL_TRACES_EXPORTER"
+	otelMetricsExporterKey = "OTEL_METRICS_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
-	otelExporterJaegerEndpointKey     = "OTEL_EXPORTER_JAEGER_ENDPOINT"
-	otelExporterOTLPEndpointKey       = "OTEL_EXPORTER_OTLP_ENDPOINT"
-	otelExporterOTLPTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+	otelExporterJaegerEndpointKey      = "OTEL_EXPORTER_JAEGER_ENDPOINT"
+	otelExporterOTLPEndpointKey        = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	otelExporterOTLPTracesEndpointKey  = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+	otelExporterOTLPMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
@@ -54,9 +55,10 @@ const (
 
 // Default configuration values.
 const (
-	defaultAccessToken   = ""
-	defaultTraceExporter = "otlp"
-	defaultLogLevel      = "info"
+	defaultAccessToken     = ""
+	defaultTraceExporter   = "otlp"
+	defaultMetricsExporter = "none"
+	defaultLogLevel        = "info"
 
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
 
@@ -75,40 +77,26 @@ type config struct {
 	Propagator propagation.TextMapPropagator
 	SpanLimits *trace.SpanLimits
 
-	ExportConfig       *exporterConfig
-	TracesExporterFunc traceExporterFunc
+	ExportConfig        *exporterConfig
+	TracesExporterFunc  traceExporterFunc
+	MetricsExporterFunc metricsExporterFunc
 }
 
 // newConfig returns a validated config with Splunk defaults.
 func newConfig(opts ...Option) *config {
 	c := &config{
 		Logger:     logger(zapConfig(envOr(otelLogLevelKey, defaultLogLevel))),
+		Propagator: autoprop.NewTextMapPropagator(),
 		SpanLimits: newSpanLimits(),
 		ExportConfig: &exporterConfig{
 			AccessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
 	}
-
 	for _, o := range opts {
 		o.apply(c)
 	}
-
-	// Apply default field values if they were not set.
-	if c.Propagator == nil {
-		c.Propagator = autoprop.NewTextMapPropagator()
-	}
-	if c.TracesExporterFunc == nil {
-		key := envOr(otelTracesExporterKey, defaultTraceExporter)
-		tef, ok := traceExporters[key]
-		if !ok {
-			err := fmt.Errorf("invalid exporter: %q", key)
-			c.Logger.Error(err, "using default trace exporter: otlp")
-
-			tef = traceExporters[defaultTraceExporter]
-		}
-		c.TracesExporterFunc = tef
-	}
-
+	c.TracesExporterFunc = tracesExporter(c.Logger)
+	c.MetricsExporterFunc = metricsExporter(c.Logger)
 	return c
 }
 
