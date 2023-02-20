@@ -47,7 +47,7 @@ const tracesSamplerKey = "OTEL_TRACES_SAMPLER"
 
 const noServiceWarn = `service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`
 
-// SDK is a struct returned by the main entry point of for this package: [Run].
+// SDK contains all OpenTelemetry SDK state and provides access to this state.
 type SDK struct {
 	shutdownFuncs []shutdownFunc
 }
