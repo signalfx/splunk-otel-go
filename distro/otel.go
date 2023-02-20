@@ -57,10 +57,13 @@ type shutdownFunc func(context.Context) error
 // Shutdown stops the SDK and releases any used resources.
 func (s SDK) Shutdown(ctx context.Context) error {
 	var retErr error
-	for _, fn := range s.shutdownFuncs { // Calling shutdownFuncs sequentially for sake of simplicity.
+	// Calling shutdownFuncs sequentially for sake of simplicity.
+	for _, fn := range s.shutdownFuncs {
 		if err := fn(ctx); err != nil {
-			otel.Handle(err)     // Each error can have different cause therefore we are logging them via otel.Handle.
-			retErr = errShutdown // We are returning a sentinel error when any shutdown error happens.
+			// Each error can have different cause therefore we are logging them via otel.Handle.
+			otel.Handle(err)
+			// We are returning a sentinel error when any shutdown error happens.
+			retErr = errShutdown
 		}
 	}
 	return retErr

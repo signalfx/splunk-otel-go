@@ -424,7 +424,7 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 
 func TestRunMetricsExporterDefault(t *testing.T) {
 	// Start collector at default address.
-	// By default the metrics exporter is NONE
+	// By default the metrics exporter is NONE.
 	coll := &collector{Endpoint: "localhost:4317"}
 	coll.Start(t)
 
@@ -582,14 +582,14 @@ func (coll *collector) Start(t *testing.T) {
 	cmpb.RegisterMetricsServiceServer(srv, coll.metricsService)
 	errCh := make(chan error, 1)
 
-	// start and stop during cleanup
+	// Serve and then stop during cleanup.
 	t.Cleanup(func() {
 		srv.GracefulStop()
 		assert.NoError(t, <-errCh)
 	})
 	go func() { errCh <- srv.Serve(ln) }()
 
-	// wait until gRPC server is up
+	// Wait until gRPC server is up.
 	dialOpts := []grpc.DialOption{grpc.WithBlock()}
 	if coll.TLS {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig(t))))
@@ -602,7 +602,8 @@ func (coll *collector) Start(t *testing.T) {
 }
 
 func (coll *collector) SpansExportRequest() *spansExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond) // Give some time for the gRPC server to process the request.
+	// Give some time for the gRPC server to process the request.
+	timeout := time.NewTimer(100 * time.Millisecond)
 	defer timeout.Stop()
 	select {
 	case got := <-coll.traceService.requests:
@@ -613,7 +614,8 @@ func (coll *collector) SpansExportRequest() *spansExportRequest {
 }
 
 func (coll *collector) MetricsExportRequest() *metricsExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond) // Give some time for the gRPC server to process the request.
+	// Give some time for the gRPC server to process the request.
+	timeout := time.NewTimer(100 * time.Millisecond)
 	defer timeout.Stop()
 	select {
 	case got := <-coll.metricsService.requests:
