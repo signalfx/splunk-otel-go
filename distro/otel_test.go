@@ -49,7 +49,7 @@ import (
 
 const (
 	spanName   = "test span"
-	metricName = "test meter"
+	metricName = "test instrument"
 	token      = "secret token"
 
 	testCert = `
@@ -518,7 +518,7 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, err)
 	cnt.Add(ctx, 123)
 
-	// Flush all spans from BMP.
+	// Flush all spans from SDK.
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
@@ -602,7 +602,7 @@ func (coll *collector) Start(t *testing.T) {
 }
 
 func (coll *collector) SpansExportRequest() *spansExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond) // give same time for the gRPC server to process the request
+	timeout := time.NewTimer(100 * time.Millisecond) // Give some time for the gRPC server to process the request.
 	defer timeout.Stop()
 	select {
 	case got := <-coll.traceService.requests:
@@ -613,7 +613,7 @@ func (coll *collector) SpansExportRequest() *spansExportRequest {
 }
 
 func (coll *collector) MetricsExportRequest() *metricsExportRequest {
-	timeout := time.NewTimer(100 * time.Millisecond) // give same time for the gRPC server to process the request
+	timeout := time.NewTimer(100 * time.Millisecond) // Give some time for the gRPC server to process the request.
 	defer timeout.Stop()
 	select {
 	case got := <-coll.metricsService.requests:
