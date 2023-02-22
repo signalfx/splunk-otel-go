@@ -101,10 +101,9 @@ func newConfig(opts ...Option) *config {
 }
 
 // envOr returns the environment variable value associated with key if it
-// exists, otherwise it returns alt.
+// set and not empty, otherwise it returns alt.
 func envOr(key, alt string) string {
-	v, ok := os.LookupEnv(key)
-	if ok {
+	if v := os.Getenv(key); v != "" {
 		return v
 	}
 	return alt
