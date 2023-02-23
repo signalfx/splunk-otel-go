@@ -75,6 +75,7 @@ func (s SDK) Shutdown(ctx context.Context) error {
 // complete. This ensures all resources are released and all telemetry
 // flushed.
 func Run(opts ...Option) (SDK, error) {
+	ctx := context.Background()
 	c := newConfig(opts...)
 
 	// Unify the SDK logging with OTel.
@@ -88,21 +89,17 @@ func Run(opts ...Option) (SDK, error) {
 		c.Logger.Info("SPLUNK_METRICS_ENDPOINT set; not supported by this distro")
 	}
 
-	otel.SetTextMapPropagator(c.Propagator)
-
-	res, err := resource.Merge(
-		resource.Default(),
-		// Use a schema-less Resource here, uses resource.Default's.
-		resource.NewSchemaless(distroVerAttr),
-	)
+	res, err := newResource(ctx)
 	if err != nil {
 		return SDK{}, err
 	}
+
 	if !serviceNameDefined(res) {
 		c.Logger.Info(noServiceWarn)
 	}
 
-	ctx := context.Background()
+	otel.SetTextMapPropagator(c.Propagator)
+
 	sdk := SDK{}
 
 	shutdownFn, err := runTraces(c, res)
@@ -124,6 +121,32 @@ func Run(opts ...Option) (SDK, error) {
 	}
 
 	return sdk, nil
+}
+
+func newResource(ctx context.Context) (*resource.Resource, error) {
+	// SDK's default resource.
+	res := resource.Default()
+
+	// Add Splunk-specific attributes.
+	resWithSplunkAttrs := resource.NewSchemaless(distroVerAttr)
+	res, err := resource.Merge(res, resWithSplunkAttrs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add additional detectors.
+	resWithDetectors, err := resource.New(ctx,
+		resource.WithProcess(), // Adds process and Go runtime information.
+	)
+	if err != nil {
+		return nil, err
+	}
+	res, err = resource.Merge(res, resWithDetectors)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func runTraces(c *config, res *resource.Resource) (shutdownFunc, error) {
