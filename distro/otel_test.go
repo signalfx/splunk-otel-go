@@ -22,8 +22,8 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -282,7 +282,7 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 
 			emitSpan(t)
 
-			tc.assertFn(t, coll.SpansExportRequest())
+			tc.assertFn(t, coll.ExportedSpans())
 		})
 	}
 }
@@ -294,7 +294,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 
 	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
-	got := coll.SpansExportRequest()
+	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	require.Len(t, got.Spans, 1)
@@ -308,7 +308,7 @@ func TestRunTracesExporterDefault(t *testing.T) {
 
 	emitSpan(t)
 
-	got := coll.SpansExportRequest()
+	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	require.Len(t, got.Spans, 1)
@@ -326,7 +326,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
-	got := coll.SpansExportRequest()
+	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 }
@@ -338,7 +338,7 @@ func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
 
 	emitSpan(t)
 
-	got := coll.SpansExportRequest()
+	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
 		Key: "splunk.distro.version",
@@ -354,8 +354,7 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *metricsExportRequest) {
 		require.NotNil(t, req)
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-		require.Len(t, req.Metrics, 1)
-		assert.Equal(t, metricName, req.Metrics[0].Name)
+		assertHasMetric(t, req, metricName)
 	}
 
 	testCases := []struct {
@@ -402,7 +401,7 @@ func TestRunOTLPMetricsExporter(t *testing.T) {
 
 			emitMetric(t)
 
-			tc.assertFn(t, coll.MetricsExportRequest())
+			tc.assertFn(t, coll.ExportedMetrics())
 		})
 	}
 }
@@ -415,11 +414,10 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 
 	emitMetric(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
-	got := coll.MetricsExportRequest()
+	got := coll.ExportedMetrics()
 	require.NotNil(t, got)
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-	require.Len(t, got.Metrics, 1)
-	assert.Equal(t, metricName, got.Metrics[0].Name)
+	assertHasMetric(t, got, metricName)
 }
 
 func TestRunMetricsExporterDefault(t *testing.T) {
@@ -427,11 +425,31 @@ func TestRunMetricsExporterDefault(t *testing.T) {
 	// By default the metrics exporter is NONE.
 	coll := &collector{Endpoint: "localhost:4317"}
 	coll.Start(t)
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
 
 	emitMetric(t)
 
-	got := coll.MetricsExportRequest()
+	got := coll.ExportedMetrics()
 	assert.Nil(t, got)
+}
+
+func TestRuntimeMetrics(t *testing.T) {
+	// Start collector at default address.
+	// By default the metrics exporter is NONE.
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	sdk, err := distroRun(t)
+	require.NoError(t, err)
+
+	// Flush all spans from SDK.
+	require.NoError(t, sdk.Shutdown(context.Background()))
+
+	got := coll.ExportedMetrics()
+	assert.NotNil(t, got)
+	assertHasMetric(t, got, "runtime.uptime")
 }
 
 func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
@@ -442,7 +460,7 @@ func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
 
 	emitMetric(t)
 
-	got := coll.MetricsExportRequest()
+	got := coll.ExportedMetrics()
 	require.NotNil(t, got)
 	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
 		Key: "splunk.distro.version",
@@ -522,6 +540,22 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
+func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
+	t.Helper()
+	for _, m := range got.Metrics {
+		if m.Name == name {
+			return
+		}
+	}
+
+	// Not found. Generate assertion failure.
+	var gotMetrics []string
+	for _, m := range got.Metrics {
+		gotMetrics = append(gotMetrics, m.Name)
+	}
+	assert.Failf(t, "should contain metric", "want: %v, got: %v", name, gotMetrics)
+}
+
 type (
 	collector struct {
 		Endpoint string
@@ -529,12 +563,14 @@ type (
 
 		traceService   *collectorTraceServiceServer
 		metricsService *collectorMetricsServiceServer
+		grpcSrv        *grpc.Server
 	}
 
 	collectorTraceServiceServer struct {
 		ctpb.UnimplementedTraceServiceServer
 
-		requests chan spansExportRequest
+		mtx  sync.Mutex
+		data *spansExportRequest
 	}
 
 	spansExportRequest struct {
@@ -546,7 +582,8 @@ type (
 	collectorMetricsServiceServer struct {
 		cmpb.UnimplementedMetricsServiceServer
 
-		requests chan metricsExportRequest
+		mtx  sync.Mutex
+		data *metricsExportRequest
 	}
 
 	metricsExportRequest struct {
@@ -564,12 +601,8 @@ func (coll *collector) Start(t *testing.T) {
 	require.NoError(t, err)
 	coll.Endpoint = ln.Addr().String() // set actual endpoint
 
-	coll.traceService = &collectorTraceServiceServer{
-		requests: make(chan spansExportRequest, 1),
-	}
-	coll.metricsService = &collectorMetricsServiceServer{
-		requests: make(chan metricsExportRequest, 1),
-	}
+	coll.traceService = &collectorTraceServiceServer{}
+	coll.metricsService = &collectorMetricsServiceServer{}
 
 	var opts []grpc.ServerOption
 	if coll.TLS {
@@ -577,17 +610,17 @@ func (coll *collector) Start(t *testing.T) {
 		opts = append(opts, grpc.Creds(creds))
 	}
 
-	srv := grpc.NewServer(opts...)
-	ctpb.RegisterTraceServiceServer(srv, coll.traceService)
-	cmpb.RegisterMetricsServiceServer(srv, coll.metricsService)
+	coll.grpcSrv = grpc.NewServer(opts...)
+	ctpb.RegisterTraceServiceServer(coll.grpcSrv, coll.traceService)
+	cmpb.RegisterMetricsServiceServer(coll.grpcSrv, coll.metricsService)
 	errCh := make(chan error, 1)
 
 	// Serve and then stop during cleanup.
 	t.Cleanup(func() {
-		srv.GracefulStop()
+		coll.grpcSrv.GracefulStop()
 		assert.NoError(t, <-errCh)
 	})
-	go func() { errCh <- srv.Serve(ln) }()
+	go func() { errCh <- coll.grpcSrv.Serve(ln) }()
 
 	// Wait until gRPC server is up.
 	dialOpts := []grpc.DialOption{grpc.WithBlock()}
@@ -601,28 +634,22 @@ func (coll *collector) Start(t *testing.T) {
 	require.NoError(t, conn.Close())
 }
 
-func (coll *collector) SpansExportRequest() *spansExportRequest {
-	// Give some time for the gRPC server to process the request.
-	timeout := time.NewTimer(100 * time.Millisecond)
-	defer timeout.Stop()
-	select {
-	case got := <-coll.traceService.requests:
-		return &got
-	case <-timeout.C:
-		return nil
-	}
+func (coll *collector) ExportedSpans() *spansExportRequest {
+	// stop to make sure all requests are processed and synchronized
+	coll.grpcSrv.GracefulStop()
+
+	defer coll.traceService.mtx.Unlock()
+	coll.traceService.mtx.Lock()
+	return coll.traceService.data
 }
 
-func (coll *collector) MetricsExportRequest() *metricsExportRequest {
-	// Give some time for the gRPC server to process the request.
-	timeout := time.NewTimer(100 * time.Millisecond)
-	defer timeout.Stop()
-	select {
-	case got := <-coll.metricsService.requests:
-		return &got
-	case <-timeout.C:
-		return nil
-	}
+func (coll *collector) ExportedMetrics() *metricsExportRequest {
+	// stop to make sure all requests are processed and synchronized
+	coll.grpcSrv.GracefulStop()
+
+	defer coll.metricsService.mtx.Unlock()
+	coll.metricsService.mtx.Lock()
+	return coll.metricsService.data
 }
 
 func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.ExportTraceServiceRequest) (*ctpb.ExportTraceServiceResponse, error) {
@@ -630,11 +657,17 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 	scopeSpans := rs.ScopeSpans[0]
 	headers, _ := metadata.FromIncomingContext(ctx)
 
-	ctss.requests <- spansExportRequest{
-		Header:   headers,
-		Resource: rs.GetResource(),
-		Spans:    scopeSpans.GetSpans(),
+	ctss.mtx.Lock()
+	if ctss.data == nil {
+		// headers and resource should be the same. set them once
+		ctss.data = &spansExportRequest{
+			Header:   headers,
+			Resource: rs.GetResource(),
+		}
 	}
+	// concat all spans
+	ctss.data.Spans = append(ctss.data.Spans, scopeSpans.GetSpans()...)
+	ctss.mtx.Unlock()
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
 }
@@ -644,11 +677,17 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	scopeMetrics := rs.ScopeMetrics[0]
 	headers, _ := metadata.FromIncomingContext(ctx)
 
-	cmss.requests <- metricsExportRequest{
-		Header:   headers,
-		Resource: rs.GetResource(),
-		Metrics:  scopeMetrics.GetMetrics(),
+	cmss.mtx.Lock()
+	if cmss.data == nil {
+		// headers and resource should be the same. set them once
+		cmss.data = &metricsExportRequest{
+			Header:   headers,
+			Resource: rs.GetResource(),
+		}
 	}
+	// concat all metrics
+	cmss.data.Metrics = append(cmss.data.Metrics, scopeMetrics.GetMetrics()...)
+	cmss.mtx.Unlock()
 
 	return &cmpb.ExportMetricsServiceResponse{}, nil
 }
