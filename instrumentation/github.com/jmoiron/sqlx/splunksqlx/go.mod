@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.3.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
