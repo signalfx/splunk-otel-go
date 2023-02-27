@@ -41,7 +41,7 @@ import (
 
 var errShutdown = errors.New("SDK shutdown failure")
 
-var distroVerAttr = attribute.String("splunk.distro.version", splunkotel.Version())
+const distroVerAttr = "splunk.distro.version"
 
 const tracesSamplerKey = "OTEL_TRACES_SAMPLER"
 
@@ -125,23 +125,22 @@ func Run(opts ...Option) (SDK, error) {
 
 func newResource(ctx context.Context) (*resource.Resource, error) {
 	// SDK's default resource.
-	res := resource.Default()
-
-	// Add Splunk-specific attributes.
-	resWithSplunkAttrs := resource.NewSchemaless(distroVerAttr)
-	res, err := resource.Merge(res, resWithSplunkAttrs)
-	if err != nil {
-		return nil, err
-	}
-
+	defaultRes := resource.Default()
 	// Add additional detectors.
 	resWithDetectors, err := resource.New(ctx,
-		resource.WithProcess(), // Adds process and Go runtime information.
+		resource.WithDetectors(
+			// Add Splunk-specific attributes.
+			resource.StringDetector(semconv.SchemaURL, distroVerAttr, func() (string, error) {
+				return splunkotel.Version(), nil
+			}),
+		),
+		// Add process and Go runtime information.
+		resource.WithProcess(),
 	)
 	if err != nil {
 		return nil, err
 	}
-	res, err = resource.Merge(res, resWithDetectors)
+	res, err := resource.Merge(defaultRes, resWithDetectors)
 	if err != nil {
 		return nil, err
 	}
