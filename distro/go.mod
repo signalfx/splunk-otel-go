@@ -6,7 +6,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/signalfx/splunk-otel-go v1.3.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/tonglil/buflogr v1.0.1
 	go.opentelemetry.io/contrib/propagators/autoprop v0.39.0
 	go.opentelemetry.io/otel v1.13.0
