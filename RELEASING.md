@@ -24,9 +24,10 @@ To bump all (execpt the `/build` module's) dependencies run:
 
 3. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
-4. Update the documentation in https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go
+4. Push the changes to upstream and create a Pull Request on GitHub.
 
-5. Push the changes to upstream and create a Pull Request on GitHub.
+5. Create a Pull Request with documentation updates in
+   [splunk/public-o11y-docs](https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go)
 
 ## Tag
 
