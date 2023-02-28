@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   as OpenTelemetry Go metrics API and SDK are not stable yet.
   Set `OTEL_METRICS_EXPORTER=otlp` to enable
   metrics support.
+- Add process and Go runtime attributes to resource.
 
 ## [1.3.1] - 2023-02-08
 
