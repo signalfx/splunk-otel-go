@@ -12,7 +12,11 @@ To bump all (execpt the `/build` module's) dependencies run:
 
 1. Verify if [wizard](https://app.signalfx.com/#/integrations/go-tracing/description)
    and [official docs](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html)
-   needs any adjustments. Contact @signalfx/gdi-docs team if needed.
+   needs any adjustments.
+   Create a Pull Request with documentation updates in
+   [splunk/public-o11y-docs](https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go)
+   if necessary.
+   Contact @signalfx/gdi-docs team if needed.
 
 2. Run the pre-release script which updates go.mod for submodules to depend on
    the new release. It creates a branch `pre_release_<new tag>`
@@ -25,9 +29,6 @@ To bump all (execpt the `/build` module's) dependencies run:
 3. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
 4. Push the changes to upstream and create a Pull Request on GitHub.
-
-5. Create a Pull Request with documentation updates in
-   [splunk/public-o11y-docs](https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go)
 
 ## Tag
 
