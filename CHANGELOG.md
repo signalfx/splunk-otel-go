@@ -22,6 +22,7 @@ This upgrades [OpenTelemetry Go to v1.14.0/v0.37.0/v0.0.4][otel-v1.14.0] and
   Set `OTEL_METRICS_EXPORTER=otlp` to enable
   metrics support.
 - Add process and Go runtime attributes to resource.
+- Add runtime metrics instrumentation.
 
 ## [1.3.1] - 2023-02-08
 
