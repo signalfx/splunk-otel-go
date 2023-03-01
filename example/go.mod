@@ -3,10 +3,8 @@ module github.com/signalfx/splunk-otel-go/example
 go 1.18
 
 require (
-	github.com/gorilla/mux v1.8.0
 	github.com/signalfx/splunk-otel-go/distro v1.3.1
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.3.1
-	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.40.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 )
 
