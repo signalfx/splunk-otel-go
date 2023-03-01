@@ -331,7 +331,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 }
 
-func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
+func TestTracesResource(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
@@ -340,14 +340,7 @@ func TestSplunkDistroVersionAttrInTracesResource(t *testing.T) {
 
 	got := coll.ExportedSpans()
 	require.NotNil(t, got)
-	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
-		Key: "splunk.distro.version",
-		Value: &comm.AnyValue{
-			Value: &comm.AnyValue_StringValue{
-				StringValue: splunkotel.Version(),
-			},
-		},
-	})
+	assertResource(t, got.Resource.GetAttributes())
 }
 
 func TestRunOTLPMetricsExporter(t *testing.T) {
@@ -452,7 +445,7 @@ func TestRuntimeMetrics(t *testing.T) {
 	assertHasMetric(t, got, "runtime.uptime")
 }
 
-func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
+func TestMetricsResource(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
@@ -462,14 +455,7 @@ func TestSplunkDistroVersionAttrInMetricsResource(t *testing.T) {
 
 	got := coll.ExportedMetrics()
 	require.NotNil(t, got)
-	assert.Contains(t, got.Resource.GetAttributes(), &comm.KeyValue{
-		Key: "splunk.distro.version",
-		Value: &comm.AnyValue{
-			Value: &comm.AnyValue_StringValue{
-				StringValue: splunkotel.Version(),
-			},
-		},
-	})
+	assertResource(t, got.Resource.GetAttributes())
 }
 
 func TestNoServiceWarn(t *testing.T) {
@@ -554,6 +540,30 @@ func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
 		gotMetrics = append(gotMetrics, m.Name)
 	}
 	assert.Failf(t, "should contain metric", "want: %v, got: %v", name, gotMetrics)
+}
+
+func assertResource(t *testing.T, attrs []*comm.KeyValue) {
+	assert.Contains(t, attrs, &comm.KeyValue{
+		Key: "splunk.distro.version",
+		Value: &comm.AnyValue{
+			Value: &comm.AnyValue_StringValue{
+				StringValue: splunkotel.Version(),
+			},
+		},
+	}, "should have proper splunk.distro.version value")
+
+	var gotAttrKeys []string
+	for _, attr := range attrs {
+		gotAttrKeys = append(gotAttrKeys, attr.Key)
+	}
+
+	assert.Subset(t, gotAttrKeys,
+		[]string{"process.pid", "process.executable.name", "process.executable.path"},
+		"should contain process attributes")
+
+	assert.Subset(t, gotAttrKeys,
+		[]string{"process.runtime.name", "process.runtime.version", "process.runtime.description"},
+		"should contain Go runtime attributes")
 }
 
 type (
