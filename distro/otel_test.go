@@ -664,7 +664,7 @@ func (coll *collector) ExportedMetrics() *metricsExportRequest {
 
 func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.ExportTraceServiceRequest) (*ctpb.ExportTraceServiceResponse, error) {
 	rs := exp.ResourceSpans[0]
-	scopeSpans := rs.ScopeSpans[0]
+
 	headers, _ := metadata.FromIncomingContext(ctx)
 
 	ctss.mtx.Lock()
@@ -676,7 +676,10 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 		}
 	}
 	// concat all spans
-	ctss.data.Spans = append(ctss.data.Spans, scopeSpans.GetSpans()...)
+	for _, scopeSpans := range rs.ScopeSpans {
+		ctss.data.Spans = append(ctss.data.Spans, scopeSpans.GetSpans()...)
+	}
+
 	ctss.mtx.Unlock()
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
@@ -684,7 +687,6 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 
 func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb.ExportMetricsServiceRequest) (*cmpb.ExportMetricsServiceResponse, error) {
 	rs := exp.ResourceMetrics[0]
-	scopeMetrics := rs.ScopeMetrics[0]
 	headers, _ := metadata.FromIncomingContext(ctx)
 
 	cmss.mtx.Lock()
@@ -696,7 +698,9 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 		}
 	}
 	// concat all metrics
-	cmss.data.Metrics = append(cmss.data.Metrics, scopeMetrics.GetMetrics()...)
+	for _, scopeMetrics := range rs.ScopeMetrics {
+		cmss.data.Metrics = append(cmss.data.Metrics, scopeMetrics.GetMetrics()...)
+	}
 	cmss.mtx.Unlock()
 
 	return &cmpb.ExportMetricsServiceResponse{}, nil
