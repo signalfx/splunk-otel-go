@@ -29,8 +29,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gorilla/mux"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/signalfx/splunk-otel-go/distro"
@@ -59,22 +57,18 @@ func main() {
 		}
 	}()
 
-	router := mux.NewRouter()
-
 	// instrument http.Handler
-	router.Use(otelmux.Middleware("mux-server"))
-	router.Use(splunkhttp.NewHandler)
-
-	router.HandleFunc("/hello", handle).Methods("GET")
+	var handler http.Handler = http.HandlerFunc(handle)
+	handler = splunkhttp.NewHandler(handler)
+	handler = otelhttp.NewHandler(handler, "handle")
 
 	srv := &http.Server{
 		Addr:              ":8080",
-		Handler:           router,
+		Handler:           handler,
 		WriteTimeout:      time.Second,
 		ReadTimeout:       time.Second,
 		ReadHeaderTimeout: time.Second,
 	}
-
 	errCh := make(chan error, 1)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

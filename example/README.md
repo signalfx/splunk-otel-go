@@ -28,6 +28,7 @@ Run the instrumented application:
 ```sh
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
+export OTEL_METRICS_EXPORTER="otlp"
 go run .
 ```
 
