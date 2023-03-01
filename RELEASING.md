@@ -16,7 +16,7 @@ To bump all (execpt the `/build` module's) dependencies run:
    Create a Pull Request with documentation updates in
    [splunk/public-o11y-docs](https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go)
    if necessary.
-   Contact @signalfx/gdi-docs team if needed.
+   Contact @splunk/gdi-docs team if needed.
 
 2. Run the pre-release script which updates go.mod for submodules to depend on
    the new release. It creates a branch `pre_release_<new tag>`
