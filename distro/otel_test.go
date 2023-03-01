@@ -645,18 +645,12 @@ func (coll *collector) Start(t *testing.T) {
 }
 
 func (coll *collector) ExportedSpans() *spansExportRequest {
-	// stop to make sure all requests are processed and synchronized
-	coll.grpcSrv.GracefulStop()
-
 	defer coll.traceService.mtx.Unlock()
 	coll.traceService.mtx.Lock()
 	return coll.traceService.data
 }
 
 func (coll *collector) ExportedMetrics() *metricsExportRequest {
-	// stop to make sure all requests are processed and synchronized
-	coll.grpcSrv.GracefulStop()
-
 	defer coll.metricsService.mtx.Unlock()
 	coll.metricsService.mtx.Lock()
 	return coll.metricsService.data
@@ -668,6 +662,7 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 	headers, _ := metadata.FromIncomingContext(ctx)
 
 	ctss.mtx.Lock()
+	defer ctss.mtx.Unlock()
 	if ctss.data == nil {
 		// headers and resource should be the same. set them once
 		ctss.data = &spansExportRequest{
@@ -680,8 +675,6 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 		ctss.data.Spans = append(ctss.data.Spans, scopeSpans.GetSpans()...)
 	}
 
-	ctss.mtx.Unlock()
-
 	return &ctpb.ExportTraceServiceResponse{}, nil
 }
 
@@ -690,6 +683,7 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	headers, _ := metadata.FromIncomingContext(ctx)
 
 	cmss.mtx.Lock()
+	defer cmss.mtx.Unlock()
 	if cmss.data == nil {
 		// headers and resource should be the same. set them once
 		cmss.data = &metricsExportRequest{
@@ -701,7 +695,6 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	for _, scopeMetrics := range rs.ScopeMetrics {
 		cmss.data.Metrics = append(cmss.data.Metrics, scopeMetrics.GetMetrics()...)
 	}
-	cmss.mtx.Unlock()
 
 	return &cmpb.ExportMetricsServiceResponse{}, nil
 }
