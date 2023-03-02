@@ -110,6 +110,12 @@ Additional recommended Splunk specific instrumentations:
 Documentation on how to manually instrument a Go application is available
 [here](https://opentelemetry.io/docs/go/getting-started/).
 
+Use [`otel.Tracer()`](https://pkg.go.dev/go.opentelemetry.io/otel#Tracer)
+to get a tracer for creating custom spans.
+
+Use [`global.Meter()`](https://pkg.go.dev/go.opentelemetry.io/otel/metric/global#Meter)
+to get a meter for creating custom metrics.
+
 ## Migrating
 
 If you're currently using the [SignalFx Tracing Library for Go](https://github.com/signalfx/signalfx-go-tracing)
