@@ -3,8 +3,8 @@ module github.com/signalfx/splunk-otel-go/example
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go/distro v1.3.1
-	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.3.1
+	github.com/signalfx/splunk-otel-go/distro v1.4.0
+	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.4.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 )
 
@@ -16,7 +16,7 @@ require (
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.3.1 // indirect
+	github.com/signalfx/splunk-otel-go v1.4.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.40.0 // indirect
 	go.opentelemetry.io/contrib/propagators/autoprop v0.40.0 // indirect
 	go.opentelemetry.io/contrib/propagators/aws v1.15.0 // indirect

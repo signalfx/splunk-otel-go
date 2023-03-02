@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
-	github.com/signalfx/splunk-otel-go v1.3.1
+	github.com/signalfx/splunk-otel-go v1.4.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tonglil/buflogr v1.0.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.40.0
