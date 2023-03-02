@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [1.4.0] - 2023-03-02
 
 The release adds metrics support.
+Set `OTEL_METRICS_EXPORTER=otlp` to enable metrics support.
 However, take notice that as for now
 the OpenTelemetry Go metrics API is not stable
 ([`v0.37.0`]([otel-v1.14.0])).
