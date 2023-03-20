@@ -151,6 +151,7 @@ func (s *SplunkSQLSuite) TestDBExecContext() {
 
 func (s *SplunkSQLSuite) TestDBQuery() {
 	rows, err := s.DB.Query("test")
+	s.T().Cleanup(func() { s.Assert().NoError(rows.Err()) })
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
 	if s.ConnImplementsQueryer {
@@ -164,6 +165,7 @@ func (s *SplunkSQLSuite) TestDBQueryContext() {
 	rows, err := s.DB.QueryContext(context.Background(), "test")
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
+	s.Require().NoError(rows.Err())
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
 	} else {
@@ -246,6 +248,7 @@ func (s *SplunkSQLSuite) TestStmtQuery() {
 	rows, err := s.newStmt().Query() //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
+	s.Require().NoError(rows.Err())
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
@@ -253,6 +256,7 @@ func (s *SplunkSQLSuite) TestStmtQueryContext() {
 	rows, err := s.newStmt().QueryContext(context.Background()) //nolint:sqlclosecheck // newStmt() adds the (*sql.Stmt).Close() to test cleanup
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
+	s.Require().NoError(rows.Err())
 	s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test query")))
 }
 
