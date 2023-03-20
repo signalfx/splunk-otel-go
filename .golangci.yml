@@ -134,7 +134,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
-    # - rowserrcheck # rowserrcheck is disabled because of generics. You can track the evolution of the generics support by following the https://github.com/golangci/golangci-lint/issues/2649."
+    - rowserrcheck
     - staticcheck
     - stylecheck
     - sqlclosecheck
@@ -144,23 +144,6 @@ linters:
     - unused
     - whitespace
     - goheader
-
-  # don't enable:
-  # - asciicheck
-  # - dupl
-  # - gochecknoglobals
-  # - gocognit
-  # - godot
-  # - godox
-  # - goerr113
-  # - interfacer
-  # - lll
-  # - maligned
-  # - nestif
-  # - prealloc
-  # - testpackage
-  # - revive
-  # - wsl
 
 issues:
   include:
