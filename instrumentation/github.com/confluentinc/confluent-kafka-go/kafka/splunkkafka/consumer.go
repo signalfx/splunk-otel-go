@@ -93,7 +93,7 @@ func wrapConsumer(c *kafka.Consumer, cfg *internal.Config) *Consumer {
 	cfg.DefaultStartOpts = append(
 		cfg.DefaultStartOpts,
 		trace.WithAttributes(
-			semconv.MessagingDestinationKindTopic,
+			semconv.MessagingSourceKindTopic,
 			semconv.MessagingOperationReceive,
 			semconv.MessagingKafkaClientIDKey.String(c.String()),
 		),

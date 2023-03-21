@@ -59,6 +59,7 @@ func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
 		cfg.DefaultStartOpts,
 		trace.WithAttributes(
 			semconv.MessagingDestinationKindTopic,
+			semconv.MessagingOperationPublish,
 		),
 	)
 	wrapped := &Producer{

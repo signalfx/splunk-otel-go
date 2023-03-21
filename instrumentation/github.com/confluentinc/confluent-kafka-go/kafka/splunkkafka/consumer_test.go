@@ -164,7 +164,7 @@ func TestConsumerSpan(t *testing.T) {
 		attrs := record.SpanConfig.Attributes()
 		assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 		assert.Contains(t, attrs, commonAttr)
-		assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
+		assert.Contains(t, attrs, semconv.MessagingSourceKindTopic)
 		assert.Contains(t, attrs, semconv.MessagingSourceNameKey.String(testTopic))
 		assert.Contains(t, attrs, semconv.MessagingOperationReceive)
 		assert.Contains(t, attrs, semconv.MessagingMessageIDKey.String("1"))
