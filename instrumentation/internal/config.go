@@ -79,6 +79,7 @@ func (c *Config) Copy() *Config {
 	newC := Config{
 		instName:         c.instName,
 		Tracer:           c.Tracer,
+		Meter:            c.Meter,
 		Propagator:       c.Propagator,
 		DefaultStartOpts: make([]trace.SpanStartOption, len(c.DefaultStartOpts)),
 	}
