@@ -122,7 +122,7 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionConv{iOpt: internal.WithTracerProvider(tp)}
 }
 
-// WithTracerProvider returns an Option that sets the TracerProvider used with
+// WithMeterProvider returns an Option that sets the MeterProvider used with
 // this instrumentation library.
 func WithMeterProvider(mp metric.MeterProvider) Option {
 	return optionConv{iOpt: internal.WithMeterProvider(mp)}
