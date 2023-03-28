@@ -100,7 +100,7 @@ func TestURLDNSParse(t *testing.T) {
 }
 
 func TestSpanName(t *testing.T) {
-	c := newTraceConfig()
+	c := newConfig()
 
 	// c.DBName empty means the moniker should be used.
 	m := moniker.Begin

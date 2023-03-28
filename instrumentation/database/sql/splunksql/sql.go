@@ -24,6 +24,8 @@ import (
 	"database/sql/driver"
 	"io"
 	"sync"
+
+	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -74,19 +76,32 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	// will allow similar instrumentation to be used with minor corrections
 	// being applied here (e.g. using `lib/pg` instead of `pgx`).
 	opts = append([]Option{regOpt}, opts...)
-	d := newDriver(db.Driver(), newTraceConfig(opts...))
+	cfg := newConfig(opts...)
+	d := newDriver(db.Driver(), cfg)
 
-	var connector driver.Connector
+	var conn driver.Connector
 	// Use the instrumented driver to open a connection to the database.
 	if driverCtx, ok := d.(driver.DriverContext); ok {
-		connector, err = driverCtx.OpenConnector(dataSourceName)
+		conn, err = driverCtx.OpenConnector(dataSourceName)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		connector = newDSNConnector(d, dataSourceName)
+		conn = newDSNConnector(d, dataSourceName)
 	}
-	return sql.OpenDB(newCloserConnector(connector, db)), nil
+	conn = newCloserConnector(conn, db)
+
+	// Register asynchronous metrics.
+	reg, err := registerMetrics(cfg.ResolveMeter(), db)
+	if err != nil {
+		// We prefer reporting problems with metrics rather than failing.
+		otel.Handle(err)
+	}
+	if reg != nil {
+		conn = newUnregisterConnector(conn, reg)
+	}
+
+	return sql.OpenDB(conn), nil
 }
 
 // dsnConnector wraps a driver to be used as a DriverContext.

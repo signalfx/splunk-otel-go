@@ -28,7 +28,7 @@ import (
 type otelStmt struct {
 	driver.Stmt
 
-	config traceConfig
+	config config
 	query  string
 }
 
@@ -39,7 +39,7 @@ var (
 	_ driver.StmtQueryContext = (*otelStmt)(nil)
 )
 
-func newStmt(stmt driver.Stmt, c traceConfig, query string) *otelStmt {
+func newStmt(stmt driver.Stmt, c config, query string) *otelStmt {
 	return &otelStmt{Stmt: stmt, config: c, query: query}
 }
 
