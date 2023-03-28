@@ -21,10 +21,7 @@ package splunksql // import "github.com/signalfx/splunk-otel-go/instrumentation/
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
-	"io"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/instrument"
@@ -81,26 +78,4 @@ func registerMetrics(db *sql.DB, meter metric.Meter, poolName string) (metric.Re
 		return nil, err
 	}
 	return reg, nil
-}
-
-type unregisterConnector struct {
-	driver.Connector
-
-	reg metric.Registration
-}
-
-func newUnregisterConnector(c driver.Connector, reg metric.Registration) driver.Connector {
-	return unregisterConnector{Connector: c, reg: reg}
-}
-
-func (c unregisterConnector) Close() error {
-	if err := c.reg.Unregister(); err != nil {
-		otel.Handle(err)
-	}
-
-	if closer, ok := c.Connector.(io.Closer); ok {
-		return closer.Close()
-	}
-
-	return nil
 }
