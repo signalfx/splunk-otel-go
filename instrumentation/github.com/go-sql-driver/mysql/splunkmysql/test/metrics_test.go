@@ -16,6 +16,7 @@ package test
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,55 +30,31 @@ import (
 
 func TestMetrics(t *testing.T) {
 	ctx := context.Background()
-
 	reader := metric.NewManualReader()
 	meterProvider := metric.NewMeterProvider(metric.WithReader(reader))
+	defer func() { assert.NoError(t, meterProvider.Shutdown(ctx)) }()
 
+	// create 1 used connection
 	db, err := splunksql.Open("mysql", dsn, splunksql.WithMeterProvider(meterProvider))
 	require.NoError(t, err)
-	t.Cleanup(func() {
-		assert.NoError(t, db.Close())
-		assert.NoError(t, meterProvider.Shutdown(ctx))
-	})
-
+	defer func() { assert.NoError(t, db.Close()) }()
 	require.NoError(t, db.Ping())
 
-	_, err = db.Exec(createStmt)
-	require.NoError(t, err)
-
-	tx, err := db.Begin()
-	require.NoError(t, err)
-	stmtIns, err := tx.Prepare(insertStmt)
-	t.Cleanup(func() { assert.NoError(t, stmtIns.Close()) })
-	require.NoError(t, err)
-	for i := 0; i < 25; i++ {
-		_, err = stmtIns.Exec(i, (i * i))
-		require.NoError(t, err)
-	}
-	require.NoError(t, tx.Commit())
-	require.NoError(t, stmtIns.Close())
-
-	var sqNum int
-	stmtOut, err := db.Prepare(queryStmt)
-	t.Cleanup(func() { assert.NoError(t, stmtOut.Close()) })
-	require.NoError(t, err)
-	require.NoError(t, stmtOut.QueryRow(13).Scan(&sqNum))
-	assert.Equal(t, 13*13, sqNum, "failed to query square of 13")
-
-	// Directly do the query.
-	require.NoError(t, db.QueryRow(queryStmt, 1).Scan(&sqNum))
-	assert.Equal(t, 1, sqNum, "failed to query square of 1")
-
+	// assert
 	rm := metricdata.ResourceMetrics{}
 	err = reader.Collect(ctx, &rm)
 	require.NoError(t, err)
 	require.Len(t, rm.ScopeMetrics, 1, "should export metrics")
 	metrics := rm.ScopeMetrics[0]
 
-	t.Logf("%+v", metrics.Metrics[0])
 	assertMetrics(t, metrics, "db.client.connections.usage", func(m metricdata.Metrics) {
 		assert.Equal(t, "{connection}", m.Unit)
 	})
+
+	// log all exported metrics
+	d, err := json.Marshal(metrics.Metrics)
+	require.NoError(t, err)
+	t.Log(string(d))
 }
 
 func assertMetrics(t *testing.T, got metricdata.ScopeMetrics, name string, fn func(metricdata.Metrics)) {

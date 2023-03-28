@@ -17,6 +17,7 @@ package test
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,6 +30,9 @@ import (
 
 func TestMetrics(t *testing.T) {
 	ctx := context.Background()
+	reader := metric.NewManualReader()
+	meterProvider := metric.NewMeterProvider(metric.WithReader(reader))
+	defer func() { assert.NoError(t, meterProvider.Shutdown(ctx)) }()
 
 	driverName := "simple-driver"
 	driver := newSimpleMockDriver()
@@ -46,19 +50,15 @@ func TestMetrics(t *testing.T) {
 		DSNParser: func(string) (splunksql.ConnectionConfig, error) { return connCfg, nil },
 	})
 
-	reader := metric.NewManualReader()
-	meterProvider := metric.NewMeterProvider(metric.WithReader(reader))
-
+	// create 1 used connection
 	db, err := splunksql.Open(driverName, "dataSourceName",
 		splunksql.WithMeterProvider(meterProvider))
 	require.NoError(t, err)
-	defer db.Close()
-	conn, err := db.Conn(ctx)
-	require.NoError(t, err)
-	defer conn.Close()
-	_, err = conn.ExecContext(ctx, "SELECT 1") // 1 active connection
+	defer func() { assert.NoError(t, db.Close()) }()
+	_, err = db.Exec("SELECT 1")
 	require.NoError(t, err)
 
+	// assert
 	rm := metricdata.ResourceMetrics{}
 	err = reader.Collect(ctx, &rm)
 	require.NoError(t, err)
@@ -68,6 +68,11 @@ func TestMetrics(t *testing.T) {
 	assertMetrics(t, metrics, "db.client.connections.usage", func(m metricdata.Metrics) {
 		assert.Equal(t, "{connection}", m.Unit)
 	})
+
+	// log all exported metrics
+	d, err := json.Marshal(metrics.Metrics)
+	require.NoError(t, err)
+	t.Log(string(d))
 }
 
 func assertMetrics(t *testing.T, got metricdata.ScopeMetrics, name string, fn func(metricdata.Metrics)) {
