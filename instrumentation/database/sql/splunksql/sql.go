@@ -74,7 +74,6 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	regCfg := retrieve(driverName)
 	var connCfg ConnectionConfig
 	if regCfg.DSNParser != nil {
-		var err error
 		connCfg, err = regCfg.DSNParser(dataSourceName)
 		if err != nil {
 			otel.Handle(err)
