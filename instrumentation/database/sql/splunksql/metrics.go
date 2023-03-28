@@ -39,6 +39,7 @@ func registerMetrics(meter metric.Meter, db *sql.DB) (metric.Registration, error
 	if err != nil {
 		return nil, err
 	}
+
 	idleMax, err := meter.Int64ObservableUpDownCounter(
 		"db.client.connections.idle.max",
 		instrument.WithUnit("{connection}"),
@@ -58,7 +59,12 @@ func registerMetrics(meter metric.Meter, db *sql.DB) (metric.Registration, error
 
 			return nil
 		},
-		idleMax, // passing different metric (sic!). We just need to provide one to make the RegisterCallback working...
+		// usage,
+		idleMax,
+		// Passing only a not-used metric and it works (sic!).
+		// We just need to provide any metric to make the RegisterCallback working...
+		// Probably the SDK should report some error like:
+		// "db.client.connections.usage was not registered, but used"
 	)
 	if err != nil {
 		return nil, err
