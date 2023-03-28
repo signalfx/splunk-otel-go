@@ -24,7 +24,6 @@ import (
 	"database/sql/driver"
 	"io"
 	"sync"
-	"sync/atomic"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
@@ -147,7 +146,7 @@ func (t dsnConnector) Driver() driver.Driver {
 type closerConnector struct {
 	driver.Connector
 	initDB *sql.DB
-	reg    atomic.Value
+	reg    metric.Registration
 }
 
 func newCloserConnector(c driver.Connector, initDB *sql.DB) *closerConnector {
@@ -155,8 +154,8 @@ func newCloserConnector(c driver.Connector, initDB *sql.DB) *closerConnector {
 }
 
 func (c *closerConnector) Close() error {
-	if reg, ok := c.reg.Load().(metric.Registration); ok {
-		if err := reg.Unregister(); err != nil {
+	if c.reg != nil {
+		if err := c.reg.Unregister(); err != nil {
 			otel.Handle(err)
 		}
 	}
@@ -178,5 +177,5 @@ func (c *closerConnector) Close() error {
 }
 
 func (c *closerConnector) SetMetricsRegistration(reg metric.Registration) {
-	c.reg.Store(reg)
+	c.reg = reg
 }
