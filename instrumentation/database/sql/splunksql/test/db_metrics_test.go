@@ -32,14 +32,18 @@ func TestMetrics(t *testing.T) {
 
 	driverName := "simple-driver"
 	driver := newSimpleMockDriver()
+	connCfg := splunksql.ConnectionConfig{
+		// Do not set the Name field so monikers are used to identify
+		// spans.
+		ConnectionString: "mockDB://bob@localhost:8080/testDB",
+		User:             "bob",
+		Host:             "localhost",
+		Port:             8080,
+		NetTransport:     splunksql.NetTransportOther,
+	}
 	sql.Register(driverName, driver)
 	splunksql.Register(driverName, splunksql.InstrumentationConfig{
-		DSNParser: func(s string) (splunksql.ConnectionConfig, error) {
-			// No-op DNS parser.
-			return splunksql.ConnectionConfig{
-				ConnectionString: s,
-			}, nil
-		},
+		DSNParser: func(string) (splunksql.ConnectionConfig, error) { return connCfg, nil },
 	})
 
 	reader := metric.NewManualReader()
@@ -52,7 +56,7 @@ func TestMetrics(t *testing.T) {
 	conn, err := db.Conn(ctx)
 	require.NoError(t, err)
 	defer conn.Close()
-	_, err = conn.ExecContext(ctx, "SELECT 1")
+	_, err = conn.ExecContext(ctx, "SELECT 1") // 1 active connection
 	require.NoError(t, err)
 
 	rm := metricdata.ResourceMetrics{}
@@ -61,7 +65,6 @@ func TestMetrics(t *testing.T) {
 	require.Len(t, rm.ScopeMetrics, 1, "should export metrics")
 	metrics := rm.ScopeMetrics[0]
 
-	t.Logf("%+v", metrics.Metrics[0])
 	assertMetrics(t, metrics, "db.client.connections.usage", func(m metricdata.Metrics) {
 		assert.Equal(t, "{connection}", m.Unit)
 	})

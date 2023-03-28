@@ -30,7 +30,7 @@ import (
 	"go.opentelemetry.io/otel/metric/instrument"
 )
 
-func registerMetrics(meter metric.Meter, db *sql.DB) (metric.Registration, error) {
+func registerMetrics(db *sql.DB, meter metric.Meter, poolName string) (metric.Registration, error) {
 	usage, err := meter.Int64ObservableUpDownCounter(
 		"db.client.connections.usage",
 		instrument.WithUnit("{connection}"),
@@ -58,14 +58,16 @@ func registerMetrics(meter metric.Meter, db *sql.DB) (metric.Registration, error
 		return nil, err
 	}
 
-	poolAttr := attribute.String("pool.name", "bad") // TODO: add tests and proper implementation
-
 	reg, err := meter.RegisterCallback(
 		func(ctx context.Context, o metric.Observer) error {
+			poolAttr := attribute.String("pool.name", poolName)
+			usedAttr := attribute.String("state", "used")
+			idleAttr := attribute.String("state", "idle")
+
 			stats := db.Stats()
 
-			o.ObserveInt64(usage, int64(stats.InUse), poolAttr, attribute.String("state", "used"))
-			o.ObserveInt64(usage, int64(stats.Idle), poolAttr, attribute.String("state", "idle"))
+			o.ObserveInt64(usage, int64(stats.InUse), poolAttr, usedAttr)
+			o.ObserveInt64(usage, int64(stats.Idle), poolAttr, idleAttr)
 			o.ObserveInt64(max, int64(stats.MaxOpenConnections), poolAttr)
 			o.ObserveInt64(waitTime, int64(stats.WaitDuration), poolAttr)
 

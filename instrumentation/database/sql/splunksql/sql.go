@@ -24,8 +24,10 @@ import (
 	"database/sql/driver"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 )
 
 var (
@@ -70,15 +72,29 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	// Setup any instrumentation that is registered for this driverName. If no
 	// instrumentation was registered for the driver, this will give a "best
 	// effort" to setup the driver.
-	regOpt := withRegistrationConfig(retrieve(driverName), dataSourceName)
+	regCfg := retrieve(driverName)
+	var connCfg ConnectionConfig
+	if regCfg.DSNParser != nil {
+		var err error
+		connCfg, err = regCfg.DSNParser(dataSourceName)
+		if err != nil {
+			otel.Handle(err)
+		}
+	} else {
+		// Fallback. This is a best effort attempt if we do not know how to
+		// explicitly parse the DSN.
+		connCfg, _ = urlDSNParse(dataSourceName)
+	}
+	regOpt := withRegistrationConfig(&connCfg, regCfg)
 	// Allow users to override default instrumentation setup values by
 	// appending opts to the Option returned from withRegistrationConfig. This
 	// will allow similar instrumentation to be used with minor corrections
 	// being applied here (e.g. using `lib/pg` instead of `pgx`).
 	opts = append([]Option{regOpt}, opts...)
 	cfg := newConfig(opts...)
-	d := newDriver(db.Driver(), cfg)
 
+	// Add traces instrumentation.
+	d := newDriver(db.Driver(), cfg)
 	var conn driver.Connector
 	// Use the instrumented driver to open a connection to the database.
 	if driverCtx, ok := d.(driver.DriverContext); ok {
@@ -89,19 +105,25 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	} else {
 		conn = newDSNConnector(d, dataSourceName)
 	}
-	conn = newCloserConnector(conn, db)
+	closerConn := newCloserConnector(conn, db)
+	db = sql.OpenDB(closerConn)
 
+	// Add metrics instrumentation.
 	// Register asynchronous metrics.
-	reg, err := registerMetrics(cfg.ResolveMeter(), db)
+	poolName := connCfg.ConnectionString // Sanitized dataSourceName.
+	if poolName == "" {
+		poolName = driverName
+	}
+	reg, err := registerMetrics(db, cfg.ResolveMeter(), poolName)
 	if err != nil {
 		// We prefer reporting problems with metrics rather than failing.
 		otel.Handle(err)
 	}
 	if reg != nil {
-		conn = newUnregisterConnector(conn, reg)
+		closerConn.SetMetricsRegistration(reg)
 	}
 
-	return sql.OpenDB(conn), nil
+	return db, nil
 }
 
 // dsnConnector wraps a driver to be used as a DriverContext.
@@ -124,15 +146,21 @@ func (t dsnConnector) Driver() driver.Driver {
 
 type closerConnector struct {
 	driver.Connector
-
 	initDB *sql.DB
+	reg    atomic.Value
 }
 
-func newCloserConnector(c driver.Connector, initDB *sql.DB) driver.Connector {
-	return closerConnector{Connector: c, initDB: initDB}
+func newCloserConnector(c driver.Connector, initDB *sql.DB) *closerConnector {
+	return &closerConnector{Connector: c, initDB: initDB}
 }
 
-func (c closerConnector) Close() error {
+func (c *closerConnector) Close() error {
+	if reg, ok := c.reg.Load().(metric.Registration); ok {
+		if err := reg.Unregister(); err != nil {
+			otel.Handle(err)
+		}
+	}
+
 	if err := c.initDB.Close(); err != nil {
 		return err
 	}
@@ -145,5 +173,10 @@ func (c closerConnector) Close() error {
 		// underlying Close is idempotent.
 		return closer.Close()
 	}
+
 	return nil
+}
+
+func (c *closerConnector) SetMetricsRegistration(reg metric.Registration) {
+	c.reg.Store(reg)
 }

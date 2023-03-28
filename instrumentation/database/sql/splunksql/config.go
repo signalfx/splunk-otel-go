@@ -137,20 +137,7 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 // withRegistrationConfig returns an Option that sets database attributes
 // required and recommended by the OpenTelemetry semantic conventions based on
 // the information instrumentation registered.
-func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
-	var connCfg ConnectionConfig
-	if regCfg.DSNParser != nil {
-		var err error
-		connCfg, err = regCfg.DSNParser(dsn)
-		if err != nil {
-			otel.Handle(err)
-		}
-	} else {
-		// Fallback. This is a best effort attempt if we do not know how to
-		// explicitly parse the DSN.
-		connCfg, _ = urlDSNParse(dsn)
-	}
-
+func withRegistrationConfig(connCfg *ConnectionConfig, regCfg InstrumentationConfig) Option {
 	attrs, err := connCfg.Attributes()
 	if err != nil {
 		otel.Handle(err)
