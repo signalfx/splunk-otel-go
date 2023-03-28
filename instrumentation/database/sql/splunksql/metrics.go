@@ -40,31 +40,40 @@ func registerMetrics(meter metric.Meter, db *sql.DB) (metric.Registration, error
 		return nil, err
 	}
 
-	idleMax, err := meter.Int64ObservableUpDownCounter(
-		"db.client.connections.idle.max",
+	max, err := meter.Int64ObservableUpDownCounter(
+		"db.client.connections.max",
 		instrument.WithUnit("{connection}"),
-		instrument.WithDescription("The maximum number of idle open connections allowed"),
+		instrument.WithDescription("The maximum number of open connections allowed"),
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	waitTime, err := meter.Int64ObservableUpDownCounter(
+		"db.client.connections.wait_time",
+		instrument.WithUnit("ms"),
+		instrument.WithDescription("The time it took to obtain an open connection from the pool"),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	poolAttr := attribute.String("pool.name", "bad") // TODO: add tests and proper implementation
+
 	reg, err := meter.RegisterCallback(
 		func(ctx context.Context, o metric.Observer) error {
 			stats := db.Stats()
-			poolAttr := attribute.String("pool.name", "bad") // TODO: add tests and proper implementation
 
 			o.ObserveInt64(usage, int64(stats.InUse), poolAttr, attribute.String("state", "used"))
 			o.ObserveInt64(usage, int64(stats.Idle), poolAttr, attribute.String("state", "idle"))
+			o.ObserveInt64(max, int64(stats.MaxOpenConnections), poolAttr)
+			o.ObserveInt64(waitTime, int64(stats.WaitDuration), poolAttr)
 
 			return nil
 		},
-		// usage,
-		idleMax,
-		// Passing only a not-used metric and it works (sic!).
-		// We just need to provide any metric to make the RegisterCallback working...
-		// Probably the SDK should report some error like:
-		// "db.client.connections.usage was not registered, but used"
+		usage,
+		max,
+		waitTime,
 	)
 	if err != nil {
 		return nil, err
