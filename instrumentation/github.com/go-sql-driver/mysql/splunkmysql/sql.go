@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package splunkmysql provides instrumentation for the
-// github.com/go-sql-driver/mysql package.
+// [github.com/go-sql-driver/mysql] package.
 //
 // To use this package, replace any blank identified imports of the
 // github.com/go-sql-driver/mysql package with an import of this package and
