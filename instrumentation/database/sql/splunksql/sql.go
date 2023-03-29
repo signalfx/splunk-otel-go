@@ -13,9 +13,19 @@
 // limitations under the License.
 
 // Package splunksql provides functions to instrument the [database/sql] package
-// using the OpenTelemetry API. It will augment operations
-// such as connections, statements and transactions with tracing
+// using the OpenTelemetry API.
+//
+// It will augment operation such as connections, statements and transactions with tracing
 // and collect connection pool metrics.
+//
+// It will collect the following connection pool metrics:
+//
+//   - db.client.connections.usage ({connection}) -
+//     The number of connections that are currently in state described by the state attribute
+//   - db.client.connections.max ({connection}) -
+//     The maximum number of open connections allowed
+//   - db.client.connections.wait_time (ms) -
+//     The time it took to obtain an open connection from the pool
 package splunksql // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
 import (
