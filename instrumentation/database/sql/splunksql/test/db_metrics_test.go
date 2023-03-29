@@ -60,8 +60,8 @@ func TestMetrics(t *testing.T) { //nolint: funlen // big want struct
 			// instrument: register the fake driver
 			driver := newSimpleMockDriver()
 			connCfg := splunksql.ConnectionConfig{
-				ConnectionString: tc.connectionString,
-				Host:             "localhost", // to avoid errors in logs
+				ConnectionString: tc.connectionString, // to make sure that pool.name value is sanitized via DSNParser
+				Host:             "localhost",         // to avoid errors in logs
 			}
 			sql.Register(tc.driverName, driver)
 			splunksql.Register(tc.driverName, splunksql.InstrumentationConfig{
