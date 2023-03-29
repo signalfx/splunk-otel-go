@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package test
+package sqltestutil // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/sqltestutil"
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,23 +30,22 @@ import (
 
 	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
 
-func TestMetrics(t *testing.T) {
+func TestMetrics(t *testing.T, wantPoolName, driverName, dataSourceName string, execFn func(*sql.DB)) {
 	ctx := context.Background()
 	reader := metric.NewManualReader()
 	meterProvider := metric.NewMeterProvider(metric.WithReader(reader))
 	defer func() { assert.NoError(t, meterProvider.Shutdown(ctx)) }()
 
 	// create 1 used connection
-	db, err := splunksql.Open("mysql", dsn, splunksql.WithMeterProvider(meterProvider))
+	db, err := splunksql.Open(driverName, dataSourceName, splunksql.WithMeterProvider(meterProvider))
 	require.NoError(t, err)
 	defer func() { assert.NoError(t, db.Close()) }()
-	require.NoError(t, db.Ping())
+	execFn(db)
 
 	// assert
-	wantPoolAttr := attribute.String("pool.name", dsnSanitized)
+	wantPoolAttr := attribute.String("pool.name", wantPoolName)
 	want := metricdata.ScopeMetrics{
 		Scope: instrumentation.Scope{
 			Name:      "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql",
