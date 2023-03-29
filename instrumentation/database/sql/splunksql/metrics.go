@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunksql provides functions to trace the database/sql package
-// (https://golang.org/pkg/database/sql) using the OpenTelemetry API. It will
-// automatically augment operations such as connections, statements and
-// transactions with tracing.
 package splunksql // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
 import (
