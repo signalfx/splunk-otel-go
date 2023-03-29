@@ -8,6 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add metrics in the following database insturmentation libraries. (#1973)
+  - `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq`
+
 ### Changed
 
 - Update attributes in
