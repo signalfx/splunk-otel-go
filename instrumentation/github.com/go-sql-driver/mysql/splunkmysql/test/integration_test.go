@@ -37,7 +37,6 @@ import (
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil"
 )
 
 const (
@@ -154,13 +153,6 @@ func TestContextSpans(t *testing.T) {
 		assert.Equal(t, parent.SpanContext().TraceID(), span.SpanContext().TraceID())
 		assertSpanBaseAttrs(t, span)
 	}
-}
-
-func TestMetrics(t *testing.T) {
-	sqltestutil.TestMetrics(t, dsnSanitized, "mysql", dsn, func(db *sql.DB) {
-		err := db.Ping()
-		require.NoError(t, err)
-	})
 }
 
 func assertSpanBaseAttrs(t *testing.T, span trace.ReadOnlySpan) {

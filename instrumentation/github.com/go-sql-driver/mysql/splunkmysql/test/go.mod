@@ -6,7 +6,6 @@ require (
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.4.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql v1.4.0
-	github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil v1.4.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/sdk v1.14.0
@@ -43,7 +42,6 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v0.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
@@ -58,5 +56,4 @@ replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
-	github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil => ../../../../../internal/sqltestutil
 )
