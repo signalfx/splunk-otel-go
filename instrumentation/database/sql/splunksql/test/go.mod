@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.4.0
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil v1.4.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil v1.4.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/sdk v1.14.0
@@ -29,6 +29,6 @@ require (
 replace (
 	github.com/signalfx/splunk-otel-go => ../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil => ../sqltestutil/
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil => ../../../../internal/sqltestutil/
 )

@@ -19,4 +19,4 @@ This package is in a separate module from the instrumentation it tests to
 isolate the dependency of the default SDK and not impose this as a transitive
 dependency for users.
 */
-package sqltestutil // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil"
+package sqltestutil // import "github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil"

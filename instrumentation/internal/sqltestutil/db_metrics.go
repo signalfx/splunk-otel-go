@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sqltestutil // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil"
+package sqltestutil // import "github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil"
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-module github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil
+module github.com/signalfx/splunk-otel-go/instrumentation/internal/sqltestutil
 
 go 1.18
 
@@ -24,7 +24,7 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../internal/
+	github.com/signalfx/splunk-otel-go => ../../../
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../database/sql/splunksql
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../
 )
