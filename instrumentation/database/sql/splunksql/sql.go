@@ -15,10 +15,10 @@
 // Package splunksql provides functions to instrument the [database/sql] package
 // using the OpenTelemetry API.
 //
-// It will augment operation such as connections, statements and transactions with tracing
-// and collect connection pool metrics.
+// It will augment operation such as connections, statements and transactions
+// with tracing.
 //
-// It will collect the following connection pool metrics:
+// It will collect the following metrics:
 //
 //   - db.client.connections.usage ({connection}) -
 //     The number of connections that are currently in state described by the state attribute
