@@ -32,6 +32,8 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
+// TestMetrics is meant for testing metrics instrumentation for instrumentation libraries
+// built on top of splunksql.
 func TestMetrics(t *testing.T, wantPoolName, driverName, dataSourceName string, execFn func(*sql.DB)) {
 	ctx := context.Background()
 	reader := metric.NewManualReader()
