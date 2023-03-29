@@ -106,18 +106,19 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	closerConn := newCloserConnector(conn, db)
 	db = sql.OpenDB(closerConn)
 
-	// Add metrics instrumentation.
-	// Register asynchronous metrics.
+	// Register asynchronous metrics collection
+	// for the db that is returned by this function.
 	poolName := connCfg.ConnectionString // Sanitized dataSourceName.
 	if poolName == "" {
 		poolName = driverName
 	}
 	reg, err := registerMetrics(db, cfg.ResolveMeter(), poolName)
 	if err != nil {
-		// We prefer reporting problems with metrics rather than failing.
+		// Report problems with metrics rather than failing.
 		otel.Handle(err)
 	}
 	if reg != nil {
+		// Unregister the metrics collection callback when the db is closed.
 		closerConn.SetMetricsRegistration(reg)
 	}
 
@@ -155,6 +156,7 @@ func newCloserConnector(c driver.Connector, initDB *sql.DB) *closerConnector {
 func (c *closerConnector) Close() error {
 	if c.reg != nil {
 		if err := c.reg.Unregister(); err != nil {
+			// Report problems with metrics rather than failing.
 			otel.Handle(err)
 		}
 	}
