@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.4.0
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/sqltestutil v1.4.0
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil v1.4.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql v1.4.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
@@ -56,7 +56,7 @@ require (
 replace (
 	github.com/signalfx/splunk-otel-go => ../../../../../..
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/sqltestutil => ../../../../../database/sql/splunksql/sqltestutil
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil => ../../../../../database/sql/splunksql/sqltestutil
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
 )

@@ -36,7 +36,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/sqltestutil"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil"
 	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
 

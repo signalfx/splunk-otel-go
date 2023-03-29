@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/sqltestutil"
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/sqltestutil"
 )
 
 func TestMetrics(t *testing.T) {
