@@ -71,19 +71,8 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	// Setup any instrumentation that is registered for this driverName. If no
 	// instrumentation was registered for the driver, this will give a "best
 	// effort" to setup the driver.
-	regCfg := retrieve(driverName)
-	var connCfg ConnectionConfig
-	if regCfg.DSNParser != nil {
-		connCfg, err = regCfg.DSNParser(dataSourceName)
-		if err != nil {
-			otel.Handle(err)
-		}
-	} else {
-		// Fallback. This is a best effort attempt if we do not know how to
-		// explicitly parse the DSN.
-		connCfg, _ = urlDSNParse(dataSourceName)
-	}
-	regOpt := withRegistrationConfig(&connCfg, regCfg)
+	regOpt := withRegistrationConfig(driverName, dataSourceName)
+
 	// Allow users to override default instrumentation setup values by
 	// appending opts to the Option returned from withRegistrationConfig. This
 	// will allow similar instrumentation to be used with minor corrections
@@ -108,7 +97,7 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 
 	// Register asynchronous metrics collection
 	// for the db that is returned by this function.
-	poolName := connCfg.ConnectionString // Sanitized dataSourceName.
+	poolName := cfg.ConnectionString // Sanitized dataSourceName.
 	if poolName == "" {
 		poolName = driverName
 	}

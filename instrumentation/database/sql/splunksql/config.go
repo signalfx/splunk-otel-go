@@ -39,7 +39,8 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 type config struct {
 	*internal.Config
 
-	DBName string
+	DBName           string
+	ConnectionString string
 }
 
 func newConfig(options ...Option) config {
@@ -137,7 +138,24 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 // withRegistrationConfig returns an Option that sets database attributes
 // required and recommended by the OpenTelemetry semantic conventions based on
 // the information instrumentation registered.
-func withRegistrationConfig(connCfg *ConnectionConfig, regCfg InstrumentationConfig) Option {
+func withRegistrationConfig(driverName, dataSourceName string) Option {
+	regCfg := retrieve(driverName)
+
+	var (
+		connCfg ConnectionConfig
+		err     error
+	)
+	if regCfg.DSNParser != nil {
+		connCfg, err = regCfg.DSNParser(dataSourceName)
+		if err != nil {
+			otel.Handle(err)
+		}
+	} else {
+		// Fallback. This is a best effort attempt if we do not know how to
+		// explicitly parse the DSN.
+		connCfg, _ = urlDSNParse(dataSourceName)
+	}
+
 	attrs, err := connCfg.Attributes()
 	if err != nil {
 		otel.Handle(err)
@@ -146,6 +164,7 @@ func withRegistrationConfig(connCfg *ConnectionConfig, regCfg InstrumentationCon
 
 	return optionFunc(func(c *config) {
 		c.DBName = connCfg.Name
+		c.ConnectionString = connCfg.ConnectionString
 		c.DefaultStartOpts = append(c.DefaultStartOpts, trace.WithAttributes(attrs...))
 	})
 }
