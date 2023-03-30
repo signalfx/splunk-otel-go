@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.5.0] - 2023-03-30
+
 ### Added
 
 - Add metrics in the following database insturmentation libraries. (#1973)
@@ -420,7 +422,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.5.0
 [1.4.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.4.0
 [1.3.1]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.3.1
 [1.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.3.0
