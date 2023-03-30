@@ -57,15 +57,15 @@ type DriverSuite struct {
 
 func (s *DriverSuite) SetupTest() {
 	s.MockDriver = newMockDriver(nil)
-	s.OTelDriver = newDriver(s.MockDriver, newTraceConfig()).(*otelDriver)
+	s.OTelDriver = newDriver(s.MockDriver, newConfig()).(*otelDriver)
 }
 
 func (s *DriverSuite) TestNewDriverImplementation() {
-	fullImpl := newDriver(s.MockDriver, newTraceConfig())
+	fullImpl := newDriver(s.MockDriver, newConfig())
 	s.Implements((*driver.Driver)(nil), fullImpl)
 	s.Implements((*driver.DriverContext)(nil), fullImpl)
 
-	partImpl := newDriver(struct{ driver.Driver }{s.MockDriver}, newTraceConfig())
+	partImpl := newDriver(struct{ driver.Driver }{s.MockDriver}, newConfig())
 	s.Implements((*driver.Driver)(nil), partImpl)
 	if _, ok := partImpl.(driver.DriverContext); ok {
 		s.Fail("wrapped driver does not implement DriverContext")

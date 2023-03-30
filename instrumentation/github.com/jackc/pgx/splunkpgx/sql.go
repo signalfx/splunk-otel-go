@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunkpgx provides instrumentation for the github.com/jackc/pgx
-// package when using database/sql.
+// Package splunkpgx provides instrumentation for the [github.com/jackc/pgx]
+// package when using [database/sql].
 //
 // To use this package, replace any blank identified imports of the
 // github.com/jackc/pgx package with an import of this package and

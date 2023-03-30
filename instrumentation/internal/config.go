@@ -19,6 +19,8 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
@@ -32,6 +34,7 @@ type Config struct {
 	instName string
 
 	Tracer           trace.Tracer
+	Meter            metric.Meter
 	Propagator       propagation.TextMapPropagator
 	DefaultStartOpts []trace.SpanStartOption
 }
@@ -56,6 +59,13 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 			trace.WithSchemaURL(semconv.SchemaURL),
 		)
 	}
+	if c.Meter == nil {
+		c.Meter = global.Meter(
+			c.instName,
+			metric.WithInstrumentationVersion(splunkotel.Version()),
+			metric.WithSchemaURL(semconv.SchemaURL),
+		)
+	}
 
 	if c.Propagator == nil {
 		c.Propagator = otel.GetTextMapPropagator()
@@ -69,6 +79,7 @@ func (c *Config) Copy() *Config {
 	newC := Config{
 		instName:         c.instName,
 		Tracer:           c.Tracer,
+		Meter:            c.Meter,
 		Propagator:       c.Propagator,
 		DefaultStartOpts: make([]trace.SpanStartOption, len(c.DefaultStartOpts)),
 	}
@@ -93,6 +104,12 @@ func (c *Config) ResolveTracer(ctx context.Context) trace.Tracer {
 		)
 	}
 	return c.Tracer
+}
+
+// ResolveMeter returns an OpenTelemetry meter from the appropriate
+// MeterProvider.
+func (c *Config) ResolveMeter() metric.Meter {
+	return c.Meter
 }
 
 // MergedSpanStartOptions returns a copy of opts with any DefaultStartOpts

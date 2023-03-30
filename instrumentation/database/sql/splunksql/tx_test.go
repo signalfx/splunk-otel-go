@@ -54,7 +54,7 @@ type TxSuite struct {
 
 func (s *TxSuite) SetupTest() {
 	s.MockTx = newMockTx(nil)
-	s.OTelTx = newTx(context.Background(), s.MockTx, newTraceConfig())
+	s.OTelTx = newTx(context.Background(), s.MockTx, newConfig())
 }
 
 func (s *TxSuite) TestCommitCallsWrapped() {

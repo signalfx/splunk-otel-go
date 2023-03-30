@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunksqlx provides instrumentation for the github.com/jmoiron/sqlx
+// Package splunksqlx provides instrumentation for the [github.com/jmoiron/sqlx]
 // package.
 package splunksqlx // import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx"
 

@@ -12,10 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunksql provides functions to trace the database/sql package
-// (https://golang.org/pkg/database/sql) using the OpenTelemetry API. It will
-// automatically augment operations such as connections, statements and
-// transactions with tracing.
+// Package splunksql provides functions to instrument the [database/sql] package
+// using the OpenTelemetry API.
+//
+// It will augment operation such as connections, statements and transactions
+// with tracing.
+//
+// It will collect the following metrics:
+//
+//   - db.client.connections.usage ({connection}) -
+//     The number of connections that are currently in state described by the state attribute
+//   - db.client.connections.max ({connection}) -
+//     The maximum number of open connections allowed
+//   - db.client.connections.wait_time (ms) -
+//     The time it took to obtain an open connection from the pool
 package splunksql // import "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
 import (
@@ -24,6 +34,9 @@ import (
 	"database/sql/driver"
 	"io"
 	"sync"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 )
 
 var (
@@ -68,25 +81,47 @@ func Open(driverName, dataSourceName string, opts ...Option) (*sql.DB, error) {
 	// Setup any instrumentation that is registered for this driverName. If no
 	// instrumentation was registered for the driver, this will give a "best
 	// effort" to setup the driver.
-	regOpt := withRegistrationConfig(retrieve(driverName), dataSourceName)
+	regOpt := withRegistrationConfig(driverName, dataSourceName)
+
 	// Allow users to override default instrumentation setup values by
 	// appending opts to the Option returned from withRegistrationConfig. This
 	// will allow similar instrumentation to be used with minor corrections
 	// being applied here (e.g. using `lib/pg` instead of `pgx`).
 	opts = append([]Option{regOpt}, opts...)
-	d := newDriver(db.Driver(), newTraceConfig(opts...))
+	cfg := newConfig(opts...)
 
-	var connector driver.Connector
+	// Add traces instrumentation.
+	d := newDriver(db.Driver(), cfg)
+	var conn driver.Connector
 	// Use the instrumented driver to open a connection to the database.
 	if driverCtx, ok := d.(driver.DriverContext); ok {
-		connector, err = driverCtx.OpenConnector(dataSourceName)
+		conn, err = driverCtx.OpenConnector(dataSourceName)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		connector = newDSNConnector(d, dataSourceName)
+		conn = newDSNConnector(d, dataSourceName)
 	}
-	return sql.OpenDB(newCloserConnector(connector, db)), nil
+	closerConn := newCloserConnector(conn, db)
+	db = sql.OpenDB(closerConn)
+
+	// Register asynchronous metrics collection
+	// for the db that is returned by this function.
+	poolName := cfg.ConnectionString // Sanitized dataSourceName.
+	if poolName == "" {
+		poolName = driverName
+	}
+	reg, err := registerMetrics(db, cfg.ResolveMeter(), poolName)
+	if err != nil {
+		// Report problems with metrics rather than failing.
+		otel.Handle(err)
+	}
+	if reg != nil {
+		// Unregister the metrics collection callback when the db is closed.
+		closerConn.SetMetricsRegistration(reg)
+	}
+
+	return db, nil
 }
 
 // dsnConnector wraps a driver to be used as a DriverContext.
@@ -109,15 +144,22 @@ func (t dsnConnector) Driver() driver.Driver {
 
 type closerConnector struct {
 	driver.Connector
-
 	initDB *sql.DB
+	reg    metric.Registration
 }
 
-func newCloserConnector(c driver.Connector, initDB *sql.DB) driver.Connector {
-	return closerConnector{Connector: c, initDB: initDB}
+func newCloserConnector(c driver.Connector, initDB *sql.DB) *closerConnector {
+	return &closerConnector{Connector: c, initDB: initDB}
 }
 
-func (c closerConnector) Close() error {
+func (c *closerConnector) Close() error {
+	if c.reg != nil {
+		if err := c.reg.Unregister(); err != nil {
+			// Report problems with metrics rather than failing.
+			otel.Handle(err)
+		}
+	}
+
 	if err := c.initDB.Close(); err != nil {
 		return err
 	}
@@ -130,5 +172,10 @@ func (c closerConnector) Close() error {
 		// underlying Close is idempotent.
 		return closer.Close()
 	}
+
 	return nil
+}
+
+func (c *closerConnector) SetMetricsRegistration(reg metric.Registration) {
+	c.reg = reg
 }

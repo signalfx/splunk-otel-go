@@ -121,7 +121,7 @@ type ConnSuite struct {
 
 func (s *ConnSuite) SetupTest() {
 	s.MockConn = newMockConn(nil)
-	s.OTelConn = newConn(s.MockConn, newTraceConfig())
+	s.OTelConn = newConn(s.MockConn, newConfig())
 }
 
 func (s *ConnSuite) TestPrepareCallsWrapped() {
@@ -177,7 +177,7 @@ func (s *ConnSuite) TestBeginTxReturnsWrappedError() {
 func (s *ConnSuite) TestBeginTxFallsbackToExec() {
 	s.OTelConn = newConn(struct {
 		driver.Conn
-	}{s.MockConn}, newTraceConfig())
+	}{s.MockConn}, newConfig())
 
 	_, err := s.OTelConn.BeginTx(context.Background(), driver.TxOptions{})
 	s.NoError(err)
@@ -197,7 +197,7 @@ func (s *ConnSuite) TestPingReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestPingReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	s.ErrorIs(s.OTelConn.Ping(context.Background()), driver.ErrSkip)
 	s.Equal(0, s.MockConn.pingN)
 }
@@ -216,7 +216,7 @@ func (s *ConnSuite) TestExecReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestExecReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	_, err := s.OTelConn.Exec("", nil)
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.execN)
@@ -236,7 +236,7 @@ type connExecer interface {
 func (s *ConnSuite) TestExecContextFallsbackToExec() {
 	s.OTelConn = newConn(struct {
 		connExecer
-	}{s.MockConn}, newTraceConfig())
+	}{s.MockConn}, newConfig())
 
 	_, err := s.OTelConn.ExecContext(context.Background(), "", nil)
 	s.NoError(err)
@@ -245,7 +245,7 @@ func (s *ConnSuite) TestExecContextFallsbackToExec() {
 }
 
 func (s *ConnSuite) TestExecContextReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	_, err := s.OTelConn.ExecContext(context.Background(), "", nil)
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.execContextN)
@@ -272,7 +272,7 @@ func (s *ConnSuite) TestQueryReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestQueryReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	_, err := s.OTelConn.Query("", nil) //nolint: gocritic // Test Query not Exec
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryN)
@@ -299,7 +299,7 @@ type connQuery interface {
 func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 	s.OTelConn = newConn(struct {
 		connQuery
-	}{s.MockConn}, newTraceConfig())
+	}{s.MockConn}, newConfig())
 
 	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
@@ -308,7 +308,7 @@ func (s *ConnSuite) TestQueryContextFallsbackToExec() {
 }
 
 func (s *ConnSuite) TestQueryContextReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	_, err := s.OTelConn.QueryContext(context.Background(), "", nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.ErrorIs(err, driver.ErrSkip)
 	s.Equal(0, s.MockConn.queryContextN)
@@ -331,7 +331,7 @@ func (s *ConnSuite) TestPrepareContextReturnsWrappedError() {
 func (s *ConnSuite) TestPrepareContextFallsbackToExec() {
 	s.OTelConn = newConn(struct {
 		driver.Conn
-	}{s.MockConn}, newTraceConfig())
+	}{s.MockConn}, newConfig())
 
 	_, err := s.OTelConn.PrepareContext(context.Background(), "")
 	s.NoError(err)
@@ -351,7 +351,7 @@ func (s *ConnSuite) TestResetSessionReturnsWrappedError() {
 }
 
 func (s *ConnSuite) TestResetSessionReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newTraceConfig())
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
 	s.ErrorIs(s.OTelConn.ResetSession(context.Background()), driver.ErrSkip)
 	s.Equal(0, s.MockConn.resetSessionN)
 }

@@ -17,6 +17,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/signalfx/splunk-otel-go v1.4.0 // indirect
+	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunkgorm provides instrumentation for the github.com/jinzhu/gorm
+// Package splunkgorm provides instrumentation for the [github.com/jinzhu/gorm]
 // package.
 package splunkgorm // import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm"
 

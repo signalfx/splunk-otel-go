@@ -16,6 +16,7 @@ package internal
 
 import (
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
@@ -44,6 +45,18 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 			c.instName,
 			trace.WithInstrumentationVersion(splunkotel.Version()),
 			trace.WithSchemaURL(semconv.SchemaURL),
+		)
+	})
+}
+
+// WithMeterProvider returns an Option that sets the MeterProvider used for
+// a configuration.
+func WithMeterProvider(mp metric.MeterProvider) Option {
+	return OptionFunc(func(c *Config) {
+		c.Meter = mp.Meter(
+			c.instName,
+			metric.WithInstrumentationVersion(splunkotel.Version()),
+			metric.WithSchemaURL(semconv.SchemaURL),
 		)
 	})
 }

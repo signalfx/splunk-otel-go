@@ -18,6 +18,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/signalfx/splunk-otel-go v1.4.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.4.0 // indirect
+	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
