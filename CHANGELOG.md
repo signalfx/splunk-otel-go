@@ -24,7 +24,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Update attributes in
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
-  to align `go.opentelemetry.io/otel/semconv` standard in `v1.17.0`
+  to align `go.opentelemetry.io/otel/semconv` standard in `v1.17.0`. (#1839)
   - Add `semconv.MessagingOperationPublish` in producer span
   - Change to `semconv.MessagingSourceKindTopic` in consumer span
 
