@@ -66,5 +66,5 @@ for this release taken from [CHANGELOG.md](CHANGELOG.md).
 
 Bump versions in the following examples:
 
-- [gorilla-mux](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go/gorilla-mux)
+- [http](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go/http)
 - [lambda](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-lambda/go)
