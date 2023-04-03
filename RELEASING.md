@@ -18,11 +18,13 @@ To bump all (execpt the `/build` module's) dependencies run:
    if necessary.
    Contact @splunk/gdi-docs team if needed.
 
+1. Update the version in [`versions.yaml`](versions.yaml)
+
 1. Run the pre-release step which updates `go.mod` and `version.go` files
    in modules for the new release.
 
     ```sh
-    ./goyek.sh -tag <new tag> prerelease
+    ./goyek.sh prerelease
     ```
 
 1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
@@ -46,7 +48,7 @@ It is critical you make sure the version you push upstream is correct.
 1. Run for the the commit of the merged Pull Request.
 
     ```sh
-    ./goyek.sh -tag <new tag> -commit <commit> -remote <remote> release
+    ./goyek.sh -commit <commit> -remote <remote> release
     ```
 
 ## Release
