@@ -27,9 +27,23 @@ To bump all (execpt the `/build` module's) dependencies run:
     ./goyek.sh prerelease
     ```
 
+1. Checkout to the branch create by `multimod`.
+
+1. Sign the commit created by `multimod`.
+
+    ```sh
+    git commit --amend --no-edit -s
+    ```
+
+1. Update `go.mod` files.
+
+    ```sh
+    ./goyek.sh mod
+    ```
+
 1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
-1. Push the changes to upstream and create a Pull Request on GitHub.
+1. Push the changes and create a Pull Request on GitHub.
 
 ## Tag
 
