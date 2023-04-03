@@ -55,39 +55,6 @@ $(TEST_TARGETS): test
 test tests:
 	${call for-all-modules,$(GO) test -timeout $(TIMEOUT)s $(ARGS) $(PKGS)}
 
-# Pre-release targets
-
-.PHONY: add-tag
-add-tag: # example usage: make add-tag tag=v1.100.1 commit=<hash>
-	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
-	$Q [ "$(commit)" ] || ( echo ">> 'commit' is not set"; exit 1 )
-	@echo "Adding tag $(tag)"
-	$Q git tag -a $(tag) -s -m "Version $(tag)" $(commit)
-	$Q set -e; for dir in $(SUBMODULES); do \
-	  (echo Adding tag "$${dir:2}/$(tag)" && \
-	 	git tag -a "$${dir:2}/$(tag)" -s -m "Version ${dir:2}/$(tag)" $(commit)); \
-	done
-
-.PHONY: delete-tag
-delete-tag: # example usage: make delete-tag tag=v1.100.1
-	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
-	@echo "Deleting tag $(tag)"
-	$Q git tag -d $(tag)
-	$Q set -e; for dir in $(SUBMODULES); do \
-	  (echo Deleting tag "$${dir:2}/$(tag)" && \
-	 	git tag -d "$${dir:2}/$(tag)" ); \
-	done
-
-.PHONY: push-tag
-push-tag: # example usage: make push-tag remote=origin tag=v1.100.1
-	$Q [ "$(remote)" ] || ( echo ">> 'remote' is not set"; exit 1 )
-	$Q [ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
-	@echo "Pushing tag $(tag) to $(remote)"
-	$Q git push $(remote) $(tag)
-	$Q set -e; for dir in $(SUBMODULES); do \
-	  (echo Pushing tag "$${dir:2}/$(tag) to $(remote)" && \
-	 	git push $(remote) "$${dir:2}/$(tag)"); \
-	done
 
 # Other targets
 

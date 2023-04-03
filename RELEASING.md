@@ -18,17 +18,16 @@ To bump all (execpt the `/build` module's) dependencies run:
    if necessary.
    Contact @splunk/gdi-docs team if needed.
 
-2. Run the pre-release script which updates go.mod for submodules to depend on
-   the new release. It creates a branch `pre_release_<new tag>`
-   that will contain all release changes.
+1. Run the pre-release step which updates `go.mod` and `version.go` files
+   in modules for the new release.
 
     ```sh
-    ./pre_release.sh -t <new tag>
+    ./goyek.sh -tag <new tag> prerelease
     ```
 
-3. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
+1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
-4. Push the changes to upstream and create a Pull Request on GitHub.
+1. Push the changes to upstream and create a Pull Request on GitHub.
 
 ## Tag
 
@@ -44,16 +43,10 @@ Failure to do so will leave things in a broken state.
 It is critical you make sure the version you push upstream is correct.
 [Failure to do so will lead to minor emergencies and tough to work around](https://github.com/open-telemetry/opentelemetry-go/issues/331).
 
-1. Run on the main branch and specify the commit for the merged Pull Request.
+1. Run for the the commit of the merged Pull Request.
 
     ```sh
-    make add-tag tag=<new tag> commit=<commit>
-    ```
-
-2. Push tags to the upstream remote (not your fork): `github.com/signalfx/splunk-otel-go.git`.
-
-    ```sh
-    make push-tag tag=<new tag> remote=upstream
+    ./goyek.sh -tag <new tag> -commit <commit> -remote <remote> release
     ```
 
 ## Release
