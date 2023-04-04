@@ -40,16 +40,3 @@ module-sets:
 
 excluded-modules:
   - github.com/signalfx/splunk-otel-go/build
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  

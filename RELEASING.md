@@ -18,6 +18,8 @@ To bump all (execpt the `/build` module's) dependencies run:
    if necessary.
    Contact @splunk/gdi-docs team if needed.
 
+1. Create a new release branch. I.e. `git checkout -b release-X.X.X main`.
+
 1. Update the version in [`versions.yaml`](versions.yaml)
 
 1. Run the pre-release step which updates `go.mod` and `version.go` files
@@ -27,14 +29,7 @@ To bump all (execpt the `/build` module's) dependencies run:
     ./goyek.sh prerelease
     ```
 
-1. Checkout to the branch create by `multimod`.
-
-1. Sign the commit created by `multimod`.
-
-    ```sh
-    git commit --amend --no-edit -s
-    ```
-
+1. Merge the branch created by `multimod` into your release branch.
 1. Update `go.mod` files.
 
     ```sh
