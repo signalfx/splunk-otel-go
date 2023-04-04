@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build tools
-// +build tools
+package main
 
-package tools
-
-// Manage tool dependencies via go.mod.
-//
-// https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
-// https://github.com/golang/go/issues/25922
 import (
-	_ "github.com/client9/misspell/cmd/misspell"
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "github.com/wadey/gocovmerge"
-	_ "go.opentelemetry.io/build-tools/multimod"
+	"github.com/goyek/goyek/v2"
+	"github.com/goyek/x/cmd"
 )
+
+var _ = goyek.Define(goyek.Task{
+	Name:  "prerelease",
+	Usage: "update go.mod and version.go",
+	Action: func(a *goyek.A) {
+		if !cmd.Exec(a, "go install go.opentelemetry.io/build-tools/multimod", cmd.Dir(dirBuild)) {
+			return
+		}
+
+		if !cmd.Exec(a, "multimod verify") {
+			return
+		}
+
+		cmd.Exec(a, "multimod prerelease -m stable-v1")
+	},
+})
