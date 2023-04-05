@@ -25,7 +25,6 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/semconv/v1.17.0/httpconv"
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/transport"
@@ -45,11 +44,17 @@ func NewWrapperFunc(opts ...option.Option) transport.WrapperFunc {
 			rt = http.DefaultTransport
 		}
 
+		o := append([]internal.Option{
+			internal.OptionFunc(func(c *internal.Config) {
+				c.Version = version()
+			}),
+		}, localToInternal(opts)...)
+
 		wrapped := roundTripper{
 			RoundTripper: rt,
 			cfg: internal.NewConfig(
 				instrumentationName,
-				localToInternal(opts)...,
+				o...,
 			),
 		}
 

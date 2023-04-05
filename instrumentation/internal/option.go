@@ -34,15 +34,6 @@ func (o OptionFunc) Apply(c *Config) {
 	o(c)
 }
 
-// WithVersion returns an Option that sets the instrumentwation version
-// used for a configuration.
-// This option is internal and should be always passed before other options.
-func WithVersion(v string) Option {
-	return OptionFunc(func(c *Config) {
-		c.version = v
-	})
-}
-
 // WithTracerProvider returns an Option that sets the TracerProvider used for
 // a configuration.
 func WithTracerProvider(tp trace.TracerProvider) Option {

@@ -33,9 +33,15 @@ type Handler struct {
 
 // WrapHandler creates a new, wrapped DNS handler.
 func WrapHandler(handler dns.Handler, opts ...Option) *Handler {
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
 	return &Handler{
 		Handler: handler,
-		cfg:     internal.NewConfig(instrumentationName, localToInternal(opts)...),
+		cfg:     internal.NewConfig(instrumentationName, o...),
 	}
 }
 

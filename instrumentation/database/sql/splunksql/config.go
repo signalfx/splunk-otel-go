@@ -44,13 +44,15 @@ type config struct {
 
 func newConfig(options ...Option) config {
 	c := config{
-		Config: internal.NewConfig(instrumentationName, internal.OptionFunc(
-			func(c *internal.Config) {
-				c.DefaultStartOpts = []trace.SpanStartOption{
-					// From the specification: span kind MUST always be CLIENT.
-					trace.WithSpanKind(trace.SpanKindClient),
-				}
-			}),
+		Config: internal.NewConfig(instrumentationName,
+			internal.OptionFunc(
+				func(c *internal.Config) {
+					c.Version = version()
+					c.DefaultStartOpts = []trace.SpanStartOption{
+						// From the specification: span kind MUST always be CLIENT.
+						trace.WithSpanKind(trace.SpanKindClient),
+					}
+				}),
 		),
 	}
 

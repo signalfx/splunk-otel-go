@@ -43,7 +43,13 @@ func WrapRoundTripper(rt http.RoundTripper, opts ...Option) http.RoundTripper {
 		rt = http.DefaultTransport
 	}
 
-	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
+	cfg := internal.NewConfig(instrumentationName, o...)
 	cfg.DefaultStartOpts = append([]trace.SpanStartOption{
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(semconv.DBSystemElasticsearch),

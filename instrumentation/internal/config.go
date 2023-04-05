@@ -30,12 +30,14 @@ import (
 type Config struct {
 	// instName is the name of the instrumentation this Config is used for.
 	instName string
-	// version is the version of the instrumentation this Config is used for.
-	version string
+	// Version is the version of the instrumentation this Config is used for.
+	// It has to be set before user-provided options are applied.
+	Version string
 
-	Tracer           trace.Tracer
-	Meter            metric.Meter
-	Propagator       propagation.TextMapPropagator
+	Tracer     trace.Tracer
+	Meter      metric.Meter
+	Propagator propagation.TextMapPropagator
+
 	DefaultStartOpts []trace.SpanStartOption
 }
 
@@ -135,8 +137,8 @@ func (c *Config) WithSpan(ctx context.Context, name string, f func(context.Conte
 // tracer creates a tracer using the passed TracerProvider.
 func (c *Config) tracer(tp trace.TracerProvider) trace.Tracer {
 	opts := []trace.TracerOption{trace.WithSchemaURL(semconv.SchemaURL)}
-	if c.version != "" {
-		opts = append(opts, trace.WithInstrumentationVersion(c.version))
+	if c.Version != "" {
+		opts = append(opts, trace.WithInstrumentationVersion(c.Version))
 	}
 	return tp.Tracer(c.instName, opts...)
 }
@@ -144,8 +146,8 @@ func (c *Config) tracer(tp trace.TracerProvider) trace.Tracer {
 // meter creates a meter using the passed MeterProvider.
 func (c *Config) meter(mp metric.MeterProvider) metric.Meter {
 	opts := []metric.MeterOption{metric.WithSchemaURL(semconv.SchemaURL)}
-	if c.version != "" {
-		opts = append(opts, metric.WithInstrumentationVersion(c.version))
+	if c.Version != "" {
+		opts = append(opts, metric.WithInstrumentationVersion(c.Version))
 	}
 	return mp.Meter(c.instName, opts...)
 }

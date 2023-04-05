@@ -120,7 +120,9 @@ func TestConfigDefaultTracer(t *testing.T) {
 
 func TestConfigTracerWithVersion(t *testing.T) {
 	ver := "1.2.3"
-	c := NewConfig(iName, WithVersion(ver))
+	c := NewConfig(iName, OptionFunc(func(c *Config) {
+		c.Version = ver
+	}))
 	expected := otel.Tracer(
 		iName,
 		trace.WithInstrumentationVersion(ver),
