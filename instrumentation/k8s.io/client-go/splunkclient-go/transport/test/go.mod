@@ -16,7 +16,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
@@ -34,7 +33,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
 	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go => ../../
 )

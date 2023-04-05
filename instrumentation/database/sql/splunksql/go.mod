@@ -15,11 +15,7 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/signalfx/splunk-otel-go => ../../../../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal/
-)
+replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal/
