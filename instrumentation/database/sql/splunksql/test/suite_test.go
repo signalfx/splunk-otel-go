@@ -27,6 +27,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
@@ -307,6 +308,7 @@ func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.Sp
 			}
 		}
 		s.Equalf(traceapi.SpanKindClient, roSpan.SpanKind(), "span %q is not a client span", name)
+		s.Equal(splunkotel.Version(), roSpan.InstrumentationLibrary().Version, "version should match")
 	}
 	s.Equalf(count, n, "wrong number of %s spans", name)
 }
