@@ -33,6 +33,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb"
 )
 
@@ -162,6 +163,7 @@ func assertSpansFunc(parent string, traceID traceapi.TraceID, names ...string) f
 
 			assert.Equal(t, traceapi.SpanKindClient, span.SpanKind())
 			assert.Equal(t, traceID, span.SpanContext().TraceID())
+			assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
 			assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("leveldb"))
 			assert.Contains(t, span.Attributes(), semconv.NetTransportInProc)
 			assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))

@@ -38,6 +38,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 )
@@ -92,6 +93,7 @@ func TestTracerNonTrivial(t *testing.T) {
 	assert.Equal(t, spans[2].SpanContext().TraceID(), spans[1].SpanContext().TraceID())
 
 	s := spans[0]
+	assert.Equal(t, splunkotel.Version(), s.InstrumentationLibrary().Version)
 	assert.Equal(t, "GraphQL validation", s.Name())
 	assert.Equal(t, traceapi.SpanKindInternal, s.SpanKind())
 

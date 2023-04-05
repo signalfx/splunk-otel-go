@@ -39,6 +39,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 	splunkredis "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis"
 )
@@ -225,6 +226,7 @@ func assertSpans(t *testing.T, n int, parentSpanName string, spans []trace.ReadO
 	for _, child := range children {
 		assert.Equal(t, "SET", child.Name())
 		assert.Equal(t, traceapi.SpanKindClient, child.SpanKind())
+		assert.Equal(t, splunkotel.Version(), child.InstrumentationLibrary().Version)
 		assert.Equal(t, parent.SpanContext().TraceID(), child.SpanContext().TraceID())
 
 		attrs := child.Attributes()
