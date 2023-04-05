@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix instrumentation scope version value
+  to properly return the instrumentation library version. (#1990)
+
 ## [1.5.0] - 2023-03-30
 
 ### Added
