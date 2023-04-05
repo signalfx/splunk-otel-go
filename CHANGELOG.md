@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Fix `telemetry.sdk.version` resouce attribute
+- Fix `telemetry.sdk.version` resource attribute
   to properly return the `github.com/signalfx/splunk-otel-go/distro` Go module version.
   (#1990)
 - Fix instrumentation scope version value
