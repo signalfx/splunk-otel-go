@@ -45,7 +45,13 @@ var (
 
 // NewTracer returns a new graphql Tracer backed by OpenTelemetry.
 func NewTracer(opts ...Option) tracer.Tracer {
-	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
+	cfg := internal.NewConfig(instrumentationName, o...)
 	return &otelTracer{cfg: *cfg}
 }
 

@@ -37,9 +37,11 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 func Middleware(options ...Option) func(http.Handler) http.Handler {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
 			c.DefaultStartOpts = append(c.DefaultStartOpts, trace.WithSpanKind(trace.SpanKindServer))
 		}),
 	}, localToInternal(options)...)
+
 	cfg := internal.NewConfig(instrumentationName, o...)
 
 	return func(next http.Handler) http.Handler {

@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/go-chi/chi v1.5.4
+	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi v1.5.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
@@ -16,7 +17,6 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect

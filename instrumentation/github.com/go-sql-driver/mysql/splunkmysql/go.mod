@@ -13,7 +13,6 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
@@ -22,7 +21,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../internal/
 )

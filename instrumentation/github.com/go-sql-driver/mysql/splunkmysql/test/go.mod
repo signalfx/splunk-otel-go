@@ -35,7 +35,6 @@ require (
 	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -52,7 +51,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../..
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/

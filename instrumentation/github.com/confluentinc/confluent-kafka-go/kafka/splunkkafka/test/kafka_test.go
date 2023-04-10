@@ -37,6 +37,7 @@ import (
 	traceapi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/goleak"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 )
 
@@ -305,6 +306,7 @@ func consumeMessage(t *testing.T, tp kafka.TopicPartition, opts ...splunkkafka.O
 func assertProducerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, fmt.Sprintf("%s send", testTopic), span.Name())
 	assert.Equal(t, traceapi.SpanKindProducer, span.SpanKind())
+	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
@@ -318,6 +320,7 @@ func assertProducerSpan(t *testing.T, span trace.ReadOnlySpan) {
 func assertConsumerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, fmt.Sprintf("%s receive", testTopic), span.Name())
 	assert.Equal(t, traceapi.SpanKindConsumer, span.SpanKind())
+	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingSourceKindTopic)

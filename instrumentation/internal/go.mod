@@ -3,7 +3,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/internal
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/metric v0.37.0
@@ -17,5 +16,3 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/signalfx/splunk-otel-go => ../../

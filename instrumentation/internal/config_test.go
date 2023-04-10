@@ -27,8 +27,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
-
-	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 const iName = "github.com/signalfx/splunk-otel-go/instrumentation/internal"
@@ -47,6 +45,8 @@ var mockTracerProvider = func(spanRecorder map[string]*mockSpan) trace.TracerPro
 				t, ok := registry[name]
 				if !ok {
 					t = &fnTracer{
+						name: name,
+						opts: opts,
 						start: func(ctx context.Context, n string, o ...trace.SpanStartOption) (context.Context, trace.Span) {
 							span := &mockSpan{Name: n, StartOpts: o}
 							recordSpan(span)
@@ -71,6 +71,9 @@ func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trac
 }
 
 type fnTracer struct {
+	name string
+	opts []trace.TracerOption
+
 	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
 }
 
@@ -110,7 +113,19 @@ func TestConfigDefaultTracer(t *testing.T) {
 	c := NewConfig(iName)
 	expected := otel.Tracer(
 		iName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
+		trace.WithSchemaURL(semconv.SchemaURL),
+	)
+	assert.Equal(t, expected, c.Tracer)
+}
+
+func TestConfigTracerWithVersion(t *testing.T) {
+	ver := "1.2.3"
+	c := NewConfig(iName, OptionFunc(func(c *Config) {
+		c.Version = ver
+	}))
+	expected := otel.Tracer(
+		iName,
+		trace.WithInstrumentationVersion(ver),
 		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, c.Tracer)
@@ -120,7 +135,6 @@ func TestResolveTracerFromGlobal(t *testing.T) {
 	c := NewConfig(iName)
 	expected := otel.Tracer(
 		iName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
 		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.ResolveTracer(context.Background())
@@ -132,7 +146,6 @@ func TestConfigTracerFromConfig(t *testing.T) {
 	c := NewConfig(iName, WithTracerProvider(mtp))
 	expected := mtp.Tracer(
 		iName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
 		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	got := c.ResolveTracer(context.Background())
@@ -152,7 +165,6 @@ func TestConfigTracerFromContext(t *testing.T) {
 	got := c.ResolveTracer(ctx)
 	expected := trace.NewNoopTracerProvider().Tracer(
 		iName,
-		trace.WithInstrumentationVersion(splunkotel.Version()),
 		trace.WithSchemaURL(semconv.SchemaURL),
 	)
 	assert.Equal(t, expected, got)

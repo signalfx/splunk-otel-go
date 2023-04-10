@@ -36,8 +36,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
-
-	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 var errShutdown = errors.New("SDK shutdown failure")
@@ -132,7 +130,7 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 		resource.WithDetectors(
 			// Add Splunk-specific attributes.
 			resource.StringDetector(semconv.SchemaURL, distroVerAttr, func() (string, error) {
-				return splunkotel.Version(), nil
+				return version(), nil
 			}),
 		),
 		// Add process and Go runtime information.

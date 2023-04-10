@@ -33,11 +33,17 @@ type Client struct {
 
 // WrapClient returns a wraped DNS client.
 func WrapClient(client *dns.Client, opts ...Option) *Client {
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
 	return &Client{
 		Client: client,
 		cfg: internal.NewConfig(
 			instrumentationName,
-			localToInternal(opts)...,
+			o...,
 		),
 	}
 }

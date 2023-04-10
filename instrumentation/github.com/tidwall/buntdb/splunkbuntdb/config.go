@@ -37,6 +37,7 @@ func newConfig(options ...Option) *config {
 	c := config{
 		Config: internal.NewConfig(instrumentationName, internal.OptionFunc(
 			func(c *internal.Config) {
+				c.Version = version()
 				c.DefaultStartOpts = []trace.SpanStartOption{
 					trace.WithAttributes(
 						semconv.DBSystemKey.String("buntdb"),

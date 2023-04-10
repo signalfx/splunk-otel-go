@@ -48,7 +48,13 @@ func Exchange(m *dns.Msg, addr string, opts ...Option) (*dns.Msg, error) {
 // ExchangeContext performs a traced synchronous UDP query, like Exchange. It
 // additionally obeys deadlines from the passed Context.
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Option) (r *dns.Msg, err error) {
-	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
+	cfg := internal.NewConfig(instrumentationName, o...)
 	err = cfg.WithSpan(ctx, name(m), func(c context.Context) error {
 		var sErr error
 		r, sErr = dns.ExchangeContext(c, m, addr)

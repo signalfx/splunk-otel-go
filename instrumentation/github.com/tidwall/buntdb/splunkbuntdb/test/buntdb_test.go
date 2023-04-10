@@ -30,6 +30,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb"
 )
 
@@ -382,6 +383,7 @@ func withTestingDeadline(ctx context.Context, t *testing.T) context.Context {
 
 func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
 	assert.Equal(t, span.SpanKind(), traceapi.SpanKindClient)
+	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
 	assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("buntdb"))
 	assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))
 	assert.Equal(t, span.Name(), name)

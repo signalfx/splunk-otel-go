@@ -56,7 +56,13 @@ func localToInternal(opts []option.Option) []internal.Option {
 // newConn returns a redis.Conn backed by conn that traces all operations it
 // performs with OpenTelemetry.
 func newConn(conn redis.Conn, opts ...option.Option) redis.Conn {
-	cfg := internal.NewConfig(instrumentationName, localToInternal(opts)...)
+	o := append([]internal.Option{
+		internal.OptionFunc(func(c *internal.Config) {
+			c.Version = version()
+		}),
+	}, localToInternal(opts)...)
+
+	cfg := internal.NewConfig(instrumentationName, o...)
 
 	// Remove the functionality the underlying conn does not implement.
 	if _, ok := conn.(redis.ConnWithContext); ok {

@@ -16,7 +16,6 @@ require (
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 // indirect
-	github.com/signalfx/splunk-otel-go v1.5.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.40.0 // indirect
 	go.opentelemetry.io/contrib/propagators/autoprop v0.40.0 // indirect
 	go.opentelemetry.io/contrib/propagators/aws v1.15.0 // indirect
@@ -45,8 +44,6 @@ require (
 	google.golang.org/grpc v1.54.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
-
-replace github.com/signalfx/splunk-otel-go => ../
 
 replace github.com/signalfx/splunk-otel-go/distro => ../distro
 
