@@ -43,7 +43,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/distro"
 )
 
@@ -547,7 +546,7 @@ func assertResource(t *testing.T, attrs []*comm.KeyValue) {
 		Key: "splunk.distro.version",
 		Value: &comm.AnyValue{
 			Value: &comm.AnyValue_StringValue{
-				StringValue: splunkotel.Version(),
+				StringValue: distro.Version(),
 			},
 		},
 	}, "should have proper splunk.distro.version value")

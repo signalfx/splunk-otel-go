@@ -38,7 +38,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	traceapi "go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
 )
 
@@ -110,7 +109,7 @@ func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T,
 		}
 		assert.Equal(t, name, span.Name())
 		assert.Equal(t, traceapi.SpanKindServer, span.SpanKind())
-		assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
+		assert.Equal(t, splunkchi.Version(), span.InstrumentationLibrary().Version)
 
 		status := span.Status()
 		assert.Equal(t, otelCode, status.Code)

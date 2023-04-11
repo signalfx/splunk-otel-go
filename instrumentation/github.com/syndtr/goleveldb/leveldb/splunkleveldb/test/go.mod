@@ -3,7 +3,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/gole
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb v1.5.0
 	github.com/stretchr/testify v1.8.2
 	github.com/syndtr/goleveldb v1.0.0
@@ -25,7 +24,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../../internal/
 )

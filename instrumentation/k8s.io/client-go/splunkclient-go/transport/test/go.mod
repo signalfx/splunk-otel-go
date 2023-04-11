@@ -3,7 +3,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splun
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v1.5.0
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.14.0
@@ -34,7 +33,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
 	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go => ../../
 )

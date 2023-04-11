@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.3
-	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tonglil/buflogr v1.0.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.40.0
@@ -47,5 +46,3 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/signalfx/splunk-otel-go => ../

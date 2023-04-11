@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/metricdata/metricdatatest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
@@ -87,7 +86,7 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			want := metricdata.ScopeMetrics{
 				Scope: instrumentation.Scope{
 					Name:      "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql",
-					Version:   splunkotel.Version(),
+					Version:   splunksql.Version(),
 					SchemaURL: semconv.SchemaURL,
 				},
 				Metrics: []metricdata.Metrics{
