@@ -47,7 +47,7 @@ var (
 func NewTracer(opts ...Option) tracer.Tracer {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = Version()
 		}),
 	}, localToInternal(opts)...)
 

@@ -14,6 +14,7 @@
 
 package splunkdns
 
-func version() string {
+// Version returns the version of splunkdns.
+func Version() string {
 	return "1.5.0"
 }

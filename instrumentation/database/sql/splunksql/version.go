@@ -14,6 +14,7 @@
 
 package splunksql
 
-func version() string {
+// Version returns the version of splunksql.
+func Version() string {
 	return "1.5.0"
 }

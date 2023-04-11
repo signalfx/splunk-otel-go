@@ -50,7 +50,7 @@ func Exchange(m *dns.Msg, addr string, opts ...Option) (*dns.Msg, error) {
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Option) (r *dns.Msg, err error) {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = Version()
 		}),
 	}, localToInternal(opts)...)
 

@@ -32,7 +32,7 @@ const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/
 
 func newConfig(options ...Option) *internal.Config {
 	o := append([]internal.Option{internal.OptionFunc(func(c *internal.Config) {
-		c.Version = version()
+		c.Version = Version()
 		c.DefaultStartOpts = []trace.SpanStartOption{
 			trace.WithAttributes(semconv.MessagingSystemKey.String("kafka")),
 		}

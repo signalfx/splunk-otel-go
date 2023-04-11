@@ -130,7 +130,7 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 		resource.WithDetectors(
 			// Add Splunk-specific attributes.
 			resource.StringDetector(semconv.SchemaURL, distroVerAttr, func() (string, error) {
-				return version(), nil
+				return Version(), nil
 			}),
 		),
 		// Add process and Go runtime information.

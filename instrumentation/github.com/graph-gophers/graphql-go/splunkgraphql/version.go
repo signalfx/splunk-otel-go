@@ -14,6 +14,7 @@
 
 package splunkgraphql
 
-func version() string {
+// Version returns the version of splunkgraphql.
+func Version() string {
 	return "1.5.0"
 }

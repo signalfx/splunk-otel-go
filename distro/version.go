@@ -14,6 +14,7 @@
 
 package distro
 
-func version() string {
+// Version returns the version of distro.
+func Version() string {
 	return "1.5.0"
 }
