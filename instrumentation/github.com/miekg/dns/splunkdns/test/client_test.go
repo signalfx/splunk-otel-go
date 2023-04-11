@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns"
 )
 
@@ -112,7 +111,7 @@ func newFixtures(t *testing.T) (*dns.Server, *tracetest.SpanRecorder, []splunkdn
 func assertClientSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, "DNS QUERY", span.Name())
 	assert.Equal(t, traceapi.SpanKindClient, span.SpanKind())
-	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkdns.Version(), span.InstrumentationLibrary().Version)
 	attrs := span.Attributes()
 	for _, a := range defaultClientAttrs {
 		assert.Contains(t, attrs, a)

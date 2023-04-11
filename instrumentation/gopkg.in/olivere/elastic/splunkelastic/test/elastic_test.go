@@ -41,7 +41,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	apitrace "go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
@@ -335,7 +334,7 @@ func TestSpans(t *testing.T) {
 func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
 	assert.Equal(t, name, span.Name())
 	assert.Equal(t, apitrace.SpanKindClient, span.SpanKind())
-	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkelastic.Version(), span.InstrumentationLibrary().Version)
 	assert.Contains(t, span.Attributes(), semconv.DBSystemElasticsearch)
 	assert.Contains(t, span.Attributes(), attr)
 }

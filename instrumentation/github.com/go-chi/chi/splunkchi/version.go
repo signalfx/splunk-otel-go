@@ -14,6 +14,7 @@
 
 package splunkchi
 
-func version() string {
+// Version returns the version of splunkchi.
+func Version() string {
 	return "1.5.0"
 }

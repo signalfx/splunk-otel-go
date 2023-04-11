@@ -35,7 +35,7 @@ type Handler struct {
 func WrapHandler(handler dns.Handler, opts ...Option) *Handler {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = Version()
 		}),
 	}, localToInternal(opts)...)
 

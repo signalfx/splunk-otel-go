@@ -35,7 +35,7 @@ type Client struct {
 func WrapClient(client *dns.Client, opts ...Option) *Client {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = Version()
 		}),
 	}, localToInternal(opts)...)
 

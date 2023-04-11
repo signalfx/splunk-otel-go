@@ -14,6 +14,7 @@
 
 package splunkleveldb
 
-func version() string {
+// Version returns the version of splunkleveldb.
+func Version() string {
 	return "1.5.0"
 }

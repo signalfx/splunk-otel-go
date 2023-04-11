@@ -45,7 +45,7 @@ func WrapRoundTripper(rt http.RoundTripper, opts ...Option) http.RoundTripper {
 
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = Version()
 		}),
 	}, localToInternal(opts)...)
 

@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/transport"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
+	splunkclientgo "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
 )
 
@@ -46,7 +47,7 @@ func NewWrapperFunc(opts ...option.Option) transport.WrapperFunc {
 
 		o := append([]internal.Option{
 			internal.OptionFunc(func(c *internal.Config) {
-				c.Version = version()
+				c.Version = splunkclientgo.Version()
 			}),
 		}, localToInternal(opts)...)
 

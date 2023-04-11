@@ -3,7 +3,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/bun
 go 1.18
 
 require (
-	github.com/signalfx/splunk-otel-go v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb v1.5.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/buntdb v1.2.10
@@ -31,7 +30,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go => ../../../../../../
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
 )

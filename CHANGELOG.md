@@ -8,6 +8,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add `Version` function to the following Go modules. (#1992)
+  - `github.com/signalfx/splunk-otel-go/distro`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
+
 ### Fixed
 
 - Fix `telemetry.sdk.version` resource attribute

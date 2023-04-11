@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package splunkelastic
+package splunkredigo
 
-// Version returns the version of splunkelastic.
+// Version returns the version of splunkredigo.
 func Version() string {
 	return "1.5.0"
 }

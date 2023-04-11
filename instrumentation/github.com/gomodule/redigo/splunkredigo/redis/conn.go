@@ -27,6 +27,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
+	splunkredigo "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
 )
@@ -58,7 +59,7 @@ func localToInternal(opts []option.Option) []internal.Option {
 func newConn(conn redis.Conn, opts ...option.Option) redis.Conn {
 	o := append([]internal.Option{
 		internal.OptionFunc(func(c *internal.Config) {
-			c.Version = version()
+			c.Version = splunkredigo.Version()
 		}),
 	}, localToInternal(opts)...)
 

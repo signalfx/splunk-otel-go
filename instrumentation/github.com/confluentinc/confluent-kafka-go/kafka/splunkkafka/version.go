@@ -18,6 +18,7 @@
 
 package splunkkafka
 
-func version() string {
+// Version returns the version of splunkkafka.
+func Version() string {
 	return "1.5.0"
 }

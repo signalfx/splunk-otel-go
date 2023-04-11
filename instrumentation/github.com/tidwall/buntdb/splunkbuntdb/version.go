@@ -14,6 +14,7 @@
 
 package splunkbuntdb
 
-func version() string {
+// Version returns the version of splunkbuntdb.
+func Version() string {
 	return "1.5.0"
 }

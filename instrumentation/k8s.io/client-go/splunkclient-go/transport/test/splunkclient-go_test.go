@@ -34,7 +34,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
-	splunkotel "github.com/signalfx/splunk-otel-go"
+	splunkclientgo "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/transport"
 )
@@ -90,7 +90,7 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 	span := sr.Ended()[0]
 	assert.Equal(t, "HTTP GET", span.Name())
 	assert.Equal(t, trace.SpanKindClient, span.SpanKind())
-	assert.Equal(t, splunkotel.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkclientgo.Version(), span.InstrumentationLibrary().Version)
 	assert.Contains(t, span.Attributes(), semconv.HTTPMethodKey.String("GET"))
 	assert.Contains(t, span.Attributes(), semconv.HTTPURLKey.String(url))
 	assert.Contains(t, span.Attributes(), semconv.HTTPSchemeHTTP)

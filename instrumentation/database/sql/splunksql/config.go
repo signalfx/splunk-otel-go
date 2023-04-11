@@ -47,7 +47,7 @@ func newConfig(options ...Option) config {
 		Config: internal.NewConfig(instrumentationName,
 			internal.OptionFunc(
 				func(c *internal.Config) {
-					c.Version = version()
+					c.Version = Version()
 					c.DefaultStartOpts = []trace.SpanStartOption{
 						// From the specification: span kind MUST always be CLIENT.
 						trace.WithSpanKind(trace.SpanKindClient),
