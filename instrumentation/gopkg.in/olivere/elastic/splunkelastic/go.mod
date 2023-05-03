@@ -6,14 +6,14 @@ require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0
 	github.com/stretchr/testify v1.8.2
-	go.opentelemetry.io/otel v1.14.0
-	go.opentelemetry.io/otel/trace v1.14.0
+	go.opentelemetry.io/otel v1.15.1
+	go.opentelemetry.io/otel/trace v1.15.1
 	gopkg.in/olivere/elastic.v3 v3.0.75
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
