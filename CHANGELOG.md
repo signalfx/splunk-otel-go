@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+This upgrades [OpenTelemetry Go to v1.15.1/v0.38.1][otel-v1.15.1] and
+[OpenTelemetry Go Contrib to v1.16.1/v0.41.1/v0.10.1][contrib-v1.16.1].
+
 ### Added
 
 - Add `Version` function to the following Go modules. (#1992)
@@ -30,6 +33,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (#1990)
 - Fix instrumentation scope version value
   to properly return the instrumentation library versions. (#1990)
+
+### Removed
+
+- Drop support for Go 1.18 as `go.opentelemetry.io` did the same in
+  [`v1.15.0`][otel-v1.15.0]. (#2095)
 
 ## [1.5.0] - 2023-03-30
 
@@ -462,6 +470,8 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.15.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.15.1
+[otel-v1.15.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.15.0
 [otel-v1.14.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.14.0
 [otel-v1.13.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.13.0
 [otel-v1.12.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.12.0
@@ -477,6 +487,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.16.1]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.16.1
 [contrib-v1.15.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.15.0
 [contrib-v1.14.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.14.0
 [contrib-v1.13.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.13.0
