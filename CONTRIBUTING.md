@@ -9,7 +9,7 @@ contribution.
 
 In addition to this document, please review our [Code of
 Conduct](CODE_OF_CONDUCT.md). For any code of conduct questions or comments
-please email oss@splunk.com.
+please email <oss@splunk.com>.
 
 ## Reporting Bugs/Feature Requests
 
