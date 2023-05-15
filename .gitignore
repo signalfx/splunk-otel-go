@@ -20,6 +20,10 @@ test-results/
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Go workspace files
+go.work
+go.work.sum
+
 # IDEs
 .idea/
 .vscode/
