@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter v1.5.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.41.1
 	go.opentelemetry.io/otel v1.15.1
 	go.opentelemetry.io/otel/sdk v1.15.1
