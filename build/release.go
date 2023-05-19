@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	flagCommit = flag.String("commit", "", "git commit to be tagged")
-	flagRemote = flag.String("remote", "", "git remote to be used")
+	flagCommit = flag.String("commit", "", "git commit to be tagged (used by: release)")
+	flagRemote = flag.String("remote", "", "git remote to be used (used by: release)")
 )
 
 var _ = goyek.Define(goyek.Task{
