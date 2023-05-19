@@ -33,10 +33,10 @@ var _ = goyek.Define(goyek.Task{
 	Usage: "publish Go modules",
 	Action: func(a *goyek.A) {
 		if *flagCommit == "" {
-			a.Fatal("tag commit is required")
+			a.Fatal("flag commit is required")
 		}
 		if *flagRemote == "" {
-			a.Fatal("tag remote is required")
+			a.Fatal("flag remote is required")
 		}
 
 		if !cmd.Exec(a, "go install go.opentelemetry.io/build-tools/multimod", cmd.Dir(dirBuild)) {

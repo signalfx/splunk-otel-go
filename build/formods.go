@@ -27,6 +27,9 @@ var _ = goyek.Define(goyek.Task{
 	Name:  "formods",
 	Usage: "runs cmd for each Go module",
 	Action: func(a *goyek.A) {
+		if *flagCmd == "" {
+			a.Fatal("flag cmd is required")
+		}
 		ForGoModules(a, func(a *goyek.A) {
 			cmd.Exec(a, *flagCmd)
 		})
