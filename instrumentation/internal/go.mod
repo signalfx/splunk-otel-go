@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/internal
 go 1.18
 
 require (
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	go.opentelemetry.io/otel v1.15.1
 	go.opentelemetry.io/otel/metric v0.38.1
 	go.opentelemetry.io/otel/trace v1.15.1

@@ -39,7 +39,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/charithe/durationcheck v0.0.10 // indirect
 	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
-	github.com/cloudflare/circl v1.1.0 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
 	github.com/daixiang0/gci v0.10.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -162,7 +162,7 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.3 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tdakkota/asciicheck v0.2.0 // indirect
