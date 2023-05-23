@@ -20,7 +20,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
@@ -58,7 +57,7 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 		c.Tracer = c.tracer(otel.GetTracerProvider())
 	}
 	if c.Meter == nil {
-		c.Meter = c.meter(global.MeterProvider())
+		c.Meter = c.meter(otel.GetMeterProvider())
 	}
 
 	if c.Propagator == nil {
