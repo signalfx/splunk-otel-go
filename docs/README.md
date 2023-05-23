@@ -113,7 +113,7 @@ Documentation on how to manually instrument a Go application is available
 Use [`otel.Tracer()`](https://pkg.go.dev/go.opentelemetry.io/otel#Tracer)
 to get a tracer for creating custom spans.
 
-Use [`global.Meter()`](https://pkg.go.dev/go.opentelemetry.io/otel/metric/global#Meter)
+Use [`otel.Meter()`](https://pkg.go.dev/go.opentelemetry.io/otel#Meter)
 to get a meter for creating custom metrics.
 
 ## Migrating
