@@ -31,7 +31,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -197,7 +196,7 @@ func runMetrics(c *config, res *resource.Resource) (shutdownFunc, error) {
 	}
 
 	provider := metric.NewMeterProvider(o...)
-	global.SetMeterProvider(provider)
+	otel.SetMeterProvider(provider)
 
 	// Add runtime metrics instrumentation.
 	if err := runtime.Start(); err != nil {

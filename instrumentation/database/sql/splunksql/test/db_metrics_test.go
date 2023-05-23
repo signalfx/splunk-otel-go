@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
@@ -58,9 +57,9 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			defer func() { assert.NoError(t, meterProvider.Shutdown(ctx)) }()
 
 			// TODO #1976: Remove the code below.
-			prevProvider := global.MeterProvider()
-			global.SetMeterProvider(meterProvider)
-			defer global.SetMeterProvider(prevProvider)
+			prevProvider := otel.GetMeterProvider()
+			otel.SetMeterProvider(meterProvider)
+			defer otel.SetMeterProvider(prevProvider)
 
 			// instrument: register the fake driver
 			driver := newSimpleMockDriver()

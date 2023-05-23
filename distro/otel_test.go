@@ -30,7 +30,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric/global"
 	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	comm "go.opentelemetry.io/proto/otlp/common/v1"
@@ -517,7 +516,7 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	cnt, err := global.MeterProvider().Meter(t.Name()).Int64Counter(metricName)
+	cnt, err := otel.GetMeterProvider().Meter(t.Name()).Int64Counter(metricName)
 	require.NoError(t, err)
 	cnt.Add(ctx, 123)
 
