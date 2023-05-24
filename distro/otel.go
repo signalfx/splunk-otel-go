@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package distro provides functionality to quickly setup the OpenTelemetry Go
-SDK with useful Splunk defaults.
-
-The default configuration sets the default OpenTelemetry SDK to propagate
-traces using a W3C tracecontext and W3C baggage propagator and export all
-spans to a locally running Splunk OpenTelemetry Collector.
-*/
 package distro
 
 import (

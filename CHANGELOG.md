@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+The release enables metrics support by default
+as OpenTelemetry Go metrics API is stable
+([`v1.16.0`]([otel-v1.16.0])).
+
 This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
 [OpenTelemetry Go Contrib to v1.17.0/v0.42.0/v0.11.0][contrib-v1.17.0].
 
@@ -27,6 +31,11 @@ This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
   - `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
 - Add `WithMeterProvider` function in `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
   (#2258)
+
+### Changed
+
+- `OTEL_METRICS_EXPORTER` defaults to `otlp`.
+  Therefore, metrics support are enabled by default.
 
 ### Fixed
 

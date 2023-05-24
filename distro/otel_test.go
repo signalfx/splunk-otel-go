@@ -143,6 +143,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestRunJaegerExporter(t *testing.T) {
+	// Do not use the default metrics exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
+
 	assertBase := func(t *testing.T, req *http.Request) {
 		assert.Equal(t, "application/x-thrift", req.Header.Get("Content-type"))
 	}
@@ -194,6 +197,9 @@ func TestRunJaegerExporter(t *testing.T) {
 }
 
 func TestRunJaegerExporterTLS(t *testing.T) {
+	// Do not use the default metrics exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
+
 	reqCh, hFunc := reqHander()
 	srv := httptest.NewUnstartedServer(hFunc)
 	t.Cleanup(srv.Close)
@@ -210,6 +216,9 @@ func TestRunJaegerExporterTLS(t *testing.T) {
 }
 
 func TestRunJaegerExporterDefault(t *testing.T) {
+	// Do not use the default metrics exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
+
 	reqCh, hFunc := reqHander()
 	srv := httptest.NewUnstartedServer(hFunc)
 	t.Cleanup(srv.Close)
@@ -229,6 +238,9 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 }
 
 func TestRunOTLPTracesExporter(t *testing.T) {
+	// Do not use the default metrics exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
+
 	assertBase := func(t *testing.T, req *spansExportRequest) {
 		require.NotNil(t, req)
 		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
@@ -413,15 +425,47 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 
 func TestRunMetricsExporterDefault(t *testing.T) {
 	// Start collector at default address.
-	// By default the metrics exporter is NONE.
+	// By default the metrics exporter is OTLP.
 	coll := &collector{Endpoint: "localhost:4317"}
 	coll.Start(t)
-	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitMetric(t)
+
+	got := coll.ExportedMetrics()
+	require.NotNil(t, got)
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	assertHasMetric(t, got, metricName)
+}
+
+func TestRunMetricsExporterNone(t *testing.T) {
+	// Start collector at default address.
+	coll := &collector{Endpoint: "localhost:4317"}
+	coll.Start(t)
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
 
 	emitMetric(t)
 
 	got := coll.ExportedMetrics()
 	assert.Nil(t, got)
+}
+
+func TestInvalidMetricsExporter(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	// Explicitly set OTLP exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "invalid value")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitMetric(t)
+
+	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
+	// is invalid.
+	got := coll.ExportedMetrics()
+	require.NotNil(t, got)
+	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	assertHasMetric(t, got, metricName)
 }
 
 func TestRuntimeMetrics(t *testing.T) {
@@ -457,6 +501,10 @@ func TestMetricsResource(t *testing.T) {
 }
 
 func TestNoServiceWarn(t *testing.T) {
+	// Disable exporters.
+	t.Setenv("OTEL_TRACES_EXPORTER", "none")
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
+
 	var buf bytes.Buffer
 
 	sdk, err := distro.Run(distro.WithLogger(buflogr.NewWithBuffer(&buf)))
