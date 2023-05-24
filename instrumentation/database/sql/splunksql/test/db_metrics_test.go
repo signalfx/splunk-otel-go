@@ -21,7 +21,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -57,11 +56,6 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			meterProvider := metric.NewMeterProvider(metric.WithReader(reader))
 			defer func() { assert.NoError(t, meterProvider.Shutdown(ctx)) }()
 
-			// TODO #1976: Remove the code below.
-			prevProvider := otel.GetMeterProvider()
-			otel.SetMeterProvider(meterProvider)
-			defer otel.SetMeterProvider(prevProvider)
-
 			// instrument: register the fake driver
 			driver := newSimpleMockDriver()
 			connCfg := splunksql.ConnectionConfig{
@@ -74,8 +68,7 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			})
 
 			// create 1 used connection
-			// TODO #1976: Add 'splunksql.WithMeterProvider(meterProvider)'
-			db, err := splunksql.Open(tc.driverName, "dataSourceName")
+			db, err := splunksql.Open(tc.driverName, "dataSourceName", splunksql.WithMeterProvider(meterProvider))
 			require.NoError(t, err)
 			defer func() { assert.NoError(t, db.Close()) }()
 			_, err = db.Exec("SELECT 1")

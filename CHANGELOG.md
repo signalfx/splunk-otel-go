@@ -29,6 +29,8 @@ This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
   - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
   - `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
   - `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
+- Add `WithMeterProvider` function in `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  (#2258)
 
 ### Changed
 
