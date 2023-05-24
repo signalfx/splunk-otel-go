@@ -238,7 +238,8 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 }
 
 func TestRunOTLPTracesExporter(t *testing.T) {
-	t.Setenv("OTEL_METRICS_EXPORTER", "none") // do not use the default metrics exporter
+	// Do not use the default metrics exporter.
+	t.Setenv("OTEL_METRICS_EXPORTER", "none")
 
 	assertBase := func(t *testing.T, req *spansExportRequest) {
 		require.NotNil(t, req)
