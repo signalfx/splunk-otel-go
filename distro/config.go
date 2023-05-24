@@ -57,7 +57,7 @@ const (
 const (
 	defaultAccessToken     = ""
 	defaultTraceExporter   = "otlp"
-	defaultMetricsExporter = "none"
+	defaultMetricsExporter = "otlp"
 	defaultLogLevel        = "info"
 
 	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
