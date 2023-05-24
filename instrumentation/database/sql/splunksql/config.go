@@ -24,6 +24,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
@@ -124,12 +125,11 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionConv{iOpt: internal.WithTracerProvider(tp)}
 }
 
-// TODO #1976: Uncomment the code below.
-// // WithMeterProvider returns an Option that sets the MeterProvider used with
-// // this instrumentation library.
-// func WithMeterProvider(mp metric.MeterProvider) Option {
-// 	return optionConv{iOpt: internal.WithMeterProvider(mp)}
-// }
+// WithMeterProvider returns an Option that sets the MeterProvider used with
+// this instrumentation library.
+func WithMeterProvider(mp metric.MeterProvider) Option {
+	return optionConv{iOpt: internal.WithMeterProvider(mp)}
+}
 
 // WithAttributes returns an Option that appends attr to the attributes set
 // for every span created with this instrumentation library.
