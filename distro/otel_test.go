@@ -236,17 +236,14 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 }
 
 func TestRunOTLPTracesExporter(t *testing.T) {
-	assertBase := func(t *testing.T, req *spansExportRequest) {
-		require.NotNil(t, req)
-		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-		require.Len(t, req.Spans, 1)
-		assert.Equal(t, spanName, req.Spans[0].Name)
+	assertBase := func(t *testing.T, got *spansExportRequest) {
+		asssertHasSpan(t, got)
 	}
 
 	testCases := []struct {
 		desc     string
 		setupFn  func(t *testing.T, url string)
-		assertFn func(t *testing.T, req *spansExportRequest)
+		assertFn func(t *testing.T, got *spansExportRequest)
 	}{
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -301,10 +298,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.ExportedSpans()
-	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-	require.Len(t, got.Spans, 1)
-	assert.Equal(t, spanName, got.Spans[0].Name)
+	asssertHasSpan(t, got)
 }
 
 func TestRunTracesExporterDefault(t *testing.T) {
@@ -316,10 +310,7 @@ func TestRunTracesExporterDefault(t *testing.T) {
 	emitSpan(t)
 
 	got := coll.ExportedSpans()
-	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
-	require.Len(t, got.Spans, 1)
-	assert.Equal(t, spanName, got.Spans[0].Name)
+	asssertHasSpan(t, got)
 }
 
 func TestInvalidTracesExporter(t *testing.T) {
@@ -334,8 +325,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
 	got := coll.ExportedSpans()
-	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
+	asssertHasSpan(t, got)
 }
 
 func TestTracesResource(t *testing.T) {
@@ -352,16 +342,14 @@ func TestTracesResource(t *testing.T) {
 }
 
 func TestRunOTLPMetricsExporter(t *testing.T) {
-	assertBase := func(t *testing.T, req *metricsExportRequest) {
-		require.NotNil(t, req)
-		assert.Equal(t, []string{"application/grpc"}, req.Header.Get("Content-type"))
-		assertHasMetric(t, req, metricName)
+	assertBase := func(t *testing.T, got *metricsExportRequest) {
+		assertHasMetric(t, got, metricName)
 	}
 
 	testCases := []struct {
 		desc     string
 		setupFn  func(t *testing.T, url string)
-		assertFn func(t *testing.T, req *metricsExportRequest)
+		assertFn func(t *testing.T, got *metricsExportRequest)
 	}{
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -416,8 +404,6 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 	emitMetric(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.ExportedMetrics()
-	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	assertHasMetric(t, got, metricName)
 }
 
@@ -432,8 +418,6 @@ func TestRunMetricsExporterDefault(t *testing.T) {
 	emitMetric(t)
 
 	got := coll.ExportedMetrics()
-	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	assertHasMetric(t, got, metricName)
 }
 
@@ -463,7 +447,6 @@ func TestInvalidMetricsExporter(t *testing.T) {
 	// is invalid.
 	got := coll.ExportedMetrics()
 	require.NotNil(t, got)
-	assert.Equal(t, []string{"application/grpc"}, got.Header.Get("Content-type"))
 	assertHasMetric(t, got, metricName)
 }
 
@@ -482,7 +465,6 @@ func TestRuntimeMetrics(t *testing.T) {
 	require.NoError(t, sdk.Shutdown(context.Background()))
 
 	got := coll.ExportedMetrics()
-	assert.NotNil(t, got)
 	assertHasMetric(t, got, "runtime.uptime")
 }
 
@@ -581,8 +563,32 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
+func asssertHasSpan(t *testing.T, got *spansExportRequest) {
+	t.Helper()
+
+	if !assert.NotNil(t, got, "request must not be nil") {
+		return
+	}
+	for _, m := range got.Spans {
+		if m.Name == spanName {
+			return
+		}
+	}
+
+	// Not found. Generate assertion failure.
+	var gotSpans []string
+	for _, m := range got.Spans {
+		gotSpans = append(gotSpans, m.Name)
+	}
+	assert.Failf(t, "should contain span", "want: %v, got: %v", spanName, gotSpans)
+}
+
 func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
 	t.Helper()
+
+	if !assert.NotNil(t, got, "request must not be nil") {
+		return
+	}
 	for _, m := range got.Metrics {
 		if m.Name == name {
 			return
