@@ -557,7 +557,9 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 func asssertHasSpan(t *testing.T, got *spansExportRequest) {
 	t.Helper()
 
-	require.NotNil(t, got, "request must not be nil")
+	if !assert.NotNil(t, got, "request must not be nil") {
+		return
+	}
 	for _, m := range got.Spans {
 		if m.Name == spanName {
 			return
@@ -575,7 +577,9 @@ func asssertHasSpan(t *testing.T, got *spansExportRequest) {
 func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
 	t.Helper()
 
-	require.NotNil(t, got, "request must not be nil")
+	if !assert.NotNil(t, got, "request must not be nil") {
+		return
+	}
 	for _, m := range got.Metrics {
 		if m.Name == name {
 			return
