@@ -30,6 +30,7 @@ To bump all (execpt the `/build` module's) dependencies run:
     ```
 
 1. Merge the branch created by `multimod` into your release branch.
+
 1. Update `go.mod` files.
 
     ```sh

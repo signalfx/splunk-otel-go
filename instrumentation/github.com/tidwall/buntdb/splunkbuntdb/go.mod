@@ -1,9 +1,9 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb
 
-go 1.18
+go 1.19
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.5.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.6.0
 	github.com/stretchr/testify v1.8.3
 	github.com/tidwall/buntdb v1.3.0
 	go.opentelemetry.io/otel v1.16.0

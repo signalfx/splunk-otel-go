@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.6.0] - 2023-05-25
+
 The release enables metrics support by default
 as OpenTelemetry Go metrics API is stable
 ([`v1.16.0`]([otel-v1.16.0])).
@@ -35,7 +37,7 @@ This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
 ### Changed
 
 - `OTEL_METRICS_EXPORTER` defaults to `otlp`.
-  Therefore, metrics support are enabled by default.
+  Therefore, metrics support are enabled by default. (#2259)
 
 ### Fixed
 
@@ -464,7 +466,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.6.0
 [1.5.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.5.0
 [1.4.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.4.0
 [1.3.1]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.3.1
