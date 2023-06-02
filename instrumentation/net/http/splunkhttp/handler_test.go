@@ -53,6 +53,6 @@ func responseForHandler() *http.Response {
 	handler = otelhttp.NewHandler(handler, "server", otelhttp.WithTracerProvider(trace.NewTracerProvider()))
 
 	w := httptest.NewRecorder()
-	handler.ServeHTTP(w, httptest.NewRequest("", "/", nil))
+	handler.ServeHTTP(w, httptest.NewRequest("", "/", http.NoBody))
 	return w.Result()
 }
