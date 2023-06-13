@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- Add a new package called splunkkafkav2 to the instrumentation package of confluent-kafka-go v2.
+
 ## [1.6.0] - 2023-05-25
 
 The release enables metrics support by default
