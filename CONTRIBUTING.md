@@ -87,11 +87,11 @@ any 'help wanted' issues is a great place to start.
 
 ## Licensing
 
-See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to
+See the [LICENSE](LICENSE) file for our repository's licensing. We will ask you to
 confirm the licensing of your contribution.
 
-We may ask you to sign a [Contributor License Agreement
-(CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger
-changes.
+### Contributor License Agreement
+
+Before contributing, you must sign the [Splunk Contributor License Agreement (CLA)](https://www.splunk.com/en_us/form/contributions.html).
 
 [report security issues here]: https://www.splunk.com/en_us/product-security/report.html
