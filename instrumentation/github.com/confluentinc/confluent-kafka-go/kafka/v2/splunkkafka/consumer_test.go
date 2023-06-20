@@ -148,6 +148,7 @@ func TestConsumerSpan(t *testing.T) {
 		}
 		// Test that context is propagated.
 		prop.Inject(ctx, NewMessageCarrier(msg))
+		//nolint: staticcheck // Ensure backwards support of deprecated API.
 		c.Consumer.Events() <- msg
 		got := (<-c.Events()).(*kafka.Message)
 		assert.Equal(t, []byte(k), got.Key)
@@ -193,6 +194,7 @@ func TestConsumerConcurrentConsuming(t *testing.T) {
 
 	// Seed message to the events channel.
 	wg.Add(1)
+	//nolint: staticcheck // Ensure backwards support of deprecated API.
 	go func() {
 		defer wg.Done()
 		c.Consumer.Events() <- &kafka.Message{

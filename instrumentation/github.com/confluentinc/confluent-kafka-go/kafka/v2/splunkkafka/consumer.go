@@ -105,7 +105,7 @@ func wrapConsumer(c *kafka.Consumer, cfg *internal.Config) *Consumer {
 		// the unsafe.Pointer is set to the correct type.
 		activeSpan: unsafe.Pointer(&consumerSpan{}),
 	}
-	wrapped.events = wrapped.traceEventsChannel(c.Events())
+	wrapped.events = wrapped.traceEventsChannel(c.Events()) //nolint: staticcheck // Ensure backwards support of deprecated API.
 	return wrapped
 }
 

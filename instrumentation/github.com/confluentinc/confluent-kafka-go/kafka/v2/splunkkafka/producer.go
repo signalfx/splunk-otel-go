@@ -67,7 +67,7 @@ func WrapProducer(p *kafka.Producer, opts ...Option) *Producer {
 		cfg:      cfg,
 		stop:     make(chan struct{}),
 	}
-	wrapped.produceChannel = wrapped.traceProduceChannel(p.ProduceChannel())
+	wrapped.produceChannel = wrapped.traceProduceChannel(p.ProduceChannel()) //nolint: staticcheck // Ensure backwards support of deprecated API.
 	return wrapped
 }
 
