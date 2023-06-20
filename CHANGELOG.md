@@ -10,7 +10,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Add the `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka` instrumentation for the `github.com/confluentinc/confluent-kafka-go/kafka/v2` package. (#2301)
+- Add the `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka`
+  instrumentation for the `github.com/confluentinc/confluent-kafka-go/kafka/v2`
+  package. (#2301)
 
 ## [1.6.0] - 2023-05-25
 
