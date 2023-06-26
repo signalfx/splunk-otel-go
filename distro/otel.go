@@ -161,13 +161,7 @@ func runTraces(c *config, res *resource.Resource) (shutdownFunc, error) {
 	traceProvider := trace.NewTracerProvider(o...)
 	otel.SetTracerProvider(traceProvider)
 
-	shutdownFn := func(ctx context.Context) error {
-		if err := traceProvider.Shutdown(ctx); err != nil {
-			return err
-		}
-		return exp.Shutdown(ctx)
-	}
-	return shutdownFn, nil
+	return traceProvider.Shutdown, nil
 }
 
 func runMetrics(c *config, res *resource.Resource) (shutdownFunc, error) {
