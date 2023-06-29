@@ -1,7 +1,7 @@
 # Splunk instrumentation for `github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka`
 
 This instrumentation is for the
-[github.com/confluentinc/confluent-kafka-go/kafka](https://github.com/confluentinc/confluent-kafka-go)
+[github.com/confluentinc/confluent-kafka-go/v2/kafka](https://pkg.go.dev/github.com/confluentinc/confluent-kafka-go/v2/kafka)
 package.
 
 ## Compatibility
@@ -11,9 +11,7 @@ The Producer will end spans when a delivery report is returned. Setting
 result in an build up of un-ended spans. If delivery reports are disabled, an
 un-instrumented Producer should be used instead.
 
-This instrumentation was built to support
-[v2.1.1](https://github.com/confluentinc/confluent-kafka-go/releases/tag/v2.1.1)
-of github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka. Similar to the
+Similar to the
 instrumented package, librdkafka 2.0.0+ is required. This means you will need
 to use an environment that supports the [pre-built
 binaries](https://github.com/confluentinc/confluent-kafka-go#librdkafka), or
