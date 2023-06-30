@@ -1,11 +1,11 @@
-module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka/test
+module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka/test
 
 go 1.19
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.1.1
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka v1.6.0
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka v1.6.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
@@ -52,6 +52,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka => ../
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka => ../
 	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../../../internal/
 )

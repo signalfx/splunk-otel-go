@@ -37,7 +37,7 @@ import (
 	traceapi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/goleak"
 
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka"
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka"
 )
 
 var (

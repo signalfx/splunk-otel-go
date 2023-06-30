@@ -28,7 +28,7 @@ import (
 )
 
 // instrumentationName is the instrumentation library identifier for a Tracer.
-const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/v2/splunkkafka"
+const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka"
 
 func newConfig(options ...Option) *internal.Config {
 	o := append([]internal.Option{internal.OptionFunc(func(c *internal.Config) {
