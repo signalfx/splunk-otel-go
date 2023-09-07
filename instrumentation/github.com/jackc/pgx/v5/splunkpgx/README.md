@@ -13,4 +13,4 @@ This package is design to be a drop-in replacement for the existing use of the
 The blank identified import of `github.com/jackc/pgx/v5/stdlib` can be replaced
 with this package, and the standard library `sql.Open` function can be replaced
 with the equivalent `Open` from `splunksql`. An example can be found
-[here](./example_test.go).
+[here](example_test.go).

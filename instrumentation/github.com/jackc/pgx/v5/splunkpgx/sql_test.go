@@ -15,12 +15,12 @@
 package splunkpgx_test
 
 import (
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/pgx/splunkpgx"
 )
 
 func TestDSNParser(t *testing.T) {

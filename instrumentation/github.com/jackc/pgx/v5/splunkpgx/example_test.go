@@ -22,9 +22,6 @@ import (
 	"strings"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-
-	// Make sure to import this so the instrumented driver is registered.
-	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/pgx/splunkpgx"
 )
 
 type server struct {
