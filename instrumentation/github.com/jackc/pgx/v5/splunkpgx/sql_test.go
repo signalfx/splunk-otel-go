@@ -15,8 +15,9 @@
 package splunkpgx_test
 
 import (
-	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx"
 	"testing"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx"
 
 	"github.com/stretchr/testify/assert"
 
