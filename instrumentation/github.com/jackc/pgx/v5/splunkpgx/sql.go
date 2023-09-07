@@ -22,7 +22,7 @@
 //
 //	import (
 //		"database/sql"
-//		_ "github.com/jackc/pgx/v4/stdlib"
+//		_ "github.com/jackc/pgx/v5/stdlib"
 //	)
 //	// ...
 //	db, err := sql.Open("pgx", "postgres://localhost:5432/dbname")
@@ -31,7 +31,7 @@
 // Update to this.
 //
 //	import (
-//		_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx"
+//		_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx"
 //		"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 //	)
 //	// ...
