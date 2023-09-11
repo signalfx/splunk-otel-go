@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add the `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx`
+  instrumentation for the `github.com/jackc/pgx/v5` package. (#2406)
+
 ## [1.7.0] - 2023-07-17
 
 This release is built on top of [OpenTelemetry Go v1.16.0/v0.39.0][otel-v1.16.0]
