@@ -555,7 +555,6 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-
 	cnt, err := otel.GetMeterProvider().Meter(t.Name()).Int64Counter(metricName)
 	require.NoError(t, err)
 	cnt.Add(ctx, 123)
