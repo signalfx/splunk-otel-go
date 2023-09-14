@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+This upgrades [OpenTelemetry Go to v1.18.0/v0.41.0/v0.0.6][otel-v1.18.0] and
+[OpenTelemetry Go Contrib to v1.19.0/v0.44.0/v0.13.0][contrib-v1.19.0].
+
 ### Added
 
 - Add the `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx`
@@ -501,6 +504,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.18.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.18.0
 [otel-v1.16.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.16.0
 [otel-v1.15.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.15.0
 [otel-v1.14.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.14.0
@@ -518,6 +522,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.19.0
 [contrib-v1.17.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.17.0
 [contrib-v1.15.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.15.0
 [contrib-v1.14.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.14.0

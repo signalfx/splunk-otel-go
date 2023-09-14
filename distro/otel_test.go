@@ -48,7 +48,7 @@ import (
 
 const (
 	spanName   = "test span"
-	metricName = "test instrument"
+	metricName = "test_instrument"
 	token      = "secret token"
 
 	testCert = `
