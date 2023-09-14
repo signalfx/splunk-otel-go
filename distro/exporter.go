@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/go-logr/logr"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated. We should consider removing its support as it is deprecated in GDI spec as well.
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/metric"
