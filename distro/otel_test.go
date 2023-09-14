@@ -48,7 +48,7 @@ import (
 
 const (
 	spanName   = "test span"
-	metricName = "test instrument"
+	metricName = "test_instrument"
 	token      = "secret token"
 
 	testCert = `
@@ -555,6 +555,7 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
+
 	cnt, err := otel.GetMeterProvider().Meter(t.Name()).Int64Counter(metricName)
 	require.NoError(t, err)
 	cnt.Add(ctx, 123)
