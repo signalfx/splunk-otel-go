@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/test
 
-go 1.19
+go 1.20
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.8.0

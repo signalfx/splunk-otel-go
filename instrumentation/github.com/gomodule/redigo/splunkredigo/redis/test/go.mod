@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis/test
 
-go 1.19
+go 1.20
 
 require (
 	github.com/gomodule/redigo v1.8.9
