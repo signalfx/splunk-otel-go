@@ -27,6 +27,6 @@ var crosslink = goyek.Define(goyek.Task{
 			return
 		}
 
-		cmd.Exec(a, "crosslink --overwrite")
+		cmd.Exec(a, "crosslink --prune")
 	},
 })
