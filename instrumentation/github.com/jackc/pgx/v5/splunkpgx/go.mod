@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx
 
-go 1.19
+go 1.20
 
 require (
 	github.com/jackc/pgx/v5 v5.4.3

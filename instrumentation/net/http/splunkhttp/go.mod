@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp
 
-go 1.19
+go 1.20
 
 require (
 	github.com/stretchr/testify v1.8.4
