@@ -18,4 +18,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal/
+replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal

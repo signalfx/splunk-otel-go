@@ -31,5 +31,5 @@ require (
 
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal
 )

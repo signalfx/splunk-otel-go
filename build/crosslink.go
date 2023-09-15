@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build tools
-// +build tools
+package main
 
-package tools
-
-// Manage tool dependencies via go.mod.
-//
-// https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
-// https://github.com/golang/go/issues/25922
 import (
-	_ "github.com/client9/misspell/cmd/misspell"
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "github.com/wadey/gocovmerge"
-	_ "go.opentelemetry.io/build-tools/crosslink"
-	_ "go.opentelemetry.io/build-tools/multimod"
+	"github.com/goyek/goyek/v2"
+	"github.com/goyek/x/cmd"
 )
+
+var crosslink = goyek.Define(goyek.Task{
+	Name:  "crosslink",
+	Usage: "crosslink",
+	Action: func(a *goyek.A) {
+		if !cmd.Exec(a, "go install go.opentelemetry.io/build-tools/crosslink", cmd.Dir(dirBuild)) {
+			return
+		}
+
+		cmd.Exec(a, "crosslink --prune")
+	},
+})

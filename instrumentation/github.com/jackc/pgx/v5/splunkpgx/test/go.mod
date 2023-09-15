@@ -57,5 +57,5 @@ require (
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../../internal
 )

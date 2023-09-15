@@ -33,6 +33,6 @@ require (
 )
 
 replace (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
-	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go => ../../
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal
+	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go => ../..
 )
