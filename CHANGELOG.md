@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Removed
 
 - Drop support for Go 1.19 as `go.opentelemetry.io/otel` did the same in
-  [v1.18.0][otel-v1.18.0]. (#????)
+  [v1.18.0][otel-v1.18.0]. (#2492)
 
 ## [1.8.0] - 2023-09-14
 
