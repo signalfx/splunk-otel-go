@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Removed
+
+- Drop support for Go 1.19 as `go.opentelemetry.io/otel` did the same in
+  [v1.18.0][otel-v1.18.0]. (#????)
+
 ## [1.8.0] - 2023-09-14
 
 This upgrades [OpenTelemetry Go to v1.18.0/v0.41.0/v0.0.6][otel-v1.18.0] and
@@ -70,7 +75,7 @@ This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
 
 ### Removed
 
-- Drop support for Go 1.18 as `go.opentelemetry.io` did the same in
+- Drop support for Go 1.18 as `go.opentelemetry.io/otel` did the same in
   [`v1.15.0`][otel-v1.15.0]. (#2095)
 
 ## [1.5.0] - 2023-03-30
@@ -179,7 +184,7 @@ This upgrades [OpenTelemetry Go to v1.11.2/v0.34.0][otel-v1.11.2] and
 
 ### Removed
 
-- Drop support for Go 1.17 as `go.opentelemetry.io` did the same in
+- Drop support for Go 1.17 as `go.opentelemetry.io/otel` did the same in
   [`v1.11.0`][otel-v1.11.0]. (#1570)
 
 ## [1.1.0] - 2022-07-14
@@ -197,7 +202,7 @@ This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
 
 ### Removed
 
-- Drop support for Go 1.16 as `go.opentelemetry.io` did the same in
+- Drop support for Go 1.16 as `go.opentelemetry.io/otel` did the same in
   [`v1.7.0`][otel-v1.7.0]. (#1172)
 
 ## [1.0.0] - 2022-06-09
@@ -432,7 +437,7 @@ packages from [`v0.20.0`][otel-v0.20.0] to [`v1.0.0-RC1`][otel-v1.0.0-RC1] and
 
 ### Remove
 
-- Drop support for Go 1.14 as [`go.opentelemetry.io@v1.0.0-RC1`](https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC1)
+- Drop support for Go 1.14 as [`go.opentelemetry.io/otel`][otel-v1.0.0-RC1]
   did the same.
 
 ## [0.3.0] - 2021-05-18
