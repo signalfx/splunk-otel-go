@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/jackc/pgx/v5 v5.4.3
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.8.0
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.8.1
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -17,7 +17,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.8.0 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.8.1 // indirect
 	go.opentelemetry.io/otel v1.18.0 // indirect
 	go.opentelemetry.io/otel/metric v1.18.0 // indirect
 	go.opentelemetry.io/otel/trace v1.18.0 // indirect
