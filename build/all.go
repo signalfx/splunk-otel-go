@@ -20,6 +20,7 @@ var all = goyek.Define(goyek.Task{
 	Name:  "all",
 	Usage: "build pipeline",
 	Deps: goyek.Deps{
+		crosslink,
 		mod,
 		spell,
 		mdlint,
