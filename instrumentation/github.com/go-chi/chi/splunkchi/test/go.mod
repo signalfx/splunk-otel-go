@@ -24,5 +24,5 @@ require (
 
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal
 )

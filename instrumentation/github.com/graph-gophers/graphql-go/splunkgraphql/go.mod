@@ -15,4 +15,4 @@ require (
 	go.opentelemetry.io/otel/metric v1.18.0 // indirect
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../internal/
+replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../internal

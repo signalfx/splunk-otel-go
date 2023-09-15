@@ -5,7 +5,7 @@ go 1.19
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal
 )
 
 require (

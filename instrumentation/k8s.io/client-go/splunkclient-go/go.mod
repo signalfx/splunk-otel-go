@@ -53,4 +53,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal/
+replace github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../internal

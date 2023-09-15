@@ -45,5 +45,5 @@ require (
 
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic => ../
-	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal/
+	github.com/signalfx/splunk-otel-go/instrumentation/internal => ../../../../../internal
 )
