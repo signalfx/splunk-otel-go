@@ -503,7 +503,7 @@ an impedance mismatch with this duplicate batching.
   additional Splunk specific instrumentation for `net/http`.
 
 [Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.9.0...HEAD
-[1.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.8.1
+[1.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.9.0
 [1.8.1]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.8.1
 [1.8.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.8.0
 [1.7.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.7.0
