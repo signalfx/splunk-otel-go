@@ -44,11 +44,6 @@ var (
 	registry   = make(map[string]InstrumentationConfig)
 )
 
-
-func OpenDB(c driver.Connector, cfg InstrumentationConfig) *sql.DB {
-	c.
-}
-
 // Register makes the InstrumentationConfig for the setup of a database
 // driverwith the provided name available. If Register is called twice for the
 // same name it panics.
