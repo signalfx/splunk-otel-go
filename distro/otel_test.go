@@ -399,7 +399,7 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
-	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint) 
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
 
 	emitMetric(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
