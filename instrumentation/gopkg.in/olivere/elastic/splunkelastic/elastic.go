@@ -106,13 +106,13 @@ func name(r *http.Request) string {
 	tokenized := tokenize(path)
 	if tokenized == "" {
 		// Unrecognized Elasticsearch path, default to HTTP semantics.
-		return "HTTP " + r.Method
+		return "HTTP " + r.Method //nolint:goconst // Ignore.
 	}
 
 	op, ok := operations[url{method: r.Method, path: tokenized}]
 	if !ok {
 		// Unrecognized Elasticsearch operation, default to HTTP semantics.
-		return "HTTP " + r.Method + " " + tokenized //nolint:goconst // Ignore.
+		return "HTTP " + r.Method + " " + tokenized
 	}
 
 	if strings.HasPrefix(tokenized, "/{index}") {

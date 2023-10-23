@@ -248,7 +248,7 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
 			setupFn: func(t *testing.T, url string) {
-				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url) //nolint:goconst // Ignore.
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
 			},
 		},
@@ -293,7 +293,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
 	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
-	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint) //nolint:goconst // Ignore.
 
 	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
@@ -399,7 +399,7 @@ func TestRunOTLPMetricsExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
-	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint) 
 
 	emitMetric(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
