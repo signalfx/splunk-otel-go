@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/distro
 go 1.20
 
 require (
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.3.0
 	github.com/go-logr/zapr v1.2.4
 	github.com/stretchr/testify v1.8.4
 	github.com/tonglil/buflogr v1.0.1
