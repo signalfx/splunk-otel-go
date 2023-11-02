@@ -6,7 +6,7 @@ require (
 	github.com/signalfx/splunk-otel-go/distro v1.9.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.9.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0
-	golang.org/x/sync v0.3.0
+	golang.org/x/sync v0.4.0
 )
 
 require (
