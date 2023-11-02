@@ -11,8 +11,8 @@ processors:
 
 exporters:
   # traces exporters
-  logging/traces:
-    # logLevel: debug
+  debug/traces:
+    # verbosity: detailed
   otlp:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
@@ -21,8 +21,8 @@ exporters:
     access_token: "${SPLUNK_ACCESS_TOKEN}"
     endpoint: "https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace"
   # metrics exporters
-  logging/metrics:
-    # logLevel: debug
+  debug/metrics:
+    # verbosity: detailed
   prometheus:
     endpoint: "0.0.0.0:8889"
   signalfx:
@@ -42,7 +42,7 @@ service:
         - jaeger
       processors: [batch]
       exporters:
-        - logging/traces
+        - debug/traces
         - otlp
         - sapm
     metrics:
@@ -50,6 +50,6 @@ service:
         - otlp
       processors: [batch]
       exporters:
-        - logging/metrics 
+        - debug/metrics 
         - prometheus
         - signalfx
