@@ -21,8 +21,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -35,12 +37,15 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
-func main() {
-	exitCode := 0
-	defer func() {
-		os.Exit(exitCode)
-	}()
+const address = "localhost:8080"
 
+func main() {
+	if err := run(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func run() (err error) {
 	// handle CTRL+C gracefully
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
@@ -48,13 +53,10 @@ func main() {
 	// initialize Splunk OTel distro
 	sdk, err := distro.Run()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer func() {
-		if err := sdk.Shutdown(context.Background()); err != nil {
-			log.Println(err)
-			exitCode = 1
-		}
+		err = errors.Join(err, sdk.Shutdown(context.Background()))
 	}()
 
 	// instrument http.Handler
@@ -62,37 +64,27 @@ func main() {
 	handler = splunkhttp.NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "handle")
 
+	l, err := net.Listen("tcp", address)
+	if err != nil {
+		return err
+	}
+
 	srv := &http.Server{
-		Addr:              ":8080",
 		Handler:           handler,
 		WriteTimeout:      time.Second,
 		ReadTimeout:       time.Second,
 		ReadHeaderTimeout: time.Second,
 	}
-	errCh := make(chan error, 1)
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			errCh <- err
-		} else {
-			errCh <- nil
-		}
+		srv.Serve(l)
 	}()
 
 	// instrument http.Client
 	client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-
 	call(ctx, client)
 
-	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Println(err)
-		exitCode = 1
-		return
-	}
-	if err := <-errCh; err != nil {
-		log.Println(err)
-		exitCode = 1
-		return
-	}
+	// When Shutdown is called, Serve immediately returns ErrServerClosed.
+	return srv.Shutdown(context.Background())
 }
 
 func handle(w http.ResponseWriter, req *http.Request) {
@@ -106,7 +98,7 @@ func handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func call(ctx context.Context, client *http.Client) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:8080/hello", http.NoBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+address, http.NoBody)
 	if err != nil {
 		panic(err)
 	}
