@@ -35,6 +35,7 @@ import (
 
 	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
+	"golang.org/x/sync/errgroup"
 )
 
 const address = "localhost:8080"
@@ -68,23 +69,33 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-
 	srv := &http.Server{
 		Handler:           handler,
 		WriteTimeout:      time.Second,
 		ReadTimeout:       time.Second,
 		ReadHeaderTimeout: time.Second,
 	}
-	go func() {
-		srv.Serve(l)
-	}()
 
-	// instrument http.Client
-	client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	call(ctx, client)
+	g := &errgroup.Group{}
 
-	// When Shutdown is called, Serve immediately returns ErrServerClosed.
-	return srv.Shutdown(context.Background())
+	g.Go(func() error {
+		err := srv.Serve(l) // Closing via srv.Shutdown.
+		if err == http.ErrServerClosed {
+			return nil
+		}
+		return err // Error while serving.
+	})
+
+	g.Go(func() error {
+		// instrument http.Client
+		client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+		call(ctx, client)
+
+		// When Shutdown is called, Serve immediately returns ErrServerClosed.
+		return srv.Shutdown(context.Background())
+	})
+
+	return g.Wait()
 }
 
 func handle(w http.ResponseWriter, req *http.Request) {
