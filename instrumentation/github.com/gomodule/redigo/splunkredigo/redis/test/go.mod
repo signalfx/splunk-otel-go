@@ -24,7 +24,7 @@ require (
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
-	github.com/lib/pq v1.10.4 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.1.10 // indirect
