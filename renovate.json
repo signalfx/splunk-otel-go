@@ -7,5 +7,12 @@
   "separateMajorMinor": true,
   "postUpdateOptions" : [
     "gomodTidy"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": true
+    }
   ]
 }
