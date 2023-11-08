@@ -3,7 +3,9 @@
   "extends": [
     "config:base"
   ],
-  "ignorePaths": [],
+  "ignorePaths": [
+    "build/**"
+  ],
   "separateMajorMinor": true,
   "postUpdateOptions" : [
     "gomodTidy"
