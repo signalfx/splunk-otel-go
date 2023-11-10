@@ -166,7 +166,8 @@ func TestConfigTracerFromContext(t *testing.T) {
 	// passed context to the tracer method.
 	c := NewConfig(iName)
 	got := c.ResolveTracer(ctx)
-	expected := noop.NewTracerProvider().Tracer(
+	//nolint:staticcheck // The noop span returned by SDK has a trace.noopTracer.
+	expected := trace.NewNoopTracerProvider().Tracer(
 		iName,
 		trace.WithSchemaURL(semconv.SchemaURL),
 	)
