@@ -31,6 +31,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 const grpID = "test group ID"
@@ -38,6 +39,7 @@ const grpID = "test group ID"
 var testTopic = "gotest"
 
 type fnTracerProvider struct {
+	noop.TracerProvider
 	tracer func(string, ...trace.TracerOption) trace.Tracer
 }
 
@@ -46,6 +48,7 @@ func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trac
 }
 
 type fnTracer struct {
+	noop.Tracer
 	start func(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
 }
 
@@ -105,7 +108,7 @@ func (s spanRecorder) start(ctx context.Context, name string, opts ...trace.Span
 		SpanConfig:  trace.NewSpanStartConfig(opts...),
 	})
 	s[name] = existing
-	return trace.NewNoopTracerProvider().Tracer("").Start(ctx, name, opts...)
+	return noop.NewTracerProvider().Tracer("").Start(ctx, name, opts...)
 }
 
 func (s spanRecorder) get(name string) []spanRecord {
