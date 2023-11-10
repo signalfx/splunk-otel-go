@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 const iName = "github.com/signalfx/splunk-otel-go/instrumentation/internal"
@@ -63,6 +64,7 @@ var mockTracerProvider = func(spanRecorder map[string]*mockSpan) trace.TracerPro
 }
 
 type fnTracerProvider struct {
+	noop.TracerProvider
 	tracer func(string, ...trace.TracerOption) trace.Tracer
 }
 
@@ -71,6 +73,7 @@ func (fn *fnTracerProvider) Tracer(name string, opts ...trace.TracerOption) trac
 }
 
 type fnTracer struct {
+	noop.Tracer
 	name string
 	opts []trace.TracerOption
 
@@ -163,6 +166,7 @@ func TestConfigTracerFromContext(t *testing.T) {
 	// passed context to the tracer method.
 	c := NewConfig(iName)
 	got := c.ResolveTracer(ctx)
+	//nolint:staticcheck // The noop span returned by SDK has a trace.noopTracer.
 	expected := trace.NewNoopTracerProvider().Tracer(
 		iName,
 		trace.WithSchemaURL(semconv.SchemaURL),
