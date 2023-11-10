@@ -31,12 +31,6 @@ To bump all (execpt the `/build` module's) dependencies run:
 
 1. Merge the branch created by `multimod` into your release branch.
 
-1. Update `go.mod` files.
-
-    ```sh
-    ./goyek.sh mod
-    ```
-
 1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
 1. Push the changes and create a Pull Request on GitHub.
