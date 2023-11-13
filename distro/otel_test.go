@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
+	otelt "go.opentelemetry.io/otel/trace"
 	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	comm "go.opentelemetry.io/proto/otlp/common/v1"
@@ -339,6 +340,35 @@ func TestTracesResource(t *testing.T) {
 	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assertResource(t, got.Resource.GetAttributes())
+}
+
+type testIDGenerator struct{}
+
+func (g *testIDGenerator) NewSpanID(ctx context.Context, traceID otelt.TraceID) otelt.SpanID {
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return sid
+}
+func (g *testIDGenerator) NewIDs(ctx context.Context) (otelt.TraceID, otelt.SpanID) {
+	tid := otelt.TraceID{}
+	copy(tid[:], "testtrace")
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return tid, sid
+}
+
+func TestTracesSpans(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitSpan(t, distro.WithIDGenerator(&testIDGenerator{}))
+
+	got := coll.ExportedSpans()
+	require.NotNil(t, got)
+	assert.Contains(t, string(got.Spans[0].TraceId), "testtrace")
+	assert.Contains(t, string(got.Spans[0].SpanId), "testspan")
 }
 
 func TestRunOTLPMetricsExporter(t *testing.T) {
