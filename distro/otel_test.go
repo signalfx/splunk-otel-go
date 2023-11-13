@@ -342,21 +342,6 @@ func TestTracesResource(t *testing.T) {
 	assertResource(t, got.Resource.GetAttributes())
 }
 
-type testIDGenerator struct{}
-
-func (g *testIDGenerator) NewSpanID(ctx context.Context, traceID otelt.TraceID) otelt.SpanID {
-	sid := otelt.SpanID{}
-	copy(sid[:], "testspan")
-	return sid
-}
-func (g *testIDGenerator) NewIDs(ctx context.Context) (otelt.TraceID, otelt.SpanID) {
-	tid := otelt.TraceID{}
-	copy(tid[:], "testtrace")
-	sid := otelt.SpanID{}
-	copy(sid[:], "testspan")
-	return tid, sid
-}
-
 func TestTracesSpans(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
@@ -692,6 +677,8 @@ type (
 		Resource *rpb.Resource
 		Metrics  []*mpb.Metric
 	}
+
+	testIDGenerator struct{}
 )
 
 func (coll *collector) Start(t *testing.T) {
@@ -788,4 +775,18 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	}
 
 	return &cmpb.ExportMetricsServiceResponse{}, nil
+}
+
+func (g *testIDGenerator) NewSpanID(ctx context.Context, traceID otelt.TraceID) otelt.SpanID {
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return sid
+}
+
+func (g *testIDGenerator) NewIDs(ctx context.Context) (otelt.TraceID, otelt.SpanID) {
+	tid := otelt.TraceID{}
+	copy(tid[:], "testtrace")
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return tid, sid
 }
