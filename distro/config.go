@@ -60,10 +60,11 @@ const (
 	defaultMetricsExporter = "otlp"
 	defaultLogLevel        = "info"
 
-	defaultJaegerEndpoint = "http://127.0.0.1:9080/v1/trace"
+	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"
+	jaegerRealmEndpointFormat = "https://ingest.%s.signalfx.com/v2/trace"
 
-	realmEndpointFormat     = "https://ingest.%s.signalfx.com/v2/trace"
-	otlpRealmEndpointFormat = "ingest.%s.signalfx.com:443"
+	otlpRealmTracesEndpointFormat  = "https://ingest.%s.signalfx.com/v2/trace/otlp"
+	otlpRealmMetricsEndpointFormat = "https://ingest.%s.signalfx.com/v2/datapoint/otlp"
 )
 
 type exporterConfig struct {
