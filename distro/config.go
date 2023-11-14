@@ -149,12 +149,8 @@ func WithLogger(l logr.Logger) Option {
 	})
 }
 
-// WithIDGenerator configures the ID Generator used to generate span and trace IDs.
-//
-// The trace.IDGenerator provided should implement the trace.IDGenerator interface
-// with NewIDs and NewSpanID methods.
-//
-// If this option is not provided, a defaultIDGenerator will be used.
+// WithIDGenerator configures the generator used to generate span and trace IDs.
+// If this option is not provided, the SDK's default ID generator will be used.
 func WithIDGenerator(g trace.IDGenerator) Option {
 	return optionFunc(func(c *config) {
 		c.IDGenerator = g

@@ -342,7 +342,7 @@ func TestTracesResource(t *testing.T) {
 	assertResource(t, got.Resource.GetAttributes())
 }
 
-func TestTracesSpans(t *testing.T) {
+func TestWithIDGenerator(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
@@ -777,13 +777,13 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	return &cmpb.ExportMetricsServiceResponse{}, nil
 }
 
-func (g *testIDGenerator) NewSpanID(ctx context.Context, traceID otelt.TraceID) otelt.SpanID {
+func (g *testIDGenerator) NewSpanID(_ context.Context, _ otelt.TraceID) otelt.SpanID {
 	sid := otelt.SpanID{}
 	copy(sid[:], "testspan")
 	return sid
 }
 
-func (g *testIDGenerator) NewIDs(ctx context.Context) (otelt.TraceID, otelt.SpanID) {
+func (g *testIDGenerator) NewIDs(_ context.Context) (otelt.TraceID, otelt.SpanID) {
 	tid := otelt.TraceID{}
 	copy(tid[:], "testtrace")
 	sid := otelt.SpanID{}
