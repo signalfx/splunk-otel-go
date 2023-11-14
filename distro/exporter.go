@@ -65,6 +65,7 @@ func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
 		return otlptracehttp.New(ctx,
 			otlptracehttp.WithEndpoint(splunkEndpoint),
+			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
 			otlptracehttp.WithHeaders(map[string]string{
 				"X-Sf-Token": c.AccessToken,
 			}),
@@ -207,6 +208,7 @@ func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
 		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
 		return otlpmetrichttp.New(ctx,
 			otlpmetrichttp.WithEndpoint(splunkEndpoint),
+			otlpmetrichttp.WithURLPath(otlpRealmMetricsEndpointPath),
 			otlpmetrichttp.WithHeaders(map[string]string{
 				"X-Sf-Token": c.AccessToken,
 			}),
