@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Add
+
+- Add the `WithIDGenerator` option to
+  `github.com/signalfx/splunk-otel-go/distro`. (#2634)
+
 ## [1.10.0] - 2023-11-10
 
 This release upgrades [OpenTelemetry Go to v1.20.0/v0.43.0][otel-v1.20.0]

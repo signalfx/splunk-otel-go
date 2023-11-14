@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
+	otelt "go.opentelemetry.io/otel/trace"
 	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	comm "go.opentelemetry.io/proto/otlp/common/v1"
@@ -339,6 +340,20 @@ func TestTracesResource(t *testing.T) {
 	got := coll.ExportedSpans()
 	require.NotNil(t, got)
 	assertResource(t, got.Resource.GetAttributes())
+}
+
+func TestWithIDGenerator(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitSpan(t, distro.WithIDGenerator(&testIDGenerator{}))
+
+	got := coll.ExportedSpans()
+	require.NotNil(t, got)
+	assert.Contains(t, string(got.Spans[0].TraceId), "testtrace")
+	assert.Contains(t, string(got.Spans[0].SpanId), "testspan")
 }
 
 func TestRunOTLPMetricsExporter(t *testing.T) {
@@ -662,6 +677,8 @@ type (
 		Resource *rpb.Resource
 		Metrics  []*mpb.Metric
 	}
+
+	testIDGenerator struct{}
 )
 
 func (coll *collector) Start(t *testing.T) {
@@ -758,4 +775,18 @@ func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb
 	}
 
 	return &cmpb.ExportMetricsServiceResponse{}, nil
+}
+
+func (g *testIDGenerator) NewSpanID(_ context.Context, _ otelt.TraceID) otelt.SpanID {
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return sid
+}
+
+func (g *testIDGenerator) NewIDs(_ context.Context) (otelt.TraceID, otelt.SpanID) {
+	tid := otelt.TraceID{}
+	copy(tid[:], "testtrace")
+	sid := otelt.SpanID{}
+	copy(sid[:], "testspan")
+	return tid, sid
 }
