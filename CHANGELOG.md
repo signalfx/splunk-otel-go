@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+The release adds support for sending metrics directly to Splunk Observability Cloud.
+
+### Add
+
+- Metrics are sent directly to Splunk Observability Cloud when `SPLUNK_REALM` is
+  set. (#2637)
+
 ## [1.10.0] - 2023-11-10
 
 This release upgrades [OpenTelemetry Go to v1.20.0/v0.43.0][otel-v1.20.0]
