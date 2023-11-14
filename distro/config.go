@@ -64,9 +64,9 @@ const (
 	jaegerRealmEndpointFormat = "https://ingest.%s.signalfx.com/v2/trace"
 
 	otlpRealmTracesEndpointFormat  = "ingest.%s.signalfx.com"
-	otlpRealmTracesEndpointPath    = "v2/trace/otlp"
+	otlpRealmTracesEndpointPath    = "/v2/trace/otlp"
 	otlpRealmMetricsEndpointFormat = "ingest.%s.signalfx.com"
-	otlpRealmMetricsEndpointPath   = "v2/datapoint/otlp"
+	otlpRealmMetricsEndpointPath   = "/v2/datapoint/otlp"
 )
 
 type exporterConfig struct {
