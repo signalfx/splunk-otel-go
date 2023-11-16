@@ -23,7 +23,9 @@ import (
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated, but we still support it to not break existing users.
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc/credentials"
@@ -56,12 +58,21 @@ func tracesExporter(log logr.Logger) traceExporterFunc {
 }
 
 func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
-	var opts []otlptracegrpc.Option
+	ctx := context.Background()
 
-	endpoint := otlpTracesEndpoint()
-	if endpoint != "" {
-		opts = append(opts, otlptracegrpc.WithEndpoint(endpoint))
+	splunkEndpoint := otlpRealmTracesEndpoint()
+	if splunkEndpoint != "" {
+		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
+		return otlptracehttp.New(ctx,
+			otlptracehttp.WithEndpoint(splunkEndpoint),
+			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
+			otlptracehttp.WithHeaders(map[string]string{
+				"X-Sf-Token": c.AccessToken,
+			}),
+		)
 	}
+
+	var opts []otlptracegrpc.Option
 
 	if c.AccessToken != "" {
 		opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
@@ -77,11 +88,11 @@ func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
 
-	return otlptracegrpc.New(context.Background(), opts...)
+	return otlptracegrpc.New(ctx, opts...)
 }
 
-// otlpTracesEndpoint returns the endpoint to use for the OTLP gRPC traces exporter.
-func otlpTracesEndpoint() string {
+// otlpRealmTracesEndpoint returns the endpoint to use for the OTLP HTTP/protobuf traces exporter.
+func otlpRealmTracesEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey}
 	for _, env := range envs {
@@ -92,18 +103,18 @@ func otlpTracesEndpoint() string {
 
 	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
 	// Also, be sure to communicate local is false so the default behavior of
-	// the OTLP gRPC exporter (using the system CA for authentication and
+	// the OTLP HTTP/protobuf exporter (using the system CA for authentication and
 	// encryption) is used.
 	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
-		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
+		return fmt.Sprintf(otlpRealmTracesEndpointFormat, realm)
 	}
 
 	// The OTel default is the same as Splunk's (localhost:4317)
 	return ""
 }
 
-// otlpMetricsEndpoint returns the endpoint to use for the OTLP gRPC metrics exporter.
-func otlpMetricsEndpoint() string {
+// otlpRealmMetricsEndpoint returns the endpoint to use for the OTLP HTTP/protobuf metrics exporter.
+func otlpRealmMetricsEndpoint() string {
 	// Allow the exporter to interpret these environment variables directly.
 	envs := []string{otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey}
 	for _, env := range envs {
@@ -114,10 +125,10 @@ func otlpMetricsEndpoint() string {
 
 	// Use the realm only if OTEL_EXPORTER_OTLP*_ENDPOINT are not defined.
 	// Also, be sure to communicate local is false so the default behavior of
-	// the OTLP gRPC exporter (using the system CA for authentication and
+	// the OTLP HTTP/protobuf exporter (using the system CA for authentication and
 	// encryption) is used.
 	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
-		return fmt.Sprintf(otlpRealmEndpointFormat, realm)
+		return fmt.Sprintf(otlpRealmMetricsEndpointFormat, realm)
 	}
 
 	// The OTel default is the same as Splunk's (localhost:4317)
@@ -159,11 +170,11 @@ func jaegerEndpoint() string {
 
 	// Use the realm only if OTEL_EXPORTER_JAGER_ENDPOINT is not defined.
 	if realm, ok := os.LookupEnv(splunkRealmKey); ok && notNone(realm) {
-		return fmt.Sprintf(realmEndpointFormat, realm)
+		return fmt.Sprintf(jaegerRealmEndpointFormat, realm)
 	}
 
 	// Use Splunk specific default (locally running collector).
-	return defaultJaegerEndpoint
+	return jaegerDefaultEndpoint
 }
 
 type metricsExporterFunc func(*exporterConfig) (metric.Exporter, error)
@@ -190,12 +201,21 @@ func metricsExporter(log logr.Logger) metricsExporterFunc {
 }
 
 func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
-	var opts []otlpmetricgrpc.Option
+	ctx := context.Background()
 
-	endpoint := otlpMetricsEndpoint()
-	if endpoint != "" {
-		opts = append(opts, otlpmetricgrpc.WithEndpoint(endpoint))
+	splunkEndpoint := otlpRealmMetricsEndpoint()
+	if splunkEndpoint != "" {
+		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
+		return otlpmetrichttp.New(ctx,
+			otlpmetrichttp.WithEndpoint(splunkEndpoint),
+			otlpmetrichttp.WithURLPath(otlpRealmMetricsEndpointPath),
+			otlpmetrichttp.WithHeaders(map[string]string{
+				"X-Sf-Token": c.AccessToken,
+			}),
+		)
 	}
+
+	var opts []otlpmetricgrpc.Option
 
 	if c.AccessToken != "" {
 		opts = append(opts, otlpmetricgrpc.WithHeaders(map[string]string{
@@ -211,7 +231,7 @@ func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
 		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
 
-	return otlpmetricgrpc.New(context.Background(), opts...)
+	return otlpmetricgrpc.New(ctx, opts...)
 }
 
 // noneEnvVarSet returns true if none of provided env vars is set.
