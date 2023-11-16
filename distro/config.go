@@ -76,9 +76,10 @@ type exporterConfig struct {
 
 // config is the configuration used to create and operate an SDK.
 type config struct {
-	Logger     logr.Logger
-	Propagator propagation.TextMapPropagator
-	SpanLimits *trace.SpanLimits
+	Logger      logr.Logger
+	Propagator  propagation.TextMapPropagator
+	SpanLimits  *trace.SpanLimits
+	IDGenerator trace.IDGenerator
 
 	ExportConfig        *exporterConfig
 	TracesExporterFunc  traceExporterFunc
@@ -148,5 +149,13 @@ func WithTLSConfig(conf *tls.Config) Option {
 func WithLogger(l logr.Logger) Option {
 	return optionFunc(func(c *config) {
 		c.Logger = l
+	})
+}
+
+// WithIDGenerator configures the generator used to generate span and trace IDs.
+// If this option is not provided, the SDK's default ID generator will be used.
+func WithIDGenerator(g trace.IDGenerator) Option {
+	return optionFunc(func(c *config) {
+		c.IDGenerator = g
 	})
 }

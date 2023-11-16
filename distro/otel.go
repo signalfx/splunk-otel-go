@@ -153,6 +153,7 @@ func runTraces(c *config, res *resource.Resource) (shutdownFunc, error) {
 		trace.WithResource(res),
 		trace.WithRawSpanLimits(*c.SpanLimits),
 		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
+		trace.WithIDGenerator(c.IDGenerator),
 	}
 	if _, ok := os.LookupEnv(tracesSamplerKey); !ok {
 		o = append(o, trace.WithSampler(trace.AlwaysSample()))

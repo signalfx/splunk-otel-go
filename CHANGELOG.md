@@ -12,6 +12,8 @@ The release adds support for sending metrics directly to Splunk Observability Cl
 
 ### Add
 
+- Add the `WithIDGenerator` option to
+  `github.com/signalfx/splunk-otel-go/distro`. (#2634)
 - Metrics are sent directly to Splunk Observability Cloud when `SPLUNK_REALM` is
   set. (#2637)
 
