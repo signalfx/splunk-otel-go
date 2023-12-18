@@ -32,7 +32,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type traceExporterFunc func(*exporterConfig) (trace.SpanExporter, error)
+type traceExporterFunc func(logr.Logger, *exporterConfig) (trace.SpanExporter, error)
 
 // traceExporters maps environment variable values to trace exporter creation
 // functions.
@@ -57,7 +57,7 @@ func tracesExporter(log logr.Logger) traceExporterFunc {
 	return tef
 }
 
-func newOTLPTracesExporter(c *exporterConfig) (trace.SpanExporter, error) {
+func newOTLPTracesExporter(_ logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
 	ctx := context.Background()
 
 	splunkEndpoint := otlpRealmTracesEndpoint()
@@ -135,7 +135,9 @@ func otlpRealmMetricsEndpoint() string {
 	return ""
 }
 
-func newJaegerThriftExporter(c *exporterConfig) (trace.SpanExporter, error) {
+func newJaegerThriftExporter(log logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
+	log.Info("OTEL_TRACES_EXPORTER=jaeger-thrift-splunk is deprecated and may be removed in a future release. Use the default OTLP exporter instead, or set the SPLUNK_REALM and SPLUNK_ACCESS_TOKEN environment variables to send telemetry directly to Splunk Observability Cloud.")
+
 	var opts []jaeger.CollectorEndpointOption
 
 	if e := jaegerEndpoint(); e != "" {

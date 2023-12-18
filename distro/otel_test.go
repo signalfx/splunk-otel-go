@@ -507,6 +507,21 @@ func TestNoServiceWarn(t *testing.T) {
 	assert.Contains(t, buf.String(), `INFO service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`)
 }
 
+func TestJaegerThriftSplunkWarn(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer srv.Close()
+	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
+	t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL)
+
+	var buf bytes.Buffer
+	sdk, err := distro.Run(distro.WithLogger(buflogr.NewWithBuffer(&buf)))
+
+	require.NoError(t, sdk.Shutdown(context.Background()))
+	require.NoError(t, err)
+	// INFO prefix for buflogr is verbosity level 0, our warn level.
+	assert.Contains(t, buf.String(), `INFO OTEL_TRACES_EXPORTER=jaeger-thrift-splunk is deprecated and may be removed in a future release. Use the default OTLP exporter instead, or set the SPLUNK_REALM and SPLUNK_ACCESS_TOKEN environment variables to send telemetry directly to Splunk Observability Cloud.`)
+}
+
 // setenv sets the value of the environment variable named by the key.
 // It returns a function that rollbacks the setting.
 func setenv(key, val string) func() {
