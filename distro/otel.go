@@ -145,7 +145,7 @@ func runTraces(c *config, res *resource.Resource) (shutdownFunc, error) {
 		return nil, nil
 	}
 
-	exp, err := c.TracesExporterFunc(c.ExportConfig)
+	exp, err := c.TracesExporterFunc(c.Logger, c.ExportConfig)
 	if err != nil {
 		return nil, err
 	}
