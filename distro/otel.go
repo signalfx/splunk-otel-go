@@ -35,7 +35,7 @@ const distroVerAttr = "splunk.distro.version"
 
 const tracesSamplerKey = "OTEL_TRACES_SAMPLER"
 
-const noServiceWarn = `service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`
+const noServiceWarn = `The service.name resource attribute is not set. Your service is unnamed and will be difficult to identify. Set your service name using the OTEL_SERVICE_NAME or OTEL_RESOURCE_ATTRIBUTES environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>".`
 
 // SDK is the Splunk distribution of the OpenTelemetry SDK.
 type SDK struct {
