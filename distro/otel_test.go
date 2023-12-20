@@ -504,7 +504,7 @@ func TestNoServiceWarn(t *testing.T) {
 	require.NoError(t, sdk.Shutdown(context.Background()))
 	require.NoError(t, err)
 	// INFO prefix for buflogr is verbosity level 0, our warn level.
-	assert.Contains(t, buf.String(), `INFO service.name attribute is not set. Your service is unnamed and might be difficult to identify. Set your service name using the OTEL_SERVICE_NAME environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>")`)
+	assert.Contains(t, buf.String(), `INFO The service.name resource attribute is not set. Your service is unnamed and will be difficult to identify. Set your service name using the OTEL_SERVICE_NAME or OTEL_RESOURCE_ATTRIBUTES environment variable. For example, OTEL_SERVICE_NAME="<YOUR_SERVICE_NAME_HERE>".`)
 }
 
 func TestJaegerThriftSplunkWarn(t *testing.T) {
