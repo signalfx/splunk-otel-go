@@ -8,13 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [1.12.0] - 2024-01-TBD
+## [1.12.0] - 2024-01-18
 
 This release deprecates `jaeger-thrift-splunk` option support for `OTEL_TRACES_EXPORTER`
 environment variable.
 
 This release upgrades [OpenTelemetry Go to v1.22.0/v0.45.0][otel-v1.22.0]
-and [OpenTelemetry Go Contrib to TBD][contrib-v1.21.1].
+and [OpenTelemetry Go Contrib to 1.22.0/0.47.0/0.16.0/0.2.0][contrib-v1.22.0].
 
 ### Deprecated
 
@@ -583,6 +583,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.22.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.22.0
 [contrib-v1.21.1]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.21.1
 [contrib-v1.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.21.0
 [contrib-v1.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.20.0
