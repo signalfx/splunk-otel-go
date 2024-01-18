@@ -27,8 +27,8 @@ go.opentelemetry.io/contrib/instrumentation/runtime v0.46.1 h1:m9ReioVPIffxjJlGN
 go.opentelemetry.io/contrib/instrumentation/runtime v0.46.1/go.mod h1:CANkrsXNzqOKXfOomu2zhOmc1/J5UZK9SGjrat6ZCG0=
 go.opentelemetry.io/contrib/propagators/autoprop v0.46.1 h1:cXTYcMjY0dsYokAuo8LbNBQxpF8VgTHdiHJJ1zlIXl4=
 go.opentelemetry.io/contrib/propagators/autoprop v0.46.1/go.mod h1:WZxgny1/6+j67B1s72PLJ4bGjidoWFzSmLNfJKVt2bo=
-go.opentelemetry.io/contrib/propagators/aws v1.21.1 h1:uQIQIDWb0gzyvon2ICnghpLAf9w7ADOCUiIiwCQgR2o=
-go.opentelemetry.io/contrib/propagators/aws v1.21.1/go.mod h1:kCcto3ACQxm+VrkQX/NK/TkDmAd99MQhvffzyTKhzL4=
+go.opentelemetry.io/contrib/propagators/aws v1.22.0 h1:SKtPYiel5TWrE9gib3F4/BUcrvVjKsA5CH9xnWvj6cQ=
+go.opentelemetry.io/contrib/propagators/aws v1.22.0/go.mod h1:zau7d6VqIVtBLLoD+WIufyXK6ZWhSdpiG6tY/hBXu+Y=
 go.opentelemetry.io/contrib/propagators/b3 v1.21.1 h1:WPYiUgmw3+b7b3sQ1bFBFAf0q+Di9dvNc3AtYfnT4RQ=
 go.opentelemetry.io/contrib/propagators/b3 v1.21.1/go.mod h1:EmzokPoSqsYMBVK4nRnhsfm5mbn8J1eDuz/U1UaQaWg=
 go.opentelemetry.io/contrib/propagators/jaeger v1.21.1 h1:f4beMGDKiVzg9IcX7/VuWVy+oGdjx3dNJ72YehmtY5k=
