@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/golangci/golangci-lint v1.55.2
-	github.com/goyek/goyek/v2 v2.0.0
+	github.com/goyek/goyek/v2 v2.1.0
 	github.com/goyek/x v0.1.6
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
 	go.opentelemetry.io/build-tools/crosslink v0.12.0
