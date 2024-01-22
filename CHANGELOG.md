@@ -8,6 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Allow bumping OpenTelemetry Go (`go.opentelemetry.io/otel`)
+  without bumping the Splunk Distribution (`github.com/signalfx/splunk-otel-go`).
+  It fixes a merge resource runtime error, which could occur when
+  the application uses a version of OpenTelemetry Go that is newer
+  than the one which the Splunk Distribution is depending on. (#2759)
+
 ## [1.12.0] - 2024-01-18
 
 This release deprecates `jaeger-thrift-splunk` option support for `OTEL_TRACES_EXPORTER`

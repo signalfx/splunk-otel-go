@@ -26,7 +26,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
 var errShutdown = errors.New("SDK shutdown failure")
@@ -115,22 +114,23 @@ func Run(opts ...Option) (SDK, error) {
 
 func newResource(ctx context.Context) (*resource.Resource, error) {
 	// SDK's default resource.
-	defaultRes := resource.Default()
-	// Add additional detectors.
-	resWithDetectors, err := resource.New(ctx,
-		resource.WithDetectors(
-			// Add Splunk-specific attributes.
-			resource.StringDetector(semconv.SchemaURL, distroVerAttr, func() (string, error) {
-				return Version(), nil
-			}),
-		),
-		// Add process and Go runtime information.
+	res := resource.Default()
+
+	// Add process and Go runtime information.
+	procRes, err := resource.New(ctx,
 		resource.WithProcess(),
 	)
 	if err != nil {
 		return nil, err
 	}
-	res, err := resource.Merge(defaultRes, resWithDetectors)
+	res, err = resource.Merge(res, procRes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add Splunk-specific attributes.
+	splunkRes := resource.NewSchemaless(attribute.String(distroVerAttr, Version()))
+	res, err = resource.Merge(res, splunkRes)
 	if err != nil {
 		return nil, err
 	}
@@ -194,6 +194,6 @@ func runMetrics(c *config, res *resource.Resource) (shutdownFunc, error) {
 }
 
 func serviceNameDefined(r *resource.Resource) bool {
-	val, ok := r.Set().Value(semconv.ServiceNameKey)
+	val, ok := r.Set().Value("service.name")
 	return ok && val.Type() == attribute.STRING && !strings.HasPrefix(val.AsString(), "unknown_service:")
 }
