@@ -45,6 +45,8 @@ jobs:
         with:
           file: ./coverage.out
           flags: ${{ runner.os }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   compatibility-test:
     strategy:
