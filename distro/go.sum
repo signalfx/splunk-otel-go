@@ -26,8 +26,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/tonglil/buflogr v1.1.1 h1:CKAjOHBSMmgbRFxpn/RhQHPj5oANc7ekhlsoUDvcZIg=
 github.com/tonglil/buflogr v1.1.1/go.mod h1:WLLtPRLqcFYWQLbA+ytXy5WrFTYnfA+beg1MpvJCxm4=
-go.opentelemetry.io/contrib/instrumentation/runtime v0.47.0 h1:fQChVLLl1h/42YGVoikLZ8yBrf1VG4DSEJ1zDnMfIog=
-go.opentelemetry.io/contrib/instrumentation/runtime v0.47.0/go.mod h1:oEBtteRW7mKJc+yAKRuEu0xk5wyPUKpm41/bDM4ZKeY=
+go.opentelemetry.io/contrib/instrumentation/runtime v0.48.0 h1:dJlCKeq+zmO5Og4kgxqPvvJrzuD/mygs1g/NYM9dAsU=
+go.opentelemetry.io/contrib/instrumentation/runtime v0.48.0/go.mod h1:p+hpBCpLHpuUrR0lHgnHbUnbCBll1IhrcMIlycC+xYs=
 go.opentelemetry.io/contrib/propagators/autoprop v0.48.0 h1:sBPzh/5mNVo4yknFgh0iTezFeljhV8FO9mcj79LsdOg=
 go.opentelemetry.io/contrib/propagators/autoprop v0.48.0/go.mod h1:Ij+STHaLubeiNHJVgYaRU8XPI1Y7DmlMq0HwJboIc1k=
 go.opentelemetry.io/contrib/propagators/aws v1.23.0 h1:pY2NxI5WwbvuUXSnqahpjqdZrA1JI/elKCGwElimPWA=
