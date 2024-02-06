@@ -17,7 +17,7 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/runtime v0.47.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/runtime v0.48.0 // indirect
 	go.opentelemetry.io/contrib/propagators/autoprop v0.48.0 // indirect
 	go.opentelemetry.io/contrib/propagators/aws v1.23.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.23.0 // indirect
