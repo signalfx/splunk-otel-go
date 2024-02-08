@@ -29,18 +29,22 @@ func ExampleOpen() {
 	// for the driver are registered with the appropriate packages.
 	db, err := splunksqlx.Open("pgx", "postgres://localhost/db")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
+	defer db.Close()
 
 	// All calls through the sqlx API are now traced.
 	query, args, err := sqlx.In("SELECT * FROM users WHERE level IN (?);", []int{4, 6, 7})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	query = db.Rebind(query)
-	rows, err := db.Queryx(query, args...)
+	rows, err := db.Queryx(query, args...) //nolint:sqlclosecheck // False positive: https://github.com/ryanrolds/sqlclosecheck/issues/35.
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	defer rows.Close()
 	/* ... */

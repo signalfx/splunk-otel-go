@@ -15,6 +15,7 @@
 package splunksql_test
 
 import (
+	"log"
 	"strings"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
@@ -25,7 +26,6 @@ func ExampleRegister() {
 	// package, a custom connection string parser and information about the
 	// driver can be registered with the splunksql package. These will be used
 	// when the splunksql.Open function is called for the registered driver.
-
 	splunksql.Register("my-registered-driver", splunksql.InstrumentationConfig{
 		DBSystem: splunksql.DBSystemOtherSQL,
 		DSNParser: func(dsn string) (splunksql.ConnectionConfig, error) {
@@ -47,11 +47,9 @@ func ExampleRegister() {
 	// Now when splunksql.Open is called the provided InstrumentationConfig
 	// will be used to ensure the telemetry produced adheres to OpenTelemetry
 	// semantic conventions. E.g.
-	//
-	//  db, err := splunksql.Open("my-registered-driver", connStr)
-	//  if err != nil {
-	//  	log.Fatalf("Failed to open database: %#+v", err)
-	//  }
-	//  defer db.Close()
-	//  ...
+	db, err := splunksql.Open("my-registered-driver", connStr)
+	if err != nil {
+		log.Fatalf("Failed to open database: %#+v", err)
+	}
+	defer db.Close()
 }

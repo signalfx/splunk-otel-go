@@ -81,7 +81,7 @@ func DialURLContext(ctx context.Context, rawurl string, options ...interface{}) 
 	var db int
 	const matchN = 2
 	if match := pathDBRegexp.FindStringSubmatch(u.Path); len(match) == matchN {
-		if len(match[1]) > 0 {
+		if match[1] != "" {
 			db, err = strconv.Atoi(match[1])
 			if err != nil {
 				return nil, fmt.Errorf("invalid database: %s", u.Path[1:])
