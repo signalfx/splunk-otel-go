@@ -208,7 +208,7 @@ func (c *otelConn) ResetSession(ctx context.Context) error {
 func namedValueToValue(named []driver.NamedValue) ([]driver.Value, error) {
 	vArgs := make([]driver.Value, len(named))
 	for n, param := range named {
-		if len(param.Name) > 0 {
+		if param.Name != "" {
 			return nil, errors.New("splunksql: driver does not support the use of Named Parameters")
 		}
 		vArgs[n] = param.Value
