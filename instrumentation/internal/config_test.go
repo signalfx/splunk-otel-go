@@ -279,7 +279,7 @@ func TestWithSpan(t *testing.T) {
 
 	expectedErr := errors.New("TestWithSpan error")
 	var called bool
-	err := c.WithSpan(context.Background(), spanName, func(c context.Context) error {
+	err := c.WithSpan(context.Background(), spanName, func(context.Context) error {
 		called = true
 		return expectedErr
 	}, opts...)

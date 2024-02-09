@@ -28,7 +28,7 @@ import (
 
 //nolint:errcheck,noctx // example usage
 func Example() {
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		io.WriteString(w, "Hello world")
 	})
 	handler = splunkhttp.NewHandler(handler)

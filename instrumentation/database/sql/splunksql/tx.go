@@ -36,14 +36,14 @@ func newTx(ctx context.Context, tx driver.Tx, c config) *otelTx {
 
 // Commit traces the call to the wrapped Tx.Commit method.
 func (t *otelTx) Commit() error {
-	return t.config.withSpan(t.ctx, moniker.Commit, func(ctx context.Context) error {
+	return t.config.withSpan(t.ctx, moniker.Commit, func(context.Context) error {
 		return t.tx.Commit()
 	})
 }
 
 // Rollback traces the call to the wrapped Tx.Rollback method.
 func (t *otelTx) Rollback() error {
-	return t.config.withSpan(t.ctx, moniker.Rollback, func(ctx context.Context) error {
+	return t.config.withSpan(t.ctx, moniker.Rollback, func(context.Context) error {
 		return t.tx.Rollback()
 	})
 }

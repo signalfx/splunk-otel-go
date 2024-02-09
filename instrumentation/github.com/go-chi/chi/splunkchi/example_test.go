@@ -25,7 +25,7 @@ import (
 func Example() {
 	router := chi.NewRouter()
 	router.Use(splunkchi.Middleware())
-	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
+	router.Get("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		_, err := w.Write([]byte("Hello World!\n"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
