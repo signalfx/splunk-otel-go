@@ -46,7 +46,7 @@ func TestNewHandlerTraceResponseHeaderDisabled(t *testing.T) {
 
 func responseForHandler() *http.Response {
 	content := []byte("Any content")
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Write(content) //nolint:errcheck // no need to check the error
 	})
 	handler = NewHandler(handler)

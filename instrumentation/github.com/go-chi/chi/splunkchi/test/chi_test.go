@@ -46,16 +46,16 @@ func newTestServer(tp *trace.TracerProvider) *chi.Mux {
 	r.Use(splunkchi.Middleware(splunkchi.WithTracerProvider(tp)))
 	r.Route("/users", func(r chi.Router) {
 		r.Route("/{user}", func(r chi.Router) {
-			r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			})
-			r.Put("/", func(w http.ResponseWriter, r *http.Request) {
+			r.Put("/", func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusAccepted)
 			})
 		})
 	})
 
-	r.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/error", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -102,7 +102,7 @@ func TestMiddleware(t *testing.T) {
 }
 
 func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T, string, string, trace.ReadOnlySpan) {
-	return func(t *testing.T, method, target string, span trace.ReadOnlySpan) {
+	return func(t *testing.T, method, _ string, span trace.ReadOnlySpan) {
 		name := "HTTP " + method
 		if path != "" {
 			name += " " + path

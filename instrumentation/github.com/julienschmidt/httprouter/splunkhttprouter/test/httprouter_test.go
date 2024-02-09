@@ -98,7 +98,7 @@ func TestRouter(t *testing.T) {
 }
 
 func assertSpan(path string, otelCode codes.Code) func(*testing.T, string, string, trace.ReadOnlySpan) {
-	return func(t *testing.T, method, target string, span trace.ReadOnlySpan) {
+	return func(t *testing.T, method, _ string, span trace.ReadOnlySpan) {
 		name := "HTTP " + method
 		if path != "" {
 			name += " " + path

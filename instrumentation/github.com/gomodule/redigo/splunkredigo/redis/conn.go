@@ -143,7 +143,7 @@ func (c *otelConn) Do(commandName string, args ...interface{}) (reply interface{
 	}
 
 	name, sso := c.params(commandName, args...)
-	err = c.cfg.WithSpan(ctx, name, func(ctx context.Context) error {
+	err = c.cfg.WithSpan(ctx, name, func(context.Context) error {
 		var e error
 		reply, e = c.Conn.Do(commandName, args...)
 		return e
@@ -164,7 +164,7 @@ func (c *otelConn) DoWithTimeout(timeout time.Duration, commandName string, args
 	}
 
 	name, sso := c.params(commandName, args...)
-	err = c.cfg.WithSpan(ctx, name, func(ctx context.Context) error {
+	err = c.cfg.WithSpan(ctx, name, func(context.Context) error {
 		var e error
 		// This should not panic given the guard in WrapConn.
 		reply, e = c.Conn.(redis.ConnWithTimeout).DoWithTimeout(timeout, commandName, args...)

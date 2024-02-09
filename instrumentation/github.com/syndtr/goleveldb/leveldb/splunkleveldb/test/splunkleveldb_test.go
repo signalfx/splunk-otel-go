@@ -89,7 +89,7 @@ func TestTransactionOperations(t *testing.T) {
 		assert.NoError(t, transaction.Commit())
 	}, "Commit"))
 
-	t.Run("Discard", testTransactionOp(func(t *testing.T, transaction *splunkleveldb.Transaction) {
+	t.Run("Discard", testTransactionOp(func(_ *testing.T, transaction *splunkleveldb.Transaction) {
 		transaction.Discard()
 	}, "Discard"))
 
@@ -121,7 +121,7 @@ func TestTransactionOperations(t *testing.T) {
 }
 
 func TestIteratorOperation(t *testing.T) {
-	testDBOp(func(t *testing.T, db *splunkleveldb.DB) {
+	testDBOp(func(_ *testing.T, db *splunkleveldb.DB) {
 		db.NewIterator(nil, nil).Release()
 	}, "Iterator")(t)
 }
