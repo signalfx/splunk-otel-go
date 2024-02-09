@@ -19,5 +19,5 @@ package splunkclientgo
 
 // Version returns the version of splunkclientgo.
 func Version() string {
-	return "1.12.0"
+	return "1.13.0"
 }
