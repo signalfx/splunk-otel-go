@@ -508,7 +508,7 @@ func TestNoServiceWarn(t *testing.T) {
 }
 
 func TestJaegerThriftSplunkWarn(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {}))
+	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	defer srv.Close()
 	t.Setenv("OTEL_TRACES_EXPORTER", "jaeger-thrift-splunk")
 	t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", srv.URL)
