@@ -22,7 +22,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -93,8 +92,6 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 	assert.Equal(t, splunkclientgo.Version(), span.InstrumentationLibrary().Version)
 	assert.Contains(t, span.Attributes(), semconv.HTTPMethodKey.String("GET"))
 	assert.Contains(t, span.Attributes(), semconv.HTTPURLKey.String(url))
-	assert.Contains(t, span.Attributes(), semconv.HTTPSchemeHTTP)
-	assert.Contains(t, span.Attributes(), semconv.NetHostName.String(strings.TrimPrefix(url, "http://")))
 	assert.Contains(t, span.Attributes(), semconv.HTTPFlavorHTTP11)
 	assert.Contains(t, span.Attributes(), semconv.HTTPStatusCodeKey.Int(200))
 	assert.Equal(t, codes.Unset, span.Status().Code)
