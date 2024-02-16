@@ -115,6 +115,7 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 const (
 	prefixAPI   = "/api/v1/"
 	prefixWatch = "watch/"
+	namePrefix  = "HTTP "
 )
 
 // name returns an appropriate span name based on the client request.
@@ -126,11 +127,11 @@ func name(r *http.Request) string {
 	method := r.Method
 
 	if !strings.HasPrefix(path, prefixAPI) {
-		return "HTTP " + method
+		return namePrefix + method
 	}
 
 	var out strings.Builder
-	out.WriteString("HTTP " + method + " ")
+	out.WriteString(namePrefix + method + " ")
 
 	path = strings.TrimPrefix(path, prefixAPI)
 
