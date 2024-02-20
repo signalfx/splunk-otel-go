@@ -71,7 +71,7 @@ func request(t *testing.T, handle func(http.ResponseWriter, *http.Request)) (*tr
 
 func TestEndToEndWrappedTransport(t *testing.T) {
 	content := []byte("Hello, world!")
-	sr, resp, url := request(t, func(w http.ResponseWriter, r *http.Request) {
+	sr, resp, url := request(t, func(w http.ResponseWriter, _ *http.Request) {
 		n, err := w.Write(content)
 		assert.NoError(t, err)
 		assert.Equal(t, len(content), n)
@@ -96,7 +96,7 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 }
 
 func TestWrappedTransportErrorResponse(t *testing.T) {
-	sr, resp, _ := request(t, func(w http.ResponseWriter, r *http.Request) {
+	sr, resp, _ := request(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	})
 	require.NoError(t, resp.Body.Close())
