@@ -10,8 +10,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Drop errant build tags in `splunkclient-go`, allowing import with Go 1.20+. Also fixes 
-  lint and test failures that were previously skipped. (#2891)
+- Drop errant build tags in `splunkclient-go`, allowing import with Go 1.20+.
+  Also fixes lint and test failures that were previously skipped. (#2891)
 
 ## [1.13.0] - 2024-02-09
 
