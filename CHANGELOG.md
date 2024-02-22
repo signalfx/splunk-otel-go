@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Drop errant build tags in `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`,
+  allowing import with Go 1.20+. (#2891)
+
 ## [1.13.0] - 2024-02-09
 
 This release upgrades [OpenTelemetry Go to v1.23.1/v0.45.2][otel-v1.23.1]

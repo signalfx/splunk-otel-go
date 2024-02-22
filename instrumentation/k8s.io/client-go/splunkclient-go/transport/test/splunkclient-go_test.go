@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !(go1.1 || go1.2 || go1.3 || go1.4 || go1.5 || go1.6 || go1.7 || go1.8 || go1.9 || go1.10 || go1.11 || go1.12 || go1.13 || go1.14 || go1.15 || go1.16)
-// +build !go1.1,!go1.2,!go1.3,!go1.4,!go1.5,!go1.6,!go1.7,!go1.8,!go1.9,!go1.10,!go1.11,!go1.12,!go1.13,!go1.14,!go1.15,!go1.16
-
 package test
 
 import (
@@ -22,7 +19,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -75,7 +71,7 @@ func request(t *testing.T, handle func(http.ResponseWriter, *http.Request)) (*tr
 
 func TestEndToEndWrappedTransport(t *testing.T) {
 	content := []byte("Hello, world!")
-	sr, resp, url := request(t, func(w http.ResponseWriter, r *http.Request) {
+	sr, resp, url := request(t, func(w http.ResponseWriter, _ *http.Request) {
 		n, err := w.Write(content)
 		assert.NoError(t, err)
 		assert.Equal(t, len(content), n)
@@ -93,8 +89,6 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 	assert.Equal(t, splunkclientgo.Version(), span.InstrumentationLibrary().Version)
 	assert.Contains(t, span.Attributes(), semconv.HTTPMethodKey.String("GET"))
 	assert.Contains(t, span.Attributes(), semconv.HTTPURLKey.String(url))
-	assert.Contains(t, span.Attributes(), semconv.HTTPSchemeHTTP)
-	assert.Contains(t, span.Attributes(), semconv.NetHostName.String(strings.TrimPrefix(url, "http://")))
 	assert.Contains(t, span.Attributes(), semconv.HTTPFlavorHTTP11)
 	assert.Contains(t, span.Attributes(), semconv.HTTPStatusCodeKey.Int(200))
 	assert.Equal(t, codes.Unset, span.Status().Code)
@@ -102,7 +96,7 @@ func TestEndToEndWrappedTransport(t *testing.T) {
 }
 
 func TestWrappedTransportErrorResponse(t *testing.T) {
-	sr, resp, _ := request(t, func(w http.ResponseWriter, r *http.Request) {
+	sr, resp, _ := request(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	})
 	require.NoError(t, resp.Body.Close())

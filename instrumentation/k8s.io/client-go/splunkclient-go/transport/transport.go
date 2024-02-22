@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !(go1.1 || go1.2 || go1.3 || go1.4 || go1.5 || go1.6 || go1.7 || go1.8 || go1.9 || go1.10 || go1.11 || go1.12 || go1.13 || go1.14 || go1.15 || go1.16)
-// +build !go1.1,!go1.2,!go1.3,!go1.4,!go1.5,!go1.6,!go1.7,!go1.8,!go1.9,!go1.10,!go1.11,!go1.12,!go1.13,!go1.14,!go1.15,!go1.16
-
 package transport
 
 import (
@@ -115,6 +112,7 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 const (
 	prefixAPI   = "/api/v1/"
 	prefixWatch = "watch/"
+	namePrefix  = "HTTP "
 )
 
 // name returns an appropriate span name based on the client request.
@@ -126,11 +124,11 @@ func name(r *http.Request) string {
 	method := r.Method
 
 	if !strings.HasPrefix(path, prefixAPI) {
-		return "HTTP " + method
+		return namePrefix + method
 	}
 
 	var out strings.Builder
-	out.WriteString("HTTP " + method + " ")
+	out.WriteString(namePrefix + method + " ")
 
 	path = strings.TrimPrefix(path, prefixAPI)
 
