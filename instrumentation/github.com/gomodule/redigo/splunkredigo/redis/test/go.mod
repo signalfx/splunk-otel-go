@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/re
 go 1.20
 
 require (
-	github.com/gomodule/redigo v1.8.9
+	github.com/gomodule/redigo v1.9.1
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo v1.13.0
 	github.com/stretchr/testify v1.8.4
