@@ -55,6 +55,9 @@ var _ = goyek.Define(goyek.Task{
 
 		tags := strings.Split(sb.String(), "\n")
 		for _, tag := range tags {
+			if strings.Contains(tag, "Using versioning file") {
+				continue
+			}
 			cmd.Exec(a, "git push "+*flagRemote+" "+tag)
 		}
 	},
