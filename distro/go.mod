@@ -31,7 +31,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.opentelemetry.io/contrib/propagators/aws v1.23.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.24.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.23.0 // indirect
 	go.opentelemetry.io/contrib/propagators/jaeger v1.23.0 // indirect
 	go.opentelemetry.io/contrib/propagators/ot v1.23.0 // indirect
