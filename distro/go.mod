@@ -7,7 +7,7 @@ require (
 	github.com/go-logr/zapr v1.3.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tonglil/buflogr v1.1.1
-	go.opentelemetry.io/contrib/instrumentation/runtime v0.48.0
+	go.opentelemetry.io/contrib/instrumentation/runtime v0.49.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.49.0
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
