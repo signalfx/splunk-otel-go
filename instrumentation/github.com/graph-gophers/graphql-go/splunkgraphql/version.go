@@ -16,5 +16,5 @@ package splunkgraphql
 
 // Version returns the version of splunkgraphql.
 func Version() string {
-	return "1.13.0"
+	return "1.14.0"
 }
