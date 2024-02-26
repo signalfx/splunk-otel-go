@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/julienschmidt/httprouter v1.3.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.48.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
 )
 
 require (
