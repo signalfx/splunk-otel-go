@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns/test
 
-go 1.20
+go 1.21
 
 require (
 	github.com/miekg/dns v1.1.58
