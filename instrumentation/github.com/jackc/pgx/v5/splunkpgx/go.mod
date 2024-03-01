@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/jackc/pgx/v5 v5.5.3
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.14.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
