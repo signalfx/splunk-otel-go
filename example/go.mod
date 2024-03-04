@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/example
 
-go 1.20
+go 1.21
 
 require (
 	github.com/signalfx/splunk-otel-go/distro v1.14.0

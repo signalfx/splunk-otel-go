@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb
 
-go 1.20
+go 1.21
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.14.0

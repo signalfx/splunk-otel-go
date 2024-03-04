@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic
 
-go 1.20
+go 1.21
 
 require (
 	github.com/olivere/elastic/v7 v7.0.32

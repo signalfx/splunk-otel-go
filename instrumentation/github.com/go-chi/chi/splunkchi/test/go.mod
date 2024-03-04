@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi/test
 
-go 1.20
+go 1.21
 
 require (
 	github.com/go-chi/chi v1.5.5
