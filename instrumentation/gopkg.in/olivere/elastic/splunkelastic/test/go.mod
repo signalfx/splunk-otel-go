@@ -37,7 +37,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
