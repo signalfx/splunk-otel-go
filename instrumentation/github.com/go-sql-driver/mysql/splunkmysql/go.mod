@@ -3,12 +3,13 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driv
 go 1.21
 
 require (
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.14.0
 	github.com/stretchr/testify v1.9.0
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
