@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql
 go 1.21
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.14.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.15.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/otel v1.25.0
 	go.opentelemetry.io/otel/metric v1.25.0
