@@ -732,7 +732,7 @@ func (coll *collector) Start(t *testing.T) {
 	} else {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
-	conn, err := grpc.Dial(coll.Endpoint, dialOpts...)
+	conn, err := grpc.NewClient(coll.Endpoint, dialOpts...)
 	require.NoError(t, err)
 	require.NoError(t, conn.Close())
 }
