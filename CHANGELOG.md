@@ -15,7 +15,7 @@ and [OpenTelemetry Go Contrib to v1.25.0/v0.50.0/v0.19.0/v0.5.0/v0.0.1][contrib-
 
 ### Removed
 
-- Drop support for Go [Go 1.20]. (#3002)
+- Drop support for [Go 1.20]. (#3002)
 
 ## [1.14.0] - 2024-02-26
 
