@@ -16,5 +16,5 @@ package splunkchi
 
 // Version returns the version of splunkchi.
 func Version() string {
-	return "1.14.0"
+	return "1.15.0"
 }
