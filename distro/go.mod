@@ -9,7 +9,7 @@ require (
 	github.com/tonglil/buflogr v1.1.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.50.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.50.0
-	go.opentelemetry.io/otel v1.25.0
+	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.25.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.25.0
@@ -17,7 +17,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.25.0
 	go.opentelemetry.io/otel/sdk v1.25.0
 	go.opentelemetry.io/otel/sdk/metric v1.25.0
-	go.opentelemetry.io/otel/trace v1.25.0
+	go.opentelemetry.io/otel/trace v1.26.0
 	go.opentelemetry.io/proto/otlp v1.2.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
@@ -35,7 +35,7 @@ require (
 	go.opentelemetry.io/contrib/propagators/jaeger v1.25.0 // indirect
 	go.opentelemetry.io/contrib/propagators/ot v1.25.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.25.0 // indirect
-	go.opentelemetry.io/otel/metric v1.25.0 // indirect
+	go.opentelemetry.io/otel/metric v1.26.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
