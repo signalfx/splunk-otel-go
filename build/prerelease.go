@@ -15,6 +15,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/goyek/goyek/v2"
 	"github.com/goyek/x/cmd"
 )
@@ -31,6 +33,6 @@ var _ = goyek.Define(goyek.Task{
 			return
 		}
 
-		cmd.Exec(a, "multimod prerelease -m stable-v1")
+		cmd.Exec(a, "multimod prerelease -m stable-v1", cmd.Stdout(os.Stdout))
 	},
 })

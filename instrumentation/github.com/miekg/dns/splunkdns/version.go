@@ -16,5 +16,5 @@ package splunkdns
 
 // Version returns the version of splunkdns.
 func Version() string {
-	return "1.14.0"
+	return "1.15.0"
 }
