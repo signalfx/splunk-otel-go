@@ -3,9 +3,6 @@
   "extends": [
     "config:base"
   ],
-  "ignorePaths": [
-    "build/**"
-  ],
   "separateMajorMinor": true,
   "postUpdateOptions" : [
     "gomodTidy"
@@ -15,6 +12,12 @@
       "matchManagers": ["gomod"],
       "matchDepTypes": ["indirect"],
       "enabled": true
+    },
+    {
+      "matchFileNames": ["build/**"],
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": false
     }
   ]
 }
