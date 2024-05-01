@@ -3,9 +3,9 @@ module github.com/signalfx/splunk-otel-go/example
 go 1.21
 
 require (
-	github.com/signalfx/splunk-otel-go/distro v1.15.0
-	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.15.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.50.0
+	github.com/signalfx/splunk-otel-go/distro v1.16.0
+	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.16.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0
 	golang.org/x/sync v0.7.0
 )
 
@@ -17,11 +17,11 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.51.0 // indirect
-	go.opentelemetry.io/contrib/propagators/autoprop v0.50.0 // indirect
-	go.opentelemetry.io/contrib/propagators/aws v1.25.0 // indirect
-	go.opentelemetry.io/contrib/propagators/b3 v1.25.0 // indirect
-	go.opentelemetry.io/contrib/propagators/jaeger v1.25.0 // indirect
-	go.opentelemetry.io/contrib/propagators/ot v1.25.0 // indirect
+	go.opentelemetry.io/contrib/propagators/autoprop v0.51.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.26.0 // indirect
+	go.opentelemetry.io/contrib/propagators/b3 v1.26.0 // indirect
+	go.opentelemetry.io/contrib/propagators/jaeger v1.26.0 // indirect
+	go.opentelemetry.io/contrib/propagators/ot v1.26.0 // indirect
 	go.opentelemetry.io/otel v1.26.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.26.0 // indirect
@@ -39,7 +39,7 @@ require (
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240401170217-c3f982113cda // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
 	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
