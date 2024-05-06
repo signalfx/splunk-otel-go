@@ -32,7 +32,7 @@ func registerMetrics(db *sql.DB, meter metric.Meter, poolName string) (metric.Re
 		return nil, err
 	}
 
-	max, err := meter.Int64ObservableUpDownCounter(
+	maxConn, err := meter.Int64ObservableUpDownCounter(
 		"db.client.connections.max",
 		metric.WithUnit("{connection}"),
 		metric.WithDescription("The maximum number of open connections allowed"),
@@ -71,13 +71,13 @@ func registerMetrics(db *sql.DB, meter metric.Meter, poolName string) (metric.Re
 			o.ObserveInt64(usage, int64(stats.Idle), opt)
 
 			opt = metric.WithAttributeSet(poolSet)
-			o.ObserveInt64(max, int64(stats.MaxOpenConnections), opt)
+			o.ObserveInt64(maxConn, int64(stats.MaxOpenConnections), opt)
 			o.ObserveInt64(waitTime, int64(stats.WaitDuration), opt)
 
 			return nil
 		},
 		usage,
-		max,
+		maxConn,
 		waitTime,
 	)
 	if err != nil {

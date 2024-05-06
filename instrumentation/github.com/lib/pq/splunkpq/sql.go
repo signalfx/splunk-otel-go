@@ -53,7 +53,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/internal"
 )
 
-func init() { //nolint: gochecknoinits // register db driver
+func init() { //nolint:init // register db driver
 	splunksql.Register("postgres", splunksql.InstrumentationConfig{
 		DBSystem:  splunksql.DBSystemPostgreSQL,
 		DSNParser: DSNParser,
