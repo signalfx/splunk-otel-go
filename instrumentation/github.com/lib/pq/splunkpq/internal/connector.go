@@ -179,7 +179,7 @@ func parseEnviron(env []string) (out map[string]string) { //nolint: funlen, gocy
 	out = make(map[string]string)
 
 	for _, v := range env {
-		parts := strings.SplitN(v, "=", 2) //nolint: gomnd // split count
+		parts := strings.SplitN(v, "=", 2) //nolint:mnd // split count
 
 		accrue := func(keyname string) {
 			out[keyname] = parts[1]
