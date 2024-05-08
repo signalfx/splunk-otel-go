@@ -49,7 +49,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
-func init() { //nolint:init // register db driver
+func init() { //nolint:gochecknoinits // register db driver
 	splunksql.Register("mysql", splunksql.InstrumentationConfig{
 		DBSystem:  splunksql.DBSystemMySQL,
 		DSNParser: DSNParser,
