@@ -726,7 +726,7 @@ func (coll *collector) Start(t *testing.T) {
 	go func() { errCh <- coll.grpcSrv.Serve(ln) }()
 
 	// Wait until gRPC server is up.
-	dialOpts := []grpc.DialOption{grpc.WithBlock()}
+	var dialOpts []grpc.DialOption
 	if coll.TLS {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig(t))))
 	} else {
