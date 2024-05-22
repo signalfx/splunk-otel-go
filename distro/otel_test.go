@@ -41,7 +41,6 @@ import (
 	"go.uber.org/goleak"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/signalfx/splunk-otel-go/distro"
@@ -721,20 +720,11 @@ func (coll *collector) Start(t *testing.T) {
 	// Serve and then stop during cleanup.
 	t.Cleanup(func() {
 		coll.grpcSrv.GracefulStop()
-		assert.NoError(t, <-errCh)
+		if err := <-errCh; err != nil && err != grpc.ErrServerStopped {
+			assert.NoError(t, err)
+		}
 	})
 	go func() { errCh <- coll.grpcSrv.Serve(ln) }()
-
-	// Wait until gRPC server is up.
-	dialOpts := []grpc.DialOption{grpc.WithBlock()}
-	if coll.TLS {
-		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(clientTLSConfig(t))))
-	} else {
-		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	}
-	conn, err := grpc.NewClient(coll.Endpoint, dialOpts...)
-	require.NoError(t, err)
-	require.NoError(t, conn.Close())
 }
 
 func (coll *collector) ExportedSpans() *spansExportRequest {
