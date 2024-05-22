@@ -1,7 +1,6 @@
-version: "3.9"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.100.0
+    image: otel/opentelemetry-collector-contrib:0.101.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
     command: --config /etc/otel/config.yaml

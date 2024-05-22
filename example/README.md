@@ -16,7 +16,7 @@ which propagates them to Splunk Observability Cloud.
 Run the OpenTelemetry Collector and Jaeger instance:
 
 ```sh
-SPLUNK_ACCESS_TOKEN=<access_token> docker-compose up
+SPLUNK_ACCESS_TOKEN=<access_token> docker compose up -d
 ```
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
@@ -42,5 +42,5 @@ You can find the collected telemetry in:
 Cleanup:
 
 ```sh
-docker-compose down
+docker compose down
 ```
