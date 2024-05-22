@@ -720,7 +720,9 @@ func (coll *collector) Start(t *testing.T) {
 	// Serve and then stop during cleanup.
 	t.Cleanup(func() {
 		coll.grpcSrv.GracefulStop()
-		assert.NoError(t, <-errCh)
+		if err := <-errCh; err != nil && err != grpc.ErrServerStopped {
+			assert.NoError(t, err)
+		}
 	})
 	go func() { errCh <- coll.grpcSrv.Serve(ln) }()
 }
