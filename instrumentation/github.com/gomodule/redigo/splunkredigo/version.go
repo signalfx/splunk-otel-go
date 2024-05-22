@@ -16,5 +16,5 @@ package splunkredigo
 
 // Version returns the version of splunkredigo.
 func Version() string {
-	return "1.16.0"
+	return "1.17.0"
 }
