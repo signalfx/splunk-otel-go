@@ -31,7 +31,7 @@ jobs:
             run-script: ./goyek.sh -v ci
           - os: windows-2022
             run-script: .\goyek.ps1 -v -skip-docker ci
-          - os: macos-11
+          - os: macos-14
             run-script: ./goyek.sh -v -skip-docker ci
     runs-on: ${{ matrix.os }}
     steps:
@@ -54,16 +54,7 @@ jobs:
         go-version:
         - '1.21'
         - '1.22'
-        os: [ubuntu-20.04, windows-2022, macos-11]
-        # GitHub Actions does not support arm* architectures on default
-        # runners. It is possible to accomplish this with a self-hosted runner
-        # if we want to add this in the future:
-        # https://docs.github.com/en/actions/hosting-your-own-runners/using-self-hosted-runners-in-a-workflow
-        arch: ["386", amd64]
-        exclude:
-        # Not a supported Go OS/architecture.
-        - os: macos-11
-          arch: "386"
+        os: [ubuntu-20.04, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4.1.7
@@ -72,5 +63,3 @@ jobs:
         go-version: ${{ matrix.go-version }}
         check-latest: true
     - run: make test-short
-      env:
-        GOARCH: ${{ matrix.arch }}
