@@ -34,7 +34,7 @@ func TestDSNParser(t *testing.T) {
 		{
 			name:   "invalid dsn",
 			dsn:    "invalid dsn",
-			errStr: "cannot parse `invalid dsn`: failed to parse as DSN (invalid dsn)",
+			errStr: "cannot parse `invalid dsn`: failed to parse as keyword/value (invalid keyword/value)",
 		},
 		{
 			name: "url: tcp address",
