@@ -27,7 +27,7 @@ require (
 	k8s.io/apimachinery v0.29.4 // indirect
 	k8s.io/client-go v0.29.4 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0 // indirect
+	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8 // indirect
 )
 
 replace (
