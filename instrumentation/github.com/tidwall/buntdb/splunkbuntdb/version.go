@@ -16,5 +16,5 @@ package splunkbuntdb
 
 // Version returns the version of splunkbuntdb.
 func Version() string {
-	return "1.17.0"
+	return "1.18.0"
 }
