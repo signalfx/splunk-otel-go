@@ -16,5 +16,5 @@ package splunksql
 
 // Version returns the version of splunksql.
 func Version() string {
-	return "1.17.0"
+	return "1.18.0"
 }
