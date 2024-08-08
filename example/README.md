@@ -13,6 +13,8 @@ which propagates them to Splunk Observability Cloud.
 
 ## Usage
 
+### OpenTelmemtry Collector
+
 Run the OpenTelemetry Collector and Jaeger instance:
 
 ```sh
@@ -43,4 +45,35 @@ Cleanup:
 
 ```sh
 docker compose down
+```
+
+### Splunk Distribution of the OpenTelemetry Collector
+
+Run the Splunk Distribution of the OpenTelemetry Collector instance:
+
+```sh
+SPLUNK_ACCESS_TOKEN=<access_token> docker compose -f docker-compose-splunk.yaml up -d
+```
+
+The value for `SPLUNK_ACCESS_TOKEN` can be found
+[here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
+Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
+
+Run the instrumented application:
+
+```sh
+export OTEL_SERVICE_NAME="splunk-otel-go-example"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
+go run .
+```
+
+You can find the collected telemetry in:
+
+- Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
+  > Note: Processing might take some time.
+
+Cleanup:
+
+```sh
+docker compose -f docker-compose-splunk.yaml down
 ```

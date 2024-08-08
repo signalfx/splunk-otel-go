@@ -1,0 +1,12 @@
+services:
+  otel-collector:
+    image: quay.io/signalfx/splunk-otel-collector:latest
+    environment:
+      - SPLUNK_ACCESS_TOKEN
+      - SPLUNK_REALM=us0
+    ports:
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "14268:14268" # Jaeger Thrift over HTTP receiver
+      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
