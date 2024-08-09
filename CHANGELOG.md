@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add container attributes to resource if available. (#3374)
+
 ## [1.18.0] - 2024-07-11
 
 This release upgrades [OpenTelemetry Go to v1.28.0/v0.50.0/v0.4.0][otel-v1.28.0]

@@ -116,9 +116,10 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 	// SDK's default resource.
 	res := resource.Default()
 
-	// Add process and Go runtime information.
+	// Add process, Go runtime, and container information.
 	procRes, err := resource.New(ctx,
 		resource.WithProcess(),
+		resource.WithContainer(),
 	)
 	if err != nil {
 		return nil, err
