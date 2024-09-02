@@ -19,7 +19,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.54.0 // indirect
 	go.opentelemetry.io/contrib/propagators/autoprop v0.53.0 // indirect
-	go.opentelemetry.io/contrib/propagators/aws v1.28.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.29.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.28.0 // indirect
 	go.opentelemetry.io/contrib/propagators/jaeger v1.28.0 // indirect
 	go.opentelemetry.io/contrib/propagators/ot v1.28.0 // indirect
