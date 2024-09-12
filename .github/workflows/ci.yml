@@ -67,3 +67,8 @@ jobs:
   compatibility-check:
     runs-on: ubuntu-22.04
     needs: [compatibility-test]
+    steps:
+      - name: Test if compatibility-test passed
+        run: |
+          echo ${{ needs.compatibility-test.result }}
+          test ${{ needs.compatibility-test.result }} == "success"
