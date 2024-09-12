@@ -66,6 +66,7 @@ jobs:
 
   compatibility-check:
     runs-on: ubuntu-22.04
+    if: ${{ always() }}
     needs: [compatibility-test]
     steps:
       - name: Test if compatibility-test passed
