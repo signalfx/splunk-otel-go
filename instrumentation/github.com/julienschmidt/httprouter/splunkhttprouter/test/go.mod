@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter/test
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/julienschmidt/httprouter v1.3.0
