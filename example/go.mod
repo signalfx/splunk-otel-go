@@ -1,6 +1,11 @@
 module github.com/signalfx/splunk-otel-go/example
 
 go 1.22
+<<<<<<< HEAD
+=======
+
+toolchain go1.23.1
+>>>>>>> b375bddb233dcb41dd249a18165d0a4a76458445
 
 require (
 	github.com/signalfx/splunk-otel-go/distro v1.19.0

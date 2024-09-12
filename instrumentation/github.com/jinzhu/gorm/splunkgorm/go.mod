@@ -1,6 +1,11 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm
 
 go 1.22
+<<<<<<< HEAD
+=======
+
+toolchain go1.23.1
+>>>>>>> b375bddb233dcb41dd249a18165d0a4a76458445
 
 require (
 	github.com/jinzhu/gorm v1.9.16
