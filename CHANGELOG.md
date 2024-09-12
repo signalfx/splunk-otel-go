@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+The release requires at least [Go 1.22].
+
+### Removed
+
+- Drop support for [Go 1.21]. (#3422)
+
 ## [1.19.0] - 2024-09-03
 
 This release upgrades [OpenTelemetry Go to v1.29.0/v0.51.0/v0.5.0][otel-v1.29.0]
@@ -683,5 +689,6 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
 
+[Go 1.22]: https://go.dev/doc/go1.22
 [Go 1.21]: https://go.dev/doc/go1.21
 [Go 1.20]: https://go.dev/doc/go1.20
