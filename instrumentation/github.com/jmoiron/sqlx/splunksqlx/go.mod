@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/jmoiron/sqlx v1.4.0

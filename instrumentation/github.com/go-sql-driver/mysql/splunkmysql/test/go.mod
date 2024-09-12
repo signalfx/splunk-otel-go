@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/ory/dockertest/v3 v3.10.0

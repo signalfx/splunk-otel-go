@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/lib/pq v1.10.9
