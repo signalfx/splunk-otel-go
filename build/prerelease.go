@@ -33,6 +33,6 @@ var _ = goyek.Define(goyek.Task{
 			return
 		}
 
-		cmd.Exec(a, "multimod prerelease -m stable-v1", cmd.Stdout(os.Stdout))
+		cmd.Exec(a, "multimod prerelease -m stable-v1", cmd.Stdout(os.Stdout), cmd.Stderr(os.Stdout))
 	},
 })
