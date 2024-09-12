@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splu
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/lib/pq v1.10.9
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.19.0

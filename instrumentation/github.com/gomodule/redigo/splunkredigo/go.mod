@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/re
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/gomodule/redigo v1.9.2
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.19.0

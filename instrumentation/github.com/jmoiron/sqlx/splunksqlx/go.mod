@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sql
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.19.0

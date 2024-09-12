@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.55.0

@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elast
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/ory/dockertest v3.3.5+incompatible

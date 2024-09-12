@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/s
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/miekg/dns v1.1.62
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.19.0

@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi v1.19.0

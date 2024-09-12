@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophe
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/graph-gophers/graphql-go v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql v1.19.0

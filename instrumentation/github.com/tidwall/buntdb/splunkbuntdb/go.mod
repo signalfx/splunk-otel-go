@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/bun
 
 go 1.22
 
-toolchain go1.23.1
-
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.19.0
 	github.com/stretchr/testify v1.9.0
