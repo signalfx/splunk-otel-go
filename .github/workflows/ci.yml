@@ -63,3 +63,7 @@ jobs:
         go-version: ${{ matrix.go-version }}
         check-latest: true
     - run: make test-short
+
+  compatibility-check:
+    runs-on: ubuntu-22.04
+    needs: [compatibility-test]
