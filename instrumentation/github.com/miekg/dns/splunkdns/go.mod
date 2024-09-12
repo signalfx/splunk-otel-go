@@ -1,11 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
 
 go 1.22
-<<<<<<< HEAD
-=======
-
-toolchain go1.23.1
->>>>>>> b375bddb233dcb41dd249a18165d0a4a76458445
 
 require (
 	github.com/miekg/dns v1.1.62

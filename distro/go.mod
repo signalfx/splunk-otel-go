@@ -1,11 +1,6 @@
 module github.com/signalfx/splunk-otel-go/distro
 
 go 1.22
-<<<<<<< HEAD
-=======
-
-toolchain go1.23.1
->>>>>>> b375bddb233dcb41dd249a18165d0a4a76458445
 
 require (
 	github.com/go-logr/logr v1.4.2

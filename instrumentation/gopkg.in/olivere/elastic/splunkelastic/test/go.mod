@@ -1,11 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic/test
 
 go 1.22
-<<<<<<< HEAD
-=======
-
-toolchain go1.23.1
->>>>>>> b375bddb233dcb41dd249a18165d0a4a76458445
 
 require (
 	github.com/olivere/elastic/v7 v7.0.32
