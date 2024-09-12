@@ -1,11 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
 
 go 1.22.0
-<<<<<<< Updated upstream
-
-toolchain go1.23.1
-=======
->>>>>>> Stashed changes
 
 require (
 	github.com/miekg/dns v1.1.62
