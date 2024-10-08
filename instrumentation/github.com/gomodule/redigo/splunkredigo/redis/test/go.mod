@@ -28,7 +28,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
-	github.com/opencontainers/runc v1.1.14 // indirect
+	github.com/opencontainers/runc v1.1.15 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.20.0 // indirect
