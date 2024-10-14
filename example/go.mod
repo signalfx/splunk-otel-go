@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	github.com/signalfx/splunk-otel-go/distro v1.20.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.20.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.55.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.56.0
 	golang.org/x/sync v0.8.0
 )
 
@@ -17,12 +17,12 @@ require (
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/runtime v0.55.0 // indirect
-	go.opentelemetry.io/contrib/propagators/autoprop v0.55.0 // indirect
-	go.opentelemetry.io/contrib/propagators/aws v1.30.0 // indirect
-	go.opentelemetry.io/contrib/propagators/b3 v1.30.0 // indirect
-	go.opentelemetry.io/contrib/propagators/jaeger v1.30.0 // indirect
-	go.opentelemetry.io/contrib/propagators/ot v1.30.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/runtime v0.56.0 // indirect
+	go.opentelemetry.io/contrib/propagators/autoprop v0.56.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/b3 v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/jaeger v1.31.0 // indirect
+	go.opentelemetry.io/contrib/propagators/ot v1.31.0 // indirect
 	go.opentelemetry.io/otel v1.31.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.31.0 // indirect
