@@ -150,7 +150,7 @@ and [OpenTelemetry Go Contrib v1.17.0/v0.42.0/v0.11.0][contrib-v1.17.0].
 
 The release enables metrics support by default
 as OpenTelemetry Go metrics API is stable
-([`v1.16.0`]([otel-v1.16.0])).
+([`v1.16.0`][otel-v1.16.0]).
 
 This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
 [OpenTelemetry Go Contrib to v1.17.0/v0.42.0/v0.11.0][contrib-v1.17.0].
@@ -216,7 +216,7 @@ The release adds metrics support.
 Set `OTEL_METRICS_EXPORTER=otlp` to enable metrics support.
 However, take notice that as for now
 the OpenTelemetry Go metrics API is not stable
-([`v0.37.0`]([otel-v1.14.0])).
+([`v0.37.0`][otel-v1.14.0]).
 
 This upgrades [OpenTelemetry Go to v1.14.0/v0.37.0/v0.0.4][otel-v1.14.0] and
 [OpenTelemetry Go Contrib to v1.15.0/v0.40.0/v0.9.0][contrib-v1.15.0].
