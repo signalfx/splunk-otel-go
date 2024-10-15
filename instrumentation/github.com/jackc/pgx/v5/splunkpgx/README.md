@@ -4,7 +4,7 @@
 
 This package instruments the
 [`github.com/jackc/pgx`](https://github.com/jackc/pgx) package using the
-[`splunksql`](../../../../database/sql/splunksql) package.
+[`splunksql`](../../../../../database/sql/splunksql) package.
 
 ## Getting Started
 

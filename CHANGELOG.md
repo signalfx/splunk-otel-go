@@ -506,7 +506,7 @@ and `go.opentelemetry.io/contrib*` dependencies are updated to [`v1.7.0`/`v0.32.
 - Update `go.opentelemetry.io/otel*` dependencies from [`v1.0.0-RC3`][otel-v1.0.0-RC3]
   to [`v1.3.0`][otel-v1.3.0].
 - Update `go.opentelemetry.io/contrib*` dependencies from [`v0.23.0`][contrib-v0.23.0]
-to [`v0.28.0`][contrib-v0.28.0].
+to [`v1.3.0`/`v0.28.0`][contrib-v1.3.0].
 
 ## [0.6.0] - 2021-09-13
 
@@ -689,7 +689,6 @@ an impedance mismatch with this duplicate batching.
 [contrib-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.7.0
 [contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0
 [contrib-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.3.0
-[contrib-v0.28.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.28.0
 [contrib-v0.23.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.23.0
 [contrib-v0.22.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.22.0
 [contrib-v0.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.21.0
