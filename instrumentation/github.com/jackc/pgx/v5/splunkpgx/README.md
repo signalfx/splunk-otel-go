@@ -1,10 +1,10 @@
 # Splunk Instrumentation for the PostgreSQL Driver Package pgx
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/instrumentation/github.com/pgx/v5/jackc/pgx/splunkpgx.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/pgx/splunkpgx)
+[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx)
 
 This package instruments the
 [`github.com/jackc/pgx`](https://github.com/jackc/pgx) package using the
-[`splunksql`](../../../../database/sql/splunksql) package.
+[`splunksql`](../../../../../database/sql/splunksql) package.
 
 ## Getting Started
 

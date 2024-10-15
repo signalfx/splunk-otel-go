@@ -150,7 +150,7 @@ and [OpenTelemetry Go Contrib v1.17.0/v0.42.0/v0.11.0][contrib-v1.17.0].
 
 The release enables metrics support by default
 as OpenTelemetry Go metrics API is stable
-([`v1.16.0`]([otel-v1.16.0])).
+([`v1.16.0`][otel-v1.16.0]).
 
 This upgrades [OpenTelemetry Go to v1.16.0/v0.39.0][otel-v1.16.0] and
 [OpenTelemetry Go Contrib to v1.17.0/v0.42.0/v0.11.0][contrib-v1.17.0].
@@ -216,7 +216,7 @@ The release adds metrics support.
 Set `OTEL_METRICS_EXPORTER=otlp` to enable metrics support.
 However, take notice that as for now
 the OpenTelemetry Go metrics API is not stable
-([`v0.37.0`]([otel-v1.14.0])).
+([`v0.37.0`][otel-v1.14.0]).
 
 This upgrades [OpenTelemetry Go to v1.14.0/v0.37.0/v0.0.4][otel-v1.14.0] and
 [OpenTelemetry Go Contrib to v1.15.0/v0.40.0/v0.9.0][contrib-v1.15.0].
@@ -506,7 +506,7 @@ and `go.opentelemetry.io/contrib*` dependencies are updated to [`v1.7.0`/`v0.32.
 - Update `go.opentelemetry.io/otel*` dependencies from [`v1.0.0-RC3`][otel-v1.0.0-RC3]
   to [`v1.3.0`][otel-v1.3.0].
 - Update `go.opentelemetry.io/contrib*` dependencies from [`v0.23.0`][contrib-v0.23.0]
-to [`v0.28.0`][contrib-v0.28.0].
+to [`v1.3.0`/`v0.28.0`][contrib-v1.3.0].
 
 ## [0.6.0] - 2021-09-13
 
@@ -689,7 +689,6 @@ an impedance mismatch with this duplicate batching.
 [contrib-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.7.0
 [contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0
 [contrib-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.3.0
-[contrib-v0.28.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.28.0
 [contrib-v0.23.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.23.0
 [contrib-v0.22.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.22.0
 [contrib-v0.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.21.0
