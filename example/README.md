@@ -95,7 +95,8 @@ You can find the collected telemetry in:
 
 ### FIPS mode - Linux
 
-Run the instrumented applications using [`boringcrypto`](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#go-fips-compliance):
+Run the instrumented applications using
+[`boringcrypto`](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#go-fips-compliance):
 
 ```sh
 CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go run .
