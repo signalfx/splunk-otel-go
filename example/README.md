@@ -100,18 +100,3 @@ Run the instrumented applications using [`boringcrypto`](https://github.com/micr
 ```sh
 CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go run .
 ```
-
-### FIPS mode - Windows
-
-Install the [Microsoft Go fork](https://github.com/microsoft/go).
-
-Enable [FIPS mode](https://learn.microsoft.com/en-us/windows/security/security-foundations/certification/fips-140-validation#use-windows-in-a-fips-approved-mode-of-operation)
-on Windows.
-
-Run the instrumented applications using:
-
-```sh
-CGO_ENABLED=1 GOEXPERIMENT=cngcrypto go run -tags=requirefips .
-```
-
-Reference: [Microsoft Go fork FIPS compliance](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#microsoft-go-fork-fips-compliance).
