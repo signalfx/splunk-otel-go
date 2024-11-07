@@ -77,3 +77,41 @@ Cleanup:
 ```sh
 docker compose -f docker-compose-splunk.yaml down
 ```
+
+### Direct to Splunk Observability Cloud
+
+Run the instrumented application:
+
+```sh
+export OTEL_SERVICE_NAME="splunk-otel-go-example"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
+SPLUNK_REALM=<realm> SPLUNK_ACCESS_TOKEN=<access_token> go run .
+```
+
+You can find the collected telemetry in:
+
+- Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
+  > Note: Processing might take some time.
+
+### FIPS mode - Linux
+
+Run the instrumented applications using [`boringcrypto`](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#go-fips-compliance):
+
+```sh
+CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go run .
+```
+
+### FIPS mode - Windows
+
+Install the [Microsoft Go fork](https://github.com/microsoft/go).
+
+Enable [FIPS mode](https://learn.microsoft.com/en-us/windows/security/security-foundations/certification/fips-140-validation#use-windows-in-a-fips-approved-mode-of-operation)
+on Windows.
+
+Run the instrumented applications using:
+
+```sh
+CGO_ENABLED=1 GOEXPERIMENT=cngcrypto go run -tags=requirefips .
+```
+
+Reference: [Microsoft Go fork FIPS compliance](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#microsoft-go-fork-fips-compliance).
