@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/distro
 
-go 1.22.0
+go 1.22.7
 
 require (
 	github.com/go-logr/logr v1.4.2
@@ -21,7 +21,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.3.1
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.67.1
+	google.golang.org/grpc v1.68.0
 )
 
 require (
