@@ -171,14 +171,14 @@ func (tx *Tx) CreateIndexOptions(name, pattern string, opts *buntdb.IndexOptions
 }
 
 // CreateSpatialIndex calls the underlying Tx.CreateSpatialIndex and traces the query.
-func (tx *Tx) CreateSpatialIndex(name, pattern string, rect func(item string) (min, max []float64)) error {
+func (tx *Tx) CreateSpatialIndex(name, pattern string, rect func(item string) (minimum, maximum []float64)) error {
 	return tx.cfg.WithSpan(tx.cfg.ctx, "CreateSpatialIndex", func(context.Context) error {
 		return tx.Tx.CreateSpatialIndex(name, pattern, rect)
 	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateSpatialIndex")))
 }
 
 // CreateSpatialIndexOptions calls the underlying Tx.CreateSpatialIndexOptions and traces the query.
-func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.IndexOptions, rect func(item string) (min, max []float64)) error {
+func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.IndexOptions, rect func(item string) (minimum, maximum []float64)) error {
 	return tx.cfg.WithSpan(tx.cfg.ctx, "CreateSpatialIndexOptions", func(context.Context) error {
 		return tx.Tx.CreateSpatialIndexOptions(name, pattern, opts, rect)
 	}, trace.WithAttributes(semconv.DBOperationKey.String("CreateSpatialIndexOptions")))
