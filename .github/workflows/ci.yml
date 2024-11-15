@@ -43,6 +43,7 @@ jobs:
       - run: ${{ matrix.run-script }}
       - uses: codecov/codecov-action@v5.0.0
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ./coverage.out
           flags: ${{ runner.os }}
