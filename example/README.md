@@ -95,6 +95,13 @@ You can find the collected telemetry in:
 
 ### FIPS mode - Linux
 
+> [!NOTE]  
+> As BoringSSL is FIPS 140-2 certified, an application built using `GOEXPERIMENT=boringcrypto`
+> is more likely to be FIPS 140-2 compliant.
+> Yet Google does not provide any liability about the suitability of this code
+> in relation to the FIPS 140-2 standard.
+> More information can be found [here](https://go.dev/src/crypto/internal/boring/README).
+
 Run the instrumented applications using
 [`boringcrypto`](https://github.com/microsoft/go/blob/microsoft/main/eng/doc/fips/README.md#go-fips-compliance).
 For example:
