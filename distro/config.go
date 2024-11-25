@@ -45,10 +45,6 @@ const (
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
 
-	// splunkMetricsEndpointKey defines the endpoint Splunk specific metrics
-	// are sent. This is not currently supported.
-	splunkMetricsEndpointKey = "SPLUNK_METRICS_ENDPOINT"
-
 	// splunkRealmKey defines the Splunk realm to build an endpoint from.
 	splunkRealmKey = "SPLUNK_REALM"
 )
