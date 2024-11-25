@@ -73,11 +73,6 @@ func Run(opts ...Option) (SDK, error) {
 	}))
 	otel.SetLogger(c.Logger)
 
-	// SPLUNK_METRICS_ENDPOINT is currently not supported, log this fact.
-	if _, ok := os.LookupEnv(splunkMetricsEndpointKey); ok {
-		c.Logger.Info("SPLUNK_METRICS_ENDPOINT set; not supported by this distro")
-	}
-
 	res, err := newResource(ctx)
 	if err != nil {
 		return SDK{}, err
