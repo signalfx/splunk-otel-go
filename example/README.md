@@ -113,9 +113,10 @@ CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go run .
 ### FIPS mode - Windows
 
 > [!NOTE]
-> Microsoft maitains [a fork of Go](https://github.com/microsoft/go)
-> that can be used to build applications
-> which are likely to be FIPS 140-2 compliant.
+> Microsoft maintains [a fork of Go](https://github.com/microsoft/go)
+> that is configurable to use a FIPS 140-2 compliant cryptography.
+> All Go applications running on Windows and intended to be
+> FIPS 140-2 compliant, should be built using this fork.
 > More information can be found [here](https://github.com/microsoft/go/tree/microsoft/main/eng/doc/fips).
 
 Build the instrumented application using
