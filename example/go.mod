@@ -5,7 +5,7 @@ go 1.22.7
 require (
 	github.com/signalfx/splunk-otel-go/distro v1.22.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.22.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	golang.org/x/sync v0.10.0
 )
 
