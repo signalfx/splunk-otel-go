@@ -18,12 +18,12 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/runtime v0.57.0 // indirect
-	go.opentelemetry.io/contrib/propagators/autoprop v0.57.0 // indirect
-	go.opentelemetry.io/contrib/propagators/aws v1.32.0 // indirect
-	go.opentelemetry.io/contrib/propagators/b3 v1.32.0 // indirect
-	go.opentelemetry.io/contrib/propagators/jaeger v1.32.0 // indirect
-	go.opentelemetry.io/contrib/propagators/ot v1.32.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/runtime v0.58.0 // indirect
+	go.opentelemetry.io/contrib/propagators/autoprop v0.58.0 // indirect
+	go.opentelemetry.io/contrib/propagators/aws v1.33.0 // indirect
+	go.opentelemetry.io/contrib/propagators/b3 v1.33.0 // indirect
+	go.opentelemetry.io/contrib/propagators/jaeger v1.33.0 // indirect
+	go.opentelemetry.io/contrib/propagators/ot v1.33.0 // indirect
 	go.opentelemetry.io/otel v1.33.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.33.0 // indirect
