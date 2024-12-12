@@ -95,7 +95,7 @@ You can find the collected telemetry in:
 
 ### FIPS mode - Linux
 
-> [!NOTE]  
+> [!NOTE]
 > As BoringSSL is FIPS 140-2 certified, an application built using `GOEXPERIMENT=boringcrypto`
 > is more likely to be FIPS 140-2 compliant.
 > Yet Google does not provide any liability about the suitability of this code
@@ -109,3 +109,27 @@ For example:
 ```sh
 CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go run .
 ```
+
+### FIPS mode - Windows
+
+> [!NOTE]
+> Microsoft maintains [a fork of Go](https://github.com/microsoft/go)
+> that is configurable to use a FIPS 140-2 compliant cryptography.
+> All Go applications running on Windows and intended to be
+> FIPS 140-2 compliant, should be built using this fork.
+> More information can be found [here](https://github.com/microsoft/go/tree/microsoft/main/eng/doc/fips).
+
+Build the instrumented application using
+[the container image containing the Microsoft build of Go](https://github.com/microsoft/go-images).
+Make sure to set `GOOS=windows GOEXPERIMENT=cngcrypto`
+and add the `requirefips` Go build tag.
+For example, using Git Bash on Windows in the root of the repository:
+
+```sh
+MSYS_NO_PATHCONV=1 docker run --rm -w /app -v $(pwd):/app mcr.microsoft.com/oss/go/microsoft/golang sh -c \
+"cd example && GOOS=windows GOEXPERIMENT=cngcrypto go build -tags=requirefips"
+```
+
+Before running the application make sure to enable the Windows FIPS policy.
+For testing purposes, Windows FIPS policy can be enabled via the registry key `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\FipsAlgorithmPolicy`
+dword value `Enabled` set to `1`.
