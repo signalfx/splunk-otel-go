@@ -20,5 +20,5 @@ package splunkotel // import "github.com/signalfx/splunk-otel-go"
 
 // Version is the current release version of splunk-otel-go in use.
 func Version() string {
-	return "1.22.0"
+	return "1.23.0"
 }
