@@ -1,6 +1,8 @@
 module github.com/signalfx/splunk-otel-go/example
 
-go 1.22.7
+go 1.23
+
+toolchain go1.23.4
 
 require (
 	github.com/signalfx/splunk-otel-go/distro v1.23.0
@@ -11,6 +13,7 @@ require (
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
