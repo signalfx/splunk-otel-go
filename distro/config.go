@@ -35,12 +35,14 @@ const (
 	// OpenTelemetry exporter to use.
 	otelTracesExporterKey  = "OTEL_TRACES_EXPORTER"
 	otelMetricsExporterKey = "OTEL_METRICS_EXPORTER"
+	otelLogsExporterKey    = "OTEL_LOGS_EXPORTER"
 
 	// OpenTelemetry exporter endpoints.
 	otelExporterJaegerEndpointKey      = "OTEL_EXPORTER_JAEGER_ENDPOINT"
 	otelExporterOTLPEndpointKey        = "OTEL_EXPORTER_OTLP_ENDPOINT"
 	otelExporterOTLPTracesEndpointKey  = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
 	otelExporterOTLPMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
+	otelExporterOTLPLogsEndpointKey    = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
@@ -54,6 +56,7 @@ const (
 	defaultAccessToken     = ""
 	defaultTraceExporter   = "otlp"
 	defaultMetricsExporter = "otlp"
+	defaultLogsExporter    = "none"
 	defaultLogLevel        = "info"
 
 	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"
@@ -80,6 +83,7 @@ type config struct {
 	ExportConfig        *exporterConfig
 	TracesExporterFunc  traceExporterFunc
 	MetricsExporterFunc metricsExporterFunc
+	LogsExporterFunc    logsExporterFunc
 }
 
 // newConfig returns a validated config with Splunk defaults.
@@ -97,6 +101,7 @@ func newConfig(opts ...Option) *config {
 	}
 	c.TracesExporterFunc = tracesExporter(c.Logger)
 	c.MetricsExporterFunc = metricsExporter(c.Logger)
+	c.LogsExporterFunc = logsExporter(c.Logger)
 	return c
 }
 

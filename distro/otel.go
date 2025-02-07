@@ -22,7 +22,9 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -96,6 +98,15 @@ func Run(opts ...Option) (SDK, error) {
 	}
 
 	shutdownFn, err = runMetrics(c, res)
+	if err != nil {
+		sdk.Shutdown(ctx) //nolint:errcheck // the Shutdown errors are logged
+		return SDK{}, err
+	}
+	if shutdownFn != nil {
+		sdk.shutdownFuncs = append(sdk.shutdownFuncs, shutdownFn)
+	}
+
+	shutdownFn, err = runLogs(c, res)
 	if err != nil {
 		sdk.Shutdown(ctx) //nolint:errcheck // the Shutdown errors are logged
 		return SDK{}, err
@@ -188,6 +199,30 @@ func runMetrics(c *config, res *resource.Resource) (shutdownFunc, error) {
 
 	return provider.Shutdown, nil
 }
+
+func runLogs(c *config, res *resource.Resource) (shutdownFunc, error) {
+	if c.LogsExporterFunc == nil {
+		c.Logger.V(1).Info("OTEL_LOGS_EXPORTER set to none: Logs disabled")
+		// "none" exporter configured.
+		return nil, nil
+	}
+
+	exp, err := c.LogsExporterFunc(c.ExportConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	o := []log.LoggerProviderOption{
+		log.WithResource(res),
+		log.WithProcessor(log.NewBatchProcessor(exp)),
+	}
+
+	provider := log.NewLoggerProvider(o...)
+	global.SetLoggerProvider(provider)
+
+	return provider.Shutdown, nil
+}
+
 
 func serviceNameDefined(r *resource.Resource) bool {
 	val, ok := r.Set().Value("service.name")

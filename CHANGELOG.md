@@ -8,6 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add logs support and `OTEL_LOGS_EXPORTER` environment variable.
+  `OTEL_LOGS_EXPORTER` accepts:
+  `none` - logs disabled,
+  `otlp` - OTLP gRPC exporter.
+  Currently `OTEL_LOGS_EXPORTER` defaults to `none`
+  as OpenTelemetry Go logs API and SDK are not stable yet.
+  Set `OTEL_LOGS_EXPORTER=otlp` to enable
+  logs support.
+
 ## [1.22.0] - 2024-11-14
 
 This release upgrades [OpenTelemetry Go to v1.32.0/v0.54.0/v0.8.0/v0.0.11][otel-v1.32.0]
