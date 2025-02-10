@@ -9,7 +9,7 @@ require (
 	github.com/goyek/x v0.2.0
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
 	go.opentelemetry.io/build-tools/crosslink v0.17.0
-	go.opentelemetry.io/build-tools/multimod v0.17.0
+	go.opentelemetry.io/build-tools/multimod v0.18.0
 )
 
 require (
@@ -199,7 +199,7 @@ require (
 	gitlab.com/bosi/decorder v0.4.2 // indirect
 	go-simpler.org/musttag v0.13.0 // indirect
 	go-simpler.org/sloglint v0.7.2 // indirect
-	go.opentelemetry.io/build-tools v0.17.0 // indirect
+	go.opentelemetry.io/build-tools v0.18.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
