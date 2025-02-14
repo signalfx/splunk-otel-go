@@ -188,7 +188,7 @@ func splitAddress(address string) (ip, hostname string, port int) {
 		base10 = 10
 		bit16  = 16
 	)
-	//nolint:gosec // False positive as bit size is 16.
+
 	if p64, err := strconv.ParseUint(p, base10, bit16); err == nil {
 		port = int(p64)
 	}
