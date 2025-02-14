@@ -266,6 +266,7 @@ func newOTLPlogExporter(c *exporterConfig) (log.Exporter, error) {
 
 	var opts []otlploggrpc.Option
 
+	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
 	if c.AccessToken != "" {
 		opts = append(opts, otlploggrpc.WithHeaders(map[string]string{
 			"X-Sf-Token": c.AccessToken,

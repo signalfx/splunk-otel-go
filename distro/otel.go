@@ -22,8 +22,8 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -222,7 +222,6 @@ func runLogs(c *config, res *resource.Resource) (shutdownFunc, error) {
 
 	return provider.Shutdown, nil
 }
-
 
 func serviceNameDefined(r *resource.Resource) bool {
 	val, ok := r.Set().Value("service.name")
