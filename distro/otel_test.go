@@ -31,10 +31,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel/log/global"
 	otelt "go.opentelemetry.io/otel/trace"
+	clpb "go.opentelemetry.io/proto/otlp/collector/logs/v1"
 	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	ctpb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	comm "go.opentelemetry.io/proto/otlp/common/v1"
+	lpb "go.opentelemetry.io/proto/otlp/logs/v1"
 	mpb "go.opentelemetry.io/proto/otlp/metrics/v1"
 	rpb "go.opentelemetry.io/proto/otlp/resource/v1"
 	tpb "go.opentelemetry.io/proto/otlp/trace/v1"
@@ -49,6 +53,7 @@ import (
 const (
 	spanName   = "test span"
 	metricName = "test_instrument"
+	logBody    = "test_log_body"
 	token      = "secret token"
 
 	testCert = `
@@ -495,6 +500,71 @@ func TestMetricsResource(t *testing.T) {
 	assertResource(t, got.Resource.GetAttributes())
 }
 
+func TestRunOTLPLogsExporterTLS(t *testing.T) {
+	coll := &collector{TLS: true}
+	coll.Start(t)
+	t.Setenv("OTEL_LOGS_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://"+coll.Endpoint)
+
+	emitLogs(t, distro.WithTLSConfig(clientTLSConfig(t)))
+
+	got := coll.ExportedLogs()
+	assertHasLog(t, got, logBody)
+}
+
+func TestRunLogsExporterDefault(t *testing.T) {
+	// By default the logs exporter is none.
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_LOGS_EXPORTER", "")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitLogs(t)
+
+	got := coll.ExportedLogs()
+	assert.Nil(t, got)
+}
+
+func TestRunLogsExporterNone(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_LOGS_EXPORTER", "none")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitLogs(t)
+
+	got := coll.ExportedLogs()
+	assert.Nil(t, got)
+}
+
+func TestInvalidLogsExporter(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	// Explicitly set none exporter.
+	t.Setenv("OTEL_LOGS_EXPORTER", "invalid value")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitLogs(t)
+
+	// Ensure none is used as the default when the OTEL_LOGS_EXPORTER value
+	// is invalid.
+	got := coll.ExportedLogs()
+	require.Nil(t, got)
+}
+
+func TestLogsResource(t *testing.T) {
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_LOGS_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+
+	emitLogs(t)
+
+	got := coll.ExportedLogs()
+	require.NotNil(t, got)
+	assertResource(t, got.Resource.GetAttributes())
+}
+
 func TestNoServiceWarn(t *testing.T) {
 	var buf bytes.Buffer
 
@@ -592,6 +662,20 @@ func emitMetric(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
+func emitLogs(t *testing.T, opts ...distro.Option) {
+	sdk, err := distroRun(t, opts...)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	var record log.Record
+	record.SetBody(log.StringValue(logBody))
+	global.GetLoggerProvider().Logger(t.Name()).Emit(ctx, record)
+
+	// Flush all spans from SDK.
+	require.NoError(t, sdk.Shutdown(ctx))
+}
+
 func asssertHasSpan(t *testing.T, got *spansExportRequest) {
 	t.Helper()
 
@@ -632,6 +716,26 @@ func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
 	assert.Failf(t, "should contain metric", "want: %v, got: %v", name, gotMetrics)
 }
 
+func assertHasLog(t *testing.T, got *logsExportRequest, body string) {
+	t.Helper()
+
+	if !assert.NotNil(t, got, "request must not be nil") {
+		return
+	}
+	for _, l := range got.Logs {
+		if l.Body.GetStringValue() == body {
+			return
+		}
+	}
+
+	// Not found. Generate assertion failure.
+	var gotLogs []string
+	for _, l := range got.Logs {
+		gotLogs = append(gotLogs, l.Body.GetStringValue())
+	}
+	assert.Failf(t, "should contain log", "want: %v, got: %v", body, gotLogs)
+}
+
 func assertResource(t *testing.T, attrs []*comm.KeyValue) {
 	assert.Contains(t, attrs, &comm.KeyValue{
 		Key: "splunk.distro.version",
@@ -663,6 +767,7 @@ type (
 
 		traceService   *collectorTraceServiceServer
 		metricsService *collectorMetricsServiceServer
+		logsService    *collectorLogsServiceServer
 		grpcSrv        *grpc.Server
 	}
 
@@ -692,6 +797,19 @@ type (
 		Metrics  []*mpb.Metric
 	}
 
+	collectorLogsServiceServer struct {
+		clpb.UnimplementedLogsServiceServer
+
+		mtx  sync.Mutex
+		data *logsExportRequest
+	}
+
+	logsExportRequest struct {
+		Header   metadata.MD
+		Resource *rpb.Resource
+		Logs     []*lpb.LogRecord
+	}
+
 	testIDGenerator struct{}
 )
 
@@ -705,6 +823,7 @@ func (coll *collector) Start(t *testing.T) {
 
 	coll.traceService = &collectorTraceServiceServer{}
 	coll.metricsService = &collectorMetricsServiceServer{}
+	coll.logsService = &collectorLogsServiceServer{}
 
 	var opts []grpc.ServerOption
 	if coll.TLS {
@@ -715,6 +834,8 @@ func (coll *collector) Start(t *testing.T) {
 	coll.grpcSrv = grpc.NewServer(opts...)
 	ctpb.RegisterTraceServiceServer(coll.grpcSrv, coll.traceService)
 	cmpb.RegisterMetricsServiceServer(coll.grpcSrv, coll.metricsService)
+	clpb.RegisterLogsServiceServer(coll.grpcSrv, coll.logsService)
+
 	errCh := make(chan error, 1)
 
 	// Serve and then stop during cleanup.
@@ -739,6 +860,12 @@ func (coll *collector) ExportedMetrics() *metricsExportRequest {
 	return coll.metricsService.data
 }
 
+func (coll *collector) ExportedLogs() *logsExportRequest {
+	defer coll.logsService.mtx.Unlock()
+	coll.logsService.mtx.Lock()
+	return coll.logsService.data
+}
+
 func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.ExportTraceServiceRequest) (*ctpb.ExportTraceServiceResponse, error) {
 	rs := exp.ResourceSpans[0]
 
@@ -759,6 +886,28 @@ func (ctss *collectorTraceServiceServer) Export(ctx context.Context, exp *ctpb.E
 	}
 
 	return &ctpb.ExportTraceServiceResponse{}, nil
+}
+
+func (clss *collectorLogsServiceServer) Export(ctx context.Context, exp *clpb.ExportLogsServiceRequest) (*clpb.ExportLogsServiceResponse, error) {
+	rl := exp.ResourceLogs[0]
+
+	headers, _ := metadata.FromIncomingContext(ctx)
+
+	clss.mtx.Lock()
+	defer clss.mtx.Unlock()
+	if clss.data == nil {
+		// headers and resource should be the same. set them once
+		clss.data = &logsExportRequest{
+			Header:   headers,
+			Resource: rl.GetResource(),
+		}
+	}
+	// concat all logs
+	for _, scopeLogs := range rl.ScopeLogs {
+		clss.data.Logs = append(clss.data.Logs, scopeLogs.GetLogRecords()...)
+	}
+
+	return &clpb.ExportLogsServiceResponse{}, nil
 }
 
 func (cmss *collectorMetricsServiceServer) Export(ctx context.Context, exp *cmpb.ExportMetricsServiceRequest) (*cmpb.ExportMetricsServiceResponse, error) {

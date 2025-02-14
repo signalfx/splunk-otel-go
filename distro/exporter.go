@@ -22,10 +22,12 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated, but we still support it to not break existing users.
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc/credentials"
@@ -234,6 +236,52 @@ func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
 	}
 
 	return otlpmetricgrpc.New(ctx, opts...)
+}
+
+type logsExporterFunc func(*exporterConfig) (log.Exporter, error)
+
+// logsExporters maps environment variable values to logs exporter creation
+// functions.
+var logsExporters = map[string]logsExporterFunc{
+	// OTLP gRPC exporter.
+	"otlp": newOTLPlogExporter,
+	// None, explicitly do not set an exporter.
+	"none": nil,
+}
+
+func logsExporter(log logr.Logger) logsExporterFunc {
+	key := envOr(otelLogsExporterKey, defaultLogsExporter)
+	lef, ok := logsExporters[key]
+	if !ok {
+		err := fmt.Errorf("invalid %s: %q", otelLogsExporterKey, key)
+		log.Error(err, "using default %s: %q", otelLogsExporterKey, defaultLogsExporter)
+
+		return logsExporters[defaultLogsExporter]
+	}
+	return lef
+}
+
+func newOTLPlogExporter(c *exporterConfig) (log.Exporter, error) {
+	ctx := context.Background()
+
+	var opts []otlploggrpc.Option
+
+	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
+	if c.AccessToken != "" {
+		opts = append(opts, otlploggrpc.WithHeaders(map[string]string{
+			"X-Sf-Token": c.AccessToken,
+		}))
+	}
+
+	if c.TLSConfig != nil {
+		tlsCreds := credentials.NewTLS(c.TLSConfig)
+		opts = append(opts, otlploggrpc.WithTLSCredentials(tlsCreds))
+	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey) {
+		// Assume that the default endpoint (local collector) is non-TLS.
+		opts = append(opts, otlploggrpc.WithTLSCredentials(insecure.NewCredentials()))
+	}
+
+	return otlploggrpc.New(ctx, opts...)
 }
 
 // noneEnvVarSet returns true if none of provided env vars is set.
