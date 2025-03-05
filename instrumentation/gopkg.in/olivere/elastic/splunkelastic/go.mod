@@ -1,6 +1,8 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic
 
-go 1.22.0
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/olivere/elastic/v7 v7.0.32
@@ -21,7 +23,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel/metric v1.34.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sync v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
