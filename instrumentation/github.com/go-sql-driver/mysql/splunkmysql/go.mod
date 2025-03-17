@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql
 
-go 1.22.0
+go 1.23.0
 
 require (
 	github.com/go-sql-driver/mysql v1.9.0
