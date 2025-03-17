@@ -29,7 +29,6 @@ The release requires at least [Go 1.23].
 
 - Drop support for [Go 1.22]. (#3721)
 
-
 ## [1.24.0] - 2025-01-22
 
 This release upgrades [OpenTelemetry Go to v1.34.0/v0.56.0/v0.10.0][otel-v1.34.0]
