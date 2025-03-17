@@ -12,6 +12,8 @@ This release adds experimental logs support. Set `OTEL_LOGS_EXPORTER=otlp` to
 enable logs support. However, take notice that, as of now, the OpenTelemetry Go
 Logs API is not stable.
 
+The release requires at least [Go 1.23].
+
 ### Added
 
 - Add logs support and `OTEL_LOGS_EXPORTER` environment variable.
@@ -22,6 +24,10 @@ Logs API is not stable.
   Currently, `OTEL_LOGS_EXPORTER` defaults to `none` as the OpenTelemetry Go
   Logs API and SDK are not stable yet. Set `OTEL_LOGS_EXPORTER=otlp` to enable
   logs support. (#3673)
+
+### Removed
+
+- Drop support for [Go 1.22]. (#3721)
 
 ## [1.24.0] - 2025-01-22
 
@@ -742,6 +748,7 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
 
+[Go 1.23]: https://go.dev/doc/go1.23
 [Go 1.22]: https://go.dev/doc/go1.22
 [Go 1.21]: https://go.dev/doc/go1.21
 [Go 1.20]: https://go.dev/doc/go1.20
