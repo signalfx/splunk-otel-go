@@ -20,5 +20,5 @@ package splunkkafka
 
 // Version returns the version of splunkkafka.
 func Version() string {
-	return "1.24.0"
+	return "1.25.0"
 }

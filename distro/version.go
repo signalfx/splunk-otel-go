@@ -16,5 +16,5 @@ package distro
 
 // Version returns the version of distro.
 func Version() string {
-	return "1.24.0"
+	return "1.25.0"
 }
