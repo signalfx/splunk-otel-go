@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -31,6 +32,7 @@ import (
 	"os/signal"
 	"time"
 
+	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/sync/errgroup"
 
@@ -59,6 +61,11 @@ func run() (err error) {
 	defer func() {
 		err = errors.Join(err, sdk.Shutdown(context.Background()))
 	}()
+
+	logger := slog.New(otelslog.NewHandler("github.com/signalfx/splunk-otel-go/example"))
+	slog.SetDefault(logger)
+
+	slog.Info("Application started", slog.String("address", address))
 
 	// instrument http.Handler
 	var handler http.Handler = http.HandlerFunc(handle)
@@ -109,6 +116,8 @@ func handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func call(ctx context.Context, client *http.Client) {
+	slog.Info("Making HTTP request", slog.String("url", "http://"+address))
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+address, http.NoBody)
 	if err != nil {
 		panic(err)
@@ -127,4 +136,5 @@ func call(ctx context.Context, client *http.Client) {
 		return
 	}
 	fmt.Print(string(dump))
+	slog.Info("HTTP request completed", slog.Int("status", resp.StatusCode))
 }
