@@ -2,7 +2,7 @@
 
 This example instruments a simple HTTP server-client application.
 
-The application is configured to send logs, spans and metrics
+The application is configured to send spans, metrics, and logs
 to a local instance of the OpenTelemetry Collector,
 which propagates them to Splunk Observability Cloud.
 
