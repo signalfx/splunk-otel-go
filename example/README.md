@@ -2,7 +2,7 @@
 
 This example instruments a simple HTTP server-client application.
 
-The application is configured to send spans and metrics
+The application is configured to send spans, metrics, and logs
 to a local instance of the OpenTelemetry Collector,
 which propagates them to Splunk Observability Cloud.
 
@@ -18,16 +18,20 @@ which propagates them to Splunk Observability Cloud.
 Run the OpenTelemetry Collector and Jaeger instance:
 
 ```sh
-SPLUNK_ACCESS_TOKEN=<access_token> docker compose up -d
+SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_URL=<url> docker compose up -d
 ```
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
 [here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
 Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
 
+The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
+[here](https://docs.splunk.com/observability/en/gdi/opentelemetry/components/splunk-hec-exporter.html#splunk-hec-token-and-endpoint).
+
 Run the instrumented application:
 
 ```sh
+export OTEL_LOGS_EXPORTER=otlp
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
@@ -52,16 +56,20 @@ docker compose down
 Run the Splunk Distribution of the OpenTelemetry Collector instance:
 
 ```sh
-SPLUNK_ACCESS_TOKEN=<access_token> docker compose -f docker-compose-splunk.yaml up -d
+SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_URL=<url> docker compose -f docker-compose-splunk.yaml up -d
 ```
 
 The value for `SPLUNK_ACCESS_TOKEN` can be found
 [here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
 Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
 
+The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
+[here](https://docs.splunk.com/observability/en/gdi/opentelemetry/components/splunk-hec-exporter.html#splunk-hec-token-and-endpoint).
+
 Run the instrumented application:
 
 ```sh
+export OTEL_LOGS_EXPORTER=otlp
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
