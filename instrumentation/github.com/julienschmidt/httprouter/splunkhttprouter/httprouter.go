@@ -55,7 +55,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // name is a SpanFormatter for the otelhttp instrumentation.
 func (r *Router) name(_ string, req *http.Request) string {
 	path := req.URL.Path
-	_, params, trailing := r.Router.Lookup(req.Method, path)
+	_, params, trailing := r.Lookup(req.Method, path)
 	for _, param := range params {
 		path = strings.Replace(path, param.Value, ":"+param.Key, 1)
 	}

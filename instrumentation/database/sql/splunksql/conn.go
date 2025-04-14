@@ -154,7 +154,7 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 		// Fallback to explicitly wrapping Prepare.
 		f = func(context.Context) error {
 			var err error
-			stmt, err = c.Conn.Prepare(query)
+			stmt, err = c.Prepare(query)
 			return err
 		}
 	}
