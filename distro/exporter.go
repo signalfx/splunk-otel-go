@@ -47,12 +47,12 @@ var traceExporters = map[string]traceExporterFunc{
 	"none": nil,
 }
 
-func tracesExporter(log logr.Logger) traceExporterFunc {
+func tracesExporter(l logr.Logger) traceExporterFunc {
 	key := envOr(otelTracesExporterKey, defaultTraceExporter)
 	tef, ok := traceExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelTracesExporterKey, key)
-		log.Error(err, "using default %s: %q", otelTracesExporterKey, defaultTraceExporter)
+		l.Error(err, "using default %s: %q", otelTracesExporterKey, defaultTraceExporter)
 
 		return traceExporters[defaultTraceExporter]
 	}
@@ -137,8 +137,8 @@ func otlpRealmMetricsEndpoint() string {
 	return ""
 }
 
-func newJaegerThriftExporter(log logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
-	log.Info("OTEL_TRACES_EXPORTER=jaeger-thrift-splunk is deprecated and may be removed in a future release. Use the default OTLP exporter instead, or set the SPLUNK_REALM and SPLUNK_ACCESS_TOKEN environment variables to send telemetry directly to Splunk Observability Cloud.")
+func newJaegerThriftExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
+	l.Info("OTEL_TRACES_EXPORTER=jaeger-thrift-splunk is deprecated and may be removed in a future release. Use the default OTLP exporter instead, or set the SPLUNK_REALM and SPLUNK_ACCESS_TOKEN environment variables to send telemetry directly to Splunk Observability Cloud.")
 
 	var opts []jaeger.CollectorEndpointOption
 
@@ -192,12 +192,12 @@ var metricsExporters = map[string]metricsExporterFunc{
 	"none": nil,
 }
 
-func metricsExporter(log logr.Logger) metricsExporterFunc {
+func metricsExporter(l logr.Logger) metricsExporterFunc {
 	key := envOr(otelMetricsExporterKey, defaultMetricsExporter)
 	mef, ok := metricsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelMetricsExporterKey, key)
-		log.Error(err, "using default %s: %q", otelMetricsExporterKey, defaultMetricsExporter)
+		l.Error(err, "using default %s: %q", otelMetricsExporterKey, defaultMetricsExporter)
 
 		return metricsExporters[defaultMetricsExporter]
 	}
@@ -249,12 +249,12 @@ var logsExporters = map[string]logsExporterFunc{
 	"none": nil,
 }
 
-func logsExporter(log logr.Logger) logsExporterFunc {
+func logsExporter(l logr.Logger) logsExporterFunc {
 	key := envOr(otelLogsExporterKey, defaultLogsExporter)
 	lef, ok := logsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelLogsExporterKey, key)
-		log.Error(err, "using default %s: %q", otelLogsExporterKey, defaultLogsExporter)
+		l.Error(err, "using default %s: %q", otelLogsExporterKey, defaultLogsExporter)
 
 		return logsExporters[defaultLogsExporter]
 	}
