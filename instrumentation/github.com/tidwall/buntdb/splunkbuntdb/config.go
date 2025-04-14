@@ -63,7 +63,7 @@ func newConfig(options ...Option) *config {
 // copy returns a deep copy of c.
 func (c *config) copy() *config {
 	return &config{
-		Config: c.Config.Copy(),
+		Config: c.Copy(),
 		ctx:    c.ctx,
 	}
 }
