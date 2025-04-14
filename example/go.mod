@@ -18,7 +18,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/bridges/otelslog v0.9.0
+	go.opentelemetry.io/contrib/bridges/otelslog v0.10.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.60.0 // indirect
 	go.opentelemetry.io/contrib/propagators/autoprop v0.60.0 // indirect
 	go.opentelemetry.io/contrib/propagators/aws v1.35.0 // indirect
