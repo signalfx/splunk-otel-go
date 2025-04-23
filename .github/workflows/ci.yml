@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             run-script: ./goyek.sh -v ci
           - os: windows-2022
             run-script: .\goyek.ps1 -v -skip-docker ci
@@ -54,7 +54,7 @@ jobs:
         go-version:
         - '1.23'
         - '1.24'
-        os: [ubuntu-20.04, windows-2022, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4.2.2
