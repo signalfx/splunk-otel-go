@@ -32,7 +32,11 @@ import (
 
 var errShutdown = errors.New("SDK shutdown failure")
 
-const distroVerAttr = "splunk.distro.version"
+// Deprecated
+const splunkVerAttr = "splunk.distro.version"
+
+const distroVerAttr = "telemetry.distro.version"
+const distroNameAttr = "telemetry.distro.name"
 
 const tracesSamplerKey = "OTEL_TRACES_SAMPLER"
 
@@ -136,8 +140,20 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 	}
 
 	// Add Splunk-specific attributes.
-	splunkRes := resource.NewSchemaless(attribute.String(distroVerAttr, Version()))
-	res, err = resource.Merge(res, splunkRes)
+	splunkVerRes := resource.NewSchemaless(attribute.String(splunkVerAttr, Version()))
+	res, err = resource.Merge(res, splunkVerRes)
+	if err != nil {
+		return nil, err
+	}
+
+	distroVerRes := resource.NewSchemaless(attribute.String(distroVerAttr, Version()))
+	res, err = resource.Merge(res, distroVerRes)
+	if err != nil {
+		return nil, err
+	}
+
+	distroNameRes := resource.NewSchemaless(attribute.String(distroNameAttr, Name()))
+    res, err = resource.Merge(res, distroNameRes)
 	if err != nil {
 		return nil, err
 	}

@@ -746,6 +746,24 @@ func assertResource(t *testing.T, attrs []*comm.KeyValue) {
 		},
 	}, "should have proper splunk.distro.version value")
 
+	assert.Contains(t, attrs, &comm.KeyValue{
+		Key: "telemetry.distro.version",
+		Value: &comm.AnyValue{
+			Value: &comm.AnyValue_StringValue{
+				StringValue: distro.Version(),
+			},
+		},
+	}, "should have proper telemetry.distro.version value")
+
+	assert.Contains(t, attrs, &comm.KeyValue{
+		Key: "telemetry.distro.name",
+		Value: &comm.AnyValue{
+			Value: &comm.AnyValue_StringValue{
+				StringValue: distro.Name(),
+			},
+		},
+	}, "should have proper telemetry.distro.name value")
+
 	var gotAttrKeys []string
 	for _, attr := range attrs {
 		gotAttrKeys = append(gotAttrKeys, attr.Key)
