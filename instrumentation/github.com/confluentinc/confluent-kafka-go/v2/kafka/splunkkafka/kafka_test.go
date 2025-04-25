@@ -15,7 +15,7 @@
 //go:build cgo && linux
 // +build cgo,linux
 
-package splunkkafka_test
+package splunkkafka
 
 import (
 	"flag"
