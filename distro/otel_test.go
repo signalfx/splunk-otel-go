@@ -738,13 +738,13 @@ func assertHasLog(t *testing.T, got *logsExportRequest, body string) {
 
 func assertResource(t *testing.T, attrs []*comm.KeyValue) {
 	assert.Contains(t, attrs, &comm.KeyValue{
-		Key: "splunk.distro.version",
+		Key: "telemetry.distro.name",
 		Value: &comm.AnyValue{
 			Value: &comm.AnyValue_StringValue{
-				StringValue: distro.Version(),
+				StringValue: "splunk-otel-go",
 			},
 		},
-	}, "should have proper splunk.distro.version value")
+	}, "should have proper telemetry.distro.name value")
 
 	assert.Contains(t, attrs, &comm.KeyValue{
 		Key: "telemetry.distro.version",
@@ -756,13 +756,13 @@ func assertResource(t *testing.T, attrs []*comm.KeyValue) {
 	}, "should have proper telemetry.distro.version value")
 
 	assert.Contains(t, attrs, &comm.KeyValue{
-		Key: "telemetry.distro.name",
+		Key: "splunk.distro.version",
 		Value: &comm.AnyValue{
 			Value: &comm.AnyValue_StringValue{
-				StringValue: distro.Name(),
+				StringValue: distro.Version(),
 			},
 		},
-	}, "should have proper telemetry.distro.name value")
+	}, "should have proper splunk.distro.version value")
 
 	var gotAttrKeys []string
 	for _, attr := range attrs {
