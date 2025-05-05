@@ -6,7 +6,7 @@ require (
 	github.com/signalfx/splunk-otel-go/distro v1.25.0
 	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.25.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0
-	golang.org/x/sync v0.13.0
+	golang.org/x/sync v0.14.0
 )
 
 require (
@@ -43,7 +43,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250428153025-10db94c68c34 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250428153025-10db94c68c34 // indirect
