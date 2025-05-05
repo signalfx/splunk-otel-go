@@ -23,7 +23,7 @@ package tools
 // https://github.com/golang/go/issues/25922
 import (
 	_ "github.com/client9/misspell/cmd/misspell"
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+	_ "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
 	_ "github.com/wadey/gocovmerge"
 	_ "go.opentelemetry.io/build-tools/crosslink"
 	_ "go.opentelemetry.io/build-tools/multimod"

@@ -12,116 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# See https://golangci-lint.run/usage/configuration/ for configuration
-# documentation.
-
-linters-settings:
-  depguard:
-    rules:
-      non-tests:
-        files:
-          - "!$test"
-          - "!**/*test/*.go"
-        deny:
-          - pkg: "testing"
-          - pkg: "github.com/stretchr/testify"
-  funlen:
-    lines: 100
-    statements: 50
-  goconst:
-    min-len: 2
-    min-occurrences: 2
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  gocyclo:
-    min-complexity: 15
-  goimports:
-    local-prefixes: github.com/signalfx/splunk-otel-go
-  revive:
-    confidence: 0.7
-    rules:
-      - name: blank-imports
-      - name: context-as-argument
-      - name: context-keys-type
-      - name: dot-imports
-      - name: error-return
-      - name: error-strings
-      - name: error-naming
-      - name: exported
-      - name: if-return
-      - name: increment-decrement
-      - name: var-naming
-      - name: var-declaration
-      - name: package-comments
-      - name: range
-      - name: receiver-naming
-      - name: time-naming
-      - name: unexported-return
-      - name: indent-error-flow
-      - name: errorf
-      - name: empty-block
-      - name: superfluous-else
-      - name: unused-parameter
-      - name: unreachable-code
-      - name: redefines-builtin-id
-  mnd:
-    # don't include the "operation" and "assign"
-    checks:
-      - argument
-      - case
-      - condition
-      - return
-  govet:
-    enable:
-      - shadow
-    settings:
-      printf:
-        funcs:
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-  maligned:
-    suggest-new: true
-  misspell:
-    locale: US
-  nolintlint:
-    allow-leading-space: false # require machine-readable nolint directives (i.e. with no leading space)
-    allow-unused: false # report any unused nolint directives
-    require-explanation: true # require an explanation for nolint directives
-    require-specific: true # require nolint directives to be specific about which linter is being skipped
-  goheader:
-    values:
-      const:
-        COMPANY: Splunk Inc.
-    template: |-
-      Copyright {{ COMPANY }}
-
-      Licensed under the Apache License, Version 2.0 (the "License");
-      you may not use this file except in compliance with the License.
-      You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-      
-      Unless required by applicable law or agreed to in writing, software
-      distributed under the License is distributed on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-      See the License for the specific language governing permissions and
-      limitations under the License.
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - depguard
@@ -133,67 +26,158 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - gofumpt
-    - goimports
-    - revive
-    - mnd
+    - goheader
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
+    - mnd
     - nakedret
     - noctx
     - nolintlint
+    - revive
     - rowserrcheck
-    - staticcheck
-    - stylecheck
     - sqlclosecheck
-    - typecheck
+    - staticcheck
     - unconvert
     - unparam
     - unused
     - whitespace
-    - goheader
+  settings:
+    depguard:
+      rules:
+        non-tests:
+          files:
+            - '!$test'
+            - '!**/*test/*.go'
+          deny:
+            - pkg: testing
+            - pkg: github.com/stretchr/testify
+    funlen:
+      lines: 100
+      statements: 50
+    goconst:
+      min-len: 2
+      min-occurrences: 2
+    gocritic:
+      disabled-checks:
+        - dupImport # https://github.com/go-critic/go-critic/issues/845
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    goheader:
+      values:
+        const:
+          COMPANY: Splunk Inc.
+      template: |-
+        Copyright {{ COMPANY }}
 
-issues:
-  include:
-    - EXC0011
-    - EXC0012
-    - EXC0013
-    - EXC0014
-    - EXC0015
-  # Excluding configuration per-path, per-linter, per-text and per-source
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - mnd
-        - gosec
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
 
-    # https://github.com/go-critic/go-critic/issues/926
-    - linters:
-        - gocritic
-      text: "unnecessaryDefer:"
+            http://www.apache.org/licenses/LICENSE-2.0
 
-    # TODO temporary rule, must be removed
-    # seems related to v0.34.1, but I was not able to reproduce locally,
-    # I was also not able to reproduce in the CI of a fork,
-    # only the golangci-lint CI seems to be affected by this invalid analysis.
-    - path: pkg/golinters/scopelint.go
-      text: 'directive `//nolint:interfacer` is unused for linter interfacer'
-
-    # TODO temporary rule, must be removed
-    # related to https://github.com/golangci/golangci-lint/pull/1756
-    # must be replaced by '//nolint:staticcheck // require changes in github.com/OpenPeeDeeP/depguard'
-    - path: pkg/golinters/depguard.go
-      text: 'SA1019: package golang.org/x/tools/go/loader is deprecated'
-
-    # TODO temporary rule, must be removed
-    # related to https://github.com/golangci/golangci-lint/pull/1756
-    # must be replaced by '///nolint:staticcheck // it's an adapter for golang.org/x/tools/go/packages'
-    - path: pkg/golinters/goanalysis/adapters.go
-      text: 'SA1019: package golang.org/x/tools/go/loader is deprecated'
-
-run:
-  timeout: 4m
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    govet:
+      enable:
+        - shadow
+      settings:
+        printf:
+          funcs:
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    misspell:
+      locale: US
+    mnd:
+      # don't include the "operation" and "assign"
+      checks:
+        - argument
+        - case
+        - condition
+        - return
+    nolintlint:
+      allow-unused: false # report any unused nolint directives
+      require-explanation: true # require an explanation for nolint directives
+      require-specific: true # require nolint directives to be specific about which linter is being skipped
+    revive:
+      confidence: 0.7
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+        - name: unreachable-code
+        - name: redefines-builtin-id
+  exclusions:
+    generated: lax
+    presets:
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gosec
+          - mnd
+        path: _test\.go
+      - linters:
+          - gocritic
+        text: 'unnecessaryDefer:'
+      - path: pkg/golinters/scopelint.go
+        text: directive `//nolint:interfacer` is unused for linter interfacer
+      - path: pkg/golinters/depguard.go
+        text: 'SA1019: package golang.org/x/tools/go/loader is deprecated'
+      - path: pkg/golinters/goanalysis/adapters.go
+        text: 'SA1019: package golang.org/x/tools/go/loader is deprecated'
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/signalfx/splunk-otel-go
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

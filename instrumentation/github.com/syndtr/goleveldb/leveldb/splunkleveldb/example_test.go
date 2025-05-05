@@ -57,7 +57,7 @@ func Example() {
 	if err != nil {
 		log.Println("failed to read data", err)
 	} else {
-		log.Println("read from database:", data)
+		log.Println("read from database:", string(data))
 	}
 
 	// Delete the data for the key. A span is created to trace this operation.
