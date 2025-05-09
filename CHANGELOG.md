@@ -8,6 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add `telemetry.distro.name` resource attribute with the value `splunk-otel-go`.
+- Add `telemetry.distro.version` resource attribute with the value of the current
+  release version.
+
+### Deprecated
+
+- `splunk.distro.version` resource attribute is deprecated and may be removed
+  in a future release.
+
 ## [1.25.0] - 2025-03-20
 
 This release adds experimental logs support. Set `OTEL_LOGS_EXPORTER=otlp` to
