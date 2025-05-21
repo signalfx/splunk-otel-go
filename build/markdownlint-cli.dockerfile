@@ -1,1 +1,1 @@
-FROM ghcr.io/igorshubovych/markdownlint-cli:v0.44.0
+FROM ghcr.io/igorshubovych/markdownlint-cli:v0.45.0
