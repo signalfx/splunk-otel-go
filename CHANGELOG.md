@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [1.26.0] - 2025-05-23
 
-This release upgrades [OpenTelemetry Go to v1.36.0/v0.58.0][otel-v1.36.0] and [v0.12.2][otel-log-v0.12.2]
+This release upgrades [OpenTelemetry Go to v1.36.0/v0.58.0][otel-v1.36.0]/[v0.12.2][otel-log-v0.12.2]
 and [OpenTelemetry Go Contrib to v1.36.0/v0.61.0/v0.30.0/v0.16.0/v0.11.0/v0.9.0/v0.8.0][contrib-v1.36.0].
 
 ### Added
