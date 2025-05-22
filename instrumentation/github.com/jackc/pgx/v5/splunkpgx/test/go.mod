@@ -4,8 +4,8 @@ go 1.23.0
 
 require (
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.25.0
-	github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx v1.25.0
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.26.0
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx v1.26.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/sdk v1.36.0
@@ -41,7 +41,7 @@ require (
 	github.com/opencontainers/runc v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.25.0 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.26.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
