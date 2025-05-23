@@ -48,7 +48,6 @@ func TestNewProducerReturnsError(t *testing.T) {
 func TestWrapProducerType(t *testing.T) {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{})
 	require.NoError(t, err)
-	defer p.Close()
 	assert.IsType(t, Producer{}, *WrapProducer(p))
 }
 
@@ -58,7 +57,6 @@ func TestProducerEventsChanCreated(t *testing.T) {
 		"go.produce.channel.size": chSize,
 	})
 	require.NoError(t, err)
-	defer p.Close()
 	assert.NotNil(t, p.ProduceChannel())
 	assert.Equal(t, chSize, cap(p.ProduceChannel()))
 }
@@ -137,7 +135,6 @@ func TestProduceSpan(t *testing.T) {
 		WithAttributes([]attribute.KeyValue{commonAttr}),
 	)
 	require.NoError(t, err)
-	defer p.Close()
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID: trace.TraceID{0x01},
