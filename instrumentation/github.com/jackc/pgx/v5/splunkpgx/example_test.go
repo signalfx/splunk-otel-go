@@ -15,6 +15,7 @@
 package splunkpgx_test
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -65,7 +66,7 @@ func Example() {
 	// Validate DSN data by opening a connection. There is no parent context
 	// to pass here so the span created from this operation will be in its own
 	// trace.
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(context.Background()); err != nil {
 		panic(err)
 	}
 

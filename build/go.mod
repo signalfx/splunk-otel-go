@@ -27,7 +27,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
-	github.com/ProtonMail/go-crypto v1.2.0 // indirect
+	github.com/ProtonMail/go-crypto v1.3.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.18.0 // indirect
 	github.com/alecthomas/go-check-sumtype v0.3.1 // indirect
 	github.com/alexkohler/nakedret/v2 v2.0.6 // indirect
@@ -165,7 +165,7 @@ require (
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.1.0 // indirect
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/sashamelentyev/interfacebloat v1.1.0 // indirect
 	github.com/sashamelentyev/usestdlibvars v1.28.0 // indirect
 	github.com/securego/gosec/v2 v2.22.4 // indirect
@@ -173,7 +173,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sivchari/containedctx v1.0.3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
-	github.com/sonatard/noctx v0.1.0 // indirect
+	github.com/sonatard/noctx v0.3.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
