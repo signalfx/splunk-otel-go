@@ -35,7 +35,6 @@ import (
 func TestNewProducerType(t *testing.T) {
 	p, err := NewProducer(&kafka.ConfigMap{})
 	require.NoError(t, err)
-	defer p.Close()
 	assert.IsType(t, &Producer{}, p)
 }
 
@@ -71,7 +70,6 @@ func TestProducerChannelSpan(t *testing.T) {
 	prop := propagation.TraceContext{}
 	p, err := NewProducer(&kafka.ConfigMap{}, WithTracerProvider(tp), WithPropagator(prop))
 	require.NoError(t, err)
-	defer p.Close()
 
 	keys := []string{"key1", "key2"}
 	produceChannel := make(chan *kafka.Message, len(keys))
