@@ -15,6 +15,7 @@
 package splunkmysql_test
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -57,6 +58,8 @@ func (s *server) handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func Example() {
+	ctx := context.Background()
+
 	// Create a traced connection to the MySQL database.
 	db, err := splunksql.Open("mysql", "user:password@/dbname")
 	if err != nil {
@@ -71,7 +74,7 @@ func Example() {
 	// Validate DSN data by opening a connection. There is no parent context
 	// to pass here so the span created from this operation will be in its own
 	// trace.
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(ctx); err != nil {
 		panic(err)
 	}
 
