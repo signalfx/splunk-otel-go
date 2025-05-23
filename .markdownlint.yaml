@@ -15,3 +15,6 @@ MD024:
 
 # inline-HTML
 MD033: false
+
+# descriptive-link-text
+MD059: false
