@@ -59,6 +59,7 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 func TestNewConsumerCapturesGroupID(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
+	defer c.Close()
 	sConf := trace.NewSpanStartConfig(c.cfg.DefaultStartOpts...)
 	assert.Contains(t, sConf.Attributes(), semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 }
@@ -66,6 +67,7 @@ func TestNewConsumerCapturesGroupID(t *testing.T) {
 func TestNewConsumerType(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
+	defer c.Close()
 	assert.IsType(t, &Consumer{}, c)
 }
 
@@ -78,6 +80,7 @@ func TestNewConsumerReturnsError(t *testing.T) {
 func TestWrapConsumerType(t *testing.T) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{"group.id": grpID})
 	require.NoError(t, err)
+	defer c.Close()
 	assert.IsType(t, Consumer{}, *WrapConsumer(c))
 }
 
@@ -90,6 +93,7 @@ func TestConsumerEventsChanCreated(t *testing.T) {
 		"group.id":                 grpID,
 	})
 	require.NoError(t, err)
+	defer c.Close()
 	assert.NotNil(t, c.Events())
 	assert.Equal(t, chSize, cap(c.Events()))
 }
@@ -130,6 +134,7 @@ func TestConsumerSpan(t *testing.T) {
 		"group.id":                 grpID,
 	}, WithTracerProvider(tp), WithPropagator(prop), WithAttributes([]attribute.KeyValue{commonAttr}))
 	require.NoError(t, err)
+	defer c.Close()
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID: trace.TraceID{0x01},
@@ -190,6 +195,7 @@ func TestConsumerConcurrentConsuming(t *testing.T) {
 		"group.id":                 grpID,
 	}, WithTracerProvider(tp))
 	require.NoError(t, err)
+	defer c.Close()
 
 	key := "test key"
 	var wg sync.WaitGroup
