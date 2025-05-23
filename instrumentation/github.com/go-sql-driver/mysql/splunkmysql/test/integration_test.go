@@ -73,14 +73,14 @@ func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, 
 func TestNoContextSpans(t *testing.T) {
 	sr, _, db := newFixtures(t)
 
-	require.NoError(t, db.Ping())
+	require.NoError(t, db.Ping()) //nolint:noctx // Testing.
 
-	_, err := db.Exec(createStmt)
+	_, err := db.Exec(createStmt) //nolint:noctx // Testing.
 	require.NoError(t, err)
 
 	tx, err := db.Begin()
 	require.NoError(t, err)
-	stmtIns, err := tx.Prepare(insertStmt)
+	stmtIns, err := tx.Prepare(insertStmt) //nolint:noctx  // Testing.
 	t.Cleanup(func() { assert.NoError(t, stmtIns.Close()) })
 	require.NoError(t, err)
 	for i := 0; i < 25; i++ {
@@ -91,14 +91,14 @@ func TestNoContextSpans(t *testing.T) {
 	require.NoError(t, stmtIns.Close())
 
 	var sqNum int
-	stmtOut, err := db.Prepare(queryStmt)
+	stmtOut, err := db.Prepare(queryStmt) //nolint:noctx  // Testing.
 	t.Cleanup(func() { assert.NoError(t, stmtOut.Close()) })
 	require.NoError(t, err)
 	require.NoError(t, stmtOut.QueryRow(13).Scan(&sqNum))
 	assert.Equal(t, 13*13, sqNum, "failed to query square of 13")
 
 	// Directly do the query.
-	require.NoError(t, db.QueryRow(queryStmt, 1).Scan(&sqNum))
+	require.NoError(t, db.QueryRow(queryStmt, 1).Scan(&sqNum)) //nolint:noctx  // Testing.
 	assert.Equal(t, 1, sqNum, "failed to query square of 1")
 
 	// How the DB ensures connections means the number of spans cannot be
@@ -203,7 +203,7 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			return err
 		}
-		return db.Ping()
+		return db.Ping() //nolint:noctx  // Testing.
 	}); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}

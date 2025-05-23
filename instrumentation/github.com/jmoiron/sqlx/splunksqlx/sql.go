@@ -52,7 +52,7 @@ func Connect(driverName, dataSourceName string, opts ...splunksql.Option) (*sqlx
 	if err != nil {
 		return nil, err
 	}
-	err = db.Ping()
+	err = db.Ping() //nolint:noctx  // No context to pass.
 	if err != nil {
 		db.Close()
 		return nil, err
