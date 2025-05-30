@@ -75,6 +75,7 @@ func TestProducerChannelSpan(t *testing.T) {
 	require.NoError(t, err)
 
 	keys := []string{"key1", "key2"}
+	
 	produceChannel := make(chan *kafka.Message, len(keys))
 	p.produceChannel = p.traceProduceChannel(produceChannel)
 
