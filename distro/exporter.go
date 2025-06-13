@@ -36,6 +36,8 @@ import (
 
 type traceExporterFunc func(logr.Logger, *exporterConfig) (trace.SpanExporter, error)
 
+const httpProtobuf = "http/protobuf"
+
 // traceExporters maps environment variable values to trace exporter creation
 // functions.
 var traceExporters = map[string]traceExporterFunc{
@@ -64,7 +66,7 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 
 	protocol := getOTLPProtocol(l, otelTracesExporterOTLPProtocolKey)
 
-	if protocol == "http/protobuf" {
+	if protocol == httpProtobuf {
 		splunkEndpoint := otlpRealmTracesEndpoint()
 		if splunkEndpoint != "" {
 			// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
@@ -307,7 +309,7 @@ func notNone(s string) bool {
 func getOTLPProtocol(l logr.Logger, signalKey string) string {
 	// signal-specific key takes precedence
 	if v := os.Getenv(signalKey); v != "" {
-		if v == "grpc" || v == "http/protobuf" {
+		if v == defaultOTLPProtocol || v == httpProtobuf {
 			return v
 		}
 		err := fmt.Errorf("invalid %s: %q", signalKey, v)
@@ -317,7 +319,7 @@ func getOTLPProtocol(l logr.Logger, signalKey string) string {
 
 	// fallback to general OTLP protocol
 	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
-		if v == "grpc" || v == "http/protobuf" {
+		if v == defaultOTLPProtocol || v == httpProtobuf {
 			return v
 		}
 		err := fmt.Errorf("invalid %s: %q", otelExporterOTLPProtocolKey, v)

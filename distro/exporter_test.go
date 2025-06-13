@@ -82,19 +82,19 @@ func TestGetOTLPProtocol(t *testing.T) {
 	})
 
 	t.Run("only general protocol", func(t *testing.T) {
-		t.Setenv(otelExporterOTLPProtocolKey, "http/protobuf")
+		t.Setenv(otelExporterOTLPProtocolKey, httpProtobuf)
 		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("only specific protocol", func(t *testing.T) {
-		t.Setenv(otelTracesExporterOTLPProtocolKey, "http/protobuf")
-		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		t.Setenv(otelTracesExporterOTLPProtocolKey, httpProtobuf)
+		assert.Equal(t, httpProtobuf, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("specific overrides general", func(t *testing.T) {
-		t.Setenv(otelExporterOTLPProtocolKey, "grpc")
-		t.Setenv(otelTracesExporterOTLPProtocolKey, "http/protobuf")
-		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		t.Setenv(otelExporterOTLPProtocolKey, defaultOTLPProtocol)
+		t.Setenv(otelTracesExporterOTLPProtocolKey, httpProtobuf)
+		assert.Equal(t, httpProtobuf, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("invalid specific value", func(t *testing.T) {
