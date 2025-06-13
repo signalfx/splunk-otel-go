@@ -240,9 +240,9 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
 }
 
-func TestRunOTLPTracesExporter(t *testing.T) {
+func TestRunOTLPGrpcTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, got *spansExportRequest) {
-		asssertHasSpan(t, got)
+		assertHasSpan(t, got)
 	}
 
 	testCases := []struct {
@@ -294,6 +294,24 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 	}
 }
 
+func TestRunOTLPHttpProtobufTracesExporter(t *testing.T) {
+	assertBase := func(t *testing.T, req *http.Request) {
+		assert.Equal(t, "application/x-protobuf", req.Header.Get("Content-Type"))
+	}
+
+	reqCh, handler := reqHander()
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", server.URL)
+	t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+
+	emitSpan(t)
+
+	req := <-reqCh
+	assertBase(t, req)
+}
+
 func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
@@ -303,7 +321,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.ExportedSpans()
-	asssertHasSpan(t, got)
+	assertHasSpan(t, got)
 }
 
 func TestRunTracesExporterDefault(t *testing.T) {
@@ -315,7 +333,7 @@ func TestRunTracesExporterDefault(t *testing.T) {
 	emitSpan(t)
 
 	got := coll.ExportedSpans()
-	asssertHasSpan(t, got)
+	assertHasSpan(t, got)
 }
 
 func TestInvalidTracesExporter(t *testing.T) {
@@ -330,7 +348,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
 	got := coll.ExportedSpans()
-	asssertHasSpan(t, got)
+	assertHasSpan(t, got)
 }
 
 func TestTracesResource(t *testing.T) {
@@ -676,7 +694,7 @@ func emitLogs(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
-func asssertHasSpan(t *testing.T, got *spansExportRequest) {
+func assertHasSpan(t *testing.T, got *spansExportRequest) {
 	t.Helper()
 
 	if !assert.NotNil(t, got, "request must not be nil") {

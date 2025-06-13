@@ -19,12 +19,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/go-logr/logr/testr"
 )
 
 const (
 	noneRealm    = "none"
 	invalidRealm = "not-a-valid-realm"
 	fakeEndpoint = "some non-zero value"
+	invalidProtocol = "invalid-protocol"
 )
 
 func TestOTLPTracesEndpoint(t *testing.T) {
@@ -68,6 +70,41 @@ func TestOTLPTracesEndpoint(t *testing.T) {
 		// OTEL_EXPORTER_OTLP_METRICS_ENDPOINT is ignored for traces exporter.
 		want := fmt.Sprintf(otlpRealmTracesEndpointFormat, invalidRealm)
 		assert.Equal(t, want, otlpRealmTracesEndpoint())
+	})
+}
+
+func TestGetOTLPProtocol(t *testing.T) {
+	logger := testr.New(t)
+
+	t.Run("default", func(t *testing.T) {
+		// Neither specific nor general env vars are set
+		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+	})
+
+	t.Run("only general protocol", func(t *testing.T) {
+		t.Setenv(otelExporterOTLPProtocolKey, "http/protobuf")
+		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+	})
+
+	t.Run("only specific protocol", func(t *testing.T) {
+		t.Setenv(otelTracesExporterOTLPProtocolKey, "http/protobuf")
+		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+	})
+
+	t.Run("specific overrides general", func(t *testing.T) {
+		t.Setenv(otelExporterOTLPProtocolKey, "grpc")
+		t.Setenv(otelTracesExporterOTLPProtocolKey, "http/protobuf")
+		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+	})
+
+	t.Run("invalid specific value", func(t *testing.T) {
+		t.Setenv(otelTracesExporterOTLPProtocolKey, invalidProtocol)
+		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+	})
+
+	t.Run("invalid general value", func(t *testing.T) {
+		t.Setenv(otelExporterOTLPProtocolKey, invalidProtocol)
+		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 }
 
