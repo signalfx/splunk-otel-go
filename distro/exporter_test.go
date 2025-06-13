@@ -18,14 +18,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/go-logr/logr/testr"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
-	noneRealm    = "none"
-	invalidRealm = "not-a-valid-realm"
-	fakeEndpoint = "some non-zero value"
+	noneRealm       = "none"
+	invalidRealm    = "not-a-valid-realm"
+	fakeEndpoint    = "some non-zero value"
 	invalidProtocol = "invalid-protocol"
 )
 
