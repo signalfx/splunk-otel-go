@@ -44,6 +44,10 @@ const (
 	otelExporterOTLPMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
 	otelExporterOTLPLogsEndpointKey    = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"
 
+	// OpenTelemetry OTLP exporter protocol.
+	otelExporterOTLPProtocolKey        = "OTEL_EXPORTER_OTLP_PROTOCOL"
+	otelTracesExporterOTLPProtocolKey  = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"
+
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
 
@@ -58,6 +62,7 @@ const (
 	defaultMetricsExporter = "otlp"
 	defaultLogsExporter    = "none"
 	defaultLogLevel        = "info"
+	defaultOTLPProtocol    = "grpc"
 
 	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"
 	jaegerRealmEndpointFormat = "https://ingest.%s.signalfx.com/v2/trace"
