@@ -304,6 +304,7 @@ func TestRunOTLPHttpProtobufTracesExporter(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", server.URL)
+	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
 	t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
 
 	emitSpan(t)
