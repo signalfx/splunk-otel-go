@@ -36,6 +36,8 @@ import (
 
 type traceExporterFunc func(logr.Logger, *exporterConfig) (trace.SpanExporter, error)
 
+const httpProtobuf = "http/protobuf"
+
 // traceExporters maps environment variable values to trace exporter creation
 // functions.
 var traceExporters = map[string]traceExporterFunc{
@@ -59,19 +61,24 @@ func tracesExporter(l logr.Logger) traceExporterFunc {
 	return tef
 }
 
-func newOTLPTracesExporter(_ logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
+func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
 	ctx := context.Background()
 
-	splunkEndpoint := otlpRealmTracesEndpoint()
-	if splunkEndpoint != "" {
-		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
-		return otlptracehttp.New(ctx,
-			otlptracehttp.WithEndpoint(splunkEndpoint),
-			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
-			otlptracehttp.WithHeaders(map[string]string{
-				"X-Sf-Token": c.AccessToken,
-			}),
-		)
+	protocol := getOTLPProtocol(l, otelTracesExporterOTLPProtocolKey)
+
+	if protocol == httpProtobuf {
+		splunkEndpoint := otlpRealmTracesEndpoint()
+		if splunkEndpoint != "" {
+			// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
+			return otlptracehttp.New(ctx,
+				otlptracehttp.WithEndpoint(splunkEndpoint),
+				otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
+				otlptracehttp.WithHeaders(map[string]string{
+					"X-Sf-Token": c.AccessToken,
+				}),
+			)
+		}
+		return otlptracehttp.New(ctx)
 	}
 
 	var opts []otlptracegrpc.Option
@@ -244,7 +251,7 @@ type logsExporterFunc func(*exporterConfig) (log.Exporter, error)
 // functions.
 var logsExporters = map[string]logsExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPlogExporter,
+	"otlp": newOTLPLogExporter,
 	// None, explicitly do not set an exporter.
 	"none": nil,
 }
@@ -261,7 +268,7 @@ func logsExporter(l logr.Logger) logsExporterFunc {
 	return lef
 }
 
-func newOTLPlogExporter(c *exporterConfig) (log.Exporter, error) {
+func newOTLPLogExporter(c *exporterConfig) (log.Exporter, error) {
 	ctx := context.Background()
 
 	var opts []otlploggrpc.Option
@@ -297,4 +304,28 @@ func noneEnvVarSet(envs ...string) bool {
 // notNone returns if s is not empty or set to none.
 func notNone(s string) bool {
 	return s != "" && s != "none"
+}
+
+func getOTLPProtocol(l logr.Logger, signalKey string) string {
+	// signal-specific key takes precedence
+	if v := os.Getenv(signalKey); v != "" {
+		if v == defaultOTLPProtocol || v == httpProtobuf {
+			return v
+		}
+		err := fmt.Errorf("invalid %s: %q", signalKey, v)
+		l.Error(err, "using default %s: %q", signalKey, defaultOTLPProtocol)
+		return defaultOTLPProtocol
+	}
+
+	// fallback to general OTLP protocol
+	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
+		if v == defaultOTLPProtocol || v == httpProtobuf {
+			return v
+		}
+		err := fmt.Errorf("invalid %s: %q", otelExporterOTLPProtocolKey, v)
+		l.Error(err, "using default %s: %q", otelExporterOTLPProtocolKey, defaultOTLPProtocol)
+		return defaultOTLPProtocol
+	}
+
+	return defaultOTLPProtocol
 }
