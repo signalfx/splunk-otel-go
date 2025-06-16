@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
       - `http/protobuf` - HTTP with Protobuf encoding
   - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL` to override the protocol specifically
   for traces export.
+  > **Note:** This functionality currently applies only to OTLP `trace` exporters.
 
 ## [1.26.0] - 2025-05-23
 
