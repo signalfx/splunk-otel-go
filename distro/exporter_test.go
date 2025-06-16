@@ -76,7 +76,7 @@ func TestOTLPTracesEndpoint(t *testing.T) {
 
 func TestOTLPProtocol(t *testing.T) {
 	var buf bytes.Buffer
-	var logger = buflogr.NewWithBuffer(&buf)
+	logger := buflogr.NewWithBuffer(&buf)
 
 	t.Run("default", func(t *testing.T) {
 		// Neither specific nor general env vars are set
