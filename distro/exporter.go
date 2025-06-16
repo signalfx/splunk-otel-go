@@ -62,20 +62,20 @@ func tracesExporter(l logr.Logger) traceExporterFunc {
 func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
 	ctx := context.Background()
 
-	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
+	splunkEndpoint := otlpRealmTracesEndpoint()
+	if splunkEndpoint != "" {
+		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
+		return otlptracehttp.New(ctx,
+			otlptracehttp.WithEndpoint(splunkEndpoint),
+			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
+			otlptracehttp.WithHeaders(map[string]string{
+				"X-Sf-Token": c.AccessToken,
+			}),
+		)
+	}
 
+	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
 	if protocol == otlpProtocolHTTPProtobuf {
-		splunkEndpoint := otlpRealmTracesEndpoint()
-		if splunkEndpoint != "" {
-			// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
-			return otlptracehttp.New(ctx,
-				otlptracehttp.WithEndpoint(splunkEndpoint),
-				otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
-				otlptracehttp.WithHeaders(map[string]string{
-					"X-Sf-Token": c.AccessToken,
-				}),
-			)
-		}
 		return otlptracehttp.New(ctx)
 	}
 
