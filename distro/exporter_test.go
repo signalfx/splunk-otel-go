@@ -15,11 +15,12 @@
 package distro
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
-	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
+	"github.com/tonglil/buflogr"
 )
 
 const (
@@ -74,37 +75,44 @@ func TestOTLPTracesEndpoint(t *testing.T) {
 }
 
 func TestGetOTLPProtocol(t *testing.T) {
-	logger := testr.New(t)
+	var buf bytes.Buffer
+	var logger = buflogr.NewWithBuffer(&buf)
 
 	t.Run("default", func(t *testing.T) {
 		// Neither specific nor general env vars are set
 		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.NotContains(t, buf.String(), "invalid")
 	})
 
 	t.Run("only general protocol", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
 		assert.Equal(t, "http/protobuf", otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.NotContains(t, buf.String(), "invalid")
 	})
 
 	t.Run("only specific protocol", func(t *testing.T) {
 		t.Setenv(otelTracesExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
 		assert.Equal(t, otlpProtocolHTTPProtobuf, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.NotContains(t, buf.String(), "invalid")
 	})
 
 	t.Run("specific overrides general", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, defaultOTLPProtocol)
 		t.Setenv(otelTracesExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
 		assert.Equal(t, otlpProtocolHTTPProtobuf, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.NotContains(t, buf.String(), "invalid")
 	})
 
 	t.Run("invalid specific value", func(t *testing.T) {
 		t.Setenv(otelTracesExporterOTLPProtocolKey, invalidProtocol)
 		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
 	})
 
 	t.Run("invalid general value", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, invalidProtocol)
 		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelExporterOTLPProtocolKey, invalidProtocol))
 	})
 }
 
