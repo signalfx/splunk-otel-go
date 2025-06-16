@@ -44,7 +44,7 @@ const (
 	otelExporterOTLPMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
 	otelExporterOTLPLogsEndpointKey    = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"
 
-	// OpenTelemetry OTLP exporter protocol.
+	// OTLP exporter protocol.
 	otelExporterOTLPProtocolKey       = "OTEL_EXPORTER_OTLP_PROTOCOL"
 	otelTracesExporterOTLPProtocolKey = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"
 
@@ -62,7 +62,7 @@ const (
 	defaultMetricsExporter = "otlp"
 	defaultLogsExporter    = "none"
 	defaultLogLevel        = "info"
-	defaultOTLPProtocol    = "grpc"
+	defaultOTLPProtocol    = otlpProtocolGRPC
 
 	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"
 	jaegerRealmEndpointFormat = "https://ingest.%s.signalfx.com/v2/trace"
@@ -71,6 +71,11 @@ const (
 	otlpRealmTracesEndpointPath    = "/v2/trace/otlp"
 	otlpRealmMetricsEndpointFormat = "ingest.%s.signalfx.com"
 	otlpRealmMetricsEndpointPath   = "/v2/datapoint/otlp"
+)
+
+const (
+	otlpProtocolGRPC         = "grpc"
+	otlpProtocolHTTPProtobuf = "http/protobuf"
 )
 
 type exporterConfig struct {

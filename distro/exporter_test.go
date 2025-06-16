@@ -78,33 +78,33 @@ func TestGetOTLPProtocol(t *testing.T) {
 
 	t.Run("default", func(t *testing.T) {
 		// Neither specific nor general env vars are set
-		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("only general protocol", func(t *testing.T) {
-		t.Setenv(otelExporterOTLPProtocolKey, httpProtobuf)
-		assert.Equal(t, "http/protobuf", getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		t.Setenv(otelExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
+		assert.Equal(t, "http/protobuf", otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("only specific protocol", func(t *testing.T) {
-		t.Setenv(otelTracesExporterOTLPProtocolKey, httpProtobuf)
-		assert.Equal(t, httpProtobuf, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		t.Setenv(otelTracesExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
+		assert.Equal(t, otlpProtocolHTTPProtobuf, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("specific overrides general", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, defaultOTLPProtocol)
-		t.Setenv(otelTracesExporterOTLPProtocolKey, httpProtobuf)
-		assert.Equal(t, httpProtobuf, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		t.Setenv(otelTracesExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
+		assert.Equal(t, otlpProtocolHTTPProtobuf, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("invalid specific value", func(t *testing.T) {
 		t.Setenv(otelTracesExporterOTLPProtocolKey, invalidProtocol)
-		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 
 	t.Run("invalid general value", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, invalidProtocol)
-		assert.Equal(t, defaultOTLPProtocol, getOTLPProtocol(logger, otelTracesExporterOTLPProtocolKey))
+		assert.Equal(t, defaultOTLPProtocol, otlpProtocol(logger, otelTracesExporterOTLPProtocolKey))
 	})
 }
 
