@@ -242,7 +242,7 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 
 func TestRunOTLPGrpcTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, got *spansExportRequest) {
-		assertHasSpan(t, got)
+		asssertHasSpan(t, got)
 	}
 
 	testCases := []struct {
@@ -322,7 +322,7 @@ func TestRunOTLPTracesExporterTLS(t *testing.T) {
 	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.ExportedSpans()
-	assertHasSpan(t, got)
+	asssertHasSpan(t, got)
 }
 
 func TestRunTracesExporterDefault(t *testing.T) {
@@ -334,7 +334,7 @@ func TestRunTracesExporterDefault(t *testing.T) {
 	emitSpan(t)
 
 	got := coll.ExportedSpans()
-	assertHasSpan(t, got)
+	asssertHasSpan(t, got)
 }
 
 func TestInvalidTracesExporter(t *testing.T) {
@@ -349,7 +349,7 @@ func TestInvalidTracesExporter(t *testing.T) {
 	// Ensure OTLP is used as the default when the OTEL_TRACES_EXPORTER value
 	// is invalid.
 	got := coll.ExportedSpans()
-	assertHasSpan(t, got)
+	asssertHasSpan(t, got)
 }
 
 func TestTracesResource(t *testing.T) {
@@ -695,7 +695,7 @@ func emitLogs(t *testing.T, opts ...distro.Option) {
 	require.NoError(t, sdk.Shutdown(ctx))
 }
 
-func assertHasSpan(t *testing.T, got *spansExportRequest) {
+func asssertHasSpan(t *testing.T, got *spansExportRequest) {
 	t.Helper()
 
 	if !assert.NotNil(t, got, "request must not be nil") {

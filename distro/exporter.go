@@ -251,7 +251,7 @@ type logsExporterFunc func(*exporterConfig) (log.Exporter, error)
 // functions.
 var logsExporters = map[string]logsExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPLogExporter,
+	"otlp": newOTLPlogExporter,
 	// None, explicitly do not set an exporter.
 	"none": nil,
 }
@@ -268,7 +268,7 @@ func logsExporter(l logr.Logger) logsExporterFunc {
 	return lef
 }
 
-func newOTLPLogExporter(c *exporterConfig) (log.Exporter, error) {
+func newOTLPlogExporter(c *exporterConfig) (log.Exporter, error) {
 	ctx := context.Background()
 
 	var opts []otlploggrpc.Option
