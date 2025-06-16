@@ -240,7 +240,7 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
 }
 
-func TestRunOTLPGrpcTracesExporter(t *testing.T) {
+func TestRunOTLPGRPCTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, got *spansExportRequest) {
 		asssertHasSpan(t, got)
 	}
@@ -294,7 +294,7 @@ func TestRunOTLPGrpcTracesExporter(t *testing.T) {
 	}
 }
 
-func TestRunOTLPHttpProtobufTracesExporter(t *testing.T) {
+func TestRunOTLPHTTPProtobufTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, req *http.Request) {
 		assert.Equal(t, "application/x-protobuf", req.Header.Get("Content-Type"))
 	}

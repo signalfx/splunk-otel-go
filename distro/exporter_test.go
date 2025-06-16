@@ -74,7 +74,7 @@ func TestOTLPTracesEndpoint(t *testing.T) {
 	})
 }
 
-func TestGetOTLPProtocol(t *testing.T) {
+func TestOTLPProtocol(t *testing.T) {
 	var buf bytes.Buffer
 	var logger = buflogr.NewWithBuffer(&buf)
 
