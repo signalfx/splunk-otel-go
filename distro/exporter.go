@@ -323,7 +323,7 @@ func notNone(s string) bool {
 
 //nolint:unparam // This will receive other input values in future.
 func otlpProtocol(l logr.Logger, signalKey string) string {
-	// signal-specific key takes precedence
+	// Signal-specific key takes precedence.
 	if v := os.Getenv(signalKey); v != "" {
 		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
 			return v
@@ -333,7 +333,7 @@ func otlpProtocol(l logr.Logger, signalKey string) string {
 		return defaultOTLPProtocol
 	}
 
-	// fallback to general OTLP protocol
+	// Fallback to general OTLP protocol.
 	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
 		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
 			return v
