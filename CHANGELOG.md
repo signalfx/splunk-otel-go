@@ -15,7 +15,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   default. Set `OTEL_GO_X_DEPRECATED_RUNTIME_METRICS=true` environment variable
   to additionally produce the deprecated metrics. See
   <https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/runtime> for
-  more information.
+  more information. We advise to migrate to new metrics as the deperecated ones
+  are going to be removed in future.
 
 ## [1.26.0] - 2025-05-23
 
