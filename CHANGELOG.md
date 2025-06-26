@@ -19,6 +19,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   for traces export.
   > **Note:** This functionality currently applies only to OTLP `trace` exporters.
 
+### Changed
+
+- Because of changes in `go.opentelemetry.io/contrib/instrumentation/runtime`,
+  `github.com/signalfx/splunk-otel-go/distro` now produces the new metrics by
+  default. Set `OTEL_GO_X_DEPRECATED_RUNTIME_METRICS=true` environment variable
+  to additionally produce the deprecated metrics. See
+  <https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/runtime> for
+  more information. We advise migrating to the new metrics, as the deprecated
+  ones will be removed in the future.
+
 ## [1.26.0] - 2025-05-23
 
 This release upgrades [OpenTelemetry Go to v1.36.0/v0.58.0][otel-v1.36.0]/[v0.12.2][otel-log-v0.12.2]
