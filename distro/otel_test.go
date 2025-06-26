@@ -486,8 +486,8 @@ func TestRuntimeMetrics(t *testing.T) {
 	require.NoError(t, sdk.Shutdown(context.Background()))
 
 	got := coll.ExportedMetrics()
-	assertHasMetric(t, got, "runtime.uptime") // Deprectated metric.
-	assertHasMetric(t, got, "go.memory.allocations") // New metric.
+	assertHasMetric(t, got, "runtime.uptime")        // Deprectated metric.
+ 	assertHasMetric(t, got, "go.memory.allocations") // New metric.
 }
 
 func TestMetricsResource(t *testing.T) {
