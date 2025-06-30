@@ -78,7 +78,7 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 	if c.AccessToken != "" {
 		headers["X-Sf-Token"] = c.AccessToken
 	}
-	isNone := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey)
+	shouldUseInsecure := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey)
 	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -90,7 +90,7 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 
 		if c.TLSConfig != nil {
 			opts = append(opts, otlptracehttp.WithTLSClientConfig(c.TLSConfig))
-		} else if isNone {
+		} else if shouldUseInsecure {
 			// Assume that the default endpoint (local collector) is non-TLS.
 			opts = append(opts, otlptracehttp.WithInsecure())
 		}
@@ -107,7 +107,7 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else if isNone {
+	} else if shouldUseInsecure {
 		// Assume that the default endpoint (local collector) is non-TLS.
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
