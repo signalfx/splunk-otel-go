@@ -150,6 +150,8 @@ func TestMain(m *testing.M) {
 	defer cleanup()
 	cleanup = setenv("OTEL_METRICS_EXPORTER", "none")
 	defer cleanup()
+	cleanup = setenv("OTEL_LOGS_EXPORTER", "none")
+	defer cleanup()
 
 	goleak.VerifyTestMain(m)
 }
@@ -542,11 +544,11 @@ func TestInvalidMetricsExporter(t *testing.T) {
 
 func TestRuntimeMetrics(t *testing.T) {
 	// Start collector at default address.
-	// By default the metrics exporter is NONE.
 	coll := &collector{}
 	coll.Start(t)
 	t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+	t.Setenv("OTEL_GO_X_DEPRECATED_RUNTIME_METRICS", "true")
 
 	sdk, err := distroRun(t)
 	require.NoError(t, err)
@@ -555,7 +557,8 @@ func TestRuntimeMetrics(t *testing.T) {
 	require.NoError(t, sdk.Shutdown(context.Background()))
 
 	got := coll.ExportedMetrics()
-	assertHasMetric(t, got, "runtime.uptime")
+	assertHasMetric(t, got, "runtime.uptime")        // Deprectated metric.
+	assertHasMetric(t, got, "go.memory.allocations") // New metric.
 }
 
 func TestMetricsResource(t *testing.T) {
