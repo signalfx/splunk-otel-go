@@ -129,6 +129,8 @@ func TestOTLPProtocol(t *testing.T) {
 
 		assert.Equal(t, defaultOTLPProtocol, got)
 		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
+		assert.Contains(t, buf.String(), "falling back to general")
+		assert.Contains(t, buf.String(), otelExporterOTLPProtocolKey)
 	})
 
 	t.Run("invalid general value", func(t *testing.T) {
@@ -139,6 +141,19 @@ func TestOTLPProtocol(t *testing.T) {
 
 		assert.Equal(t, defaultOTLPProtocol, got)
 		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelExporterOTLPProtocolKey, invalidProtocol))
+		assert.Contains(t, buf.String(), "using default")
+	})
+
+	t.Run("invalid specific, valid general", func(t *testing.T) {
+		t.Setenv(otelTracesExporterOTLPProtocolKey, invalidProtocol)
+		t.Setenv(otelExporterOTLPProtocolKey, otlpProtocolHTTPProtobuf)
+		buf, logger := newTestLogger()
+
+		got := otlpProtocol(logger, otelTracesExporterOTLPProtocolKey)
+
+		assert.Equal(t, otlpProtocolHTTPProtobuf, got)
+		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
+		assert.Contains(t, buf.String(), "falling back to general")
 	})
 }
 
