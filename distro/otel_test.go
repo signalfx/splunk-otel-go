@@ -242,7 +242,78 @@ func TestRunJaegerExporterDefault(t *testing.T) {
 	assert.Equal(t, "application/x-thrift", got.Header.Get("Content-type"))
 }
 
-func TestRunOTLPTracesExporter(t *testing.T) {
+func TestRunOTLPHTTPProtobufExporter(t *testing.T) {
+	assertBase := func(t *testing.T, req *http.Request) {
+		assert.Equal(t, "application/x-protobuf", req.Header.Get("Content-Type"))
+	}
+
+	testCases := []struct {
+		desc     string
+		setupFn  func(t *testing.T, url string)
+		assertFn func(t *testing.T, req *http.Request)
+	}{
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
+				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT with SPLUNK_ACCESS_TOKEN",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
+				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+				t.Setenv("SPLUNK_ACCESS_TOKEN", token)
+				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+			},
+			assertFn: func(t *testing.T, req *http.Request) {
+				assertBase(t, req)
+				assert.Equal(t, []string{token}, req.Header["X-Sf-Token"])
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		if tc.assertFn == nil {
+			tc.assertFn = assertBase
+		}
+
+		t.Run(tc.desc, func(t *testing.T) {
+			reqCh, handler := reqHander()
+			srv := httptest.NewServer(handler)
+			t.Cleanup(srv.Close)
+
+			tc.setupFn(t, srv.URL)
+			emitSpan(t)
+
+			req := <-reqCh
+			tc.assertFn(t, req)
+		})
+	}
+}
+
+func TestRunOTLPHTTPProtobufTracesExporterTLS(t *testing.T) {
+	reqCh, handler := reqHander()
+
+	srv := httptest.NewUnstartedServer(handler)
+	t.Cleanup(srv.Close)
+	srv.TLS = serverTLSConfig(t)
+	srv.StartTLS()
+
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", srv.URL)
+	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+	t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+
+	emitSpan(t, distro.WithTLSConfig(clientTLSConfig(t)))
+
+	got := <-reqCh
+	assert.Equal(t, "application/x-protobuf", got.Header.Get("Content-type"))
+	assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
+}
+
+func TestRunOTLPGRPCTracesExporter(t *testing.T) {
 	assertBase := func(t *testing.T, got *spansExportRequest) {
 		asssertHasSpan(t, got)
 	}
@@ -296,7 +367,7 @@ func TestRunOTLPTracesExporter(t *testing.T) {
 	}
 }
 
-func TestRunOTLPTracesExporterTLS(t *testing.T) {
+func TestRunOTLPGRPCTracesExporterTLS(t *testing.T) {
 	coll := &collector{TLS: true}
 	coll.Start(t)
 	t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
