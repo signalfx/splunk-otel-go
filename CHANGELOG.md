@@ -8,6 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Support for OTLP protocol configuration via environment variables:
+  - `OTEL_EXPORTER_OTLP_PROTOCOL` to specify the protocol used by OTLP exporters.
+    - Allowed values:
+      - `grpc` - gRPC protocol (default)
+      - `http/protobuf` - HTTP with Protobuf encoding
+  - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL` to override the protocol specifically
+  for traces export.
+  > **Note:** This functionality currently applies only to OTLP `trace` exporters.
+
 ### Changed
 
 - Because of changes in `go.opentelemetry.io/contrib/instrumentation/runtime`,
