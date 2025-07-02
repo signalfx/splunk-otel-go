@@ -366,7 +366,6 @@ func notNone(s string) bool {
 	return s != "" && s != "none"
 }
 
-//nolint:unparam // This will receive other input values in future.
 func otlpProtocol(l logr.Logger, signalKey string) string {
 	// Signal-specific key takes precedence.
 	if v := os.Getenv(signalKey); v != "" {
