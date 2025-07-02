@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated, but we still support it to not break existing users.
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -282,7 +283,7 @@ func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, 
 	return otlpmetricgrpc.New(ctx, opts...)
 }
 
-type logsExporterFunc func(*exporterConfig) (log.Exporter, error)
+type logsExporterFunc func(logr.Logger, *exporterConfig) (log.Exporter, error)
 
 // logsExporters maps environment variable values to logs exporter creation
 // functions.
@@ -305,22 +306,44 @@ func logsExporter(l logr.Logger) logsExporterFunc {
 	return lef
 }
 
-func newOTLPlogExporter(c *exporterConfig) (log.Exporter, error) {
+func newOTLPlogExporter(l logr.Logger, c *exporterConfig) (log.Exporter, error) {
 	ctx := context.Background()
+	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
+
+	headers := make(map[string]string)
+	if c.AccessToken != "" {
+		headers["X-Sf-Token"] = c.AccessToken
+	}
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey)
+	protocol := otlpProtocol(l, otelLogsExporterOTLPProtocolKey)
+
+	if protocol == otlpProtocolHTTPProtobuf {
+		var opts []otlploghttp.Option
+
+		if len(headers) > 0 {
+			opts = append(opts, otlploghttp.WithHeaders(headers))
+		}
+
+		if c.TLSConfig != nil {
+			opts = append(opts, otlploghttp.WithTLSClientConfig(c.TLSConfig))
+		} else if isLocalCollector {
+			// Assume that the default endpoint (local collector) is non-TLS.
+			opts = append(opts, otlploghttp.WithInsecure())
+		}
+
+		return otlploghttp.New(ctx, opts...)
+	}
 
 	var opts []otlploggrpc.Option
 
-	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
-	if c.AccessToken != "" {
-		opts = append(opts, otlploggrpc.WithHeaders(map[string]string{
-			"X-Sf-Token": c.AccessToken,
-		}))
+	if len(headers) > 0 {
+		opts = append(opts, otlploggrpc.WithHeaders(headers))
 	}
 
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlploggrpc.WithTLSCredentials(tlsCreds))
-	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey) {
+	} else if isLocalCollector {
 		// Assume that the default endpoint (local collector) is non-TLS.
 		opts = append(opts, otlploggrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}

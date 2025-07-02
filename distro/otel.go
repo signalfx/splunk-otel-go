@@ -220,7 +220,7 @@ func runLogs(c *config, res *resource.Resource) (shutdownFunc, error) {
 		return nil, nil
 	}
 
-	exp, err := c.LogsExporterFunc(c.ExportConfig)
+	exp, err := c.LogsExporterFunc(c.Logger, c.ExportConfig)
 	if err != nil {
 		return nil, err
 	}
