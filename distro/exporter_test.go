@@ -129,7 +129,7 @@ func TestOTLPProtocol(t *testing.T) {
 
 		assert.Equal(t, defaultOTLPProtocol, got)
 		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
-		assert.Contains(t, buf.String(), "falling back to general")
+		assert.Contains(t, buf.String(), "falling back to")
 		assert.Contains(t, buf.String(), otelExporterOTLPProtocolKey)
 	})
 
@@ -153,7 +153,7 @@ func TestOTLPProtocol(t *testing.T) {
 
 		assert.Equal(t, otlpProtocolHTTPProtobuf, got)
 		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
-		assert.Contains(t, buf.String(), "falling back to general")
+		assert.Contains(t, buf.String(), "falling back to")
 	})
 }
 

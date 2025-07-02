@@ -329,7 +329,7 @@ func otlpProtocol(l logr.Logger, signalKey string) string {
 			return v
 		}
 		err := fmt.Errorf("invalid %s: %q", signalKey, v)
-		l.Error(err, "falling back to general %q", otelExporterOTLPProtocolKey)
+		l.Error(err, "falling back to %q", otelExporterOTLPProtocolKey)
 	}
 
 	// Fallback to general OTLP protocol.
