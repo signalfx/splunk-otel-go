@@ -21,13 +21,6 @@ Run the OpenTelemetry Collector and Jaeger instance:
 SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_URL=<url> docker compose up -d
 ```
 
-The value for `SPLUNK_ACCESS_TOKEN` can be found
-[here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
-Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
-
-The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
-[here](https://docs.splunk.com/observability/en/gdi/opentelemetry/components/splunk-hec-exporter.html#splunk-hec-token-and-endpoint).
-
 Run the instrumented application:
 
 ```sh
@@ -58,13 +51,6 @@ Run the Splunk Distribution of the OpenTelemetry Collector instance:
 ```sh
 SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_URL=<url> docker compose -f docker-compose-splunk.yaml up -d
 ```
-
-The value for `SPLUNK_ACCESS_TOKEN` can be found
-[here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens).
-Reference: [docs](https://docs.splunk.com/Observability/admin/authentication-tokens/api-access-tokens.html#admin-api-access-tokens).
-
-The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
-[here](https://docs.splunk.com/observability/en/gdi/opentelemetry/components/splunk-hec-exporter.html#splunk-hec-token-and-endpoint).
 
 Run the instrumented application:
 
@@ -141,3 +127,11 @@ MSYS_NO_PATHCONV=1 docker run --rm -w /app -v $(pwd):/app mcr.microsoft.com/oss/
 Before running the application make sure to enable the Windows FIPS policy.
 For testing purposes, Windows FIPS policy can be enabled via the registry key `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\FipsAlgorithmPolicy`
 dword value `Enabled` set to `1`.
+
+## Resources
+
+The information about `SPLUNK_ACCESS_TOKEN` and can be found
+[here](https://help.splunk.com/en/splunk-observability-cloud/administer/authentication-and-security/authentication-tokens/org-access-tokens).
+
+The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
+[here](https://help.splunk.com/en/splunk-observability-cloud/manage-data/splunk-distribution-of-the-opentelemetry-collector/get-started-with-the-splunk-distribution-of-the-opentelemetry-collector/collector-components/exporters/splunk-hec-exporter#splunk-hec-token-and-endpoint-0).
