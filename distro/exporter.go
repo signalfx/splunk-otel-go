@@ -59,7 +59,7 @@ func tracesExporter(l logr.Logger) traceExporterFunc {
 	return tef
 }
 
-func newOTLPTracesExporter(_ logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
+func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter, error) {
 	ctx := context.Background()
 
 	splunkEndpoint := otlpRealmTracesEndpoint()
@@ -74,18 +74,40 @@ func newOTLPTracesExporter(_ logr.Logger, c *exporterConfig) (trace.SpanExporter
 		)
 	}
 
+	headers := make(map[string]string)
+	if c.AccessToken != "" {
+		headers["X-Sf-Token"] = c.AccessToken
+	}
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey)
+	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
+
+	if protocol == otlpProtocolHTTPProtobuf {
+		var opts []otlptracehttp.Option
+
+		if len(headers) > 0 {
+			opts = append(opts, otlptracehttp.WithHeaders(headers))
+		}
+
+		if c.TLSConfig != nil {
+			opts = append(opts, otlptracehttp.WithTLSClientConfig(c.TLSConfig))
+		} else if isLocalCollector {
+			// Assume that the default endpoint (local collector) is non-TLS.
+			opts = append(opts, otlptracehttp.WithInsecure())
+		}
+
+		return otlptracehttp.New(ctx, opts...)
+	}
+
 	var opts []otlptracegrpc.Option
 
-	if c.AccessToken != "" {
-		opts = append(opts, otlptracegrpc.WithHeaders(map[string]string{
-			"X-Sf-Token": c.AccessToken,
-		}))
+	if len(headers) > 0 {
+		opts = append(opts, otlptracegrpc.WithHeaders(headers))
 	}
 
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(tlsCreds))
-	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey) {
+	} else if isLocalCollector {
 		// Assume that the default endpoint (local collector) is non-TLS.
 		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
@@ -297,4 +319,27 @@ func noneEnvVarSet(envs ...string) bool {
 // notNone returns if s is not empty or set to none.
 func notNone(s string) bool {
 	return s != "" && s != "none"
+}
+
+//nolint:unparam // This will receive other input values in future.
+func otlpProtocol(l logr.Logger, signalKey string) string {
+	// Signal-specific key takes precedence.
+	if v := os.Getenv(signalKey); v != "" {
+		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
+			return v
+		}
+		err := fmt.Errorf("invalid %s: %q", signalKey, v)
+		l.Error(err, "falling back to %q", otelExporterOTLPProtocolKey)
+	}
+
+	// Fallback to general OTLP protocol.
+	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
+		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
+			return v
+		}
+		err := fmt.Errorf("invalid %s: %q", otelExporterOTLPProtocolKey, v)
+		l.Error(err, "using default %s: %q", otelExporterOTLPProtocolKey, defaultOTLPProtocol)
+	}
+
+	return defaultOTLPProtocol
 }
