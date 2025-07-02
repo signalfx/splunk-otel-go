@@ -203,7 +203,7 @@ func jaegerEndpoint() string {
 	return jaegerDefaultEndpoint
 }
 
-type metricsExporterFunc func(*exporterConfig) (metric.Exporter, error)
+type metricsExporterFunc func(logr.Logger, *exporterConfig) (metric.Exporter, error)
 
 // metricsExporters maps environment variable values to metrics exporter creation
 // functions.
@@ -226,7 +226,7 @@ func metricsExporter(l logr.Logger) metricsExporterFunc {
 	return mef
 }
 
-func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
+func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, error) {
 	ctx := context.Background()
 
 	splunkEndpoint := otlpRealmMetricsEndpoint()
@@ -241,18 +241,40 @@ func newOTLPMetricsExporter(c *exporterConfig) (metric.Exporter, error) {
 		)
 	}
 
+	headers := make(map[string]string)
+	if c.AccessToken != "" {
+		headers["X-Sf-Token"] = c.AccessToken
+	}
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey, splunkRealmKey)
+	protocol := otlpProtocol(l, otelMetricsExporterOTLPProtocolKey)
+
+	if protocol == otlpProtocolHTTPProtobuf {
+		var opts []otlpmetrichttp.Option
+
+		if len(headers) > 0 {
+			opts = append(opts, otlpmetrichttp.WithHeaders(headers))
+		}
+
+		if c.TLSConfig != nil {
+			opts = append(opts, otlpmetrichttp.WithTLSClientConfig(c.TLSConfig))
+		} else if isLocalCollector {
+			// Assume that the default endpoint (local collector) is non-TLS.
+			opts = append(opts, otlpmetrichttp.WithInsecure())
+		}
+
+		return otlpmetrichttp.New(ctx, opts...)
+	}
+
 	var opts []otlpmetricgrpc.Option
 
-	if c.AccessToken != "" {
-		opts = append(opts, otlpmetricgrpc.WithHeaders(map[string]string{
-			"X-Sf-Token": c.AccessToken,
-		}))
+	if len(headers) > 0 {
+		opts = append(opts, otlpmetricgrpc.WithHeaders(headers))
 	}
 
 	if c.TLSConfig != nil {
 		tlsCreds := credentials.NewTLS(c.TLSConfig)
 		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(tlsCreds))
-	} else if noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey, splunkRealmKey) {
+	} else if isLocalCollector {
 		// Assume that the default endpoint (local collector) is non-TLS.
 		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(insecure.NewCredentials()))
 	}
