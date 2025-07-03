@@ -131,7 +131,7 @@ dword value `Enabled` set to `1`.
 ## Resources
 
 The information about `SPLUNK_ACCESS_TOKEN` and can be found
-[here](https://help.splunk.com/en/splunk-observability-cloud/administer/authentication-and-security/authentication-tokens/org-access-tokens).
+[here](https://help.splunk.com/?resourceId=admin_authentication-tokens_org-tokens).
 
 The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
 [here](https://help.splunk.com/en/splunk-observability-cloud/manage-data/splunk-distribution-of-the-opentelemetry-collector/get-started-with-the-splunk-distribution-of-the-opentelemetry-collector/collector-components/exporters/splunk-hec-exporter#splunk-hec-token-and-endpoint-0).
