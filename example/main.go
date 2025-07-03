@@ -65,14 +65,14 @@ func run() (err error) {
 	logger := slog.New(otelslog.NewHandler("github.com/signalfx/splunk-otel-go/example"))
 	slog.SetDefault(logger)
 
-	slog.Info("Application started", slog.String("address", address))
+	slog.InfoContext(ctx, "Application started", slog.String("address", address))
 
 	// instrument http.Handler
 	var handler http.Handler = http.HandlerFunc(handle)
 	handler = splunkhttp.NewHandler(handler)
 	handler = otelhttp.NewHandler(handler, "handle")
 
-	l, err := net.Listen("tcp", address)
+	l, err := (&net.ListenConfig{}).Listen(ctx, "tcp", address)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func call(ctx context.Context, client *http.Client) {
-	slog.Info("Making HTTP request", slog.String("url", "http://"+address))
+	slog.InfoContext(ctx, "Making HTTP request", slog.String("url", "http://"+address))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+address, http.NoBody)
 	if err != nil {
@@ -136,5 +136,5 @@ func call(ctx context.Context, client *http.Client) {
 		return
 	}
 	fmt.Print(string(dump))
-	slog.Info("HTTP request completed", slog.Int("status", resp.StatusCode))
+	slog.InfoContext(ctx, "HTTP request completed", slog.Int("status", resp.StatusCode))
 }
