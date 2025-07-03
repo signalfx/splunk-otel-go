@@ -645,7 +645,7 @@ for sending data directly to Splunk Observability Cloud.
 
 ### Added
 
-- Add support for setting the [Splunk's organization access token](https://docs.splunk.com/observability/admin/authentication-tokens/org-tokens.html)
+- Add support for setting the [Splunk's organization access token](https://help.splunk.com/en/splunk-observability-cloud/administer/authentication-and-security/authentication-tokens/org-access-tokens)
   using the `SPLUNK_ACCESS_TOKEN` environmental variable or `distro.WithAccessToken`
   option. It allows exporters sending data directly to the Splunk Observability Cloud.
   To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be

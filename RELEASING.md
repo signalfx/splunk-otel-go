@@ -11,7 +11,7 @@ To bump all (execpt the `/build` module's) dependencies run:
 ## Pre-Release
 
 1. Verify if [wizard](https://app.signalfx.com/#/integrations/go-tracing/description)
-   and [official docs](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html)
+   and [official docs](https://quickdraw.splunk.com/redirect/?product=Observability&version=current&location=go.application)
    needs any adjustments.
    Create a Pull Request with documentation updates in
    [splunk/public-o11y-docs](https://github.com/splunk/public-o11y-docs/tree/main/gdi/get-data-in/application/go)

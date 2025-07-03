@@ -10,4 +10,4 @@ and forward all telemetry to Splunk Observabilty Cloud.
 See our [example applications](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
 
 Read the official documentation for this distribution in the
-[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
+[Splunk Docs site](https://quickdraw.splunk.com/redirect/?product=Observability&version=current&location=go.application).
