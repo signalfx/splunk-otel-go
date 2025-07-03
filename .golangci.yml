@@ -155,6 +155,21 @@ linters:
           - mnd
         path: _test\.go
       - linters:
+          - noctx
+        path: instrumentation/database/sql/splunksql
+      - linters:
+          - noctx
+        path: instrumentation/github.com/go-sql-driver/mysql/splunkmysql
+      - linters:
+          - noctx
+        path: instrumentation/github.com/jackc/pgx/splunkpgx
+      - linters:
+          - noctx
+        path: instrumentation/github.com/jackc/pgx/v5/splunkpgx
+      - linters:
+          - noctx
+        path: instrumentation/github.com/lib/pq/splunkpq
+      - linters:
           - gocritic
         text: 'unnecessaryDefer:'
       - path: pkg/golinters/scopelint.go

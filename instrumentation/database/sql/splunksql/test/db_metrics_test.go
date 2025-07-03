@@ -71,7 +71,7 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			db, err := splunksql.Open(tc.driverName, "dataSourceName", splunksql.WithMeterProvider(meterProvider))
 			require.NoError(t, err)
 			defer func() { assert.NoError(t, db.Close()) }()
-			_, err = db.Exec("SELECT 1") //nolint:noctx  // Testing.
+			_, err = db.Exec("SELECT 1")
 			require.NoError(t, err)
 
 			// assert
