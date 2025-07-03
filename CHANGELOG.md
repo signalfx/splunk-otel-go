@@ -18,9 +18,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL` to override the protocol specifically
   for traces export.
   - `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` to override the protocol specifically
-  for traces export.
+  for metrics export.
   - `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` to override the protocol specifically
-  for traces export.
+  for logs export.
 
 ### Changed
 
