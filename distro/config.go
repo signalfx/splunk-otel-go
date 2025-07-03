@@ -45,8 +45,10 @@ const (
 	otelExporterOTLPLogsEndpointKey    = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"
 
 	// OTLP exporter protocol.
-	otelExporterOTLPProtocolKey       = "OTEL_EXPORTER_OTLP_PROTOCOL"
-	otelTracesExporterOTLPProtocolKey = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"
+	otelExporterOTLPProtocolKey        = "OTEL_EXPORTER_OTLP_PROTOCOL"
+	otelTracesExporterOTLPProtocolKey  = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"
+	otelMetricsExporterOTLPProtocolKey = "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL"
+	otelLogsExporterOTLPProtocolKey    = "OTEL_EXPORTER_OTLP_LOGS_PROTOCOL"
 
 	// Logging level to set when using the default logger.
 	otelLogLevelKey = "OTEL_LOG_LEVEL"
