@@ -26,7 +26,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp"
 )
 
-//nolint:errcheck,noctx // example usage
+//nolint:errcheck // example usage
 func Example() {
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		io.WriteString(w, "Hello world")

@@ -110,7 +110,7 @@ func (s *SplunkSQLSuite) TearDownSuite() {
 }
 
 func (s *SplunkSQLSuite) TestDBPing() {
-	err := s.DB.Ping() //nolint:noctx  // Test Ping operation.
+	err := s.DB.Ping()
 	if s.ConnImplementsPinger {
 		s.Require().NoError(err)
 		s.assertSpan(moniker.Ping)
@@ -130,7 +130,7 @@ func (s *SplunkSQLSuite) TestDBPingContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBExec() {
-	_, err := s.DB.Exec("test") //nolint:noctx  // Test Exec operation.
+	_, err := s.DB.Exec("test")
 	s.Require().NoError(err)
 	if s.ConnImplementsExecer {
 		s.assertSpan(moniker.Exec, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -150,7 +150,7 @@ func (s *SplunkSQLSuite) TestDBExecContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBQuery() {
-	rows, err := s.DB.Query("test") //nolint:noctx  // Test Query operation.
+	rows, err := s.DB.Query("test")
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Err()) })
 	s.T().Cleanup(func() { s.Assert().NoError(rows.Close()) })
 	s.Require().NoError(err)
@@ -174,7 +174,7 @@ func (s *SplunkSQLSuite) TestDBQueryContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBQueryRow() {
-	r := s.DB.QueryRow("test") //nolint:noctx  // Test QueryRow operation.
+	r := s.DB.QueryRow("test")
 	s.Require().NoError(r.Err())
 	if s.ConnImplementsQueryer {
 		s.assertSpan(moniker.Query, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -194,7 +194,7 @@ func (s *SplunkSQLSuite) TestDBQueryRowContext() {
 }
 
 func (s *SplunkSQLSuite) TestDBPrepare() {
-	stmt, err := s.DB.Prepare("test") //nolint:noctx  // Test Prepare operation.
+	stmt, err := s.DB.Prepare("test")
 	s.T().Cleanup(func() { s.Assert().NoError(stmt.Close()) })
 	s.Require().NoError(err)
 	s.assertSpan(moniker.Prepare, traceapi.WithAttributes(semconv.DBStatementKey.String("test")))
@@ -226,7 +226,7 @@ func (s *SplunkSQLSuite) TestDBBeginTx() {
 }
 
 func (s *SplunkSQLSuite) newStmt() *sql.Stmt {
-	stmt, err := s.DB.Prepare("test query") //nolint:noctx  // Testing lib.
+	stmt, err := s.DB.Prepare("test query")
 	s.T().Cleanup(func() { s.Assert().NoError(stmt.Close()) })
 	s.Require().NoError(err)
 	return stmt
