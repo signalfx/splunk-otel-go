@@ -38,7 +38,7 @@ var defaultClientAttrs = []attribute.KeyValue{
 
 func startServer(t *testing.T) *dns.Server {
 	// Let the system determine the port.
-	pc, err := net.ListenPacket("udp", "127.0.0.1:0") //nolint:noctx // Testing.
+	pc, err := net.ListenPacket("udp", "127.0.0.1:0")
 	require.NoError(t, err)
 
 	mux := dns.NewServeMux()
