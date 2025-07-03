@@ -9,7 +9,10 @@ require (
 	golang.org/x/sync v0.15.0
 )
 
-require github.com/cenkalti/backoff/v5 v5.0.2 // indirect
+require (
+	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.13.0 // indirect
+)
 
 require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
