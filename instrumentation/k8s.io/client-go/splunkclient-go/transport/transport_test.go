@@ -36,7 +36,7 @@ func TestNewWrapperFuncNilRoundTripper(t *testing.T) {
 
 func TestRequestToSpanNameUnrecognized(t *testing.T) {
 	path := "/unrecognized"
-	r, err := http.NewRequest("GET", path, http.NoBody) //nolint: noctx  // Unused request does not need context.
+	r, err := http.NewRequest("GET", path, http.NoBody)
 	require.NoError(t, err)
 
 	expected := "HTTP GET"
@@ -103,7 +103,7 @@ func TestRequestPathToSpanName(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		r, err := http.NewRequest("GET", test.path, http.NoBody) //nolint: noctx  // Unused request does not need context.
+		r, err := http.NewRequest("GET", test.path, http.NoBody)
 		require.NoError(t, err)
 
 		expected := "HTTP GET " + test.name
@@ -155,7 +155,7 @@ func TestRequestMethodToSpanName(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		r, err := http.NewRequest(test.method, "http://localhost/", http.NoBody) //nolint: noctx  // Unused request does not need context.
+		r, err := http.NewRequest(test.method, "http://localhost/", http.NoBody)
 		require.NoError(t, err)
 		assert.Equalf(t, test.name, name(r), "method: %q", test.method)
 	}
