@@ -45,7 +45,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Let the system determine the port.
-	pc, err := net.ListenPacket("udp", "127.0.0.1:0")
+	pc, err := net.ListenPacket("udp", "127.0.0.1:0") //nolint:noctx // Testing.
 	require.NoError(t, err)
 
 	mux := dns.NewServeMux()
