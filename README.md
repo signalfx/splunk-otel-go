@@ -1,6 +1,6 @@
 # Splunk Distribution of OpenTelemetry Go
 
-[![OpenTelemetry Go](https://img.shields.io/badge/OTel-1.36.0-blueviolet)](https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.36.0)
+[![OpenTelemetry Go](https://img.shields.io/badge/OTel-1.37.0-blueviolet)](https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.37.0)
 [![Splunk GDI Specification](https://img.shields.io/badge/GDI-1.6.0-blueviolet)](https://github.com/signalfx/gdi-specification/releases/tag/v1.6.0)
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/splunk-otel-go?include_prereleases)](https://github.com/signalfx/splunk-otel-go/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/splunk-otel-go.svg)](https://pkg.go.dev/github.com/signalfx/splunk-otel-go)
