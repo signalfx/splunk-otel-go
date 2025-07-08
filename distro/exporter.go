@@ -289,7 +289,7 @@ type logsExporterFunc func(logr.Logger, *exporterConfig) (log.Exporter, error)
 // functions.
 var logsExporters = map[string]logsExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPlogExporter,
+	"otlp": newOTLPLogExporter,
 	// None, explicitly do not set an exporter.
 	"none": nil,
 }
@@ -306,7 +306,7 @@ func logsExporter(l logr.Logger) logsExporterFunc {
 	return lef
 }
 
-func newOTLPlogExporter(l logr.Logger, c *exporterConfig) (log.Exporter, error) {
+func newOTLPLogExporter(l logr.Logger, c *exporterConfig) (log.Exporter, error) {
 	ctx := context.Background()
 	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
 
