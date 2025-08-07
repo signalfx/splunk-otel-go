@@ -55,7 +55,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
