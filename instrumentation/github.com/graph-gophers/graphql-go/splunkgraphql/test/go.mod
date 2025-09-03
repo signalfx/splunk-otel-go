@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophe
 go 1.23.0
 
 require (
-	github.com/graph-gophers/graphql-go v1.7.0
+	github.com/graph-gophers/graphql-go v1.7.2
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql v1.27.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel/sdk v1.38.0
