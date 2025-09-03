@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/test
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/graph-gophers/graphql-go v1.7.2
