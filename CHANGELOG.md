@@ -12,7 +12,7 @@ The release requires at least [Go 1.24].
 
 ### Removed
 
-- Drop support for [Go 1.23]. (#XXXX)
+- Drop support for [Go 1.23]. (#4093)
 
 ## [1.28.0] - 2025-09-03
 
