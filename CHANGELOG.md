@@ -8,6 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.28.0] - 2025-09-03
+
+This release upgrades [OpenTelemetry Go to v1.38.0/v0.60.0/v0.14.0/v0.0.13][otel-v1.38.0]
+and [OpenTelemetry Go Contrib to v1.38.0/v2.0.0/v0.63.0/v0.32.0/v0.18.0/v0.13.0/v0.11.0/v0.10.0][contrib-v1.38.0].
+
+This minor release is the last to support [Go 1.23].
+The next minor release will require at least [Go 1.24].
+
 ## [1.27.0] - 2025-07-03
 
 This release upgrades [OpenTelemetry Go to 1.37.0/0.59.0/0.13.0][otel-v1.37.0]
@@ -695,7 +703,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.27.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.28.0...HEAD
+[1.28.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.28.0
 [1.27.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.27.0
 [1.26.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.26.0
 [1.25.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.25.0
@@ -735,6 +744,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.38.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.38.0
 [otel-v1.37.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.37.0
 [otel-log-v0.12.2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/log/v0.12.2
 [otel-v1.36.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.36.0
@@ -773,6 +783,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.38.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.38.0
 [contrib-v1.37.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.37.0
 [contrib-v1.36.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.36.0
 [contrib-v1.35.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.35.0
@@ -808,6 +819,7 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
 
+[Go 1.24]: https://go.dev/doc/go1.24
 [Go 1.23]: https://go.dev/doc/go1.23
 [Go 1.22]: https://go.dev/doc/go1.22
 [Go 1.21]: https://go.dev/doc/go1.21
