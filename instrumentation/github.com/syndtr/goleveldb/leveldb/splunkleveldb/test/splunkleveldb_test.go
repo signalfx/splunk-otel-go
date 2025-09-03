@@ -162,7 +162,7 @@ func assertSpansFunc(parent string, traceID traceapi.TraceID, names ...string) f
 
 			assert.Equal(t, traceapi.SpanKindClient, span.SpanKind())
 			assert.Equal(t, traceID, span.SpanContext().TraceID())
-			assert.Equal(t, splunkleveldb.Version(), span.InstrumentationLibrary().Version)
+			assert.Equal(t, splunkleveldb.Version(), span.InstrumentationScope().Version)
 			assert.Contains(t, span.Attributes(), semconv.DBSystemKey.String("leveldb"))
 			assert.Contains(t, span.Attributes(), semconv.NetTransportInProc)
 			assert.Contains(t, span.Attributes(), semconv.DBOperationKey.String(name))

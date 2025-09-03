@@ -226,7 +226,7 @@ func assertSpans(t *testing.T, n int, parentSpanName string, spans []trace.ReadO
 	for _, child := range children {
 		assert.Equal(t, "SET", child.Name())
 		assert.Equal(t, traceapi.SpanKindClient, child.SpanKind())
-		assert.Equal(t, splunkredigo.Version(), child.InstrumentationLibrary().Version)
+		assert.Equal(t, splunkredigo.Version(), child.InstrumentationScope().Version)
 		assert.Equal(t, parent.SpanContext().TraceID(), child.SpanContext().TraceID())
 
 		attrs := child.Attributes()

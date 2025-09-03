@@ -334,7 +334,7 @@ func TestSpans(t *testing.T) {
 func assertSpan(t *testing.T, name string, span trace.ReadOnlySpan) {
 	assert.Equal(t, name, span.Name())
 	assert.Equal(t, apitrace.SpanKindClient, span.SpanKind())
-	assert.Equal(t, splunkelastic.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkelastic.Version(), span.InstrumentationScope().Version)
 	assert.Contains(t, span.Attributes(), semconv.DBSystemElasticsearch)
 	assert.Contains(t, span.Attributes(), attr)
 }
