@@ -305,7 +305,7 @@ func consumeMessage(t *testing.T, tp kafka.TopicPartition, opts ...splunkkafka.O
 func assertProducerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, fmt.Sprintf("%s send", testTopic), span.Name())
 	assert.Equal(t, traceapi.SpanKindProducer, span.SpanKind())
-	assert.Equal(t, splunkkafka.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkkafka.Version(), span.InstrumentationScope().Version)
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingDestinationKindTopic)
@@ -319,7 +319,7 @@ func assertProducerSpan(t *testing.T, span trace.ReadOnlySpan) {
 func assertConsumerSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, fmt.Sprintf("%s receive", testTopic), span.Name())
 	assert.Equal(t, traceapi.SpanKindConsumer, span.SpanKind())
-	assert.Equal(t, splunkkafka.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkkafka.Version(), span.InstrumentationScope().Version)
 	attrs := span.Attributes()
 	assert.Contains(t, attrs, semconv.MessagingSystemKey.String("kafka"))
 	assert.Contains(t, attrs, semconv.MessagingSourceKindTopic)

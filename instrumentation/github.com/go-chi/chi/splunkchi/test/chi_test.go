@@ -109,7 +109,7 @@ func assertSpan(path string, otelCode codes.Code, httpCode int) func(*testing.T,
 		}
 		assert.Equal(t, name, span.Name())
 		assert.Equal(t, traceapi.SpanKindServer, span.SpanKind())
-		assert.Equal(t, splunkchi.Version(), span.InstrumentationLibrary().Version)
+		assert.Equal(t, splunkchi.Version(), span.InstrumentationScope().Version)
 
 		status := span.Status()
 		assert.Equal(t, otelCode, status.Code)

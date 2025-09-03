@@ -307,7 +307,7 @@ func (s *SplunkSQLSuite) assertSpans(name moniker.Span, count int, c traceapi.Sp
 			}
 		}
 		s.Equalf(traceapi.SpanKindClient, roSpan.SpanKind(), "span %q is not a client span", name)
-		s.Equal(splunksql.Version(), roSpan.InstrumentationLibrary().Version, "version should match")
+		s.Equal(splunksql.Version(), roSpan.InstrumentationScope().Version, "version should match")
 	}
 	s.Equalf(count, n, "wrong number of %s spans", name)
 }

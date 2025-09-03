@@ -111,7 +111,7 @@ func newFixtures(t *testing.T) (*dns.Server, *tracetest.SpanRecorder, []splunkdn
 func assertClientSpan(t *testing.T, span trace.ReadOnlySpan) {
 	assert.Equal(t, "DNS QUERY", span.Name())
 	assert.Equal(t, traceapi.SpanKindClient, span.SpanKind())
-	assert.Equal(t, splunkdns.Version(), span.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkdns.Version(), span.InstrumentationScope().Version)
 	attrs := span.Attributes()
 	for _, a := range defaultClientAttrs {
 		assert.Contains(t, attrs, a)

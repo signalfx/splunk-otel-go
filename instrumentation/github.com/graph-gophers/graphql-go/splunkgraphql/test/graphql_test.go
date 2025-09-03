@@ -92,7 +92,7 @@ func TestTracerNonTrivial(t *testing.T) {
 	assert.Equal(t, spans[2].SpanContext().TraceID(), spans[1].SpanContext().TraceID())
 
 	s := spans[0]
-	assert.Equal(t, splunkgraphql.Version(), s.InstrumentationLibrary().Version)
+	assert.Equal(t, splunkgraphql.Version(), s.InstrumentationScope().Version)
 	assert.Equal(t, "GraphQL validation", s.Name())
 	assert.Equal(t, traceapi.SpanKindInternal, s.SpanKind())
 
