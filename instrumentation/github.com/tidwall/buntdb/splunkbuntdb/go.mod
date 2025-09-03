@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/bun
 go 1.23.0
 
 require (
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.27.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.28.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/buntdb v1.3.2
 	go.opentelemetry.io/otel v1.38.0

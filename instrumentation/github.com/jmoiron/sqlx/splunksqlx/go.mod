@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.27.0
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.28.0
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -13,7 +13,7 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.27.0 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.28.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
