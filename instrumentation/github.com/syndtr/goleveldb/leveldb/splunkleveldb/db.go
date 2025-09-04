@@ -177,7 +177,7 @@ func (db *DB) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
 		},
 		trace.WithAttributes(semconv.DBOperationKey.String("Get")),
 	)
-	return
+	return value, err
 }
 
 // GetSnapshot returns a latest snapshot of the underlying DB. A snapshot
@@ -209,7 +209,7 @@ func (db *DB) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
 		},
 		trace.WithAttributes(semconv.DBOperationKey.String("Has")),
 	)
-	return
+	return ret, err
 }
 
 // NewIterator returns a traced iterator for the latest snapshot of the

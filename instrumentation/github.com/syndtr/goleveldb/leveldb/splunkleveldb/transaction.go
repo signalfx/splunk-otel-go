@@ -82,7 +82,7 @@ func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) (value []byte, err e
 		},
 		trace.WithAttributes(semconv.DBOperationKey.String("Get")),
 	)
-	return
+	return value, err
 }
 
 // Has returns true if the DB does contains the given key.
@@ -99,7 +99,7 @@ func (tr *Transaction) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error
 		},
 		trace.WithAttributes(semconv.DBOperationKey.String("Has")),
 	)
-	return
+	return ret, err
 }
 
 // NewIterator returns a traced iterator for the latest snapshot of the

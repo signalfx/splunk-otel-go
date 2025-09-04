@@ -61,5 +61,5 @@ func (c *Client) ExchangeContext(ctx context.Context, m *dns.Msg, addr string) (
 		resp, rtt, sErr = c.Client.ExchangeContext(ctx, m, addr)
 		return sErr
 	}, trace.WithSpanKind(trace.SpanKindClient))
-	return
+	return resp, rtt, err
 }

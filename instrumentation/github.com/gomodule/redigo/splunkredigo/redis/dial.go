@@ -192,5 +192,5 @@ func splitAddress(address string) (ip, hostname string, port int) {
 	if p64, err := strconv.ParseUint(p, base10, bit16); err == nil {
 		port = int(p64)
 	}
-	return
+	return ip, hostname, port
 }
