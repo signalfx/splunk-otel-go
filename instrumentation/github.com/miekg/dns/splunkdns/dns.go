@@ -60,5 +60,5 @@ func ExchangeContext(ctx context.Context, m *dns.Msg, addr string, opts ...Optio
 		r, sErr = dns.ExchangeContext(c, m, addr)
 		return sErr
 	}, trace.WithSpanKind(trace.SpanKindClient))
-	return
+	return r, err
 }

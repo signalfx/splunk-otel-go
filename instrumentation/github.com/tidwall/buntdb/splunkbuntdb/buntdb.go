@@ -191,7 +191,7 @@ func (tx *Tx) Delete(key string) (val string, err error) {
 		val, iErr = tx.Tx.Delete(key)
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("Delete")))
-	return
+	return val, err
 }
 
 // DeleteAll calls the underlying Tx.DeleteAll and traces the query.
@@ -257,7 +257,7 @@ func (tx *Tx) Get(key string, ignoreExpired ...bool) (val string, err error) {
 		val, iErr = tx.Tx.Get(key, ignoreExpired...)
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("Get")))
-	return
+	return val, err
 }
 
 // Indexes calls the underlying Tx.Indexes and traces the query.
@@ -267,7 +267,7 @@ func (tx *Tx) Indexes() (indexes []string, err error) {
 		indexes, iErr = tx.Tx.Indexes()
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("Indexes")))
-	return
+	return indexes, err
 }
 
 // Intersects calls the underlying Tx.Intersects and traces the query.
@@ -284,7 +284,7 @@ func (tx *Tx) Len() (n int, err error) {
 		n, iErr = tx.Tx.Len()
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("Len")))
-	return
+	return n, err
 }
 
 // Nearby calls the underlying Tx.Nearby and traces the query.
@@ -301,7 +301,7 @@ func (tx *Tx) Set(key, value string, opts *buntdb.SetOptions) (previousValue str
 		previousValue, replaced, iErr = tx.Tx.Set(key, value, opts)
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("Set")))
-	return
+	return previousValue, replaced, err
 }
 
 // TTL calls the underlying Tx.TTL and traces the query.
@@ -311,7 +311,7 @@ func (tx *Tx) TTL(key string) (duration time.Duration, err error) {
 		duration, iErr = tx.Tx.TTL(key)
 		return iErr
 	}, trace.WithAttributes(semconv.DBOperationKey.String("TTL")))
-	return
+	return duration, err
 }
 
 // Commit calls the underlying Tx.Commit and traces the query.

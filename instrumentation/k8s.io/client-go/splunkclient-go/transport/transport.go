@@ -99,14 +99,14 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		span.End()
-		return
+		return resp, err
 	}
 
 	span.SetAttributes(httpconv.ClientResponse(resp)...)
 	span.SetStatus(httpconv.ClientStatus(resp.StatusCode))
 	resp.Body = &wrappedBody{ctx: ctx, span: span, body: resp.Body}
 
-	return
+	return resp, err
 }
 
 const (

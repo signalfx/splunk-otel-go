@@ -148,7 +148,7 @@ func (c *otelConn) Do(commandName string, args ...interface{}) (reply interface{
 		reply, e = c.Conn.Do(commandName, args...)
 		return e
 	}, sso...)
-	return
+	return reply, err
 }
 
 // DoWithTimeout sends a command to the server and returns the received reply.
@@ -170,7 +170,7 @@ func (c *otelConn) DoWithTimeout(timeout time.Duration, commandName string, args
 		reply, e = c.Conn.(redis.ConnWithTimeout).DoWithTimeout(timeout, commandName, args...)
 		return e
 	}, sso...)
-	return
+	return reply, err
 }
 
 // ReceiveWithTimeout receives a single reply from the Redis server.
@@ -194,7 +194,7 @@ func (c *otelConn) DoContext(ctx context.Context, commandName string, args ...in
 		reply, e = c.Conn.(redis.ConnWithContext).DoContext(ctx, commandName, args...)
 		return e
 	}, sso...)
-	return
+	return reply, err
 }
 
 // ReceiveContext receives a single reply from the Redis server.

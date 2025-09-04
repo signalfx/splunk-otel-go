@@ -84,11 +84,11 @@ func (rt *roundTripper) RoundTrip(r *http.Request) (resp *http.Response, err err
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		return
+		return resp, err
 	}
 	span.SetAttributes(httpconv.ClientResponse(resp)...)
 	span.SetStatus(httpconv.ClientStatus(resp.StatusCode))
-	return
+	return resp, err
 }
 
 // name returns an appropriate span name based on the client request.
