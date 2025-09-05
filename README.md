@@ -20,12 +20,12 @@ application to capture and report distributed traces to Splunk APM.
 ## Get started
 
 Read the official documentation for this distribution in the
-[Splunk Docs site](https://quickdraw.splunk.com/redirect/?product=Observability&version=current&location=go.application).
+[Splunk Docs site](https://help.splunk.com/en/splunk-observability-cloud/manage-data/available-data-sources/supported-integrations-in-splunk-observability-cloud/apm-instrumentation/instrument-a-go-application).
 
 ### Troubleshooting
 
 For troubleshooting information, see the
-[Troubleshooting](https://quickdraw.splunk.com/redirect/?product=Observability&version=current&location=go.troubleshooting)
+[Troubleshooting](https://help.splunk.com/en/splunk-observability-cloud/manage-data/available-data-sources/supported-integrations-in-splunk-observability-cloud/apm-instrumentation/instrument-a-go-application/troubleshoot-go-instrumentation)
 documentation.
 
 ## Examples
