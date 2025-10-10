@@ -13,7 +13,6 @@
 // limitations under the License.
 
 //go:build cgo && linux
-// +build cgo,linux
 
 package test
 
