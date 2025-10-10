@@ -13,8 +13,6 @@
 // limitations under the License.
 
 //go:build cgo && (linux || darwin)
-// +build cgo
-// +build linux darwin
 
 package splunkkafka_test
 
