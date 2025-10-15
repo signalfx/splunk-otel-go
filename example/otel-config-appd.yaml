@@ -50,7 +50,6 @@ service:
       exporters:
         - debug/traces
         - otlphttp
-        - sapm
     metrics:
       receivers:
         - otlp
