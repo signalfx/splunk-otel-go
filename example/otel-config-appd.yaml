@@ -1,0 +1,66 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:        # used by default
+        endpoint: "0.0.0.0:4317"
+
+processors:
+  batch:
+  resource:
+    attributes:
+      - key: appdynamics.controller.host
+        value: "${APPD_HOST}"
+        action: upsert
+      - key: appdynamics.controller.port
+        value: "${APPD_PORT}"
+        action: upsert
+      - key: appdynamics.controller.account
+        value: "${APPD_ACCOUNT}"
+        action: upsert
+
+exporters:
+  # traces exporters
+  debug/traces:
+    # verbosity: detailed
+  otlphttp:
+    endpoint: "https://${APPD_REGION}-sls-agent-api.saas.appdynamics.com"
+    headers: { "x-api-key": "${APPD_API_KEY}" }
+  # metrics exporters
+  debug/metrics:
+    # verbosity: detailed
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  # logs exporters
+  debug/logs:
+      verbosity: detailed
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+         - batch
+         - resource
+      exporters:
+        - debug/traces
+        - otlphttp
+        - sapm
+    metrics:
+      receivers:
+        - otlp
+      processors: [batch]
+      exporters:
+        - debug/metrics 
+        - prometheus
+    logs:
+      receivers: 
+        - otlp
+      processors: [batch]
+      exporters: 
+        - debug/logs
