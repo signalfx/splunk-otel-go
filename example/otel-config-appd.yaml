@@ -22,6 +22,10 @@ exporters:
   # traces exporters
   debug/traces:
     # verbosity: detailed
+  otlp:
+    endpoint: "${JAEGER_ENDPOINT}"
+    tls:
+      insecure: true
   otlphttp:
     endpoint: "https://${APPD_REGION}-sls-agent-api.saas.appdynamics.com"
     headers: { "x-api-key": "${APPD_API_KEY}" }
@@ -49,6 +53,7 @@ service:
          - resource
       exporters:
         - debug/traces
+        - otlp
         - otlphttp
     metrics:
       receivers:
