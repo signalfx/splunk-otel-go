@@ -8,7 +8,7 @@ processors:
   batch:
   transform:
     trace_statements:
-      # === General Attribute Renaming (New -> Old) ===
+      # === HTTP Attribute Renaming (New -> v1.20.0) ===
       # Copy http.request.method to the old http.method
       - set(span.attributes["http.method"], span.attributes["http.request.method"]) where span.attributes["http.request.method"] != nil
       # Copy http.response.status_code to the old http.status_code
@@ -22,7 +22,7 @@ processors:
       # Copy user_agent.original to the old http.user_agent
       - set(span.attributes["http.user_agent"], span.attributes["user_agent.original"]) where span.attributes["user_agent.original"] != nil
 
-      # === Reconstruct http.target from url.path and url.query ===
+      # Reconstruct http.target from url.path and url.query
       # Case 1: Both path and query exist. Combine them with a "?".
       - set(span.attributes["http.target"], Concat([span.attributes["url.path"], "?", span.attributes["url.query"]], "")) where span.attributes["url.path"] != nil and span.attributes["url.query"] != nil
       # Case 2: Only path exists.
@@ -34,10 +34,15 @@ processors:
       - set(span.attributes["net.peer.port"], span.attributes["client.port"]) where span.kind == SPAN_KIND_SERVER and span.attributes["client.port"] != nil
       # On a SERVER span, server.address becomes http.host.
       - set(span.attributes["http.host"], span.attributes["server.address"]) where span.kind == SPAN_KIND_SERVER and span.attributes["server.address"] != nil
-
       # On a CLIENT span, the peer is the server.
       - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.address"] != nil
       - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.port"] != nil
+
+      # === Messaging Attribute Renaming (New -> v1.16.0) ===
+      # Case 1: messaging.destination.name exist.
+      - set(span.attributes["messaging.destination"], span.attributes["messaging.destination.name"]) where span.attributes["messaging.destination.name"] != nil
+      # Case 2: messaging.destination.name does not exist, use span name as fallback.
+      - set(span.attributes["messaging.destination"], span.name) where span.attributes["messaging.destination.name"] == nil
 
       # === Clean up new, now-redundant span.attributes ===
       - delete_key(span.attributes, "http.request.method")
@@ -52,6 +57,7 @@ processors:
       - delete_key(span.attributes, "server.port")
       - delete_key(span.attributes, "client.address")
       - delete_key(span.attributes, "client.port")
+      - delete_key(span.attributes, "messaging.destination.name")
   resource:
     attributes:
       - key: appdynamics.controller.host
