@@ -6,6 +6,52 @@ receivers:
 
 processors:
   batch:
+  transform:
+    trace_statements:
+      # === General Attribute Renaming (New -> Old) ===
+      # Copy http.request.method to the old http.method
+      - set(span.attributes["http.method"], span.attributes["http.request.method"]) where span.attributes["http.request.method"] != nil
+      # Copy http.response.status_code to the old http.status_code
+      - set(span.attributes["http.status_code"], span.attributes["http.response.status_code"]) where span.attributes["http.response.status_code"] != nil
+      # Copy url.full to the old http.url
+      - set(span.attributes["http.url"], span.attributes["url.full"]) where span.attributes["url.full"] != nil
+      # Copy url.scheme to the old http.scheme
+      - set(span.attributes["http.scheme"], span.attributes["url.scheme"]) where span.attributes["url.scheme"] != nil
+      # Copy network.protocol.version to the old http.flavor
+      - set(span.attributes["http.flavor"], span.attributes["network.protocol.version"]) where span.attributes["network.protocol.version"] != nil
+      # Copy user_agent.original to the old http.user_agent
+      - set(span.attributes["http.user_agent"], span.attributes["user_agent.original"]) where span.attributes["user_agent.original"] != nil
+
+      # === Reconstruct http.target from url.path and url.query ===
+      # Case 1: Both path and query exist. Combine them with a "?".
+      - set(span.attributes["http.target"], Concat([span.attributes["url.path"], "?", span.attributes["url.query"]], "")) where span.attributes["url.path"] != nil and span.attributes["url.query"] != nil
+      # Case 2: Only path exists.
+      - set(span.attributes["http.target"], span.attributes["url.path"]) where span.attributes["url.path"] != nil and span.attributes["url.query"] == nil
+
+      # === Conditional Mapping for Peer/Host span.attributes (New -> Old) ===
+      # On a SERVER span, the peer is the client.
+      - set(span.attributes["net.peer.name"], span.attributes["client.address"]) where span.kind == SPAN_KIND_SERVER and span.attributes["client.address"] != nil
+      - set(span.attributes["net.peer.port"], span.attributes["client.port"]) where span.kind == SPAN_KIND_SERVER and span.attributes["client.port"] != nil
+      # On a SERVER span, server.address becomes http.host.
+      - set(span.attributes["http.host"], span.attributes["server.address"]) where span.kind == SPAN_KIND_SERVER and span.attributes["server.address"] != nil
+
+      # On a CLIENT span, the peer is the server.
+      - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.address"] != nil
+      - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.port"] != nil
+
+      # === Clean up new, now-redundant span.attributes ===
+      - delete_key(span.attributes, "http.request.method")
+      - delete_key(span.attributes, "http.response.status_code")
+      - delete_key(span.attributes, "url.full")
+      - delete_key(span.attributes, "url.path")
+      - delete_key(span.attributes, "url.query")
+      - delete_key(span.attributes, "url.scheme")
+      - delete_key(span.attributes, "network.protocol.version")
+      - delete_key(span.attributes, "user_agent.original")
+      - delete_key(span.attributes, "server.address")
+      - delete_key(span.attributes, "server.port")
+      - delete_key(span.attributes, "client.address")
+      - delete_key(span.attributes, "client.port")
   resource:
     attributes:
       - key: appdynamics.controller.host
@@ -50,6 +96,7 @@ service:
         - otlp
       processors:
          - batch
+         - transform
          - resource
       exporters:
         - debug/traces
