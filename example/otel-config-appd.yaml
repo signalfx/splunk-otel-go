@@ -6,7 +6,7 @@ receivers:
 
 processors:
   batch:
-  transform:
+  transform: # This is a custom processor to rename span attributes for AppDynamics compatibility. It should not be necessary (and avoided) in future.
     trace_statements:
       # === HTTP Attribute Renaming (New -> v1.20.0) ===
       # Copy http.request.method to the old http.method
