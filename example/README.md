@@ -92,7 +92,7 @@ You can find the collected telemetry in:
 Run the the OpenTelemetry Collector instance:
 
 ```sh
-APPD_ACCOUNT=<account> APPD_HOST=<host> APPD_API_KEY=<api_key> docker compose -f docker-compose-appd.yaml up -d
+APPD_ACCOUNT=<account> APPD_API_KEY=<api_key> docker compose -f docker-compose-appd.yaml up -d
 ```
 
 Run the instrumented application:

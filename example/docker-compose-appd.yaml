@@ -6,10 +6,10 @@ services:
     command: --config /etc/otel/config.yaml
     environment:
       - JAEGER_ENDPOINT=jaeger:4317
-      - APPD_HOST
-      - APPD_PORT=443
       - APPD_ACCOUNT
       - APPD_API_KEY
+      - APPD_HOST=${APPD_ACCOUNT}.saas.appdynamics.com
+      - APPD_PORT=443
       - APPD_REGION=pdx
     ports:
       - "1777:1777"   # pprof extension
