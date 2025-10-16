@@ -73,7 +73,7 @@ processors:
 exporters:
   # traces exporters
   debug/traces:
-    # verbosity: detailed
+    verbosity: detailed
   otlp:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
