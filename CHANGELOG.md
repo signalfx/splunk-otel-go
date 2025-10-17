@@ -13,7 +13,7 @@ The release requires at least [Go 1.24].
 ### Changed
 
 - Make `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_*_PROTOCOL`,
-  `OTEL_*_EXPORTER` environment variables case insensitive. ()
+  `OTEL_*_EXPORTER` environment variables case insensitive. (#4197)
 
 ### Removed
 
