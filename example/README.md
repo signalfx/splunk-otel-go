@@ -87,6 +87,36 @@ You can find the collected telemetry in:
 - Splunk Observability Cloud: <https://app.signalfx.com/#/apm?environments=YOURUSERNAME>
   > Note: Processing might take some time.
 
+### Splunk AppDynamics SaaS via the OpenTelemetry Collector
+
+Run the the OpenTelemetry Collector instance:
+
+```sh
+APPD_ACCOUNT=<account> APPD_API_KEY=<api_key> docker compose -f docker-compose-appd.yaml up -d
+```
+
+Run the instrumented application:
+
+```sh
+export OTEL_SERVICE_NAME="splunk-otel-go-example"
+export OTEL_RESOURCE_ATTRIBUTES="service.namespace=$(whoami)"
+go run .
+```
+
+You can find the collected telemetry in:
+
+- OpenTelemetry Collector output
+- Jaeger: <http://localhost:16686/search>
+- Prometheus scrape handler: <http://localhost:8889/metrics>
+- Splunk AppDynamics SaaS (traces only)
+  > Note: Processing might take some time.
+
+Cleanup:
+
+```sh
+docker compose -f docker-compose-appd.yaml down
+```
+
 ### FIPS mode - Linux
 
 > [!NOTE]
@@ -135,3 +165,5 @@ The information about `SPLUNK_ACCESS_TOKEN` and can be found
 
 The information about `SPLUNK_HEC_TOKEN` and `SPLUNK_HEC_URL` can be found
 [here](https://help.splunk.com/en/splunk-observability-cloud/manage-data/splunk-distribution-of-the-opentelemetry-collector/get-started-with-the-splunk-distribution-of-the-opentelemetry-collector/collector-components/exporters/splunk-hec-exporter#splunk-hec-token-and-endpoint-0).
+
+The information about `APPD_` prefixed environment variables can be found [here](https://help.splunk.com/en/appdynamics-saas/application-performance-monitoring/25.8.0/splunk-appdynamics-for-opentelemetry/configure-the-opentelemetry-collector).
