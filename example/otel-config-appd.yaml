@@ -38,6 +38,10 @@ processors:
       - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.address"] != nil
       - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.port"] != nil
 
+      # === Database Attribute Renaming (New -> v1.24.0) ===
+      # Copy db.system.name to the old db.system
+      - set(span.attributes["db.system"], span.attributes["db.system.name"]) where span.attributes["db.system.name"] != nil
+
       # === Messaging Attribute Renaming (New -> v1.16.0) ===
       # Case 1: messaging.destination.name exist.
       - set(span.attributes["messaging.destination"], span.attributes["messaging.destination.name"]) where span.attributes["messaging.destination.name"] != nil
