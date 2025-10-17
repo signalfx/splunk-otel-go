@@ -174,6 +174,13 @@ func TestRunJaegerExporter(t *testing.T) {
 			},
 		},
 		{
+			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
+				t.Setenv("OTEL_TRACES_EXPORTER", "Jaeger-Thrift-Splunk")
+			},
+		},
+		{
 			desc: "OTEL_EXPORTER_JAEGER_ENDPOINT and SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_JAEGER_ENDPOINT", url)
@@ -261,6 +268,14 @@ func TestRunOTLPHTTPProtobufExporter(t *testing.T) {
 			},
 		},
 		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
+				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "Http/Protobuf")
+				t.Setenv("OTEL_TRACES_EXPORTER", "OTLP")
+			},
+		},
+		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT with SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
@@ -328,6 +343,13 @@ func TestRunOTLPGRPCTracesExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_TRACES_EXPORTER", "otlp")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_TRACES_EXPORTER", "OTLP")
 			},
 		},
 		{
@@ -452,6 +474,14 @@ func TestRunOTLPHTTPProtobufMetricsExporter(t *testing.T) {
 			},
 		},
 		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
+				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "Http/Protobuf")
+				t.Setenv("OTEL_METRICS_EXPORTER", "OTLP")
+			},
+		},
+		{
 			desc: "OTEL_EXPORTER_OTLP_ENDPOINT with SPLUNK_ACCESS_TOKEN",
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
@@ -519,6 +549,13 @@ func TestRunOTLPGRPCMetricsExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_METRICS_EXPORTER", "otlp")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_METRICS_EXPORTER", "OTLP")
 			},
 		},
 		{
@@ -694,6 +731,13 @@ func TestRunOTLPGRPCLogsExporter(t *testing.T) {
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
 				t.Setenv("OTEL_LOGS_EXPORTER", "otlp")
+			},
+		},
+		{
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			setupFn: func(t *testing.T, url string) {
+				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+url)
+				t.Setenv("OTEL_LOGS_EXPORTER", "OTLP")
 			},
 		},
 		{
