@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated, but we still support it to not break existing users.
@@ -369,8 +370,9 @@ func notNone(s string) bool {
 func otlpProtocol(l logr.Logger, signalKey string) string {
 	// Signal-specific key takes precedence.
 	if v := os.Getenv(signalKey); v != "" {
-		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
-			return v
+		vLower := strings.ToLower(v)
+		if vLower == otlpProtocolGRPC || vLower == otlpProtocolHTTPProtobuf {
+			return vLower
 		}
 		err := fmt.Errorf("invalid %s: %q", signalKey, v)
 		l.Error(err, "falling back to %q", otelExporterOTLPProtocolKey)
@@ -378,8 +380,9 @@ func otlpProtocol(l logr.Logger, signalKey string) string {
 
 	// Fallback to general OTLP protocol.
 	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
-		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
-			return v
+		vLower := strings.ToLower(v)
+		if vLower == otlpProtocolGRPC || vLower == otlpProtocolHTTPProtobuf {
+			return vLower
 		}
 		err := fmt.Errorf("invalid %s: %q", otelExporterOTLPProtocolKey, v)
 		l.Error(err, "using default %s: %q", otelExporterOTLPProtocolKey, defaultOTLPProtocol)

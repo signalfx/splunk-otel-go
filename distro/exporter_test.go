@@ -155,6 +155,37 @@ func TestOTLPProtocol(t *testing.T) {
 		assert.Contains(t, buf.String(), fmt.Sprintf("invalid %s: %q", otelTracesExporterOTLPProtocolKey, invalidProtocol))
 		assert.Contains(t, buf.String(), "falling back to")
 	})
+
+	t.Run("specific uppercase value", func(t *testing.T) {
+		t.Setenv(otelTracesExporterOTLPProtocolKey, "GRPC")
+		buf, logger := newTestLogger()
+
+		got := otlpProtocol(logger, otelTracesExporterOTLPProtocolKey)
+
+		assert.Equal(t, otlpProtocolGRPC, got)
+		assert.Empty(t, buf.String())
+	})
+
+	t.Run("general mixed case value", func(t *testing.T) {
+		t.Setenv(otelExporterOTLPProtocolKey, "Http/Protobuf")
+		buf, logger := newTestLogger()
+
+		got := otlpProtocol(logger, otelTracesExporterOTLPProtocolKey)
+
+		assert.Equal(t, otlpProtocolHTTPProtobuf, got)
+		assert.Empty(t, buf.String())
+	})
+
+	t.Run("specific overrides general (case-insensitive)", func(t *testing.T) {
+		t.Setenv(otelExporterOTLPProtocolKey, "HTTP/PROTOBUF")
+		t.Setenv(otelTracesExporterOTLPProtocolKey, "GrPc")
+		buf, logger := newTestLogger()
+
+		got := otlpProtocol(logger, otelTracesExporterOTLPProtocolKey)
+
+		assert.Equal(t, otlpProtocolGRPC, got)
+		assert.Empty(t, buf.String())
+	})
 }
 
 func TestOTLPMetricsEndpoint(t *testing.T) {
