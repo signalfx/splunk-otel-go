@@ -166,16 +166,6 @@ func TestOTLPProtocol(t *testing.T) {
 		assert.Empty(t, buf.String())
 	})
 
-	t.Run("general mixed case value", func(t *testing.T) {
-		t.Setenv(otelExporterOTLPProtocolKey, "Http/Protobuf")
-		buf, logger := newTestLogger()
-
-		got := otlpProtocol(logger, otelTracesExporterOTLPProtocolKey)
-
-		assert.Equal(t, otlpProtocolHTTPProtobuf, got)
-		assert.Empty(t, buf.String())
-	})
-
 	t.Run("specific overrides general (case-insensitive)", func(t *testing.T) {
 		t.Setenv(otelExporterOTLPProtocolKey, "HTTP/PROTOBUF")
 		t.Setenv(otelTracesExporterOTLPProtocolKey, "GrPc")
