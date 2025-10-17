@@ -50,7 +50,7 @@ var traceExporters = map[string]traceExporterFunc{
 }
 
 func tracesExporter(l logr.Logger) traceExporterFunc {
-	key := envOr(otelTracesExporterKey, defaultTraceExporter)
+	key := strings.ToLower(envOr(otelTracesExporterKey, defaultTraceExporter))
 	tef, ok := traceExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelTracesExporterKey, key)
@@ -217,7 +217,7 @@ var metricsExporters = map[string]metricsExporterFunc{
 }
 
 func metricsExporter(l logr.Logger) metricsExporterFunc {
-	key := envOr(otelMetricsExporterKey, defaultMetricsExporter)
+	key := strings.ToLower(envOr(otelMetricsExporterKey, defaultMetricsExporter))
 	mef, ok := metricsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelMetricsExporterKey, key)
@@ -296,7 +296,7 @@ var logsExporters = map[string]logsExporterFunc{
 }
 
 func logsExporter(l logr.Logger) logsExporterFunc {
-	key := envOr(otelLogsExporterKey, defaultLogsExporter)
+	key := strings.ToLower(envOr(otelLogsExporterKey, defaultLogsExporter))
 	lef, ok := logsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelLogsExporterKey, key)
