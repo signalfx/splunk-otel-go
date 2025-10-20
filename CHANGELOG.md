@@ -12,7 +12,7 @@ The release requires at least [Go 1.24].
 
 ### Changed
 
-- The following environment variable values are now case-insensitive:
+- The following environment variable values are now case-insensitive. (#4197)
   - OTEL_EXPORTER_OTLP_PROTOCOL
   - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
   - OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -20,7 +20,6 @@ The release requires at least [Go 1.24].
   - OTEL_TRACES_EXPORTER
   - OTEL_METRICS_EXPORTER
   - OTEL_LOGS_EXPORTER
-  (#4197)
 
 ### Removed
 
