@@ -7,61 +7,56 @@ receivers:
 processors:
   batch:
   transform: # This is a custom processor to rename span attributes for AppDynamics compatibility. It should not be necessary (and avoided) in future.
-    trace_statements:
-      # === HTTP Attribute Renaming (New -> v1.20.0) ===
-      # Copy http.request.method to the old http.method
-      - set(span.attributes["http.method"], span.attributes["http.request.method"])
-      # Copy http.response.status_code to the old http.status_code
-      - set(span.attributes["http.status_code"], span.attributes["http.response.status_code"])
-      # Copy url.full to the old http.url
-      - set(span.attributes["http.url"], span.attributes["url.full"])
-      # Copy url.scheme to the old http.scheme
-      - set(span.attributes["http.scheme"], span.attributes["url.scheme"])
-      # Copy network.protocol.version to the old http.flavor
-      - set(span.attributes["http.flavor"], span.attributes["network.protocol.version"])
-      # Copy user_agent.original to the old http.user_agent
-      - set(span.attributes["http.user_agent"], span.attributes["user_agent.original"])
+    - context: span
+      conditions:
+        - kind == SPAN_KIND_SERVER
+      statements:
+        # === HTTP Attribute Renaming (New -> v1.20.0) ===
+        # Copy http.request.method to the old http.method
+        - set(attributes["http.method"], attributes["http.request.method"])
+        # Copy http.response.status_code to the old http.status_code
+        - set(attributes["http.status_code"], attributes["http.response.status_code"])
+        # Copy url.full to the old http.url
+        - set(attributes["http.url"], attributes["url.full"])
+        # Copy url.scheme to the old http.scheme
+        - set(attributes["http.scheme"], attributes["url.scheme"])
+        # Copy network.protocol.version to the old http.flavor
+        - set(attributes["http.flavor"], attributes["network.protocol.version"])
+        # Copy user_agent.original to the old http.user_agent
+        - set(attributes["http.user_agent"], attributes["user_agent.original"])
 
-      # Reconstruct http.target from url.path and url.query
-      # Case 1: Both path and query exist. Combine them with a "?".
-      - set(span.attributes["http.target"], Concat([span.attributes["url.path"], "?", span.attributes["url.query"]], "")) where span.attributes["url.path"] != nil and span.attributes["url.query"] != nil
-      # Case 2: Only path exists.
-      - set(span.attributes["http.target"], span.attributes["url.path"]) where span.attributes["url.path"] != nil and span.attributes["url.query"] == nil
+        # Reconstruct http.target from url.path and url.query
+        # Case 1: Both path and query exist. Combine them with a "?".
+        - set(attributes["http.target"], Concat([attributes["url.path"], "?", attributes["url.query"]], "")) where attributes["url.path"] != nil and attributes["url.query"] != nil
+        # Case 2: Only path exists.
+        - set(attributes["http.target"], attributes["url.path"]) where attributes["url.path"] != nil and attributes["url.query"] == nil
 
-      # === Conditional Mapping for Peer/Host span.attributes (New -> Old) ===
-      # On a SERVER span, the peer is the client.
-      - set(span.attributes["net.peer.name"], span.attributes["client.address"]) where span.kind == SPAN_KIND_SERVER
-      - set(span.attributes["net.peer.port"], span.attributes["client.port"]) where span.kind == SPAN_KIND_SERVER
-      # On a SERVER span, server.address becomes http.host.
-      - set(span.attributes["http.host"], span.attributes["server.address"]) where span.kind == SPAN_KIND_SERVER
-      # On a CLIENT span, the peer is the server.
-      - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT
-      - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT
+        # === Conditional Mapping for Peer/Host attributes (New -> Old) ===
+        - set(attributes["net.peer.name"], attributes["server.address"])
+        - set(attributes["net.peer.port"], attributes["server.port"])
 
-      # === Database Attribute Renaming (New -> v1.24.0) ===
-      # Copy db.system.name to the old db.system
-      - set(span.attributes["db.system"], span.attributes["db.system.name"])
+        # === Database Attribute Renaming (New -> v1.24.0) ===
+        # Copy db.system.name to the old db.system
+        - set(attributes["db.system"], attributes["db.system.name"])
 
-      # === Messaging Attribute Renaming (New -> v1.16.0) ===
-      # Case 1: messaging.destination.name exist.
-      - set(span.attributes["messaging.destination"], span.attributes["messaging.destination.name"])
-      # Case 2: messaging.destination.name does not exist, use span name as fallback.
-      - set(span.attributes["messaging.destination"], span.name) where span.attributes["messaging.destination.name"] == nil
+        # === Messaging Attribute Renaming (New -> v1.16.0) ===
+        # Case 1: messaging.destination.name exist.
+        - set(attributes["messaging.destination"], attributes["messaging.destination.name"])
+        # Case 2: messaging.destination.name does not exist, use span name as fallback.
+        - set(attributes["messaging.destination"], name) where attributes["messaging.destination.name"] == nil
 
-      # === Clean up new, now-redundant span.attributes ===
-      - delete_key(span.attributes, "http.request.method")
-      - delete_key(span.attributes, "http.response.status_code")
-      - delete_key(span.attributes, "url.full")
-      - delete_key(span.attributes, "url.path")
-      - delete_key(span.attributes, "url.query")
-      - delete_key(span.attributes, "url.scheme")
-      - delete_key(span.attributes, "network.protocol.version")
-      - delete_key(span.attributes, "user_agent.original")
-      - delete_key(span.attributes, "server.address")
-      - delete_key(span.attributes, "server.port")
-      - delete_key(span.attributes, "client.address")
-      - delete_key(span.attributes, "client.port")
-      - delete_key(span.attributes, "messaging.destination.name")
+        # === Clean up new, now-redundant attributes ===
+        - delete_key(attributes, "http.request.method")
+        - delete_key(attributes, "http.response.status_code")
+        - delete_key(attributes, "url.full")
+        - delete_key(attributes, "url.path")
+        - delete_key(attributes, "url.query")
+        - delete_key(attributes, "url.scheme")
+        - delete_key(attributes, "network.protocol.version")
+        - delete_key(attributes, "user_agent.original")
+        - delete_key(attributes, "server.address")
+        - delete_key(attributes, "server.port")
+        - delete_key(attributes, "messaging.destination.name")
   resource:
     attributes:
       - key: appdynamics.controller.host
