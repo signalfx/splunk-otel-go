@@ -10,17 +10,17 @@ processors:
     trace_statements:
       # === HTTP Attribute Renaming (New -> v1.20.0) ===
       # Copy http.request.method to the old http.method
-      - set(span.attributes["http.method"], span.attributes["http.request.method"]) where span.attributes["http.request.method"] != nil
+      - set(span.attributes["http.method"], span.attributes["http.request.method"])
       # Copy http.response.status_code to the old http.status_code
-      - set(span.attributes["http.status_code"], span.attributes["http.response.status_code"]) where span.attributes["http.response.status_code"] != nil
+      - set(span.attributes["http.status_code"], span.attributes["http.response.status_code"])
       # Copy url.full to the old http.url
-      - set(span.attributes["http.url"], span.attributes["url.full"]) where span.attributes["url.full"] != nil
+      - set(span.attributes["http.url"], span.attributes["url.full"])
       # Copy url.scheme to the old http.scheme
-      - set(span.attributes["http.scheme"], span.attributes["url.scheme"]) where span.attributes["url.scheme"] != nil
+      - set(span.attributes["http.scheme"], span.attributes["url.scheme"])
       # Copy network.protocol.version to the old http.flavor
-      - set(span.attributes["http.flavor"], span.attributes["network.protocol.version"]) where span.attributes["network.protocol.version"] != nil
+      - set(span.attributes["http.flavor"], span.attributes["network.protocol.version"])
       # Copy user_agent.original to the old http.user_agent
-      - set(span.attributes["http.user_agent"], span.attributes["user_agent.original"]) where span.attributes["user_agent.original"] != nil
+      - set(span.attributes["http.user_agent"], span.attributes["user_agent.original"])
 
       # Reconstruct http.target from url.path and url.query
       # Case 1: Both path and query exist. Combine them with a "?".
@@ -30,21 +30,21 @@ processors:
 
       # === Conditional Mapping for Peer/Host span.attributes (New -> Old) ===
       # On a SERVER span, the peer is the client.
-      - set(span.attributes["net.peer.name"], span.attributes["client.address"]) where span.kind == SPAN_KIND_SERVER and span.attributes["client.address"] != nil
-      - set(span.attributes["net.peer.port"], span.attributes["client.port"]) where span.kind == SPAN_KIND_SERVER and span.attributes["client.port"] != nil
+      - set(span.attributes["net.peer.name"], span.attributes["client.address"]) where span.kind == SPAN_KIND_SERVER
+      - set(span.attributes["net.peer.port"], span.attributes["client.port"]) where span.kind == SPAN_KIND_SERVER
       # On a SERVER span, server.address becomes http.host.
-      - set(span.attributes["http.host"], span.attributes["server.address"]) where span.kind == SPAN_KIND_SERVER and span.attributes["server.address"] != nil
+      - set(span.attributes["http.host"], span.attributes["server.address"]) where span.kind == SPAN_KIND_SERVER
       # On a CLIENT span, the peer is the server.
-      - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.address"] != nil
-      - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT and span.attributes["server.port"] != nil
+      - set(span.attributes["net.peer.name"], span.attributes["server.address"]) where span.kind == SPAN_KIND_CLIENT
+      - set(span.attributes["net.peer.port"], span.attributes["server.port"]) where span.kind == SPAN_KIND_CLIENT
 
       # === Database Attribute Renaming (New -> v1.24.0) ===
       # Copy db.system.name to the old db.system
-      - set(span.attributes["db.system"], span.attributes["db.system.name"]) where span.attributes["db.system.name"] != nil
+      - set(span.attributes["db.system"], span.attributes["db.system.name"])
 
       # === Messaging Attribute Renaming (New -> v1.16.0) ===
       # Case 1: messaging.destination.name exist.
-      - set(span.attributes["messaging.destination"], span.attributes["messaging.destination.name"]) where span.attributes["messaging.destination.name"] != nil
+      - set(span.attributes["messaging.destination"], span.attributes["messaging.destination.name"])
       # Case 2: messaging.destination.name does not exist, use span name as fallback.
       - set(span.attributes["messaging.destination"], span.name) where span.attributes["messaging.destination.name"] == nil
 
