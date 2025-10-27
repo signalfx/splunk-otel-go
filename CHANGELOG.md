@@ -10,6 +10,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 The release requires at least [Go 1.24].
 
+### Changed
+
+- The following environment variable values are now case-insensitive. (#4197)
+  - OTEL_EXPORTER_OTLP_PROTOCOL
+  - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+  - OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
+  - OTEL_EXPORTER_OTLP_LOGS_PROTOCOL
+  - OTEL_TRACES_EXPORTER
+  - OTEL_METRICS_EXPORTER
+  - OTEL_LOGS_EXPORTER
+
 ### Removed
 
 - Drop support for [Go 1.23]. (#4093)
