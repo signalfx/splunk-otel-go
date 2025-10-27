@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/exporters/jaeger" //nolint:staticcheck // Jaeger is deprecated, but we still support it to not break existing users.
@@ -49,7 +50,7 @@ var traceExporters = map[string]traceExporterFunc{
 }
 
 func tracesExporter(l logr.Logger) traceExporterFunc {
-	key := envOr(otelTracesExporterKey, defaultTraceExporter)
+	key := strings.ToLower(envOr(otelTracesExporterKey, defaultTraceExporter))
 	tef, ok := traceExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelTracesExporterKey, key)
@@ -216,7 +217,7 @@ var metricsExporters = map[string]metricsExporterFunc{
 }
 
 func metricsExporter(l logr.Logger) metricsExporterFunc {
-	key := envOr(otelMetricsExporterKey, defaultMetricsExporter)
+	key := strings.ToLower(envOr(otelMetricsExporterKey, defaultMetricsExporter))
 	mef, ok := metricsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelMetricsExporterKey, key)
@@ -295,7 +296,7 @@ var logsExporters = map[string]logsExporterFunc{
 }
 
 func logsExporter(l logr.Logger) logsExporterFunc {
-	key := envOr(otelLogsExporterKey, defaultLogsExporter)
+	key := strings.ToLower(envOr(otelLogsExporterKey, defaultLogsExporter))
 	lef, ok := logsExporters[key]
 	if !ok {
 		err := fmt.Errorf("invalid %s: %q", otelLogsExporterKey, key)
@@ -369,8 +370,9 @@ func notNone(s string) bool {
 func otlpProtocol(l logr.Logger, signalKey string) string {
 	// Signal-specific key takes precedence.
 	if v := os.Getenv(signalKey); v != "" {
-		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
-			return v
+		vLower := strings.ToLower(v)
+		if vLower == otlpProtocolGRPC || vLower == otlpProtocolHTTPProtobuf {
+			return vLower
 		}
 		err := fmt.Errorf("invalid %s: %q", signalKey, v)
 		l.Error(err, "falling back to %q", otelExporterOTLPProtocolKey)
@@ -378,8 +380,9 @@ func otlpProtocol(l logr.Logger, signalKey string) string {
 
 	// Fallback to general OTLP protocol.
 	if v := os.Getenv(otelExporterOTLPProtocolKey); v != "" {
-		if v == otlpProtocolGRPC || v == otlpProtocolHTTPProtobuf {
-			return v
+		vLower := strings.ToLower(v)
+		if vLower == otlpProtocolGRPC || vLower == otlpProtocolHTTPProtobuf {
+			return vLower
 		}
 		err := fmt.Errorf("invalid %s: %q", otelExporterOTLPProtocolKey, v)
 		l.Error(err, "using default %s: %q", otelExporterOTLPProtocolKey, defaultOTLPProtocol)
