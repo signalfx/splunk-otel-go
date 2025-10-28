@@ -32,7 +32,7 @@ processors:
           # Case 2: Only path exists.
           - set(attributes["http.target"], attributes["url.path"]) where attributes["url.path"] != nil and attributes["url.query"] == nil
 
-          # === Conditional Mapping for Peer/Host attributes (New -> Old) ===
+          # === Peer attributes Renaming (New -> Old) ===
           - set(attributes["net.peer.name"], attributes["server.address"])
           - set(attributes["net.peer.port"], attributes["server.port"])
 
