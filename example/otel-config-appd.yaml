@@ -41,10 +41,7 @@ processors:
           - set(attributes["db.system"], attributes["db.system.name"])
 
           # === Messaging Attribute Renaming (New -> v1.16.0) ===
-          # Case 1: messaging.destination.name exist.
           - set(attributes["messaging.destination"], attributes["messaging.destination.name"])
-          # Case 2: messaging.destination.name does not exist, use span name as fallback.
-          - set(attributes["messaging.destination"], name) where attributes["messaging.destination.name"] == nil
 
           # === Clean up new, now-redundant attributes ===
           - delete_key(attributes, "http.request.method")
