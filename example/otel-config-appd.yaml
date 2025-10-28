@@ -10,7 +10,7 @@ processors:
     trace_statements:
       - context: span
         conditions:
-          - kind == SPAN_KIND_SERVER
+          - kind == SPAN_KIND_CLIENT or kind == SPAN_KIND_PRODUCER or kind == SPAN_KIND_CONSUMER
         statements:
           # === HTTP Attribute Renaming (New -> v1.20.0) ===
           # Copy http.request.method to the old http.method
