@@ -57,6 +57,7 @@ processors:
           - delete_key(attributes, "user_agent.original")
           - delete_key(attributes, "server.address")
           - delete_key(attributes, "server.port")
+          - delete_key(attributes, "db.system.name")
           - delete_key(attributes, "messaging.destination.name")
   resource:
     attributes:
