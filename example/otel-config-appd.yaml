@@ -1,0 +1,109 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:        # used by default
+        endpoint: "0.0.0.0:4317"
+
+processors:
+  batch:
+  transform: # This is a custom processor to rename span attributes for AppDynamics compatibility. It should not be necessary (and avoided) in future.
+    trace_statements:
+      - context: span
+        conditions:
+          - kind == SPAN_KIND_CLIENT or kind == SPAN_KIND_PRODUCER or kind == SPAN_KIND_CONSUMER
+        statements:
+          # Peer attributes Renaming (v1.37.0 -> v1.20.0).
+          - set(attributes["net.peer.name"], attributes["server.address"])
+          - set(attributes["net.peer.port"], attributes["server.port"])
+        
+          # HTTP Attribute Renaming (v1.37.0 -> v1.20.0).
+          - set(attributes["http.method"], attributes["http.request.method"])
+          - set(attributes["http.status_code"], attributes["http.response.status_code"])
+          - set(attributes["http.url"], attributes["url.full"])
+          - set(attributes["http.scheme"], attributes["url.scheme"])
+          # Reconstruct http.target from url.path and url.query.
+          # Case 1: Both path and query exist. Combine them with a "?".
+          - set(attributes["http.target"], Concat([attributes["url.path"], "?", attributes["url.query"]], "")) where attributes["url.path"] != nil and attributes["url.query"] != nil
+          # Case 2: Only path exists.
+          - set(attributes["http.target"], attributes["url.path"]) where attributes["url.path"] != nil and attributes["url.query"] == nil
+
+          # Database Attribute Renaming (v1.37.0 -> v1.24.0).
+          - set(attributes["db.system"], attributes["db.system.name"])
+
+          # Messaging Attribute Renaming (v1.37.0 -> v1.16.0).
+          - set(attributes["messaging.destination"], attributes["messaging.destination.name"])
+
+          # Clean up new, now-redundant attributes.
+          - delete_key(attributes, "http.request.method")
+          - delete_key(attributes, "http.response.status_code")
+          - delete_key(attributes, "url.full")
+          - delete_key(attributes, "url.path")
+          - delete_key(attributes, "url.query")
+          - delete_key(attributes, "url.scheme")
+          - delete_key(attributes, "server.address")
+          - delete_key(attributes, "server.port")
+          - delete_key(attributes, "db.system.name")
+          - delete_key(attributes, "messaging.destination.name")
+  resource:
+    attributes:
+      - key: appdynamics.controller.host
+        value: "${APPD_HOST}"
+        action: upsert
+      - key: appdynamics.controller.port
+        value: "${APPD_PORT}"
+        action: upsert
+      - key: appdynamics.controller.account
+        value: "${APPD_ACCOUNT}"
+        action: upsert
+
+exporters:
+  # traces exporters
+  debug/traces:
+    verbosity: detailed
+  otlp:
+    endpoint: "${JAEGER_ENDPOINT}"
+    tls:
+      insecure: true
+  otlphttp:
+    endpoint: "https://${APPD_REGION}-sls-agent-api.saas.appdynamics.com"
+    headers: { "x-api-key": "${APPD_API_KEY}" }
+  # metrics exporters
+  debug/metrics:
+    # verbosity: detailed
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  # logs exporters
+  debug/logs:
+      verbosity: detailed
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+         - batch
+         - transform
+         - resource
+      exporters:
+        - debug/traces
+        - otlp
+        - otlphttp
+    metrics:
+      receivers:
+        - otlp
+      processors: [batch]
+      exporters:
+        - debug/metrics 
+        - prometheus
+    logs:
+      receivers: 
+        - otlp
+      processors: [batch]
+      exporters: 
+        - debug/logs

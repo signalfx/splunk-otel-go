@@ -96,7 +96,18 @@ func run() (err error) {
 	g.Go(func() error {
 		// instrument http.Client
 		client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+
 		call(ctx, client)
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://example.com", http.NoBody)
+		if err != nil {
+			panic(err)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println(err)
+		}
+		resp.Body.Close()
 
 		// When Shutdown is called, Serve immediately returns ErrServerClosed.
 		return srv.Shutdown(context.Background())
