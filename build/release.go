@@ -19,7 +19,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/goyek/goyek/v2"
+	"github.com/goyek/goyek/v3"
 	"github.com/goyek/x/cmd"
 )
 

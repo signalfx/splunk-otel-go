@@ -21,7 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goyek/goyek/v2"
+	"github.com/goyek/goyek/v3"
 )
 
 // ForGoModules is a helper that executes given function

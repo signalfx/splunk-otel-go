@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/goyek/goyek/v2"
+	"github.com/goyek/goyek/v3"
 )
 
 func TestRandString(t *testing.T) {
