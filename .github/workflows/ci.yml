@@ -70,9 +70,11 @@ jobs:
   compatibility-check:
     runs-on: ubuntu-24.04
     if: ${{ always() }}
-    needs: [compatibility-test]
+    needs: [compatibility-test, goyek]
     steps:
       - name: Test if compatibility-test passed
         run: |
-          echo ${{ needs.compatibility-test.result }}
+          echo compatibility-test = ${{ needs.compatibility-test.result }} 
           test ${{ needs.compatibility-test.result }} == "success"
+          echo goyek = ${{ needs.goyek.result }}
+          test ${{ needs.goyek.result }} == "success"
