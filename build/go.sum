@@ -246,8 +246,10 @@ github.com/gostaticanalysis/testutil v0.5.0 h1:Dq4wT1DdTwTGCQQv3rl3IvD5Ld0E6HiY+
 github.com/gostaticanalysis/testutil v0.5.0/go.mod h1:OLQSbuM6zw2EvCcXTz1lVq5unyoNft372msDY0nY5Hs=
 github.com/goyek/goyek/v2 v2.3.0 h1:ZQlQZp+JOkbZXuPNw6SbeQxYMRKB0Gm3nbC2K9IY1r4=
 github.com/goyek/goyek/v2 v2.3.0/go.mod h1:VKzmleKfV5LB9f20Xg5umuPC4XfSdDXwPNesfr1RsLU=
-github.com/goyek/x v0.3.0 h1:JEgcLmqnxAPFR7/IqPMBoSRUcvykNS3o7YCVrC1VKHQ=
-github.com/goyek/x v0.3.0/go.mod h1:mgGZpAHdFAW9vEpq+aGFF36DTo/zRjmE7z4BMKVqD7g=
+github.com/goyek/goyek/v3 v3.0.0 h1:WwitsxY+DOEcYH8tGciagfi/XXlUASCQzHD33ITiJy8=
+github.com/goyek/goyek/v3 v3.0.0/go.mod h1:+s6hMsSBkg3ph3o6ImXU5bY+azWRh3eKRwrhIqxuz0U=
+github.com/goyek/x v0.4.0 h1:o/O7CJ0wLH/XN1QkruJ84og7ZKQmUImLoZQfjv3K9WY=
+github.com/goyek/x v0.4.0/go.mod h1:K6l/1A3AIPhGjWvL1j0YXgsuvk2ktSaMhiRygTePcd8=
 github.com/hashicorp/go-cleanhttp v0.5.2 h1:035FKYIWjmULyFRBKPs8TBQoi0x6d9G4xc9neXJWAZQ=
 github.com/hashicorp/go-cleanhttp v0.5.2/go.mod h1:kO/YDlP8L1346E6Sodw+PrpBSV4/SoxCXGY6BqNFT48=
 github.com/hashicorp/go-hclog v1.6.3 h1:Qr2kF+eVWjTiYmU7Y31tYlP1h0q/X3Nl3tPGdaB11/k=
