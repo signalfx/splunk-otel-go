@@ -31,11 +31,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            run-script: ./goyek.sh -v ci
+            run-script: ./goyek.sh ci -v
           - os: windows-2022
-            run-script: .\goyek.ps1 -v -skip-docker ci
+            run-script: .\goyek.ps1 ci -v -skip-docker
           - os: macos-14
-            run-script: ./goyek.sh -v -skip-docker ci
+            run-script: ./goyek.sh ci -v -skip-docker
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6.0.0
@@ -70,9 +70,11 @@ jobs:
   compatibility-check:
     runs-on: ubuntu-24.04
     if: ${{ always() }}
-    needs: [compatibility-test]
+    needs: [compatibility-test, goyek]
     steps:
       - name: Test if compatibility-test passed
         run: |
-          echo ${{ needs.compatibility-test.result }}
+          echo compatibility-test = ${{ needs.compatibility-test.result }} 
           test ${{ needs.compatibility-test.result }} == "success"
+          echo goyek = ${{ needs.goyek.result }}
+          test ${{ needs.goyek.result }} == "success"
