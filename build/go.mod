@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/build
 
-go 1.24.0
+go 1.24.2
 
 require (
 	github.com/client9/misspell v0.3.4
