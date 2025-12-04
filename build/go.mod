@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/client9/misspell v0.3.4
-	github.com/golangci/golangci-lint/v2 v2.7.0
+	github.com/golangci/golangci-lint/v2 v2.7.1
 	github.com/goyek/goyek/v3 v3.0.0
 	github.com/goyek/x v0.4.0
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
