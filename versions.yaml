@@ -1,6 +1,6 @@
 module-sets:
   stable-v1:
-    version: v1.28.0
+    version: v1.29.0
     modules:
       - github.com/signalfx/splunk-otel-go
       - github.com/signalfx/splunk-otel-go/distro
