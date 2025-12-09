@@ -16,5 +16,5 @@ package splunkleveldb
 
 // Version returns the version of splunkleveldb.
 func Version() string {
-	return "1.28.0"
+	return "1.29.0"
 }
