@@ -17,7 +17,8 @@ The release requires at least [Go 1.24].
 
 ### Changed
 
-- The following environment variable values are now case-insensitive. (#4197)
+- The following environment variable values are now case-insensitive.
+  ([#4197](https://github.com/signalfx/splunk-otel-go/pull/4197))
   - OTEL_EXPORTER_OTLP_PROTOCOL
   - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
   - OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -28,7 +29,8 @@ The release requires at least [Go 1.24].
 
 ### Removed
 
-- Drop support for [Go 1.23]. (#4093)
+- Drop support for [Go 1.23].
+  ([#4093](https://github.com/signalfx/splunk-otel-go/pull/4093))
 
 ## [1.28.0] - 2025-09-03
 
