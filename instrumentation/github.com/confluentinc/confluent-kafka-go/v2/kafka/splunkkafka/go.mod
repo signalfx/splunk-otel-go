@@ -1,9 +1,9 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka
 
-go 1.24.0
+go 1.24.3
 
 require (
-	github.com/confluentinc/confluent-kafka-go/v2 v2.12.0
+	github.com/confluentinc/confluent-kafka-go/v2 v2.13.0
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.29.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.39.0
