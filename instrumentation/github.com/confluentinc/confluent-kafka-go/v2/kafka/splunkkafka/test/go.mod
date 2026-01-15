@@ -2,8 +2,6 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentin
 
 go 1.24.3
 
-toolchain go1.24.11
-
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.13.0
 	github.com/ory/dockertest/v3 v3.12.0
