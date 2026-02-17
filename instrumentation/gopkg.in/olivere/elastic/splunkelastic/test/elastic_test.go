@@ -67,7 +67,7 @@ func TestMain(m *testing.M) {
 		Host:   getHostPort(resource, "9200/tcp"),
 	}
 	addr = target.String()
-	addr = strings.Replace(addr, "localhost", "127.0.0.1", 1)
+	addr = strings.Replace(addr, "localhost", "127.0.0.1", 1) // Otherwise it uses IPv6 which was not working in GitHub Actions.
 
 	// Wait for the Elasticsearch to come up using an exponential-backoff
 	// retry.
