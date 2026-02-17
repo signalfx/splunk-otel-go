@@ -71,6 +71,7 @@ func TestMain(m *testing.M) {
 
 	// Wait for the Elasticsearch to come up using an exponential-backoff
 	// retry.
+	pool.MaxWait = 3 * time.Minute
 	if err = pool.Retry(func() error {
 		client, e := elastic.NewClient(elastic.SetURL(addr), elastic.SetSniff(false))
 		if e != nil {
