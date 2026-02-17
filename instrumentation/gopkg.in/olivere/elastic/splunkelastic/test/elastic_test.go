@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -31,7 +30,7 @@ import (
 	"time"
 
 	"github.com/olivere/elastic/v7"
-	"github.com/ory/dockertest"
+	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -62,19 +61,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not create elasticsearch container: %v", err)
 	}
 
-	// If run with docker-machine the hostname needs to be set.
-	u, err := url.Parse(pool.Client.Endpoint())
-	if err != nil {
-		log.Fatalf("Could not parse endpoint: %s", pool.Client.Endpoint())
-	}
-	hostname := u.Hostname()
-	if hostname == "" {
-		hostname = "127.0.0.1"
-	}
-
 	target := &url.URL{
 		Scheme: "http",
-		Host:   net.JoinHostPort(hostname, resource.GetPort("9200/tcp")),
+		Host:   getHostPort(resource, "9200/tcp"),
 	}
 	addr = target.String()
 
@@ -105,6 +94,18 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(code)
+}
+
+func getHostPort(resource *dockertest.Resource, id string) string {
+	dockerURL := os.Getenv("DOCKER_HOST")
+	if dockerURL == "" {
+		return resource.GetHostPort(id)
+	}
+	u, err := url.Parse(dockerURL)
+	if err != nil {
+		panic(err)
+	}
+	return u.Hostname() + ":" + resource.GetPort(id)
 }
 
 type Tweet struct {
