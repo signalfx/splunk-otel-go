@@ -11,7 +11,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Removed
 
 - Remove `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
-  Go module.
+  Go module. Note that the currently supported and official [Go client for Elasticsearch](https://github.com/elastic/go-elasticsearch)
+  has [native OTel instrumentation](https://www.elastic.co/docs/reference/elasticsearch/clients/go/advanced/observability).
   ([#4370](https://github.com/signalfx/splunk-otel-go/pull/4370))
 
 ## [1.29.0] - 2025-12-09
