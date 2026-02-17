@@ -69,7 +69,7 @@ func TestMain(m *testing.M) {
 		NetworkID:  confNet.Network.ID,
 		Hostname:   "zookeeper",
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"2181/tcp": {{HostIP: "zookeeper", HostPort: "2181/tcp"}},
+			"2181/tcp": {{HostIP: "127.0.0.1", HostPort: "2181/tcp"}},
 		},
 		Env: []string{
 			"ZOOKEEPER_CLIENT_PORT=2181",
@@ -82,7 +82,7 @@ func TestMain(m *testing.M) {
 
 	// Wait for the Kafka to come up using an exponential-backoff retry.
 	if err = pool.Retry(func() error {
-		_, dialErr := net.Dial("tcp", "localhost:2181")
+		_, dialErr := net.Dial("tcp", "127.0.0.1:2181")
 		return dialErr
 	}); err != nil {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
@@ -94,14 +94,14 @@ func TestMain(m *testing.M) {
 		NetworkID:  confNet.Network.ID,
 		Hostname:   "broker",
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"29092/tcp": {{HostIP: "broker", HostPort: "29092/tcp"}},
-			"9092/tcp":  {{HostIP: "localhost", HostPort: "9092/tcp"}},
+			"29092/tcp": {{HostIP: "127.0.0.1", HostPort: "29092/tcp"}},
+			"9092/tcp":  {{HostIP: "127.0.0.1", HostPort: "9092/tcp"}},
 		},
 		Env: []string{
 			"KAFKA_BROKER_ID=1",
 			"KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
-			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092",
+			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://127.0.0.1:9092",
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
