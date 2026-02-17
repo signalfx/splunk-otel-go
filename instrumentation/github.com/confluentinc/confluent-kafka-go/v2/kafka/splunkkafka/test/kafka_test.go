@@ -94,8 +94,7 @@ func TestMain(m *testing.M) {
 		NetworkID:  confNet.Network.ID,
 		Hostname:   "broker",
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"29092/tcp": {{HostIP: "127.0.0.1", HostPort: "29092/tcp"}},
-			"9092/tcp":  {{HostIP: "127.0.0.1", HostPort: "9092/tcp"}},
+			"9092/tcp": {{HostIP: "127.0.0.1", HostPort: "9092/tcp"}},
 		},
 		Env: []string{
 			"KAFKA_BROKER_ID=1",
