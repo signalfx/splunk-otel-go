@@ -684,9 +684,10 @@ for sending data directly to Splunk Observability Cloud.
 
 - Add support for setting the [Splunk's organization access token](https://help.splunk.com/en/splunk-observability-cloud/administer/authentication-and-security/authentication-tokens/org-access-tokens)
   using the `SPLUNK_ACCESS_TOKEN` environmental variable or `distro.WithAccessToken`
-  option. It allows exporters sending data directly to the Splunk Observability Cloud.
-  To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint` must be
-  set with Splunk back-end ingest endpoint URL: `https://ingest.<REALM>.signalfx.com/v2/trace`.
+  option. It allows exporters sending data directly to the Splunk Observability
+  Cloud. To do so, the `OTEL_EXPORTER_JAEGER_ENDPOINT` or `distro.WithEndpoint`
+  must be set with Splunk back-end ingest endpoint URL:
+  `https://ingest.<REALM>.signalfx.com/v2/trace`.
 
 ### Changed
 
