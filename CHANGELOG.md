@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Remove `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
   Go module.
+  ([#4370](https://github.com/signalfx/splunk-otel-go/pull/4370))
 
 ## [1.29.0] - 2025-12-09
 
