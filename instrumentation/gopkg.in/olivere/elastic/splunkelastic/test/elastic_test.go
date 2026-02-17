@@ -26,12 +26,12 @@ import (
 	"net/url"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/olivere/elastic/v7"
 	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -43,7 +43,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
-var addr string
+const addr = "http://127.0.0.1:9200"
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -57,17 +57,17 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	resource, err := pool.Run("elasticsearch", "7.16.2", []string{"discovery.type=single-node"})
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "elasticsearch",
+		Tag:        "7.17.28",
+		Env:        []string{"discovery.type=single-node"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"9200/tcp": {{HostIP: "127.0.0.1", HostPort: "9200/tcp"}},
+		},
+	})
 	if err != nil {
 		log.Fatalf("Could not create elasticsearch container: %v", err)
 	}
-
-	target := &url.URL{
-		Scheme: "http",
-		Host:   getHostPort(resource, "9200/tcp"),
-	}
-	addr = target.String()
-	addr = strings.Replace(addr, "localhost", "127.0.0.1", 1) // Otherwise it uses IPv6 which was not working in GitHub Actions.
 
 	// Wait for the Elasticsearch to come up using an exponential-backoff
 	// retry.
