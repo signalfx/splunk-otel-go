@@ -183,7 +183,7 @@ func TestMain(m *testing.M) {
 		Tag:        "8",
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"3306/tcp": {
-				{HostIP: "localhost", HostPort: "3306"},
+				{HostIP: "127.0.0.1", HostPort: "3306"},
 			},
 		},
 		Env: []string{
