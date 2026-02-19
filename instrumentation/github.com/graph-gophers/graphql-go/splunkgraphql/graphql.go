@@ -14,6 +14,9 @@
 
 // Package splunkgraphql provides OpenTelemetry instrumentation for the
 // github.com/graph-gophers/graphql-go module.
+//
+// Deprecated: the module is not going to be released in future.
+// See https://github.com/signalfx/splunk-otel-go/issues/4398 for more details.
 package splunkgraphql
 
 import (

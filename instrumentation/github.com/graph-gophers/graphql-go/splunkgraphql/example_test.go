@@ -20,6 +20,7 @@ import (
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
 )
 
