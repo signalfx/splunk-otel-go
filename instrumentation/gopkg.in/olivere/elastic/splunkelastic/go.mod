@@ -1,4 +1,4 @@
-// Deprecated: the module is not going to be released in future.
+// Deprecated: this module is no longer supported.
 // See https://github.com/signalfx/splunk-otel-go/issues/4394 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic
 
