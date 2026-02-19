@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Deprecated
+
+- The `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
+  module is deprecated. See [#4394](https://github.com/signalfx/splunk-otel-go/issues/4394)
+  for more details.
+  (#XXXX)
+
 ## [1.29.0] - 2025-12-09
 
 This release upgrades [OpenTelemetry Go to v1.39.0/v0.61.0/v0.15.0/v0.0.14][otel-v1.39.0]
