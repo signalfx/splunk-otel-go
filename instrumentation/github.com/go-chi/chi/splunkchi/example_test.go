@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-chi/chi"
 
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi"
 )
 
