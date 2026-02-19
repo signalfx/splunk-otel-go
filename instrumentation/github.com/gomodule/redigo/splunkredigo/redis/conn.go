@@ -15,7 +15,7 @@
 // Package redis provides tracing functionality for the
 // github.com/gomodule/redigo/redis package.
 //
-// Deprecated: the module is not going to be released in future.
+// Deprecated: this module is no longer supported.
 // See https://github.com/signalfx/splunk-otel-go/issues/4397 for more details
 package redis
 
