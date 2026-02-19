@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
   module is deprecated. See [#4401](https://github.com/signalfx/splunk-otel-go/issues/4401)
   for more details.
-  (#XXXX)
+  ([#4411](https://github.com/signalfx/splunk-otel-go/pull/4411))
 
 ## [1.29.0] - 2025-12-09
 
