@@ -14,4 +14,7 @@
 
 // Package splunkredigo provides OpenTelemetry instrumentation for the
 // github.com/gomodule/redigo module.
+//
+// Deprecated: this module is no longer supported.
+// See https://github.com/signalfx/splunk-otel-go/issues/4397 for more details.
 package splunkredigo

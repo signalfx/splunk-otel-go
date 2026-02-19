@@ -14,4 +14,7 @@
 
 // Package splunkkafka provides functions to trace the
 // github.com/confluentinc/confluent-kafka-go/kafka package.
+//
+// Deprecated: this module is no longer supported.
+// See https://github.com/signalfx/splunk-otel-go/issues/4396 for more details.
 package splunkkafka // import "github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
