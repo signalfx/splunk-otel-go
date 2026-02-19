@@ -22,16 +22,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/olivere/elastic/v7"
-	"github.com/ory/dockertest"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -43,7 +42,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic"
 )
 
-var addr string
+const addr = "http://127.0.0.1:9200"
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -57,29 +56,21 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	resource, err := pool.Run("elasticsearch", "7.16.2", []string{"discovery.type=single-node"})
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "elasticsearch",
+		Tag:        "7.17.28",
+		Env:        []string{"discovery.type=single-node"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"9200/tcp": {{HostIP: "127.0.0.1", HostPort: "9200/tcp"}},
+		},
+	})
 	if err != nil {
 		log.Fatalf("Could not create elasticsearch container: %v", err)
 	}
 
-	// If run with docker-machine the hostname needs to be set.
-	u, err := url.Parse(pool.Client.Endpoint())
-	if err != nil {
-		log.Fatalf("Could not parse endpoint: %s", pool.Client.Endpoint())
-	}
-	hostname := u.Hostname()
-	if hostname == "" {
-		hostname = "127.0.0.1"
-	}
-
-	target := &url.URL{
-		Scheme: "http",
-		Host:   net.JoinHostPort(hostname, resource.GetPort("9200/tcp")),
-	}
-	addr = target.String()
-
 	// Wait for the Elasticsearch to come up using an exponential-backoff
 	// retry.
+	pool.MaxWait = 3 * time.Minute
 	if err = pool.Retry(func() error {
 		client, e := elastic.NewClient(elastic.SetURL(addr), elastic.SetSniff(false))
 		if e != nil {

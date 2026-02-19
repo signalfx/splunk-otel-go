@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/ory/dockertest"
+	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -64,16 +64,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not create redis container: %v", err)
 	}
 
-	// If run with docker-machine the hostname needs to be set.
-	u, err := url.Parse(pool.Client.Endpoint())
-	if err != nil {
-		log.Fatalf("Could not parse endpoint: %s", pool.Client.Endpoint())
-	}
-	hostname := u.Hostname()
-	if hostname == "" {
-		hostname = "localhost"
-	}
-	addr = net.JoinHostPort(hostname, resource.GetPort("6379/tcp"))
+	addr = getHostPort(resource, "6379/tcp")
 
 	// Wait for the Redis to come up using an exponential-backoff retry.
 	if err = pool.Retry(func() error {
@@ -99,6 +90,18 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(code)
+}
+
+func getHostPort(resource *dockertest.Resource, id string) string {
+	dockerURL := os.Getenv("DOCKER_HOST")
+	if dockerURL == "" {
+		return resource.GetHostPort(id)
+	}
+	u, err := url.Parse(dockerURL)
+	if err != nil {
+		panic(err)
+	}
+	return u.Hostname() + ":" + resource.GetPort(id)
 }
 
 func TestConnCreation(t *testing.T) {
