@@ -1,3 +1,5 @@
+// Deprecated: this module is no longer supported.
+// See https://github.com/signalfx/splunk-otel-go/issues/4398 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql
 
 go 1.24.0

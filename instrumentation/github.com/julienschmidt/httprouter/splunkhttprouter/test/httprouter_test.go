@@ -29,6 +29,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	//nolint:staticcheck // Deprecated package, but still used here.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter"
 
 	"github.com/julienschmidt/httprouter"

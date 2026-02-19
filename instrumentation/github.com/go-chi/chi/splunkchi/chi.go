@@ -14,6 +14,9 @@
 
 // Package splunkchi provides OpenTelemetry instrumentation for the
 // github.com/go-chi/chi package.
+//
+// Deprecated: this module is no longer supported.
+// See https://github.com/signalfx/splunk-otel-go/issues/4395 for more details.
 package splunkchi
 
 import (
