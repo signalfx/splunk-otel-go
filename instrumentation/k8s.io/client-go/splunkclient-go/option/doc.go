@@ -15,6 +15,6 @@
 // Package option provides configuration options for the splunkclient-go
 // package and its subpackages.
 //
-// Deprecated: the module is not going to be released in future.
+// Deprecated: this module is no longer supported.
 // See https://github.com/signalfx/splunk-otel-go/issues/4403 for more details.
 package option
