@@ -14,6 +14,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   module is deprecated. See [#4396](https://github.com/signalfx/splunk-otel-go/issues/4396)
   for more details.
   ([#4405](https://github.com/signalfx/splunk-otel-go/pull/4405))
+- The `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
+  module is deprecated. See [#4394](https://github.com/signalfx/splunk-otel-go/issues/4394)
+  for more details.
+  ([#4404](https://github.com/signalfx/splunk-otel-go/pull/4404))
 
 ## [1.29.0] - 2025-12-09
 
