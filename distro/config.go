@@ -81,7 +81,7 @@ const (
 )
 
 type exporterConfig struct {
-	AccessToken string
+	accessToken string
 	TLSConfig   *tls.Config
 }
 
@@ -105,7 +105,7 @@ func newConfig(opts ...Option) *config {
 		Propagator: autoprop.NewTextMapPropagator(),
 		SpanLimits: newSpanLimits(),
 		ExportConfig: &exporterConfig{
-			AccessToken: envOr(accessTokenKey, defaultAccessToken),
+			accessToken: envOr(accessTokenKey, defaultAccessToken),
 		},
 	}
 	for _, o := range opts {

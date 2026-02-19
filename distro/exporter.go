@@ -71,14 +71,14 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 			otlptracehttp.WithEndpoint(splunkEndpoint),
 			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
 			otlptracehttp.WithHeaders(map[string]string{
-				"X-Sf-Token": c.AccessToken,
+				"X-Sf-Token": c.accessToken,
 			}),
 		)
 	}
 
 	headers := make(map[string]string)
-	if c.AccessToken != "" {
-		headers["X-Sf-Token"] = c.AccessToken
+	if c.accessToken != "" {
+		headers["X-Sf-Token"] = c.accessToken
 	}
 	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey)
 	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
@@ -170,11 +170,11 @@ func newJaegerThriftExporter(l logr.Logger, c *exporterConfig) (trace.SpanExport
 		opts = append(opts, jaeger.WithEndpoint(e))
 	}
 
-	if c.AccessToken != "" {
+	if c.accessToken != "" {
 		opts = append(
 			opts,
 			jaeger.WithUsername("auth"),
-			jaeger.WithPassword(c.AccessToken),
+			jaeger.WithPassword(c.accessToken),
 		)
 	}
 
@@ -238,14 +238,14 @@ func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, 
 			otlpmetrichttp.WithEndpoint(splunkEndpoint),
 			otlpmetrichttp.WithURLPath(otlpRealmMetricsEndpointPath),
 			otlpmetrichttp.WithHeaders(map[string]string{
-				"X-Sf-Token": c.AccessToken,
+				"X-Sf-Token": c.accessToken,
 			}),
 		)
 	}
 
 	headers := make(map[string]string)
-	if c.AccessToken != "" {
-		headers["X-Sf-Token"] = c.AccessToken
+	if c.accessToken != "" {
+		headers["X-Sf-Token"] = c.accessToken
 	}
 	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey, splunkRealmKey)
 	protocol := otlpProtocol(l, otelMetricsExporterOTLPProtocolKey)
@@ -312,8 +312,8 @@ func newOTLPLogExporter(l logr.Logger, c *exporterConfig) (log.Exporter, error) 
 	// SPLUNK_REALM is not supported, Splunk Observability ingest does not support OTLP.
 
 	headers := make(map[string]string)
-	if c.AccessToken != "" {
-		headers["X-Sf-Token"] = c.AccessToken
+	if c.accessToken != "" {
+		headers["X-Sf-Token"] = c.accessToken
 	}
 	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey)
 	protocol := otlpProtocol(l, otelLogsExporterOTLPProtocolKey)

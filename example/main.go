@@ -103,7 +103,7 @@ func run() (err error) {
 		if err != nil {
 			panic(err)
 		}
-		resp, err := client.Do(req)
+		resp, err := client.Do(req) //nolint:gosec // G704: URL is constant and not user-controlled.
 		if err != nil {
 			log.Println(err)
 		}
@@ -133,7 +133,7 @@ func call(ctx context.Context, client *http.Client) {
 	if err != nil {
 		panic(err)
 	}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) //nolint:gosec // G704: URL is constant and not user-controlled.
 	if err != nil {
 		log.Println(err)
 		return
