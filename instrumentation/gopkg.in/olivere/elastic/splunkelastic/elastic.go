@@ -14,6 +14,9 @@
 
 // Package splunkelastic provides OpenTelemetry instrumentation for the
 // gopkg.in/olivere/elastic package.
+//
+// Deprecated: the module is not going to be released in future.
+// See https://github.com/signalfx/splunk-otel-go/issues/4394 for more details.
 package splunkelastic
 
 import (
