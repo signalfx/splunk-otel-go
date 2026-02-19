@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
   module is deprecated. See [#4396](https://github.com/signalfx/splunk-otel-go/issues/4396)
   for more details.
-  (#XXXX)
+  ([#4405](https://github.com/signalfx/splunk-otel-go/pull/4405))
 
 ## [1.29.0] - 2025-12-09
 
