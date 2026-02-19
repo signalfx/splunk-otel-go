@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`
   module is deprecated. See [#4395](https://github.com/signalfx/splunk-otel-go/issues/4395)
   for more details.
-  (#XXXX)
+  ([#4406](https://github.com/signalfx/splunk-otel-go/pull/4406))
 
 ## [1.29.0] - 2025-12-09
 
