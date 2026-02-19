@@ -38,7 +38,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
 
-	//nolint:staticcheck // Deprecated module, but still used in this test.
+	//nolint:staticcheck // Deprecated package, but still used here.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql"
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/internal"
 )
