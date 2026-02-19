@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`
   module is deprecated. See [#4399](https://github.com/signalfx/splunk-otel-go/issues/4399)
   for more details.
-  (#XXXX)
+  ([#4409](https://github.com/signalfx/splunk-otel-go/pull/4409))
 
 ## [1.29.0] - 2025-12-09
 
