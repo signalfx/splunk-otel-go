@@ -40,7 +40,9 @@ import (
 
 	//nolint:staticcheck // Deprecated module, but still used in this test.
 	splunkredigo "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo"
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/option"
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	splunkredis "github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis"
 )
 
