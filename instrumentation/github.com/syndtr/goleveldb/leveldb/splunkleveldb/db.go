@@ -15,7 +15,7 @@
 // Package splunkleveldb provides OpenTelemetry instrumentation for the
 // github.com/syndtr/goleveldb/leveldb package.
 //
-// Deprecated: the module is not going to be released in future.
+// Deprecated: this module is no longer supported.
 // See https://github.com/signalfx/splunk-otel-go/issues/4401 for more details.
 package splunkleveldb
 
