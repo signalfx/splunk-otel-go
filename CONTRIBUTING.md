@@ -85,5 +85,5 @@ any 'help wanted' issues is a great place to start.
 
 ## Licensing
 
-See the [LICENSE](LICENSE) file for our repository's licensing. We will ask you to
-confirm the licensing of your contribution.
+See the [LICENSE](LICENSE) file for our repository's licensing. We will ask you
+to confirm the licensing of your contribution.
