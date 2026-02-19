@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql`
   module is deprecated. See [#4398](https://github.com/signalfx/splunk-otel-go/issues/4398)
   for more details.
-  (#XXXX)
+  ([#4408](https://github.com/signalfx/splunk-otel-go/pull/4408))
 
 ## [1.29.0] - 2025-12-09
 
