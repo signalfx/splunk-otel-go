@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
   module is deprecated. See [#4403](https://github.com/signalfx/splunk-otel-go/issues/4403)
   for more details.
-  (#XXXX)
+  ([#4413](https://github.com/signalfx/splunk-otel-go/pull/4413))
 
 ## [1.29.0] - 2025-12-09
 
