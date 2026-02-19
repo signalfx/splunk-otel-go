@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Deprecated
 
+- The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql`
+  module is deprecated. See [#4398](https://github.com/signalfx/splunk-otel-go/issues/4398)
+  for more details.
+  ([#4408](https://github.com/signalfx/splunk-otel-go/pull/4408))
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
   module is deprecated. See [#4397](https://github.com/signalfx/splunk-otel-go/issues/4397)
   for more details.
