@@ -15,7 +15,7 @@
 // Package splunkbuntdb provides instrumentation for the github.com/tidwall/buntdb
 // package.
 //
-// Deprecated: the module is not going to be released in future.
+// Deprecated: this module is no longer supported.
 // See https://github.com/signalfx/splunk-otel-go/issues/4402 for more details.
 package splunkbuntdb
 
