@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`
   module is deprecated. See [#4400](https://github.com/signalfx/splunk-otel-go/issues/4400)
   for more details.
-  (#XXXX)
+  ([#4410](https://github.com/signalfx/splunk-otel-go/pull/4410))
 
 ## [1.29.0] - 2025-12-09
 
