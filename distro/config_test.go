@@ -37,7 +37,7 @@ var configurationTests = []*configFieldTest{
 	{
 		Name: "AccessToken",
 		ValueFunc: func(c *config) interface{} {
-			return c.ExportConfig.AccessToken
+			return c.ExportConfig.accessToken
 		},
 		DefaultValue: "",
 		EnvironmentTests: []keyValue{
