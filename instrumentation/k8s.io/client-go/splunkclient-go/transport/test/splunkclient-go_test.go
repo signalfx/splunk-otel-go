@@ -32,7 +32,9 @@ import (
 
 	//nolint:staticcheck // Deprecated module, but still used in this test.
 	splunkclientgo "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/transport"
 )
 
