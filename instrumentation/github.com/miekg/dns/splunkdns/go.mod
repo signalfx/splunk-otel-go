@@ -1,3 +1,5 @@
+// Deprecated: the module is not going to be released in future.
+// See https://github.com/signalfx/splunk-otel-go/issues/4400 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
 
 go 1.24.0

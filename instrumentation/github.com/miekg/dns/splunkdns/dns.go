@@ -14,6 +14,9 @@
 
 // Package splunkdns provides OpenTelemetry instrumentation for the
 // github.com/miekg/dns package.
+//
+// Deprecated: the module is not going to be released in future.
+// See https://github.com/signalfx/splunk-otel-go/issues/4400 for more details.
 package splunkdns
 
 import (

@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	traceapi "go.opentelemetry.io/otel/trace"
 
+	//nolint:staticcheck // Deprecated module, but still used in this test.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns"
 )
 
