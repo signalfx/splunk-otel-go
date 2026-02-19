@@ -36,7 +36,7 @@ import (
 	traceapi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/goleak"
 
-	//nolint:staticcheck // Deprecated module, but still used in this test.
+	//nolint:staticcheck // Deprecated package, but still used here.
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka"
 )
 
