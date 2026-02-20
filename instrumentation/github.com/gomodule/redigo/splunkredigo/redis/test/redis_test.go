@@ -51,9 +51,14 @@ var addr string
 const db = 15
 
 func TestMain(m *testing.M) {
+	deprecated := flag.Bool("deprecated", false, "run integration tests of a deprecated module")
 	flag.Parse()
 	if testing.Short() {
 		fmt.Println("Skipping running heavy integration test in short mode.")
+		return
+	}
+	if !*deprecated {
+		fmt.Println("Skipping running integration test for deprecated module. Run 'go test -deprecated' to execute it.")
 		return
 	}
 
