@@ -30,8 +30,11 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
+	//nolint:staticcheck // Deprecated package, but still used.
 	splunkclientgo "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
+	//nolint:staticcheck // Deprecated package, but still used.
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
+	//nolint:staticcheck // Deprecated package, but still used.
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/transport"
 )
 

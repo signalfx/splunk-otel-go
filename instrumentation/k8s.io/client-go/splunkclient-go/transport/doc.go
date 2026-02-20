@@ -14,4 +14,7 @@
 
 // Package transport provides a Kubernetes client wrapper function that traces
 // the Kubernetes client operations.
+//
+// Deprecated: this module is no longer supported.
+// See https://github.com/signalfx/splunk-otel-go/issues/4403 for more details.
 package transport
