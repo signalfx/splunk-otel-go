@@ -13,7 +13,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This release upgrades [OpenTelemetry Go to v1.40.0/v0.62.0/v0.16.0][otel-v1.40.0]
 and [OpenTelemetry Go Contrib to v1.40.0/v2.2.0/v0.65.0/v0.34.0/v0.20.0/v0.15.0/v0.13.0/v0.12.0][contrib-v1.40.0].
 
-The release requires at least [Go 1.24].
+This release is the last to support [Go 1.24].
+The next release will require at least [Go 1.25].
 
 ### Deprecated
 
@@ -900,6 +901,7 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
 
+[Go 1.25]: https://go.dev/doc/go1.25
 [Go 1.24]: https://go.dev/doc/go1.24
 [Go 1.23]: https://go.dev/doc/go1.23
 [Go 1.22]: https://go.dev/doc/go1.22
