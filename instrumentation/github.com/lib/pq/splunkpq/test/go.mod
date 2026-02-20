@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/test
 
-go 1.24.0
+go 1.25.0
 
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql

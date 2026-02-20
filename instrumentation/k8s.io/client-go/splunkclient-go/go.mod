@@ -2,7 +2,7 @@
 // See https://github.com/signalfx/splunk-otel-go/issues/4403 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.30.0

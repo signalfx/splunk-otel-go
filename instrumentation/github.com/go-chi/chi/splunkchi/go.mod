@@ -2,7 +2,7 @@
 // See https://github.com/signalfx/splunk-otel-go/issues/4395 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/go-chi/chi v1.5.5

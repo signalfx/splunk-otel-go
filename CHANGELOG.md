@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+The release requires at least [Go 1.25].
+
+### Removed
+
+- Drop support for [Go 1.24].
+  ([#4416](https://github.com/signalfx/splunk-otel-go/pull/4416))
+
 ## [1.30.0] - 2026-02-20
 
 This release upgrades [OpenTelemetry Go to v1.40.0/v0.62.0/v0.16.0][otel-v1.40.0]
