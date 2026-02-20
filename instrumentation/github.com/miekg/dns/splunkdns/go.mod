@@ -2,7 +2,7 @@
 // See https://github.com/signalfx/splunk-otel-go/issues/4400 for more details.
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/miekg/dns v1.1.72
