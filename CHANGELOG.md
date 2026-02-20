@@ -10,6 +10,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Deprecated
 
+- The `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
+  module is deprecated. See [#4403](https://github.com/signalfx/splunk-otel-go/issues/4403)
+  for more details.
+  ([#4413](https://github.com/signalfx/splunk-otel-go/pull/4413))
+- The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
+  module is deprecated. See [#4402](https://github.com/signalfx/splunk-otel-go/issues/4402)
+  for more details.
+  ([#4413](https://github.com/signalfx/splunk-otel-go/pull/4413))
+- The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
+  module is deprecated. See [#4401](https://github.com/signalfx/splunk-otel-go/issues/4401)
+  for more details.
+  ([#4411](https://github.com/signalfx/splunk-otel-go/pull/4411))
+- The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`
+  module is deprecated. See [#4400](https://github.com/signalfx/splunk-otel-go/issues/4400)
+  for more details.
+  ([#4410](https://github.com/signalfx/splunk-otel-go/pull/4410))
 - The `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`
   module is deprecated. See [#4399](https://github.com/signalfx/splunk-otel-go/issues/4399)
   for more details.

@@ -27,7 +27,9 @@ import (
 	"k8s.io/client-go/transport"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/internal"
+	//nolint:staticcheck // Deprecated package, but still used.
 	splunkclientgo "github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go"
+	//nolint:staticcheck // Deprecated package, but still used.
 	"github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/option"
 )
 
