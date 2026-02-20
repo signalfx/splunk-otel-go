@@ -10,8 +10,8 @@ replace (
 
 require (
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.29.0
-	github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq v1.29.0
+	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.30.0
+	github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq v1.30.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/sdk v1.40.0
@@ -48,7 +48,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runc v1.3.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.29.0 // indirect
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.30.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
