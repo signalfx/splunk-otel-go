@@ -33,6 +33,8 @@ To bump all (execpt the `/build` module's) dependencies run:
 
 1. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
+1. Update the version of the OpenTelemetry Go badge in [README.md](README.md).
+
 1. Push the changes and create a Pull Request on GitHub.
 
 ## Tag
