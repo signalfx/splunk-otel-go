@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.13.3
-	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.30.0
+	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.31.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.42.0
 	go.opentelemetry.io/otel/trace v1.42.0
