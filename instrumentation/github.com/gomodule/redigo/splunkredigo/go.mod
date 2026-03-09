@@ -5,7 +5,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/re
 go 1.25.0
 
 require (
-	github.com/gomodule/redigo v1.9.3
+	github.com/gomodule/redigo/v2 v2.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/internal v1.30.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.42.0
