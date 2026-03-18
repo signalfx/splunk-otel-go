@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   from `ingest.<realm>.signalfx.com` to `ingest.<realm>.observability.splunkcloud.com`.
   If you need to continue using the old endpoints, set the `OTEL_EXPORTER_OTLP_*`
   environment variables explicitly.
+  ([#4471](https://github.com/signalfx/splunk-otel-go/pull/4471))
 
 ## [1.31.0] - 2026-03-09
 
