@@ -67,11 +67,11 @@ const (
 	defaultOTLPProtocol    = otlpProtocolGRPC
 
 	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"
-	jaegerRealmEndpointFormat = "https://ingest.%s.signalfx.com/v2/trace"
+	jaegerRealmEndpointFormat = "https://ingest.%s.observability.splunkcloud.com/v2/trace"
 
-	otlpRealmTracesEndpointFormat  = "ingest.%s.signalfx.com"
+	otlpRealmTracesEndpointFormat  = "ingest.%s.observability.splunkcloud.com"
 	otlpRealmTracesEndpointPath    = "/v2/trace/otlp"
-	otlpRealmMetricsEndpointFormat = "ingest.%s.signalfx.com"
+	otlpRealmMetricsEndpointFormat = "ingest.%s.observability.splunkcloud.com"
 	otlpRealmMetricsEndpointPath   = "/v2/datapoint/otlp"
 )
 
