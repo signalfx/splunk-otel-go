@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splu
 go 1.25.0
 
 require (
-	github.com/lib/pq v1.11.2
+	github.com/lib/pq v1.12.0
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.31.0
 	github.com/stretchr/testify v1.11.1
 )
