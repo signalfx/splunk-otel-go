@@ -44,7 +44,7 @@ func TestZapLevelEncoder(t *testing.T) {
 		2:  logLevelError,
 		1:  logLevelError,
 		0:  logLevelWarn,
-		-1: defaultLogLevel,
+		-1: logLevelInfo,
 	}
 
 	enc := new(stringEncoder)
