@@ -41,7 +41,7 @@ var (
 	// debug so all debug levels are logged.
 	debugLevel = logLevel{name: logLevelDebug, priority: -127}
 	// infoLevel is verbosity equal to 1.
-	infoLevel = logLevel{name: defaultLogLevel, priority: -1}
+	infoLevel = logLevel{name: logLevelInfo, priority: -1}
 	// infoLevel is verbosity equal to 0.
 	warnLevel = logLevel{name: logLevelWarn, priority: 0}
 	// errorLevel only prints log messages made with the logr.Error function.
