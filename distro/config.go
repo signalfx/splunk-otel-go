@@ -59,11 +59,20 @@ const (
 
 // Default configuration values.
 const (
+	noneValue = "none"
+
+	otlpValue = "otlp"
+
+	logLevelDebug = "debug"
+	logLevelInfo  = "info"
+	logLevelWarn  = "warn"
+	logLevelError = "error"
+
 	defaultAccessToken     = ""
-	defaultTraceExporter   = "otlp"
-	defaultMetricsExporter = "otlp"
-	defaultLogsExporter    = "none"
-	defaultLogLevel        = "info"
+	defaultTraceExporter   = otlpValue
+	defaultMetricsExporter = otlpValue
+	defaultLogsExporter    = noneValue
+	defaultLogLevel        = logLevelInfo
 	defaultOTLPProtocol    = otlpProtocolGRPC
 
 	jaegerDefaultEndpoint     = "http://127.0.0.1:9080/v1/trace"

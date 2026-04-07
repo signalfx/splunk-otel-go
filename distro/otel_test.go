@@ -260,7 +260,7 @@ func TestRunOTLPHTTPProtobufExporter(t *testing.T) {
 		assertFn func(t *testing.T, req *http.Request)
 	}{
 		{
-			desc: "OTEL_EXPORTER_OTLP_ENDPOINT",
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT", //nolint:goconst // Repeated case labels keep the signal-specific test tables easy to scan.
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
 				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
@@ -268,7 +268,7 @@ func TestRunOTLPHTTPProtobufExporter(t *testing.T) {
 			},
 		},
 		{
-			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive",
+			desc: "OTEL_EXPORTER_OTLP_ENDPOINT case-insensitive", //nolint:goconst // Repeated case labels keep the signal-specific test tables easy to scan.
 			setupFn: func(t *testing.T, url string) {
 				t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", url)
 				t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "Http/Protobuf")
@@ -403,7 +403,7 @@ func TestRunOTLPGRPCTracesExporterTLS(t *testing.T) {
 
 func TestRunTracesExporterDefault(t *testing.T) {
 	// Start collector at default address.
-	coll := &collector{Endpoint: "localhost:4317"}
+	coll := &collector{Endpoint: "localhost:4317"} //nolint:goconst // Tests intentionally exercise the default collector endpoint literal.
 	coll.Start(t)
 	t.Setenv("OTEL_TRACES_EXPORTER", "")
 

@@ -39,13 +39,13 @@ var (
 	// debugLevel is any verbosity 2 or higher. The zap levels are capped at
 	// -127 because int8 is the underlying type. Use this as a stand-in for
 	// debug so all debug levels are logged.
-	debugLevel = logLevel{name: "debug", priority: -127}
+	debugLevel = logLevel{name: logLevelDebug, priority: -127}
 	// infoLevel is verbosity equal to 1.
-	infoLevel = logLevel{name: "info", priority: -1}
+	infoLevel = logLevel{name: defaultLogLevel, priority: -1}
 	// infoLevel is verbosity equal to 0.
-	warnLevel = logLevel{name: "warn", priority: 0}
+	warnLevel = logLevel{name: logLevelWarn, priority: 0}
 	// errorLevel only prints log messages made with the logr.Error function.
-	errorLevel = logLevel{name: "error", priority: 1}
+	errorLevel = logLevel{name: logLevelError, priority: 1}
 
 	logLevels = []logLevel{debugLevel, infoLevel, warnLevel, errorLevel}
 )
