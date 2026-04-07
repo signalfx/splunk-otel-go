@@ -24,6 +24,11 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
 
+const (
+	testHost              = "localhost"
+	sanitizedUserLocalURL = "https://bob@localhost:8080"
+)
+
 func TestURLDNSParse(t *testing.T) {
 	testcases := []struct {
 		name        string
@@ -52,7 +57,7 @@ func TestURLDNSParse(t *testing.T) {
 			dsn:  "http://localhost",
 			expectedCfg: ConnectionConfig{
 				ConnectionString: "http://localhost",
-				Host:             "localhost",
+				Host:             testHost,
 			},
 		},
 		{
@@ -60,17 +65,17 @@ func TestURLDNSParse(t *testing.T) {
 			dsn:  "https://localhost:8080",
 			expectedCfg: ConnectionConfig{
 				ConnectionString: "https://localhost:8080",
-				Host:             "localhost",
+				Host:             testHost,
 				Port:             8080,
 			},
 		},
 		{
 			name: "with user",
-			dsn:  "https://bob@localhost:8080",
+			dsn:  sanitizedUserLocalURL,
 			expectedCfg: ConnectionConfig{
-				ConnectionString: "https://bob@localhost:8080",
+				ConnectionString: sanitizedUserLocalURL,
 				User:             "bob",
-				Host:             "localhost",
+				Host:             testHost,
 				Port:             8080,
 			},
 		},
@@ -78,9 +83,9 @@ func TestURLDNSParse(t *testing.T) {
 			name: "redact password",
 			dsn:  "https://bob:pa55w0rd@localhost:8080",
 			expectedCfg: ConnectionConfig{
-				ConnectionString: "https://bob@localhost:8080",
+				ConnectionString: sanitizedUserLocalURL,
 				User:             "bob",
-				Host:             "localhost",
+				Host:             testHost,
 				Port:             8080,
 			},
 		},

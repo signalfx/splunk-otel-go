@@ -23,6 +23,8 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
 
+const testDBName = "testdb"
+
 func TestDSNParser(t *testing.T) {
 	testcases := []struct {
 		name    string
@@ -37,10 +39,10 @@ func TestDSNParser(t *testing.T) {
 		},
 		{
 			name: "db name with defaults",
-			dsn:  "/testdb",
+			dsn:  "/" + testDBName,
 			connCfg: splunksql.ConnectionConfig{
-				Name:             "testdb",
-				ConnectionString: "tcp(127.0.0.1:3306)/testdb",
+				Name:             testDBName,
+				ConnectionString: "tcp(127.0.0.1:3306)/" + testDBName,
 				Host:             "127.0.0.1",
 				Port:             3306,
 				NetTransport:     splunksql.NetTransportTCP,
@@ -49,10 +51,10 @@ func TestDSNParser(t *testing.T) {
 		},
 		{
 			name: "tcp address",
-			dsn:  "user:password@tcp(localhost:8080)/testdb",
+			dsn:  "user:password@tcp(localhost:8080)/" + testDBName,
 			connCfg: splunksql.ConnectionConfig{
-				Name:             "testdb",
-				ConnectionString: "user@tcp(localhost:8080)/testdb",
+				Name:             testDBName,
+				ConnectionString: "user@tcp(localhost:8080)/" + testDBName,
 				User:             "user",
 				Host:             "localhost",
 				Port:             8080,
@@ -61,10 +63,10 @@ func TestDSNParser(t *testing.T) {
 		},
 		{
 			name: "unix socket",
-			dsn:  "user:password@unix(/tmp)/testdb",
+			dsn:  "user:password@unix(/tmp)/" + testDBName,
 			connCfg: splunksql.ConnectionConfig{
-				Name:             "testdb",
-				ConnectionString: "user@unix(/tmp)/testdb",
+				Name:             testDBName,
+				ConnectionString: "user@unix(/tmp)/" + testDBName,
 				User:             "user",
 				NetTransport:     splunksql.NetTransportPipe,
 				NetSockFamily:    splunksql.NetSockFamilyUnix,

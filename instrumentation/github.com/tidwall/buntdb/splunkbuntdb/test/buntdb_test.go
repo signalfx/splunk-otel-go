@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:goconst // This fixture-heavy test intentionally reuses a fixed set of keys across many assertions.
 package test
 
 import (

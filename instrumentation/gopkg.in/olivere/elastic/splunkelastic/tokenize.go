@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:goconst // Generated specification data intentionally keeps repeated endpoint paths inline.
 package splunkelastic
 
 import (
