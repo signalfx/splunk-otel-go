@@ -17,13 +17,13 @@ and [OpenTelemetry Go Contrib to v1.43.0/v0.68.0/v0.18.0][contrib-v1.43.0].
 
 - The default ingest endpoint for `SPLUNK_REALM`-based configuration has been updated
   from `ingest.<realm>.signalfx.com` to `ingest.<realm>.observability.splunkcloud.com`.
+  ([#4471](https://github.com/signalfx/splunk-otel-go/pull/4471))
   If you need to continue using the old endpoints, set the environment variables
   in the following way to override the configuration:
   - `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.$SPLUNK_REALM.observability.splunkcloud.com/v2/trace/otlp`
   - `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://ingest.$SPLUNK_REALM.observability.splunkcloud.com/v2/datapoint/otlp`
   - `OTEL_LOGS_EXPORTER=none`
-  ([#4471](https://github.com/signalfx/splunk-otel-go/pull/4471))
 
 ## [1.31.0] - 2026-03-09
 
