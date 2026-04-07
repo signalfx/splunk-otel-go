@@ -8,17 +8,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-04-07
+
+This release upgrades [OpenTelemetry Go to v1.43.0/v0.19.0][otel-v1.43.0]
+and [OpenTelemetry Go Contrib to v1.43.0/v0.68.0/v0.18.0][contrib-v1.43.0].
+
 ### Changed
 
 - The default ingest endpoint for `SPLUNK_REALM`-based configuration has been updated
   from `ingest.<realm>.signalfx.com` to `ingest.<realm>.observability.splunkcloud.com`.
+  ([#4471](https://github.com/signalfx/splunk-otel-go/pull/4471))
   If you need to continue using the old endpoints, set the environment variables
   in the following way to override the configuration:
   - `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.$SPLUNK_REALM.observability.splunkcloud.com/v2/trace/otlp`
   - `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://ingest.$SPLUNK_REALM.observability.splunkcloud.com/v2/datapoint/otlp`
   - `OTEL_LOGS_EXPORTER=none`
-  ([#4471](https://github.com/signalfx/splunk-otel-go/pull/4471))
 
 ## [1.31.0] - 2026-03-09
 
@@ -803,7 +808,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.31.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.32.0...HEAD
+[1.32.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.32.0
 [1.31.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.31.0
 [1.30.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.30.0
 [1.29.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.29.0
@@ -847,6 +853,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.43.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.43.0
 [otel-v1.42.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.42.0
 [otel-v1.40.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.40.0
 [otel-v1.39.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.39.0
@@ -889,6 +896,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.43.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.43.0
 [contrib-v1.42.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.42.0
 [contrib-v1.40.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.40.0
 [contrib-v1.39.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.39.0
