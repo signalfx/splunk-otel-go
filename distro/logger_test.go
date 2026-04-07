@@ -67,7 +67,7 @@ func TestZapLevel(t *testing.T) {
 		want int8
 	}{
 		{in: logLevelDebug, want: -127},
-		{in: defaultLogLevel, want: -1},
+		{in: logLevelInfo, want: -1},
 		{in: logLevelWarn, want: 0},
 		{in: logLevelError, want: 1},
 		{in: "invalid", want: -1}, // default for unrecognized value
