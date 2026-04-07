@@ -39,8 +39,8 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 	}{
 		{
 			driverName:       "SanitizedConnectionString",
-			connectionString: "mockDB://bob@localhost:8080/testDB",
-			wantPoolName:     "mockDB://bob@localhost:8080/testDB",
+			connectionString: mockDBConnectionString,
+			wantPoolName:     mockDBConnectionString,
 		},
 		{
 			driverName:       "NoConnectionString",
@@ -60,7 +60,7 @@ func TestMetrics(t *testing.T) { //nolint:funlen // the want is big
 			driver := newSimpleMockDriver()
 			connCfg := splunksql.ConnectionConfig{
 				ConnectionString: tc.connectionString, // to make sure that pool.name value is sanitized via DSNParser
-				Host:             "localhost",         // to avoid errors in logs
+				Host:             mockDBHost,          // to avoid errors in logs
 			}
 			sql.Register(tc.driverName, driver)
 			splunksql.Register(tc.driverName, splunksql.InstrumentationConfig{

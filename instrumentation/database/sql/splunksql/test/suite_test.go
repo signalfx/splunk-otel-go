@@ -31,6 +31,11 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/internal/moniker"
 )
 
+const (
+	mockDBConnectionString = "mockDB://bob@localhost:8080/testDB"
+	mockDBHost             = "localhost"
+)
+
 // SplunkSQLSuite is the tracing test suite for the splunksql package.
 type SplunkSQLSuite struct {
 	suite.Suite
@@ -60,9 +65,9 @@ func NewSplunkSQLSuite(dName string, d driver.Driver) (*SplunkSQLSuite, error) {
 	connCfg := splunksql.ConnectionConfig{
 		// Do not set the Name field so monikers are used to identify
 		// spans.
-		ConnectionString: "mockDB://bob@localhost:8080/testDB",
+		ConnectionString: mockDBConnectionString,
 		User:             "bob",
-		Host:             "localhost",
+		Host:             mockDBHost,
 		Port:             8080,
 		NetTransport:     splunksql.NetTransportOther,
 	}

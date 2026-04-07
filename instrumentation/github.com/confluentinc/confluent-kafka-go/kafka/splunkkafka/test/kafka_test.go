@@ -47,6 +47,11 @@ var (
 	testTopic   = "gotest"
 )
 
+const (
+	bootstrapServersConfigKey = "bootstrap.servers"
+	kafkaBootstrapServers     = "127.0.0.1:9092"
+)
+
 func TestMain(m *testing.M) {
 	deprecated := flag.Bool("deprecated", false, "run integration tests of a deprecated module")
 	flag.Parse()
@@ -141,7 +146,7 @@ func TestMain(m *testing.M) {
 
 func verifyCanProduceToKafka() error {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": "127.0.0.1:9092",
+		bootstrapServersConfigKey: kafkaBootstrapServers,
 	})
 	if err != nil {
 		return err
@@ -269,8 +274,8 @@ func newFixtures() (*tracetest.SpanRecorder, []splunkkafka.Option) {
 
 func newProducer(t *testing.T, opts ...splunkkafka.Option) *splunkkafka.Producer {
 	p, err := splunkkafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers":   "127.0.0.1:9092",
-		"go.delivery.reports": true,
+		bootstrapServersConfigKey: kafkaBootstrapServers,
+		"go.delivery.reports":     true,
 	}, opts...)
 	require.NoError(t, err)
 	return p
@@ -278,9 +283,9 @@ func newProducer(t *testing.T, opts ...splunkkafka.Option) *splunkkafka.Producer
 
 func newConsumer(t *testing.T, opts ...splunkkafka.Option) *splunkkafka.Consumer {
 	c, err := splunkkafka.NewConsumer(&kafka.ConfigMap{
-		"group.id":          testGroupID,
-		"bootstrap.servers": "127.0.0.1:9092",
-		"socket.timeout.ms": 6000,
+		"group.id":                testGroupID,
+		bootstrapServersConfigKey: kafkaBootstrapServers,
+		"socket.timeout.ms":       6000,
 	}, opts...)
 	require.NoError(t, err)
 	return c

@@ -32,9 +32,16 @@ import (
 	"go.opentelemetry.io/otel/trace/noop"
 )
 
-const grpID = "test group ID"
+const (
+	grpID                        = "test group ID"
+	groupIDConfigKey             = "group.id"
+	eventsChannelEnableConfigKey = "go.events.channel.enable"
+)
 
-var testTopic = "gotest"
+var (
+	testTopic       = "gotest"
+	testMessageKeys = []string{"key1", "key2"}
+)
 
 type fnTracerProvider struct {
 	noop.TracerProvider
@@ -55,14 +62,14 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 }
 
 func TestNewConsumerCapturesGroupID(t *testing.T) {
-	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
+	c, err := NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
 	sConf := trace.NewSpanStartConfig(c.cfg.DefaultStartOpts...)
 	assert.Contains(t, sConf.Attributes(), semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 }
 
 func TestNewConsumerType(t *testing.T) {
-	c, err := NewConsumer(&kafka.ConfigMap{"group.id": grpID})
+	c, err := NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
 	assert.IsType(t, &Consumer{}, c)
 }
@@ -74,7 +81,7 @@ func TestNewConsumerReturnsError(t *testing.T) {
 }
 
 func TestWrapConsumerType(t *testing.T) {
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{"group.id": grpID})
+	c, err := kafka.NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
 	assert.IsType(t, Consumer{}, *WrapConsumer(c))
 }
@@ -83,9 +90,9 @@ func TestConsumerEventsChanCreated(t *testing.T) {
 	chSize := 500
 	c, err := NewConsumer(&kafka.ConfigMap{
 		// required for the events channel to be turned on
-		"go.events.channel.enable": true,
-		"go.events.channel.size":   chSize,
-		"group.id":                 grpID,
+		eventsChannelEnableConfigKey: true,
+		"go.events.channel.size":     chSize,
+		groupIDConfigKey:             grpID,
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, c.Events())
@@ -124,8 +131,8 @@ func TestConsumerSpan(t *testing.T) {
 	commonAttr := attribute.String("key", "value")
 	c, err := NewConsumer(&kafka.ConfigMap{
 		// required for the events channel to be turned on
-		"go.events.channel.enable": true,
-		"group.id":                 grpID,
+		eventsChannelEnableConfigKey: true,
+		groupIDConfigKey:             grpID,
 	}, WithTracerProvider(tp), WithPropagator(prop), WithAttributes([]attribute.KeyValue{commonAttr}))
 	require.NoError(t, err)
 
@@ -136,7 +143,7 @@ func TestConsumerSpan(t *testing.T) {
 	})
 	ctx := trace.ContextWithSpanContext(context.Background(), sc)
 
-	keys := []string{"key1", "key2"}
+	keys := testMessageKeys
 	for _, k := range keys {
 		msg := &kafka.Message{
 			TopicPartition: kafka.TopicPartition{
@@ -185,8 +192,8 @@ func TestConsumerConcurrentConsuming(t *testing.T) {
 	}
 	c, err := NewConsumer(&kafka.ConfigMap{
 		// Required for the events channel to be turned on.
-		"go.events.channel.enable": true,
-		"group.id":                 grpID,
+		eventsChannelEnableConfigKey: true,
+		groupIDConfigKey:             grpID,
 	}, WithTracerProvider(tp))
 	require.NoError(t, err)
 

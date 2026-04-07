@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:goconst // These table-driven tests intentionally mirror repeated HTTP verbs and operation names from the generated spec data.
 package splunkelastic
 
 import (
@@ -24,6 +25,8 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
+
+const aliasPath = "/_alias"
 
 type prop struct {
 	propagation.TextMapPropagator
@@ -81,7 +84,7 @@ func TestName(t *testing.T) {
 		},
 		{
 			method: "GET",
-			path:   "/_alias",
+			path:   aliasPath,
 			name:   "indices.get_alias",
 		},
 		{

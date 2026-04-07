@@ -29,6 +29,8 @@ import (
 
 type myStr bool
 
+const redisSetCommand = "SET"
+
 func (b myStr) String() string {
 	return strconv.FormatBool(bool(b))
 }
@@ -49,18 +51,18 @@ func TestParams(t *testing.T) {
 			),
 		},
 		{
-			cmd:      "SET",
-			wantName: "SET",
+			cmd:      redisSetCommand,
+			wantName: redisSetCommand,
 			wantConfig: trace.NewSpanStartConfig(
 				trace.WithAttributes(
 					semconv.DBSystemRedis,
-					semconv.DBOperationKey.String("SET"),
+					semconv.DBOperationKey.String(redisSetCommand),
 				),
 				trace.WithSpanKind(trace.SpanKindClient),
 			),
 		},
 		{
-			cmd: "SET",
+			cmd: redisSetCommand,
 			args: []interface{}{
 				"zero",
 				int(1),
@@ -71,7 +73,7 @@ func TestParams(t *testing.T) {
 				struct{}{}, // skipped
 				myStr(true),
 			},
-			wantName: "SET",
+			wantName: redisSetCommand,
 			wantConfig: trace.NewSpanStartConfig(
 				trace.WithAttributes(
 					semconv.DBSystemRedis,

@@ -38,13 +38,13 @@ func (e *stringEncoder) assert(t *testing.T, want string) {
 func TestZapLevelEncoder(t *testing.T) {
 	levelMap := map[int8]string{
 		// Not that we use it, but 5 is the "fatal" level in zap.
-		5:  "error",
-		4:  "error",
-		3:  "error",
-		2:  "error",
-		1:  "error",
-		0:  "warn",
-		-1: "info",
+		5:  logLevelError,
+		4:  logLevelError,
+		3:  logLevelError,
+		2:  logLevelError,
+		1:  logLevelError,
+		0:  logLevelWarn,
+		-1: logLevelInfo,
 	}
 
 	enc := new(stringEncoder)
@@ -66,10 +66,10 @@ func TestZapLevel(t *testing.T) {
 		in   string
 		want int8
 	}{
-		{in: "debug", want: -127},
-		{in: "info", want: -1},
-		{in: "warn", want: 0},
-		{in: "error", want: 1},
+		{in: logLevelDebug, want: -127},
+		{in: logLevelInfo, want: -1},
+		{in: logLevelWarn, want: 0},
+		{in: logLevelError, want: 1},
 		{in: "invalid", want: -1}, // default for unrecognized value
 		{in: "DEBUG", want: -127}, // values are case insensitive
 	}
@@ -82,7 +82,7 @@ func TestZapLevel(t *testing.T) {
 }
 
 func TestLoggerPanic(t *testing.T) {
-	zc := zapConfig("info")
+	zc := zapConfig(defaultLogLevel)
 	// Set an invalid level so the zap logger build will error. This error
 	// should be panic-ed.
 	zc.Level = zap.AtomicLevel{}

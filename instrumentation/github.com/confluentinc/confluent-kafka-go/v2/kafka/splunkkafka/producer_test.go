@@ -69,7 +69,7 @@ func TestProducerChannelSpan(t *testing.T) {
 	p, err := NewProducer(&kafka.ConfigMap{}, WithTracerProvider(tp), WithPropagator(prop))
 	require.NoError(t, err)
 
-	keys := []string{"key1", "key2"}
+	keys := testMessageKeys
 	produceChannel := make(chan *kafka.Message, len(keys))
 	p.produceChannel = p.traceProduceChannel(produceChannel)
 
@@ -139,7 +139,7 @@ func TestProduceSpan(t *testing.T) {
 	})
 	ctx := trace.ContextWithSpanContext(context.Background(), sc)
 
-	keys := []string{"key1", "key2"}
+	keys := testMessageKeys
 	for _, k := range keys {
 		msg := &kafka.Message{
 			TopicPartition: kafka.TopicPartition{

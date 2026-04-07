@@ -42,11 +42,11 @@ type traceExporterFunc func(logr.Logger, *exporterConfig) (trace.SpanExporter, e
 // functions.
 var traceExporters = map[string]traceExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPTracesExporter,
+	otlpValue: newOTLPTracesExporter,
 	// Jaeger thrift exporter.
 	"jaeger-thrift-splunk": newJaegerThriftExporter,
 	// None, explicitly do not set an exporter.
-	"none": nil,
+	noneValue: nil,
 }
 
 func tracesExporter(l logr.Logger) traceExporterFunc {
@@ -211,9 +211,9 @@ type metricsExporterFunc func(logr.Logger, *exporterConfig) (metric.Exporter, er
 // functions.
 var metricsExporters = map[string]metricsExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPMetricsExporter,
+	otlpValue: newOTLPMetricsExporter,
 	// None, explicitly do not set an exporter.
-	"none": nil,
+	noneValue: nil,
 }
 
 func metricsExporter(l logr.Logger) metricsExporterFunc {
@@ -290,9 +290,9 @@ type logsExporterFunc func(logr.Logger, *exporterConfig) (log.Exporter, error)
 // functions.
 var logsExporters = map[string]logsExporterFunc{
 	// OTLP gRPC exporter.
-	"otlp": newOTLPLogExporter,
+	otlpValue: newOTLPLogExporter,
 	// None, explicitly do not set an exporter.
-	"none": nil,
+	noneValue: nil,
 }
 
 func logsExporter(l logr.Logger) logsExporterFunc {
@@ -364,7 +364,7 @@ func noneEnvVarSet(envs ...string) bool {
 
 // notNone returns if s is not empty or set to none.
 func notNone(s string) bool {
-	return s != "" && s != "none"
+	return s != "" && s != noneValue
 }
 
 func otlpProtocol(l logr.Logger, signalKey string) string {
