@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elast
 go 1.25.5
 
 require (
-	github.com/moby/moby/api v1.54.1
+	github.com/moby/moby/api v1.54.2
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/ory/dockertest/v4 v4.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic v1.32.0

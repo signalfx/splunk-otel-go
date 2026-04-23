@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
-	github.com/moby/moby/api v1.54.1
+	github.com/moby/moby/api v1.54.2
 	github.com/ory/dockertest/v4 v4.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka v1.32.0
 	github.com/stretchr/testify v1.11.1
