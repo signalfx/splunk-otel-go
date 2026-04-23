@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/test
 
-go 1.25.0
+go 1.25.5
 
 replace (
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql => ../../../../../database/sql/splunksql
@@ -10,6 +10,7 @@ replace (
 
 require (
 	github.com/ory/dockertest/v3 v3.12.0
+	github.com/ory/dockertest/v4 v4.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.32.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq v1.32.0
 	github.com/stretchr/testify v1.11.1
