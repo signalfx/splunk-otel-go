@@ -23,14 +23,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/netip"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/moby/moby/api/types/network"
 	"github.com/olivere/elastic/v7"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
+	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -57,32 +58,33 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	pool, err := dockertest.NewPool("")
+	ctx := context.Background()
+	pool, err := dockertest.NewPool(ctx, "", dockertest.WithMaxWait(3*time.Minute))
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "elasticsearch",
-		Tag:        "7.17.28",
-		Env:        []string{"discovery.type=single-node"},
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"9200/tcp": {{HostIP: "127.0.0.1", HostPort: "9200/tcp"}},
-		},
-	})
+	_, err = pool.Run(ctx, "elasticsearch",
+		dockertest.WithTag("7.17.28"),
+		dockertest.WithEnv([]string{"discovery.type=single-node"}),
+		dockertest.WithPortBindings(network.PortMap{
+			network.MustParsePort("9200/tcp"): {
+				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "9200"},
+			},
+		}),
+		dockertest.WithoutReuse(),
+	)
 	if err != nil {
 		log.Fatalf("Could not create elasticsearch container: %v", err)
 	}
 
-	// Wait for the Elasticsearch to come up using an exponential-backoff
-	// retry.
-	pool.MaxWait = 3 * time.Minute
-	if err = pool.Retry(func() error {
+	// Wait for the Elasticsearch to come up using dockertest retry.
+	if err = pool.Retry(ctx, 0, func() error {
 		client, e := elastic.NewClient(elastic.SetURL(addr), elastic.SetSniff(false))
 		if e != nil {
 			return e
 		}
-		_, code, e := client.Ping(addr).Do(context.Background())
+		_, code, e := client.Ping(addr).Do(ctx)
 		if e != nil {
 			return e
 		}
@@ -97,8 +99,8 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Run sequentially becauase os.Exit will skip a defer.
-	if err = pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
+	if err = pool.Close(ctx); err != nil {
+		log.Fatalf("Could not close pool: %s", err)
 	}
 
 	os.Exit(code)
