@@ -149,6 +149,10 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not close pool: %v", err)
 	}
 
+	if err := goleak.Find(); err != nil {
+		log.Fatalf("Goroutine leak detected: %v", err)
+	}
+
 	os.Exit(code)
 }
 
@@ -180,8 +184,6 @@ func verifyCanProduceToKafka() error {
 }
 
 func TestChannelBasedProducer(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)
@@ -228,8 +230,6 @@ func TestChannelBasedProducer(t *testing.T) {
 }
 
 func TestFunctionBasedProducer(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)
