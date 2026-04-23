@@ -24,11 +24,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/netip"
 	"os"
 	"testing"
+	"time"
 
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
+	"github.com/moby/moby/api/types/network"
+	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -170,31 +172,32 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	pool, err := dockertest.NewPool("")
+	ctx := context.Background()
+	pool, err := dockertest.NewPool(ctx, "")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "13",
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"5432/tcp": {
-				{HostIP: "127.0.0.1", HostPort: "5432"},
+	_, err = pool.Run(ctx, "postgres",
+		dockertest.WithTag("13"),
+		dockertest.WithPortBindings(network.PortMap{
+			network.MustParsePort("5432/tcp"): {
+				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "5432"},
 			},
-		},
-		Env: []string{
+		}),
+		dockertest.WithEnv([]string{
 			fmt.Sprintf("POSTGRES_USER=%s", user),
 			fmt.Sprintf("POSTGRES_PASSWORD=%s", pass),
 			fmt.Sprintf("POSTGRES_DB=%s", dbName),
-		},
-	})
+		}),
+		dockertest.WithoutReuse(),
+	)
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
-	// Wait for the database to come up using an exponential-backoff retry.
-	if err := pool.Retry(func() error {
+	// Wait for the database to come up using dockertest retry.
+	if err := pool.Retry(ctx, 10*time.Minute, func() error {
 		db, err := sql.Open("pgx", dsn)
 		if err != nil {
 			return err
@@ -207,8 +210,8 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// You can't defer this because os.Exit doesn't care for defer
-	if err := pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
+	if err := pool.Close(ctx); err != nil {
+		log.Fatalf("Could not close pool: %s", err)
 	}
 
 	os.Exit(code)

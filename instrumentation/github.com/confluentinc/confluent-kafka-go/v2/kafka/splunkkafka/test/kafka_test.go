@@ -17,16 +17,20 @@
 package test
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"net/netip"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
+	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/propagation"
@@ -58,50 +62,57 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	pool, err := dockertest.NewPool("")
+	ctx := context.Background()
+	pool, err := dockertest.NewPool(ctx, "")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	confNet, err := pool.CreateNetwork("confluent")
+	confNet, err := pool.CreateNetwork(ctx, "confluent", nil)
 	if err != nil {
 		log.Fatalf("Could not create docker network: %v", err)
 	}
 
-	zkRes, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "confluentinc/cp-zookeeper",
-		Tag:        "6.2.0",
-		NetworkID:  confNet.Network.ID,
-		Hostname:   "zookeeper",
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"2181/tcp": {{HostIP: "127.0.0.1", HostPort: "2181/tcp"}},
-		},
-		Env: []string{
+	_, err = pool.Run(ctx, "confluentinc/cp-zookeeper",
+		dockertest.WithTag("6.2.0"),
+		dockertest.WithHostname("zookeeper"),
+		dockertest.WithName("zookeeper"),
+		dockertest.WithPortBindings(network.PortMap{
+			network.MustParsePort("2181/tcp"): {
+				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "2181"},
+			},
+		}),
+		dockertest.WithEnv([]string{
 			"ZOOKEEPER_CLIENT_PORT=2181",
 			"ZOOKEEPER_TICK_TIME=2000",
-		},
-	})
+		}),
+		dockertest.WithHostConfig(func(hostConfig *container.HostConfig) {
+			hostConfig.NetworkMode = container.NetworkMode(confNet.ID())
+		}),
+		dockertest.WithoutReuse(),
+	)
 	if err != nil {
 		log.Fatalf("Could not create zookeeper: %v", err)
 	}
 
-	// Wait for the Kafka to come up using an exponential-backoff retry.
-	if err = pool.Retry(func() error {
+	// Wait for the Kafka to come up using dockertest retry.
+	if err = pool.Retry(ctx, 10*time.Minute, func() error {
 		_, dialErr := net.Dial("tcp", "127.0.0.1:2181")
 		return dialErr
 	}); err != nil {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
 	}
 
-	kafkaRes, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "confluentinc/cp-kafka",
-		Tag:        "6.2.0",
-		NetworkID:  confNet.Network.ID,
-		Hostname:   "broker",
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"9092/tcp": {{HostIP: "127.0.0.1", HostPort: "9092/tcp"}},
-		},
-		Env: []string{
+	_, err = pool.Run(ctx, "confluentinc/cp-kafka",
+		dockertest.WithTag("6.2.0"),
+		dockertest.WithHostname("broker"),
+		dockertest.WithName("broker"),
+		dockertest.WithPortBindings(network.PortMap{
+			network.MustParsePort("9092/tcp"): {
+				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "9092"},
+			},
+		}),
+		dockertest.WithEnv([]string{
 			"KAFKA_BROKER_ID=1",
 			"KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
@@ -111,28 +122,30 @@ func TestMain(m *testing.M) {
 			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
 			"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
 			fmt.Sprintf("KAFKA_CREATE_TOPICS=%s:1:1", testTopic),
-		},
-	})
+		}),
+		dockertest.WithHostConfig(func(hostConfig *container.HostConfig) {
+			hostConfig.NetworkMode = container.NetworkMode(confNet.ID())
+		}),
+		dockertest.WithoutReuse(),
+	)
 	if err != nil {
 		log.Fatalf("Could not create kakfa container: %v", err)
 	}
 
-	// Wait for the Kafka to come up using an exponential-backoff retry.
-	if err = pool.Retry(verifyCanProduceToKafka); err != nil {
+	// Wait for the Kafka to come up using dockertest retry.
+	if err = pool.Retry(ctx, 10*time.Minute, verifyCanProduceToKafka); err != nil {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
 	}
 
 	code := m.Run()
 
 	// Run sequentially becauase os.Exit will skip a defer.
-	if err := pool.Purge(kafkaRes); err != nil {
-		log.Fatalf("Could not purge kafka: %v", err)
+	if err := pool.Close(ctx); err != nil {
+		log.Fatalf("Could not close pool: %v", err)
 	}
-	if err := pool.Purge(zkRes); err != nil {
-		log.Fatalf("Could not purge zookeeper: %v", err)
-	}
-	if err := confNet.Close(); err != nil {
-		log.Fatalf("Could not remove network: %v", err)
+
+	if err := goleak.Find(); err != nil {
+		log.Fatalf("Goroutine leak detected: %v", err)
 	}
 
 	os.Exit(code)
@@ -166,8 +179,6 @@ func verifyCanProduceToKafka() error {
 }
 
 func TestChannelBasedProducer(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)
@@ -214,8 +225,6 @@ func TestChannelBasedProducer(t *testing.T) {
 }
 
 func TestFunctionBasedProducer(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)

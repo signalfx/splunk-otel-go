@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
@@ -62,20 +62,21 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	pool, err := dockertest.NewPool("")
+	ctx := context.Background()
+	pool, err := dockertest.NewPool(ctx, "")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	resource, err := pool.Run("redis", "6", nil)
+	resource, err := pool.Run(ctx, "redis", dockertest.WithTag("6"), dockertest.WithoutReuse())
 	if err != nil {
 		log.Fatalf("Could not create redis container: %v", err)
 	}
 
 	addr = getHostPort(resource, "6379/tcp")
 
-	// Wait for the Redis to come up using an exponential-backoff retry.
-	if err = pool.Retry(func() error {
+	// Wait for the Redis to come up using dockertest retry.
+	if err = pool.Retry(ctx, 10*time.Minute, func() error {
 		conn, e := redis.Dial(
 			"tcp", addr, redis.DialConnectTimeout(time.Second),
 		)
@@ -93,14 +94,14 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Run sequentially becauase os.Exit will skip a defer.
-	if err = pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
+	if err = pool.Close(ctx); err != nil {
+		log.Fatalf("Could not close pool: %s", err)
 	}
 
 	os.Exit(code)
 }
 
-func getHostPort(resource *dockertest.Resource, id string) string {
+func getHostPort(resource dockertest.Resource, id string) string {
 	dockerURL := os.Getenv("DOCKER_HOST")
 	if dockerURL == "" {
 		return resource.GetHostPort(id)
