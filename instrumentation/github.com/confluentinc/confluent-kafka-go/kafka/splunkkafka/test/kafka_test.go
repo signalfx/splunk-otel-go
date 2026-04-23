@@ -25,6 +25,7 @@ import (
 	"net/netip"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/moby/moby/api/types/container"
@@ -101,7 +102,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Wait for the Kafka to come up using dockertest retry.
-	if err = pool.Retry(ctx, 0, func() error {
+	if err = pool.Retry(ctx, 10*time.Minute, func() error {
 		_, dialErr := net.Dial("tcp", "127.0.0.1:2181")
 		return dialErr
 	}); err != nil {
@@ -138,7 +139,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Wait for the Kafka to come up using dockertest retry.
-	if err = pool.Retry(ctx, 0, verifyCanProduceToKafka); err != nil {
+	if err = pool.Retry(ctx, 10*time.Minute, verifyCanProduceToKafka); err != nil {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
 	}
 

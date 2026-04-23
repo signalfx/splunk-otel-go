@@ -76,7 +76,7 @@ func TestMain(m *testing.M) {
 	addr = getHostPort(resource, "6379/tcp")
 
 	// Wait for the Redis to come up using dockertest retry.
-	if err = pool.Retry(ctx, 0, func() error {
+	if err = pool.Retry(ctx, 10*time.Minute, func() error {
 		conn, e := redis.Dial(
 			"tcp", addr, redis.DialConnectTimeout(time.Second),
 		)

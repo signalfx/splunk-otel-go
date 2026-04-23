@@ -27,6 +27,7 @@ import (
 	"net/netip"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/moby/moby/api/types/network"
 	"github.com/ory/dockertest/v4"
@@ -196,7 +197,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Wait for the database to come up using dockertest retry.
-	if err := pool.Retry(ctx, 0, func() error {
+	if err := pool.Retry(ctx, 10*time.Minute, func() error {
 		db, err := sql.Open("postgres", dsn)
 		if err != nil {
 			return err

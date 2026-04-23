@@ -79,7 +79,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Wait for the Elasticsearch to come up using dockertest retry.
-	if err = pool.Retry(ctx, 0, func() error {
+	if err = pool.Retry(ctx, 10*time.Minute, func() error {
 		client, e := elastic.NewClient(elastic.SetURL(addr), elastic.SetSniff(false))
 		if e != nil {
 			return e
