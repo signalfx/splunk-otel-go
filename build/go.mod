@@ -8,8 +8,8 @@ require (
 	github.com/goyek/goyek/v3 v3.0.1
 	github.com/goyek/x v0.4.0
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
-	go.opentelemetry.io/build-tools/crosslink v0.29.0
-	go.opentelemetry.io/build-tools/multimod v0.29.0
+	go.opentelemetry.io/build-tools/crosslink v0.30.0
+	go.opentelemetry.io/build-tools/multimod v0.30.0
 )
 
 require (
