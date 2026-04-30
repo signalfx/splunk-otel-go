@@ -22,13 +22,11 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/netip"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/moby/moby/api/types/network"
 	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,8 +50,9 @@ var (
 
 const (
 	bootstrapServersConfigKey = "bootstrap.servers"
-	kafkaBootstrapServers     = "127.0.0.1:9092"
 )
+
+var kafkaBootstrapServers string
 
 func TestMain(m *testing.M) {
 	deprecated := flag.Bool("deprecated", false, "run integration tests of a deprecated module")
@@ -75,11 +74,6 @@ func TestMain(m *testing.M) {
 
 	zkRes, err := pool.Run(ctx, "confluentinc/cp-zookeeper",
 		dockertest.WithTag("6.2.0"),
-		dockertest.WithPortBindings(network.PortMap{
-			network.MustParsePort("2181/tcp"): {
-				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "2181"},
-			},
-		}),
 		dockertest.WithEnv([]string{
 			"ZOOKEEPER_CLIENT_PORT=2181",
 			"ZOOKEEPER_TICK_TIME=2000",
@@ -89,43 +83,48 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not create zookeeper: %v", err)
 	}
-	zookeeperEndpoint := zkRes.Container().NetworkSettings.Networks["bridge"]
-	if zookeeperEndpoint == nil || !zookeeperEndpoint.IPAddress.IsValid() {
+	zookeeperIP := bridgeIP(zkRes)
+	if zookeeperIP == "" {
 		log.Fatal("Could not determine zookeeper container IP")
 	}
-	zookeeperIP := zookeeperEndpoint.IPAddress.String()
+	zookeeperHostPort := zkRes.GetHostPort("2181/tcp")
+	if zookeeperHostPort == "" {
+		log.Fatal("Could not determine zookeeper host port")
+	}
 
 	// Wait for the Kafka to come up using dockertest retry.
 	if err = pool.Retry(ctx, 10*time.Minute, func() error {
-		_, dialErr := net.Dial("tcp", "127.0.0.1:2181")
+		_, dialErr := net.Dial("tcp", zookeeperHostPort)
 		return dialErr
 	}); err != nil {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
 	}
 
-	_, err = pool.Run(ctx, "confluentinc/cp-kafka",
+	kafkaRes, err := pool.Run(ctx, "confluentinc/cp-kafka",
 		dockertest.WithTag("6.2.0"),
-		dockertest.WithPortBindings(network.PortMap{
-			network.MustParsePort("9092/tcp"): {
-				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "9092"},
-			},
-		}),
 		dockertest.WithEnv([]string{
 			"KAFKA_BROKER_ID=1",
 			fmt.Sprintf("KAFKA_ZOOKEEPER_CONNECT=%s:2181", zookeeperIP),
-			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
-			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092",
+			"KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092",
+			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT",
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
 			"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
 			fmt.Sprintf("KAFKA_CREATE_TOPICS=%s:1:1", testTopic),
 		}),
+		dockertest.WithEntrypoint([]string{"/bin/bash", "-c"}),
+		dockertest.WithCmd([]string{`export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://$(hostname -i):9092"; exec /etc/confluent/docker/run`}),
 		dockertest.WithoutReuse(),
 	)
 	if err != nil {
 		log.Fatalf("Could not create kakfa container: %v", err)
 	}
+	kafkaIP := bridgeIP(kafkaRes)
+	if kafkaIP == "" {
+		log.Fatal("Could not determine Kafka container IP")
+	}
+	kafkaBootstrapServers = net.JoinHostPort(kafkaIP, "9092")
 
 	// Wait for the Kafka to come up using dockertest retry.
 	if err = pool.Retry(ctx, 10*time.Minute, verifyCanProduceToKafka); err != nil {
@@ -144,6 +143,14 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(code)
+}
+
+func bridgeIP(res dockertest.Resource) string {
+	endpoint := res.Container().NetworkSettings.Networks["bridge"]
+	if endpoint == nil || !endpoint.IPAddress.IsValid() {
+		return ""
+	}
+	return endpoint.IPAddress.String()
 }
 
 func verifyCanProduceToKafka() error {
