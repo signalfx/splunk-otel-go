@@ -76,7 +76,6 @@ func TestMain(m *testing.M) {
 	_, err = pool.Run(ctx, "confluentinc/cp-zookeeper",
 		dockertest.WithTag("6.2.0"),
 		dockertest.WithHostname("zookeeper"),
-		dockertest.WithName("zookeeper"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("2181/tcp"): {
 				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "2181"},
@@ -106,7 +105,6 @@ func TestMain(m *testing.M) {
 	_, err = pool.Run(ctx, "confluentinc/cp-kafka",
 		dockertest.WithTag("6.2.0"),
 		dockertest.WithHostname("broker"),
-		dockertest.WithName("broker"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("9092/tcp"): {
 				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "9092"},
