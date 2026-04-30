@@ -4,7 +4,6 @@ go 1.25.5
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.14.1
-	github.com/moby/moby/api v1.54.2
 	github.com/ory/dockertest/v4 v4.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka v1.32.0
 	github.com/stretchr/testify v1.11.1
@@ -36,6 +35,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
+	github.com/moby/moby/api v1.54.2 // indirect
 	github.com/moby/moby/client v0.4.1 // indirect
 	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/capability v0.4.0 // indirect
