@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not create zookeeper: %v", err)
 	}
-	zookeeperIP := bridgeIP(zkRes)
+	zookeeperIP := containerIP(zkRes)
 	if zookeeperIP == "" {
 		log.Fatal("Could not determine zookeeper container IP")
 	}
@@ -118,9 +118,9 @@ func TestMain(m *testing.M) {
 		dockertest.WithoutReuse(),
 	)
 	if err != nil {
-		log.Fatalf("Could not create kakfa container: %v", err)
+		log.Fatalf("Could not create kafka container: %v", err)
 	}
-	kafkaIP := bridgeIP(kafkaRes)
+	kafkaIP := containerIP(kafkaRes)
 	if kafkaIP == "" {
 		log.Fatal("Could not determine Kafka container IP")
 	}
@@ -145,12 +145,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func bridgeIP(res dockertest.Resource) string {
-	endpoint := res.Container().NetworkSettings.Networks["bridge"]
-	if endpoint == nil || !endpoint.IPAddress.IsValid() {
-		return ""
+func containerIP(res dockertest.Resource) string {
+	for _, endpoint := range res.Container().NetworkSettings.Networks {
+		if endpoint != nil && endpoint.IPAddress.IsValid() {
+			return endpoint.IPAddress.String()
+		}
 	}
-	return endpoint.IPAddress.String()
+	return ""
 }
 
 func verifyCanProduceToKafka() error {
