@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 	"github.com/ory/dockertest/v4"
 	"github.com/stretchr/testify/assert"
@@ -68,14 +67,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	confNet, err := pool.CreateNetwork(ctx, "confluent", nil)
-	if err != nil {
-		log.Fatalf("Could not create docker network: %v", err)
-	}
-
-	_, err = pool.Run(ctx, "confluentinc/cp-zookeeper",
+	zkRes, err := pool.Run(ctx, "confluentinc/cp-zookeeper",
 		dockertest.WithTag("6.2.0"),
-		dockertest.WithHostname("zookeeper"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("2181/tcp"): {
 				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "2181"},
@@ -85,14 +78,16 @@ func TestMain(m *testing.M) {
 			"ZOOKEEPER_CLIENT_PORT=2181",
 			"ZOOKEEPER_TICK_TIME=2000",
 		}),
-		dockertest.WithHostConfig(func(hostConfig *container.HostConfig) {
-			hostConfig.NetworkMode = container.NetworkMode(confNet.ID())
-		}),
 		dockertest.WithoutReuse(),
 	)
 	if err != nil {
 		log.Fatalf("Could not create zookeeper: %v", err)
 	}
+	zookeeperEndpoint := zkRes.Container().NetworkSettings.Networks["bridge"]
+	if zookeeperEndpoint == nil || !zookeeperEndpoint.IPAddress.IsValid() {
+		log.Fatal("Could not determine zookeeper container IP")
+	}
+	zookeeperIP := zookeeperEndpoint.IPAddress.String()
 
 	// Wait for the Kafka to come up using dockertest retry.
 	if err = pool.Retry(ctx, 10*time.Minute, func() error {
@@ -104,7 +99,6 @@ func TestMain(m *testing.M) {
 
 	_, err = pool.Run(ctx, "confluentinc/cp-kafka",
 		dockertest.WithTag("6.2.0"),
-		dockertest.WithHostname("broker"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("9092/tcp"): {
 				{HostIP: netip.MustParseAddr("127.0.0.1"), HostPort: "9092"},
@@ -112,17 +106,14 @@ func TestMain(m *testing.M) {
 		}),
 		dockertest.WithEnv([]string{
 			"KAFKA_BROKER_ID=1",
-			"KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
+			fmt.Sprintf("KAFKA_ZOOKEEPER_CONNECT=%s:2181", zookeeperIP),
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
-			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://127.0.0.1:9092",
+			"KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092",
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
 			"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
 			"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
 			fmt.Sprintf("KAFKA_CREATE_TOPICS=%s:1:1", testTopic),
-		}),
-		dockertest.WithHostConfig(func(hostConfig *container.HostConfig) {
-			hostConfig.NetworkMode = container.NetworkMode(confNet.ID())
 		}),
 		dockertest.WithoutReuse(),
 	)
