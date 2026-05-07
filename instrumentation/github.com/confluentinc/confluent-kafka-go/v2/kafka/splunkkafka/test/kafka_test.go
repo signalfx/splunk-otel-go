@@ -73,7 +73,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not create docker network: %v", err)
 	}
 
-	_, err = pool.Run(ctx, "confluentinc/cp-zookeeper",
+	_, err = pool.Run(
+		ctx, "confluentinc/cp-zookeeper",
 		dockertest.WithTag("6.2.0"),
 		dockertest.WithHostname("zookeeper"),
 		dockertest.WithName("zookeeper"),
@@ -103,7 +104,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to Kafka broker: %v", err)
 	}
 
-	_, err = pool.Run(ctx, "confluentinc/cp-kafka",
+	_, err = pool.Run(
+		ctx, "confluentinc/cp-kafka",
 		dockertest.WithTag("6.2.0"),
 		dockertest.WithHostname("broker"),
 		dockertest.WithName("broker"),

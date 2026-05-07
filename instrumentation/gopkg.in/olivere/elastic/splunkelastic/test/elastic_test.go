@@ -64,7 +64,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 
-	_, err = pool.Run(ctx, "elasticsearch",
+	_, err = pool.Run(
+		ctx, "elasticsearch",
 		dockertest.WithTag("7.17.28"),
 		dockertest.WithEnv([]string{"discovery.type=single-node"}),
 		dockertest.WithPortBindings(network.PortMap{

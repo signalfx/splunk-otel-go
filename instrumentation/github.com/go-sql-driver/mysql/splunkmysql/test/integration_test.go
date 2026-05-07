@@ -181,7 +181,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	_, err = pool.Run(ctx, "mysql",
+	_, err = pool.Run(
+		ctx, "mysql",
 		dockertest.WithTag("8"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("3306/tcp"): {
