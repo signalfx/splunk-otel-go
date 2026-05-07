@@ -45,7 +45,8 @@ type config struct {
 
 func newConfig(options ...Option) config {
 	c := config{
-		Config: internal.NewConfig(instrumentationName,
+		Config: internal.NewConfig(
+			instrumentationName,
 			internal.OptionFunc(
 				func(c *internal.Config) {
 					c.Version = Version()
@@ -53,7 +54,8 @@ func newConfig(options ...Option) config {
 						// From the specification: span kind MUST always be CLIENT.
 						trace.WithSpanKind(trace.SpanKindClient),
 					}
-				}),
+				},
+			),
 		),
 	}
 

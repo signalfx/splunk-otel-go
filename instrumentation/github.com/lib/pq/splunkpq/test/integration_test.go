@@ -178,7 +178,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	_, err = pool.Run(ctx, "postgres",
+	_, err = pool.Run(
+		ctx, "postgres",
 		dockertest.WithTag("13"),
 		dockertest.WithPortBindings(network.PortMap{
 			network.MustParsePort("5432/tcp"): {

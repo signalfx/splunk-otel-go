@@ -131,7 +131,8 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 	res := resource.Default()
 
 	// Add process, Go runtime, and container information.
-	procRes, err := resource.New(ctx,
+	procRes, err := resource.New(
+		ctx,
 		resource.WithProcess(),
 		resource.WithContainer(),
 	)

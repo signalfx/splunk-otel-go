@@ -67,7 +67,8 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 	splunkEndpoint := otlpRealmTracesEndpoint()
 	if splunkEndpoint != "" {
 		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
-		return otlptracehttp.New(ctx,
+		return otlptracehttp.New(
+			ctx,
 			otlptracehttp.WithEndpoint(splunkEndpoint),
 			otlptracehttp.WithURLPath(otlpRealmTracesEndpointPath),
 			otlptracehttp.WithHeaders(map[string]string{
@@ -234,7 +235,8 @@ func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, 
 	splunkEndpoint := otlpRealmMetricsEndpoint()
 	if splunkEndpoint != "" {
 		// Direct ingest to Splunk Observabilty Cloud using HTTP/protobuf.
-		return otlpmetrichttp.New(ctx,
+		return otlpmetrichttp.New(
+			ctx,
 			otlpmetrichttp.WithEndpoint(splunkEndpoint),
 			otlpmetrichttp.WithURLPath(otlpRealmMetricsEndpointPath),
 			otlpmetrichttp.WithHeaders(map[string]string{

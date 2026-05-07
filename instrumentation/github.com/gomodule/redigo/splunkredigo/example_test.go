@@ -37,7 +37,8 @@ func Example() {
 	const db = 15
 	// Options passed to Dial* functions can be either redis DialOptions or
 	// splunkredigo options.
-	conn, err := splunkredis.DialContext(ctx, "tcp", "127.0.0.1:6379",
+	conn, err := splunkredis.DialContext(
+		ctx, "tcp", "127.0.0.1:6379",
 		redis.DialDatabase(db),
 		option.WithAttributes([]attribute.KeyValue{
 			attribute.String("tier", "alpha"),
