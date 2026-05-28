@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//nolint:goconst // These table-driven tests intentionally mirror repeated HTTP verbs and operation names from the generated spec data.
 package splunkelastic
 
 import (
