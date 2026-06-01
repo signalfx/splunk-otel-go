@@ -54,7 +54,7 @@ It is critical you make sure the version you push upstream is correct.
 1. Run for the the commit of the merged Pull Request.
 
     ```sh
-    ./goyek.sh -commit <commit> -remote <remote> release
+    ./goyek.sh release -commit <commit> -remote <remote>
     ```
 
 ## Release
