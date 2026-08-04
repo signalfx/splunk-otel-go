@@ -836,24 +836,43 @@ func testTLSCredentials(t *testing.T) (tls.Certificate, *x509.CertPool) {
 }
 
 func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return tls.Certificate{}, nil, err
 	}
 
 	now := time.Now()
-	template := &x509.Certificate{
+	caTemplate := &x509.Certificate{
 		SerialNumber:          big.NewInt(1),
 		NotBefore:             now.Add(-time.Minute),
 		NotAfter:              now.Add(time.Hour),
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageCertSign,
 		BasicConstraintsValid: true,
 		IsCA:                  true,
-		DNSNames:              []string{"localhost"},
-		IPAddresses:           []net.IP{net.ParseIP("127.0.0.1")},
 	}
-	certDER, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
+	caDER, err := x509.CreateCertificate(rand.Reader, caTemplate, caTemplate, &caKey.PublicKey, caKey)
+	if err != nil {
+		return tls.Certificate{}, nil, err
+	}
+	ca, err := x509.ParseCertificate(caDER)
+	if err != nil {
+		return tls.Certificate{}, nil, err
+	}
+
+	serverKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return tls.Certificate{}, nil, err
+	}
+	serverTemplate := &x509.Certificate{
+		SerialNumber: big.NewInt(2),
+		NotBefore:    now.Add(-time.Minute),
+		NotAfter:     now.Add(time.Hour),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		DNSNames:     []string{"localhost"},
+		IPAddresses:  []net.IP{net.ParseIP("127.0.0.1")},
+	}
+	certDER, err := x509.CreateCertificate(rand.Reader, serverTemplate, ca, &serverKey.PublicKey, caKey)
 	if err != nil {
 		return tls.Certificate{}, nil, err
 	}
@@ -863,11 +882,11 @@ func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
 	}
 
 	certs := x509.NewCertPool()
-	certs.AddCert(cert)
+	certs.AddCert(ca)
 
 	return tls.Certificate{
 		Certificate: [][]byte{certDER},
-		PrivateKey:  key,
+		PrivateKey:  serverKey,
 		Leaf:        cert,
 	}, certs, nil
 }
