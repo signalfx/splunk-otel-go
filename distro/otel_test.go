@@ -17,20 +17,14 @@ package distro_test
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -63,38 +57,12 @@ const (
 	token      = "secret token"
 )
 
-var testTLSCert = sync.OnceValues(func() (tls.Certificate, error) {
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-
-	now := time.Now()
-	template := &x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject:      pkix.Name{CommonName: "localhost"},
-		NotBefore:    now.Add(-time.Minute),
-		NotAfter:     now.Add(24 * time.Hour),
-		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		DNSNames:     []string{"localhost"},
-		IPAddresses:  []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")},
-	}
-	certDER, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-	leaf, err := x509.ParseCertificate(certDER)
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-
-	return tls.Certificate{
-		Certificate: [][]byte{certDER},
-		PrivateKey:  key,
-		Leaf:        leaf,
-	}, nil
-})
+var (
+	testTLSOnce           sync.Once
+	testTLSCertificate    tls.Certificate
+	testTLSCertPool       *x509.CertPool
+	testTLSCredentialsErr error
+)
 
 func TestMain(m *testing.M) {
 	// Do not use the default exporters.
@@ -835,11 +803,7 @@ func reqHander() (<-chan *http.Request, http.HandlerFunc) {
 }
 
 func clientTLSConfig(t *testing.T) *tls.Config {
-	cert, err := testTLSCert()
-	require.NoError(t, err, "failed to generate test TLS certificate")
-
-	certs := x509.NewCertPool()
-	certs.AddCert(cert.Leaf)
+	_, certs := testTLSCredentials(t)
 
 	return &tls.Config{
 		RootCAs:    certs,
@@ -848,13 +812,31 @@ func clientTLSConfig(t *testing.T) *tls.Config {
 }
 
 func serverTLSConfig(t *testing.T) *tls.Config {
-	cert, err := testTLSCert()
-	require.NoError(t, err, "failed to generate test TLS certificate")
+	cert, _ := testTLSCredentials(t)
 
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		MinVersion:   tls.VersionTLS13,
 	}
+}
+
+func testTLSCredentials(t *testing.T) (tls.Certificate, *x509.CertPool) {
+	t.Helper()
+	testTLSOnce.Do(func() {
+		testTLSCertificate, testTLSCertPool, testTLSCredentialsErr = newTestTLSCredentials()
+	})
+	require.NoError(t, testTLSCredentialsErr, "failed to generate TLS test credentials")
+
+	return testTLSCertificate, testTLSCertPool
+}
+
+func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
+	srv := httptest.NewTLSServer(http.NotFoundHandler())
+	defer srv.Close()
+
+	transport := srv.Client().Transport.(*http.Transport)
+
+	return srv.TLS.Certificates[0], transport.TLSClientConfig.RootCAs, nil
 }
 
 func emitSpan(t *testing.T, opts ...distro.Option) {
