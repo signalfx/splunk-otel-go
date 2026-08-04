@@ -17,11 +17,11 @@ package distro_test
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"math/big"
 	"net"
 	"net/http"
@@ -60,6 +60,7 @@ const (
 	metricName = "test_instrument"
 	logBody    = "test_log_body"
 	token      = "secret token"
+	serverName = "localhost"
 )
 
 var (
@@ -812,6 +813,7 @@ func clientTLSConfig(t *testing.T) *tls.Config {
 
 	return &tls.Config{
 		RootCAs:    certs,
+		ServerName: serverName,
 		MinVersion: tls.VersionTLS13,
 	}
 }
@@ -836,7 +838,7 @@ func testTLSCredentials(t *testing.T) (tls.Certificate, *x509.CertPool) {
 }
 
 func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
-	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	caKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return tls.Certificate{}, nil, err
 	}
@@ -844,9 +846,10 @@ func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
 	now := time.Now()
 	caTemplate := &x509.Certificate{
 		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "test CA"},
 		NotBefore:             now.Add(-time.Minute),
 		NotAfter:              now.Add(time.Hour),
-		KeyUsage:              x509.KeyUsageCertSign,
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 	}
@@ -859,18 +862,20 @@ func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
 		return tls.Certificate{}, nil, err
 	}
 
-	serverKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return tls.Certificate{}, nil, err
 	}
 	serverTemplate := &x509.Certificate{
-		SerialNumber: big.NewInt(2),
-		NotBefore:    now.Add(-time.Minute),
-		NotAfter:     now.Add(time.Hour),
-		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		DNSNames:     []string{"localhost"},
-		IPAddresses:  []net.IP{net.ParseIP("127.0.0.1")},
+		SerialNumber:          big.NewInt(2),
+		Subject:               pkix.Name{CommonName: serverName},
+		NotBefore:             now.Add(-time.Minute),
+		NotAfter:              now.Add(time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		DNSNames:              []string{serverName},
+		IPAddresses:           []net.IP{net.ParseIP("127.0.0.1")},
 	}
 	certDER, err := x509.CreateCertificate(rand.Reader, serverTemplate, ca, &serverKey.PublicKey, caKey)
 	if err != nil {
