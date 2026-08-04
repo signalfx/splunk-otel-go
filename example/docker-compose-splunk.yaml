@@ -1,6 +1,6 @@
 services:
   otel-collector:
-    image: quay.io/signalfx/splunk-otel-collector:0.156.0@sha256:67d29bb1f6b3f5efd4fad39d028cf69e5f220cc216f330f6933b8acd9c7b9050
+    image: quay.io/signalfx/splunk-otel-collector:0.157.0@sha256:0f3207d15b8066aa57cd3639944a112901e1050e04dea98676e118427438ab5c
     environment:
       - SPLUNK_ACCESS_TOKEN
       - SPLUNK_REALM=us0
