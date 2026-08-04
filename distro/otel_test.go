@@ -814,6 +814,12 @@ func clientTLSConfig(t *testing.T) *tls.Config {
 	return &tls.Config{
 		RootCAs:    certs,
 		MinVersion: tls.VersionTLS13,
+		// The checked-in certificate is a deterministic test fixture. Pin
+		// verification to its validity period so this TLS behavior test does not
+		// depend on the wall clock or require periodic certificate rotation.
+		Time: func() time.Time {
+			return time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
+		},
 	}
 }
 
