@@ -17,19 +17,14 @@ package distro_test
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -60,7 +55,6 @@ const (
 	metricName = "test_instrument"
 	logBody    = "test_log_body"
 	token      = "secret token"
-	serverName = "localhost"
 )
 
 var (
@@ -813,7 +807,6 @@ func clientTLSConfig(t *testing.T) *tls.Config {
 
 	return &tls.Config{
 		RootCAs:    certs,
-		ServerName: serverName,
 		MinVersion: tls.VersionTLS13,
 	}
 }
@@ -838,62 +831,12 @@ func testTLSCredentials(t *testing.T) (tls.Certificate, *x509.CertPool) {
 }
 
 func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
-	caKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
+	srv := httptest.NewTLSServer(http.NotFoundHandler())
+	defer srv.Close()
 
-	now := time.Now()
-	caTemplate := &x509.Certificate{
-		SerialNumber:          big.NewInt(1),
-		Subject:               pkix.Name{CommonName: "test CA"},
-		NotBefore:             now.Add(-time.Minute),
-		NotAfter:              now.Add(time.Hour),
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
-		BasicConstraintsValid: true,
-		IsCA:                  true,
-	}
-	caDER, err := x509.CreateCertificate(rand.Reader, caTemplate, caTemplate, &caKey.PublicKey, caKey)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
-	ca, err := x509.ParseCertificate(caDER)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
+	transport := srv.Client().Transport.(*http.Transport)
 
-	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
-	serverTemplate := &x509.Certificate{
-		SerialNumber:          big.NewInt(2),
-		Subject:               pkix.Name{CommonName: serverName},
-		NotBefore:             now.Add(-time.Minute),
-		NotAfter:              now.Add(time.Hour),
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: true,
-		DNSNames:              []string{serverName},
-		IPAddresses:           []net.IP{net.ParseIP("127.0.0.1")},
-	}
-	certDER, err := x509.CreateCertificate(rand.Reader, serverTemplate, ca, &serverKey.PublicKey, caKey)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
-	cert, err := x509.ParseCertificate(certDER)
-	if err != nil {
-		return tls.Certificate{}, nil, err
-	}
-
-	certs := x509.NewCertPool()
-	certs.AddCert(ca)
-
-	return tls.Certificate{
-		Certificate: [][]byte{certDER},
-		PrivateKey:  serverKey,
-		Leaf:        cert,
-	}, certs, nil
+	return srv.TLS.Certificates[0], transport.TLSClientConfig.RootCAs, nil
 }
 
 func emitSpan(t *testing.T, opts ...distro.Option) {
