@@ -17,19 +17,14 @@ package distro_test
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -63,9 +58,10 @@ const (
 )
 
 var (
-	testTLSCert     tls.Certificate
-	testTLSCertErr  error
-	testTLSCertOnce sync.Once
+	testTLSOnce           sync.Once
+	testTLSCertificate    tls.Certificate
+	testTLSCertPool       *x509.CertPool
+	testTLSCredentialsErr error
 )
 
 func TestMain(m *testing.M) {
@@ -807,79 +803,40 @@ func reqHander() (<-chan *http.Request, http.HandlerFunc) {
 }
 
 func clientTLSConfig(t *testing.T) *tls.Config {
-	cert := testTLSCertificate(t)
-	certs := x509.NewCertPool()
-	certs.AddCert(cert.Leaf)
+	_, certs := testTLSCredentials(t)
 
 	return &tls.Config{
 		RootCAs:    certs,
 		MinVersion: tls.VersionTLS13,
-		// The checked-in certificate is a deterministic test fixture. Pin
-		// verification to its validity period so this TLS behavior test does not
-		// depend on the wall clock or require periodic certificate rotation.
-		Time: func() time.Time {
-			return time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
-		},
 	}
 }
 
 func serverTLSConfig(t *testing.T) *tls.Config {
+	cert, _ := testTLSCredentials(t)
+
 	return &tls.Config{
-		Certificates: []tls.Certificate{testTLSCertificate(t)},
+		Certificates: []tls.Certificate{cert},
 		MinVersion:   tls.VersionTLS13,
 	}
 }
 
-func testTLSCertificate(t *testing.T) tls.Certificate {
+func testTLSCredentials(t *testing.T) (tls.Certificate, *x509.CertPool) {
 	t.Helper()
-
-	testTLSCertOnce.Do(func() {
-		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-		if err != nil {
-			testTLSCertErr = err
-			return
-		}
-
-		serialLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-		serialNumber, err := rand.Int(rand.Reader, serialLimit)
-		if err != nil {
-			testTLSCertErr = err
-			return
-		}
-
-		now := time.Now()
-		template := x509.Certificate{
-			SerialNumber: serialNumber,
-			Subject:      pkix.Name{CommonName: "localhost"},
-			NotBefore:    now.Add(-time.Minute),
-			NotAfter:     now.Add(24 * time.Hour),
-			KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-			ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-			DNSNames:     []string{"localhost"},
-			IPAddresses:  []net.IP{net.ParseIP("127.0.0.1")},
-		}
-
-		certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
-		if err != nil {
-			testTLSCertErr = err
-			return
-		}
-
-		leaf, err := x509.ParseCertificate(certDER)
-		if err != nil {
-			testTLSCertErr = err
-			return
-		}
-
-		testTLSCert = tls.Certificate{
-			Certificate: [][]byte{certDER},
-			PrivateKey:  privateKey,
-			Leaf:        leaf,
-		}
+	testTLSOnce.Do(func() {
+		testTLSCertificate, testTLSCertPool, testTLSCredentialsErr = newTestTLSCredentials()
 	})
+	require.NoError(t, testTLSCredentialsErr, "failed to generate TLS test credentials")
 
-	require.NoError(t, testTLSCertErr, "failed to generate test TLS certificate")
-	return testTLSCert
+	return testTLSCertificate, testTLSCertPool
+}
+
+func newTestTLSCredentials() (tls.Certificate, *x509.CertPool, error) {
+	srv := httptest.NewTLSServer(http.NotFoundHandler())
+	defer srv.Close()
+
+	transport := srv.Client().Transport.(*http.Transport)
+
+	return srv.TLS.Certificates[0], transport.TLSClientConfig.RootCAs, nil
 }
 
 func emitSpan(t *testing.T, opts ...distro.Option) {
