@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonglil/buflogr"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/log/global"
 	otelt "go.opentelemetry.io/otel/trace"
@@ -871,7 +872,7 @@ func emitLogs(t *testing.T, opts ...distro.Option) {
 	ctx := context.Background()
 
 	var record log.Record
-	record.SetBody(log.StringValue(logBody))
+	record.SetBody(attribute.StringValue(logBody))
 	global.GetLoggerProvider().Logger(t.Name()).Emit(ctx, record)
 
 	// Flush all spans from SDK.
