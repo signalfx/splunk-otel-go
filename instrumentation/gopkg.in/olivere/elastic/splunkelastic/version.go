@@ -16,5 +16,5 @@ package splunkelastic
 
 // Version returns the version of splunkelastic.
 func Version() string {
-	return "1.33.0"
+	return "1.34.0"
 }
