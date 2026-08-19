@@ -24,7 +24,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.11.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.83.0
+	google.golang.org/grpc v1.83.1
 )
 
 require github.com/cespare/xxhash/v2 v2.3.0 // indirect
