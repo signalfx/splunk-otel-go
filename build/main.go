@@ -16,7 +16,10 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"fmt"
+	"io"
 	"os"
 
 	"github.com/goyek/goyek/v3"
@@ -25,6 +28,7 @@ import (
 
 const (
 	dirBuild          = "build"
+	exitCodeInvalid   = 2
 	repoPackagePrefix = "github.com/signalfx/splunk-otel-go"
 )
 
@@ -35,5 +39,57 @@ func main() {
 		panic(err)
 	}
 	goyek.SetDefault(all)
+	if err := validateArgs(flag.CommandLine, os.Args[1:]); err != nil && !errors.Is(err, flag.ErrHelp) {
+		fmt.Fprintln(goyek.Output(), err)
+		os.Exit(exitCodeInvalid)
+	}
 	boot.Main()
+}
+
+type boolFlag interface {
+	IsBoolFlag() bool
+}
+
+type validationFlagValue struct {
+	isBool bool
+}
+
+func (v *validationFlagValue) IsBoolFlag() bool {
+	return v.isBool
+}
+
+func (*validationFlagValue) Set(string) error {
+	return nil
+}
+
+func (*validationFlagValue) String() string {
+	return ""
+}
+
+func validateArgs(flags *flag.FlagSet, args []string) error {
+	_, flagArgs := goyek.SplitTasks(args)
+	// Only positional arguments after an explicit separator are intentional.
+	for i, arg := range flagArgs {
+		if arg == "--" {
+			flagArgs = flagArgs[:i]
+			break
+		}
+	}
+
+	validationFlags := flag.NewFlagSet(flags.Name(), flag.ContinueOnError)
+	validationFlags.SetOutput(io.Discard)
+	// Parse no-op copies so validation follows each flag's argument arity
+	// without applying flag values before boot.Main parses them.
+	flags.VisitAll(func(f *flag.Flag) {
+		bf, ok := f.Value.(boolFlag)
+		validationFlags.Var(&validationFlagValue{isBool: ok && bf.IsBoolFlag()}, f.Name, f.Usage)
+	})
+
+	if err := validationFlags.Parse(flagArgs); err != nil {
+		return err
+	}
+	if validationFlags.NArg() > 0 {
+		return fmt.Errorf("unexpected arguments: %v", validationFlags.Args())
+	}
+	return nil
 }
