@@ -13,7 +13,6 @@ The release requires at least [Go 1.26].
 ### Removed
 
 - Drop support for [Go 1.25].
-  ([#4821](https://github.com/signalfx/splunk-otel-go/pull/4821))
 
 ## [1.35.0] - 2026-08-27
 
