@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+The release requires at least [Go 1.26].
+
+### Removed
+
+- Drop support for [Go 1.25].
+
 ## [1.35.0] - 2026-08-27
 
 This release upgrades [OpenTelemetry Go to v1.46.0/v0.68.0/v0.22.0/v0.0.19][otel-v1.46.0]

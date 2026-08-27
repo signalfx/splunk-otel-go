@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.15.0

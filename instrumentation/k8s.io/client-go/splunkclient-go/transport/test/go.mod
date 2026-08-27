@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go/transport/test
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go v1.35.0
