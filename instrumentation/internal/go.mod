@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/internal
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/stretchr/testify v1.12.1

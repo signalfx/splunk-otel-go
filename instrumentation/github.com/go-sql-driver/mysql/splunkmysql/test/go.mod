@@ -1,6 +1,6 @@
 module github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test
 
-go 1.25.5
+go 1.26.0
 
 require (
 	github.com/moby/moby/api v1.55.0
