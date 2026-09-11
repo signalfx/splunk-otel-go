@@ -3,7 +3,7 @@ module github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentin
 go 1.26.0
 
 require (
-	github.com/confluentinc/confluent-kafka-go/v2 v2.15.0
+	github.com/confluentinc/confluent-kafka-go/v2 v2.15.1
 	github.com/moby/moby/api v1.56.0
 	github.com/ory/dockertest/v4 v4.0.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka v1.35.0
