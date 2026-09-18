@@ -10,6 +10,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 The release requires at least [Go 1.26].
 
+> [!WARNING]
+> This release changes the default span collection count limits from unlimited
+> (or `1000` for span links) to the OpenTelemetry default of `128`. Applications
+> that exceed these limits will drop excess span attributes and event or link
+> attributes, and retain at most 128 events and links per span. To preserve the
+> previous defaults, set `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=-1`,
+> `OTEL_SPAN_EVENT_COUNT_LIMIT=-1`, `OTEL_SPAN_LINK_COUNT_LIMIT=1000`,
+> `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT=-1`, and
+> `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT=-1`.
+
+### Changed
+
+- Align span collection count limits with OpenTelemetry defaults, as required
+  by [GDI specification #414].
+
 ### Removed
 
 - Drop support for [Go 1.25].
@@ -972,6 +987,8 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.21.0
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
+
+[GDI specification #414]: https://github.com/signalfx/gdi-specification/pull/414
 
 [Go 1.27]: https://go.dev/doc/go1.27
 [Go 1.26]: https://go.dev/doc/go1.26
