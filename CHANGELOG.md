@@ -22,8 +22,8 @@ The release requires at least [Go 1.26].
 
 ### Changed
 
-- Align span collection count limits with OpenTelemetry defaults, as required
-  by [GDI specification #414].
+- Align span collection count limits with OpenTelemetry defaults.
+  ([#4880](https://github.com/signalfx/splunk-otel-go/pull/4880))
 
 ### Removed
 
@@ -987,8 +987,6 @@ an impedance mismatch with this duplicate batching.
 [contrib-v0.21.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.21.0
 [contrib-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.20.0
 [contrib-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v0.19.0
-
-[GDI specification #414]: https://github.com/signalfx/gdi-specification/pull/414
 
 [Go 1.27]: https://go.dev/doc/go1.27
 [Go 1.26]: https://go.dev/doc/go1.26
