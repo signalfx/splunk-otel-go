@@ -13,7 +13,7 @@ The release requires at least [Go 1.26].
 ### Removed
 
 - Remove the deprecated `splunkleveldb` instrumentation library.
-  ([#4401](https://github.com/signalfx/splunk-otel-go/issues/4401))
+  ([#4933](https://github.com/signalfx/splunk-otel-go/pull/4933))
 - Drop support for [Go 1.25].
 
 ## [1.35.0] - 2026-08-27
