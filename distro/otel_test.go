@@ -336,7 +336,6 @@ func TestRunTracesExporterDefault(t *testing.T) {
 func TestInvalidTracesExporter(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
-	// Explicitly set OTLP exporter.
 	t.Setenv("OTEL_TRACES_EXPORTER", "invalid value")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 
@@ -557,7 +556,6 @@ func TestRunMetricsExporterNone(t *testing.T) {
 func TestInvalidMetricsExporter(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
-	// Explicitly set OTLP exporter.
 	t.Setenv("OTEL_METRICS_EXPORTER", "invalid value")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 
