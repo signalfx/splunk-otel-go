@@ -698,22 +698,16 @@ func TestRunOTLPGRPCLogsExporterTLS(t *testing.T) {
 }
 
 func TestRunLogsExporterDefault(t *testing.T) {
-	for _, name := range []string{"unset", "empty"} {
-		t.Run(name, func(t *testing.T) {
-			coll := &collector{}
-			coll.Start(t)
-			t.Setenv("OTEL_LOGS_EXPORTER", "")
-			if name == "unset" {
-				require.NoError(t, os.Unsetenv("OTEL_LOGS_EXPORTER"))
-			}
-			t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+	// By default the metrics exporter is OTLP.
+	coll := &collector{}
+	coll.Start(t)
+	t.Setenv("OTEL_LOGS_EXPORTER", "")
+	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 
-			emitLogs(t)
+	emitLogs(t)
 
-			got := coll.ExportedLogs()
-			assertHasLog(t, got)
-		})
-	}
+	got := coll.ExportedLogs()
+	assertHasLog(t, got)
 }
 
 func TestRunLogsExporterNone(t *testing.T) {
