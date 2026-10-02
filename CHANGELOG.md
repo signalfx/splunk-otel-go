@@ -12,7 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
-- Remove the deprecated `splunkclient-go` instrumentation library.
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`.
   ([#4935](https://github.com/signalfx/splunk-otel-go/pull/4935))
 - Drop support for [Go 1.25].
 
