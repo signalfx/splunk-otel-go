@@ -12,6 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
+- Remove the deprecated `splunkhttprouter` instrumentation library.
+  ([#4399](https://github.com/signalfx/splunk-otel-go/issues/4399))
 - Drop support for [Go 1.25].
 
 ## [1.35.0] - 2026-08-27
