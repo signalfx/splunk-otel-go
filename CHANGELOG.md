@@ -12,7 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
-- Remove the deprecated `splunkchi` instrumentation library.
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`.
   ([#4927](https://github.com/signalfx/splunk-otel-go/pull/4927))
 - Drop support for [Go 1.25].
 
