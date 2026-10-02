@@ -12,7 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
-- Remove the deprecated `splunkredigo` instrumentation library.
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`.
   ([#4929](https://github.com/signalfx/splunk-otel-go/pull/4929))
 - Drop support for [Go 1.25].
 
