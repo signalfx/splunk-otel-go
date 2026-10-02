@@ -7,10 +7,6 @@ is the main entry point for this package.
 Use it to create an SDK ready to be used with OpenTelemetry
 and forward all telemetry to Splunk Observabilty Cloud.
 
-By default, `Run` installs global tracer, meter, and logger providers and exports
-spans, metrics, and logs using OTLP to a local OpenTelemetry Collector.
-Set `OTEL_LOGS_EXPORTER=none` to disable the logger provider.
-
 See our [example applications](https://github.com/signalfx/tracing-examples/tree/main/opentelemetry-tracing/opentelemetry-go).
 
 Read the official documentation for this distribution in the
