@@ -44,7 +44,7 @@ const (
 
 // newSpanLimits returns new span limits that use Splunk defaults (the link
 // count is limited to 1000, the attribute value length is limited to 12000,
-// and all other limts are set to be unlimited) or the corresponding OTel
+// and all other count limits are unlimited) or the corresponding OTel
 // environment variable value if it is set.
 func newSpanLimits() *trace.SpanLimits {
 	// Use trace.NewSpanLimits here to ensure any future additions are not set
