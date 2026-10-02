@@ -17,8 +17,6 @@ module-sets:
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx
