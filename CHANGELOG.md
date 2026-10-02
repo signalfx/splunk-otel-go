@@ -18,6 +18,7 @@ The release requires at least [Go 1.26].
 - Change the default `OTEL_LOGS_EXPORTER` to `otlp` now that the OpenTelemetry Go
   Logs API and SDK are stable. The global logger provider is enabled by default.
   Set `OTEL_LOGS_EXPORTER=none` to disable it.
+  ([#4924](https://github.com/signalfx/splunk-otel-go/pull/4924))
 
 ### Removed
 
