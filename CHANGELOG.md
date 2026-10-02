@@ -12,7 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
-- Remove the deprecated `splunkbuntdb` instrumentation library.
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`.
   ([#4934](https://github.com/signalfx/splunk-otel-go/pull/4934))
 - Drop support for [Go 1.25].
 
