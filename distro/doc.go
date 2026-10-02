@@ -18,6 +18,6 @@ SDK with useful Splunk defaults.
 
 The default configuration sets the default OpenTelemetry SDK to propagate
 traces using a W3C tracecontext and W3C baggage propagator and export all
-spans and metrics to a locally running Splunk OpenTelemetry Collector.
+spans, metrics, and logs to a locally running Splunk OpenTelemetry Collector.
 */
 package distro
