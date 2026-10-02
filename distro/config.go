@@ -71,7 +71,7 @@ const (
 	defaultAccessToken     = ""
 	defaultTraceExporter   = otlpValue
 	defaultMetricsExporter = otlpValue
-	defaultLogsExporter    = noneValue
+	defaultLogsExporter    = otlpValue
 	defaultLogLevel        = logLevelInfo
 	defaultOTLPProtocol    = otlpProtocolGRPC
 
