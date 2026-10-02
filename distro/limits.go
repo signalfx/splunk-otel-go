@@ -24,53 +24,31 @@ const (
 	attributeValueLengthKey         = "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT"
 	spanAttributeValueLengthKey     = "OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT"
 	spanAttributeValueLengthDefault = 12000
-
-	attributeCountKey         = "OTEL_ATTRIBUTE_COUNT_LIMIT"
-	spanAttributeCountKey     = "OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT"
-	spanAttributeCountDefault = -1 // Unlimited.
-
-	spanEventCountKey     = "OTEL_SPAN_EVENT_COUNT_LIMIT"
-	spanEventCountDefault = -1 // Unlimited.
-
-	spanEventAttributeCountKey     = "OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT"
-	spanEventAttributeCountDefault = -1 // Unlimited.
-
-	spanLinkCountKey     = "OTEL_SPAN_LINK_COUNT_LIMIT"
-	spanLinkCountDefault = 1000
-
-	spanLinkAttributeCountKey     = "OTEL_LINK_ATTRIBUTE_COUNT_LIMIT"
-	spanLinkAttributeCountDefault = -1 // Unlimited.
 )
 
-// newSpanLimits returns new span limits that use Splunk defaults (the link
-// count is limited to 1000, the attribute value length is limited to 12000,
-// and all other limts are set to be unlimited) or the corresponding OTel
-// environment variable value if it is set.
+// newSpanLimits returns new span limits that use the Splunk default attribute
+// value length and OpenTelemetry defaults for all count limits. Environment
+// variable values override these defaults.
 func newSpanLimits() *trace.SpanLimits {
 	// Use trace.NewSpanLimits here to ensure any future additions are not set
-	// to zero, which would happen if we delared with &trace.SpanLimits{...}.
+	// to zero, which would happen if we declared with &trace.SpanLimits{...}.
 	limits := trace.NewSpanLimits()
 
-	// limits will use OTel defaults or the applicable environment variable if
-	// they are set. The Splunk defaults need to be applied only if the
-	// environment variables were unset.
+	// limits will use OpenTelemetry defaults or the applicable environment
+	// variable if set. Apply the Splunk default only if neither attribute value
+	// length environment variable was set.
 	limits.AttributeValueLengthLimit = limitValue(limits.AttributeValueLengthLimit, spanAttributeValueLengthDefault, attributeValueLengthKey, spanAttributeValueLengthKey)
-	limits.AttributeCountLimit = limitValue(limits.AttributeCountLimit, spanAttributeCountDefault, attributeCountKey, spanAttributeCountKey)
-	limits.EventCountLimit = limitValue(limits.EventCountLimit, spanEventCountDefault, spanEventCountKey)
-	limits.LinkCountLimit = limitValue(limits.LinkCountLimit, spanLinkCountDefault, spanLinkCountKey)
-	limits.AttributePerEventCountLimit = limitValue(limits.AttributePerEventCountLimit, spanEventAttributeCountDefault, spanEventAttributeCountKey)
-	limits.AttributePerLinkCountLimit = limitValue(limits.AttributePerLinkCountLimit, spanLinkAttributeCountDefault, spanLinkAttributeCountKey)
 
 	return &limits
 }
 
-// limitValue returns the current limit value if it was set because one of
-// envs is defined, otherwise it returns the limit zero value.
-func limitValue(current, zero int, envs ...string) int {
+// limitValue returns the current limit value if one of envs is defined;
+// otherwise, it returns defaultValue.
+func limitValue(current, defaultValue int, envs ...string) int {
 	for _, env := range envs {
 		if _, ok := os.LookupEnv(env); ok {
 			return current
 		}
 	}
-	return zero
+	return defaultValue
 }
