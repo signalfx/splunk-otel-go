@@ -13,8 +13,6 @@ module-sets:
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi/test
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo/redis/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql
