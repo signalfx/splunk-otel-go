@@ -8,7 +8,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]
+and [OpenTelemetry Go Contrib to v1.47.0/v2.6.0/v0.72.0/v0.38.0/v0.27.0/v0.21.0/v0.17.0/v0.19.0][contrib-v1.47.0].
+
 The release requires at least [Go 1.26].
+
+### Changed
+
+- Change the default `OTEL_LOGS_EXPORTER` to `otlp` now that the OpenTelemetry Go
+  Logs API and SDK are stable. The global logger provider is enabled by default.
+  Set `OTEL_LOGS_EXPORTER=none` to disable it.
+  ([#4924](https://github.com/signalfx/splunk-otel-go/pull/4924))
 
 ### Removed
 
@@ -887,6 +897,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.47.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.47.0
 [otel-v1.46.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.46.0
 [otel-v1.45.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.45.0
 [otel-v1.44.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.44.0
@@ -933,6 +944,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.47.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.47.0
 [contrib-v1.46.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.46.0
 [contrib-v1.45.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.45.0
 [contrib-v1.44.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.44.0
