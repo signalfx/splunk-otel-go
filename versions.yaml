@@ -29,8 +29,6 @@ module-sets:
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/test
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb
