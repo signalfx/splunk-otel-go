@@ -24,6 +24,7 @@ import (
 func expectedSL(aLen, aN, eN, lN, aPerE, aPerL int) *trace.SpanLimits {
 	return &trace.SpanLimits{
 		AttributeValueLengthLimit:   aLen,
+		AttributeValueDepthLimit:    trace.DefaultAttributeValueDepthLimit,
 		AttributeCountLimit:         aN,
 		EventCountLimit:             eN,
 		LinkCountLimit:              lN,

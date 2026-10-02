@@ -33,7 +33,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log"
-	"go.opentelemetry.io/otel/log/global"
 	otelt "go.opentelemetry.io/otel/trace"
 	clpb "go.opentelemetry.io/proto/otlp/collector/logs/v1"
 	cmpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
@@ -639,7 +638,7 @@ func TestRunOTLPHTTPProtobufLogsExporterTLS(t *testing.T) {
 
 func TestRunOTLPGRPCLogsExporter(t *testing.T) {
 	assertBase := func(t *testing.T, got *logsExportRequest) {
-		assertHasLog(t, got, logBody)
+		assertHasLog(t, got)
 	}
 
 	testCases := []struct {
@@ -695,20 +694,26 @@ func TestRunOTLPGRPCLogsExporterTLS(t *testing.T) {
 	emitLogs(t, distro.WithTLSConfig(clientTLSConfig(t)))
 
 	got := coll.ExportedLogs()
-	assertHasLog(t, got, logBody)
+	assertHasLog(t, got)
 }
 
 func TestRunLogsExporterDefault(t *testing.T) {
-	// By default the logs exporter is none.
-	coll := &collector{}
-	coll.Start(t)
-	t.Setenv("OTEL_LOGS_EXPORTER", "")
-	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
+	for _, name := range []string{"unset", "empty"} {
+		t.Run(name, func(t *testing.T) {
+			coll := &collector{}
+			coll.Start(t)
+			t.Setenv("OTEL_LOGS_EXPORTER", "")
+			if name == "unset" {
+				require.NoError(t, os.Unsetenv("OTEL_LOGS_EXPORTER"))
+			}
+			t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 
-	emitLogs(t)
+			emitLogs(t)
 
-	got := coll.ExportedLogs()
-	assert.Nil(t, got)
+			got := coll.ExportedLogs()
+			assertHasLog(t, got)
+		})
+	}
 }
 
 func TestRunLogsExporterNone(t *testing.T) {
@@ -726,16 +731,15 @@ func TestRunLogsExporterNone(t *testing.T) {
 func TestInvalidLogsExporter(t *testing.T) {
 	coll := &collector{}
 	coll.Start(t)
-	// Explicitly set none exporter.
 	t.Setenv("OTEL_LOGS_EXPORTER", "invalid value")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://"+coll.Endpoint)
 
 	emitLogs(t)
 
-	// Ensure none is used as the default when the OTEL_LOGS_EXPORTER value
+	// Ensure OTLP is used as the default when the OTEL_LOGS_EXPORTER value
 	// is invalid.
 	got := coll.ExportedLogs()
-	require.Nil(t, got)
+	assertHasLog(t, got)
 }
 
 func TestLogsResource(t *testing.T) {
@@ -873,7 +877,7 @@ func emitLogs(t *testing.T, opts ...distro.Option) {
 
 	var record log.Record
 	record.SetBody(attribute.StringValue(logBody))
-	global.GetLoggerProvider().Logger(t.Name()).Emit(ctx, record)
+	otel.GetLoggerProvider().Logger(t.Name()).Emit(ctx, record)
 
 	// Flush all spans from SDK.
 	require.NoError(t, sdk.Shutdown(ctx))
@@ -919,14 +923,14 @@ func assertHasMetric(t *testing.T, got *metricsExportRequest, name string) {
 	assert.Failf(t, "should contain metric", "want: %v, got: %v", name, gotMetrics)
 }
 
-func assertHasLog(t *testing.T, got *logsExportRequest, body string) {
+func assertHasLog(t *testing.T, got *logsExportRequest) {
 	t.Helper()
 
 	if !assert.NotNil(t, got, "request must not be nil") {
 		return
 	}
 	for _, l := range got.Logs {
-		if l.Body.GetStringValue() == body {
+		if l.Body.GetStringValue() == logBody {
 			return
 		}
 	}
@@ -936,7 +940,7 @@ func assertHasLog(t *testing.T, got *logsExportRequest, body string) {
 	for _, l := range got.Logs {
 		gotLogs = append(gotLogs, l.Body.GetStringValue())
 	}
-	assert.Failf(t, "should contain log", "want: %v, got: %v", body, gotLogs)
+	assert.Failf(t, "should contain log", "want: %v, got: %v", logBody, gotLogs)
 }
 
 func assertResource(t *testing.T, attrs []*comm.KeyValue) {
