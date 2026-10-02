@@ -12,7 +12,8 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
-- Remove the deprecated `splunkkafka (v1)` instrumentation library.
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`.
   ([#4928](https://github.com/signalfx/splunk-otel-go/pull/4928))
 - Drop support for [Go 1.25].
 
