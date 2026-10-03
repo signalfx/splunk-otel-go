@@ -22,6 +22,9 @@ The release requires at least [Go 1.26].
 
 ### Removed
 
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`.
+  ([#4925](https://github.com/signalfx/splunk-otel-go/pull/4925))
 - Drop support for [Go 1.25].
 
 ## [1.35.0] - 2026-08-27
