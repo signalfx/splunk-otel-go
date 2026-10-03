@@ -19,8 +19,6 @@ module-sets:
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/test
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb/test
       - github.com/signalfx/splunk-otel-go/instrumentation/internal
