@@ -23,6 +23,9 @@ The release requires at least [Go 1.26].
 ### Removed
 
 - Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`.
+  ([#4932](https://github.com/signalfx/splunk-otel-go/pull/4932))
+- Remove the deprecated instrumentation library
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`.
   ([#4931](https://github.com/signalfx/splunk-otel-go/pull/4931))
 - Remove the deprecated instrumentation library
