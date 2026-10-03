@@ -23,6 +23,9 @@ The release requires at least [Go 1.26].
 ### Removed
 
 - Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql`.
+  ([#4930](https://github.com/signalfx/splunk-otel-go/pull/4930))
+- Remove the deprecated instrumentation library
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`.
   ([#4929](https://github.com/signalfx/splunk-otel-go/pull/4929))
 - Remove the deprecated instrumentation library
