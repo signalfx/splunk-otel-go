@@ -3,8 +3,8 @@ module github.com/signalfx/splunk-otel-go/example
 go 1.26.0
 
 require (
-	github.com/signalfx/splunk-otel-go/distro v1.35.0
-	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.35.0
+	github.com/signalfx/splunk-otel-go/distro v1.36.0
+	github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp v1.36.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	golang.org/x/sync v0.23.0
 )
