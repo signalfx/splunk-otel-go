@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package test
-
-// Build restrictions come from docker not being available on Windows and
-// MacOS GitHub Actions. The code itself should be compatible these	systems
-// and the build restrictions can be removed if this is run elsewhere.
+package splunkpgx_test
 
 import (
 	"context"
@@ -38,7 +34,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx"
+	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx"
 )
 
 const (
@@ -71,6 +67,10 @@ func newFixtures(t *testing.T) (*tracetest.SpanRecorder, *trace.TracerProvider, 
 }
 
 func TestNoContextSpans(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping running heavy integration test in short mode.")
+	}
+
 	sr, _, db := newFixtures(t)
 
 	require.NoError(t, db.Ping())
@@ -110,6 +110,10 @@ func TestNoContextSpans(t *testing.T) {
 }
 
 func TestContextSpans(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping running heavy integration test in short mode.")
+	}
+
 	sr, tp, db := newFixtures(t)
 	// The TracerProvider that created the span in the passed context will be
 	// used to create all the other spans. Make sure to use the TracerProvider
@@ -168,8 +172,7 @@ func assertSpanBaseAttrs(t *testing.T, span trace.ReadOnlySpan) {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	if testing.Short() {
-		fmt.Println("Skipping running heavy integration test in short mode.")
-		return
+		os.Exit(m.Run())
 	}
 
 	ctx := context.Background()
