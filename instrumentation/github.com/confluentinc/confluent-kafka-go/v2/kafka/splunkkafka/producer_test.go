@@ -33,6 +33,7 @@ import (
 func TestNewProducerType(t *testing.T) {
 	p, err := NewProducer(&kafka.ConfigMap{})
 	require.NoError(t, err)
+	t.Cleanup(p.Close)
 	assert.IsType(t, &Producer{}, p)
 }
 
@@ -45,7 +46,9 @@ func TestNewProducerReturnsError(t *testing.T) {
 func TestWrapProducerType(t *testing.T) {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{})
 	require.NoError(t, err)
-	assert.IsType(t, Producer{}, *WrapProducer(p))
+	wrapped := WrapProducer(p)
+	t.Cleanup(wrapped.Close)
+	assert.IsType(t, &Producer{}, wrapped)
 }
 
 func TestProducerEventsChanCreated(t *testing.T) {
@@ -54,6 +57,7 @@ func TestProducerEventsChanCreated(t *testing.T) {
 		"go.produce.channel.size": chSize,
 	})
 	require.NoError(t, err)
+	t.Cleanup(p.Close)
 	assert.NotNil(t, p.ProduceChannel())
 	assert.Equal(t, chSize, cap(p.ProduceChannel()))
 }
@@ -68,9 +72,11 @@ func TestProducerChannelSpan(t *testing.T) {
 	prop := propagation.TraceContext{}
 	p, err := NewProducer(&kafka.ConfigMap{}, WithTracerProvider(tp), WithPropagator(prop))
 	require.NoError(t, err)
+	t.Cleanup(p.Close)
 
 	keys := testMessageKeys
 	produceChannel := make(chan *kafka.Message, len(keys))
+	close(p.produceChannel)
 	p.produceChannel = p.traceProduceChannel(produceChannel)
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
@@ -131,6 +137,7 @@ func TestProduceSpan(t *testing.T) {
 		WithAttributes([]attribute.KeyValue{commonAttr}),
 	)
 	require.NoError(t, err)
+	t.Cleanup(p.Close)
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID: trace.TraceID{0x01},
