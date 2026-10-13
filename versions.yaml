@@ -6,19 +6,13 @@ module-sets:
       - github.com/signalfx/splunk-otel-go/distro
       - github.com/signalfx/splunk-otel-go/example
       - github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql
-      - github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/v5/splunkpgx/test
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/jmoiron/sqlx/splunksqlx
       - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq
-      - github.com/signalfx/splunk-otel-go/instrumentation/github.com/lib/pq/splunkpq/test
       - github.com/signalfx/splunk-otel-go/instrumentation/internal
       - github.com/signalfx/splunk-otel-go/instrumentation/net/http/splunkhttp
 

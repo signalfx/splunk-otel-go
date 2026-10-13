@@ -14,7 +14,7 @@
 
 //go:build cgo && linux
 
-package test
+package splunkkafka_test
 
 import (
 	"context"
@@ -58,7 +58,7 @@ const (
 func TestMain(m *testing.M) {
 	flag.Parse()
 	if testing.Short() {
-		fmt.Println("Skipping running heavy integration test in short mode.")
+		goleak.VerifyTestMain(m)
 		return
 	}
 
@@ -181,6 +181,10 @@ func verifyCanProduceToKafka() error {
 }
 
 func TestChannelBasedProducer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping heavy integration test in short mode.")
+	}
+
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)
@@ -227,6 +231,10 @@ func TestChannelBasedProducer(t *testing.T) {
 }
 
 func TestFunctionBasedProducer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping heavy integration test in short mode.")
+	}
+
 	partition := int32(0)
 	sr, opts := newFixtures()
 	p := newProducer(t, opts...)

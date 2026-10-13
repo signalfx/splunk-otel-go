@@ -64,6 +64,7 @@ func (fn *fnTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 func TestNewConsumerCapturesGroupID(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, c.Close()) })
 	sConf := trace.NewSpanStartConfig(c.cfg.DefaultStartOpts...)
 	assert.Contains(t, sConf.Attributes(), semconv.MessagingKafkaConsumerGroupKey.String(grpID))
 }
@@ -71,6 +72,7 @@ func TestNewConsumerCapturesGroupID(t *testing.T) {
 func TestNewConsumerType(t *testing.T) {
 	c, err := NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, c.Close()) })
 	assert.IsType(t, &Consumer{}, c)
 }
 
@@ -83,7 +85,9 @@ func TestNewConsumerReturnsError(t *testing.T) {
 func TestWrapConsumerType(t *testing.T) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{groupIDConfigKey: grpID})
 	require.NoError(t, err)
-	assert.IsType(t, Consumer{}, *WrapConsumer(c))
+	wrapped := WrapConsumer(c)
+	t.Cleanup(func() { require.NoError(t, wrapped.Close()) })
+	assert.IsType(t, &Consumer{}, wrapped)
 }
 
 func TestConsumerEventsChanCreated(t *testing.T) {
@@ -95,6 +99,7 @@ func TestConsumerEventsChanCreated(t *testing.T) {
 		groupIDConfigKey:             grpID,
 	})
 	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, c.Close()) })
 	assert.NotNil(t, c.Events())
 	assert.Equal(t, chSize, cap(c.Events()))
 }
@@ -135,6 +140,7 @@ func TestConsumerSpan(t *testing.T) {
 		groupIDConfigKey:             grpID,
 	}, WithTracerProvider(tp), WithPropagator(prop), WithAttributes([]attribute.KeyValue{commonAttr}))
 	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, c.Close()) })
 
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID: trace.TraceID{0x01},
@@ -196,6 +202,7 @@ func TestConsumerConcurrentConsuming(t *testing.T) {
 		groupIDConfigKey:             grpID,
 	}, WithTracerProvider(tp))
 	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, c.Close()) })
 
 	key := "test key"
 	var wg sync.WaitGroup
