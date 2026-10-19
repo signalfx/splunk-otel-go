@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/moby/moby/api v1.56.1
-	github.com/ory/dockertest/v4 v4.0.0
+	github.com/ory/dockertest/v4 v4.0.1
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.36.0
 	github.com/stretchr/testify v1.12.1
 	go.opentelemetry.io/otel v1.47.0
