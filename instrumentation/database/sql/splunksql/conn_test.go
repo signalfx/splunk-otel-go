@@ -196,9 +196,9 @@ func (s *ConnSuite) TestPingReturnsWrappedError() {
 	s.Equal(1, s.MockConn.pingN)
 }
 
-func (s *ConnSuite) TestPingReturnsErrSkipIfNotImplemented() {
+func (s *ConnSuite) TestPingReturnsNilIfNotImplemented() {
 	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
-	s.ErrorIs(s.OTelConn.Ping(context.Background()), driver.ErrSkip)
+	s.NoError(s.OTelConn.Ping(context.Background()))
 	s.Equal(0, s.MockConn.pingN)
 }
 
