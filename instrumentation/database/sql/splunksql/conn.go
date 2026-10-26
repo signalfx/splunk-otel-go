@@ -180,6 +180,12 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		}
 	} else {
 		// Fallback to explicitly wrapping Begin.
+		if opts.Isolation != 0 {
+			return nil, errors.New("sql: driver does not support non-default isolation level")
+		}
+		if opts.ReadOnly {
+			return nil, errors.New("sql: driver does not support read-only transactions")
+		}
 		f = func(context.Context) error {
 			var err error
 			tx, err = c.Conn.Begin() //nolint:staticcheck // Ensure backwards support of deprecated interface.
