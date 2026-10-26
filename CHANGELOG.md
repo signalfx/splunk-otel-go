@@ -12,13 +12,28 @@ The release requires at least [Go 1.26].
 
 > [!WARNING]
 > This release changes the default span collection count limits from unlimited
-> (or `1000` for span links) to the OpenTelemetry default of `128`. Applications
-> that exceed these limits will drop excess span attributes and event or link
-> attributes, and retain at most 128 events and links per span. To preserve the
-> previous defaults, set `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=-1`,
-> `OTEL_SPAN_EVENT_COUNT_LIMIT=-1`, `OTEL_SPAN_LINK_COUNT_LIMIT=1000`,
-> `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT=-1`, and
-> `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT=-1`.
+> (or `1000` for span links) to the OpenTelemetry default of `128`. This reduces
+> the risk of resource exhaustion from unbounded telemetry collections.
+> Applications that exceed these limits will drop excess span attributes and
+> event or link attributes, and retain at most 128 events and links per span.
+>
+> Existing explicit environment variable overrides are preserved. If your
+> application needs higher counts, configure the corresponding count limits.
+> To restore the previous defaults, set the following environment variables;
+> `-1` disables the corresponding count limit in the Go SDK:
+>
+> ```text
+> OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=-1
+> OTEL_SPAN_EVENT_COUNT_LIMIT=-1
+> OTEL_SPAN_LINK_COUNT_LIMIT=1000
+> OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT=-1
+> OTEL_LINK_ATTRIBUTE_COUNT_LIMIT=-1
+> ```
+>
+> Restoring unlimited counts or raising limits increases memory usage and the
+> risk of resource exhaustion and denial of service, especially when telemetry
+> is influenced by untrusted input. Prefer finite limits appropriate for your
+> workload.
 
 ### Changed
 
