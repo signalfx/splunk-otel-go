@@ -46,7 +46,7 @@ func (d *otelDriver) Open(name string) (driver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newConn(conn, d.config), nil
+	return wrapConn(conn, d.config), nil
 }
 
 // OpenConnector returns a new traced connector to the database. The name is a
