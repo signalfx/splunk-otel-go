@@ -24,7 +24,6 @@ SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_UR
 Run the instrumented application:
 
 ```sh
-export OTEL_LOGS_EXPORTER=otlp
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
@@ -55,7 +54,6 @@ SPLUNK_ACCESS_TOKEN=<access_token> SPLUNK_HEC_TOKEN=<access_token> SPLUNK_HEC_UR
 Run the instrumented application:
 
 ```sh
-export OTEL_LOGS_EXPORTER=otlp
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 go run .
@@ -77,6 +75,7 @@ docker compose -f docker-compose-splunk.yaml down
 Run the instrumented application:
 
 ```sh
+export OTEL_LOGS_EXPORTER=none
 export OTEL_SERVICE_NAME="splunk-otel-go-example"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=$(whoami)"
 SPLUNK_REALM=<realm> SPLUNK_ACCESS_TOKEN=<access_token> go run .

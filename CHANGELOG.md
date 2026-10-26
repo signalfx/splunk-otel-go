@@ -8,8 +8,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-The release requires at least [Go 1.26].
-
 > [!WARNING]
 > This release changes the default span collection count limits from unlimited
 > (or `1000` for span links) to the OpenTelemetry default of `128`. This reduces
@@ -40,8 +38,52 @@ The release requires at least [Go 1.26].
 - Align span collection count limits with OpenTelemetry defaults.
   ([#4880](https://github.com/signalfx/splunk-otel-go/pull/4880))
 
+## [1.36.0] - 2026-10-07
+
+This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]
+and [OpenTelemetry Go Contrib to v1.47.0/v2.6.0/v0.72.0/v0.38.0/v0.27.0/v0.21.0/v0.17.0/v0.19.0][contrib-v1.47.0].
+
+The release requires at least [Go 1.26].
+
+### Changed
+
+- Change the default `OTEL_LOGS_EXPORTER` to `otlp` now that the OpenTelemetry Go
+  Logs API and SDK are stable. The global logger provider is enabled by default.
+  Set `OTEL_LOGS_EXPORTER=none` to disable it.
+  ([#4924](https://github.com/signalfx/splunk-otel-go/pull/4924))
+
 ### Removed
 
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`.
+  ([#4935](https://github.com/signalfx/splunk-otel-go/pull/4935))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`.
+  ([#4934](https://github.com/signalfx/splunk-otel-go/pull/4934))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`.
+  ([#4933](https://github.com/signalfx/splunk-otel-go/pull/4933))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/miekg/dns/splunkdns`.
+  ([#4932](https://github.com/signalfx/splunk-otel-go/pull/4932))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/julienschmidt/httprouter/splunkhttprouter`.
+  ([#4931](https://github.com/signalfx/splunk-otel-go/pull/4931))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/graph-gophers/graphql-go/splunkgraphql`.
+  ([#4930](https://github.com/signalfx/splunk-otel-go/pull/4930))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`.
+  ([#4929](https://github.com/signalfx/splunk-otel-go/pull/4929))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`.
+  ([#4928](https://github.com/signalfx/splunk-otel-go/pull/4928))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`.
+  ([#4927](https://github.com/signalfx/splunk-otel-go/pull/4927))
+- Remove the deprecated instrumentation library
+  `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`.
+  ([#4925](https://github.com/signalfx/splunk-otel-go/pull/4925))
 - Drop support for [Go 1.25].
 
 ## [1.35.0] - 2026-08-27
@@ -866,7 +908,8 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.35.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.36.0...HEAD
+[1.36.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.36.0
 [1.35.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.35.0
 [1.34.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.34.0
 [1.33.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.33.0
@@ -914,6 +957,7 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.47.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.47.0
 [otel-v1.46.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.46.0
 [otel-v1.45.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.45.0
 [otel-v1.44.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.44.0
@@ -960,6 +1004,7 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.47.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.47.0
 [contrib-v1.46.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.46.0
 [contrib-v1.45.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.45.0
 [contrib-v1.44.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.44.0

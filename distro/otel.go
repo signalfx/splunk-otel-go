@@ -23,7 +23,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -232,7 +231,7 @@ func runLogs(c *config, res *resource.Resource) (shutdownFunc, error) {
 	}
 
 	provider := log.NewLoggerProvider(o...)
-	global.SetLoggerProvider(provider)
+	otel.SetLoggerProvider(provider)
 
 	return provider.Shutdown, nil
 }

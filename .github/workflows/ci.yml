@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   check-links:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -44,7 +44,7 @@ jobs:
           go-version: '1.27'
           check-latest: true
       - run: ${{ matrix.run-script }}
-      - uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
@@ -68,7 +68,7 @@ jobs:
     - run: make test-short
 
   compatibility-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ always() }}
     needs: [compatibility-test, goyek]
     steps:
