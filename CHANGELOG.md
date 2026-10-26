@@ -10,9 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Return `nil` from the `splunksql` connection's `ResetSession` method when the
-  wrapped driver does not implement `driver.SessionResetter`, matching the
-  no-op behavior of `database/sql`.
+- `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
+  connection does not implement `driver.SessionResetter` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5014](https://github.com/signalfx/splunk-otel-go/pull/5014))
 
 ## [1.36.0] - 2026-10-07
 
