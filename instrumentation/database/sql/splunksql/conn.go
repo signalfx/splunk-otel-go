@@ -85,7 +85,12 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		if err != nil {
 			return nil, err
 		}
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
+			select {
+			default:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 			var err error
 			res, err = c.Exec(query, vArgs)
 			return err
@@ -124,7 +129,12 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		if err != nil {
 			return nil, err
 		}
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
+			select {
+			default:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 			var err error
 			rows, err = c.Query(query, vArgs)
 			return err
@@ -152,9 +162,17 @@ func (c *otelConn) PrepareContext(ctx context.Context, query string) (driver.Stm
 		}
 	} else {
 		// Fallback to explicitly wrapping Prepare.
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
 			var err error
 			stmt, err = c.Prepare(query)
+			if err == nil {
+				select {
+				default:
+				case <-ctx.Done():
+					_ = stmt.Close()
+					return ctx.Err()
+				}
+			}
 			return err
 		}
 	}
@@ -180,9 +198,17 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		}
 	} else {
 		// Fallback to explicitly wrapping Begin.
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
 			var err error
 			tx, err = c.Conn.Begin() //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			if err == nil {
+				select {
+				default:
+				case <-ctx.Done():
+					_ = tx.Rollback()
+					return ctx.Err()
+				}
+			}
 			return err
 		}
 	}

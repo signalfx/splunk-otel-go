@@ -62,7 +62,12 @@ func (s *otelStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (d
 		if err != nil {
 			return nil, err
 		}
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
+			select {
+			default:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 			var err error
 			res, err = s.Exec(vArgs)
 			return err
@@ -92,7 +97,12 @@ func (s *otelStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (
 		if err != nil {
 			return nil, err
 		}
-		f = func(context.Context) error {
+		f = func(ctx context.Context) error {
+			select {
+			default:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 			var err error
 			rows, err = s.Query(vArgs)
 			return err

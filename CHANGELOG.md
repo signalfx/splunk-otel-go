@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Honor context cancellation when falling back to legacy driver methods in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches `database/sql` checking cancellation before legacy execution and
+  query calls, and cleaning up statements or transactions if cancellation occurs
+  during preparation or transaction creation.
+  ([#5016](https://github.com/signalfx/splunk-otel-go/pull/5016))
+
 ## [1.36.0] - 2026-10-07
 
 This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]
