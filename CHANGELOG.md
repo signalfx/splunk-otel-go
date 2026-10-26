@@ -10,10 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Honor context cancellation when
-  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
-  falls back to legacy driver methods, including closing prepared statements
-  and rolling back transactions created after cancellation.
+- Honor context cancellation when falling back to legacy driver methods in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches `database/sql` checking cancellation before legacy execution and
+  query calls, and cleaning up statements or transactions if cancellation occurs
+  during preparation or transaction creation.
+  ([#5016](https://github.com/signalfx/splunk-otel-go/pull/5016))
 
 ## [1.36.0] - 2026-10-07
 
