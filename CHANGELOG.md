@@ -10,8 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Preserve `driver.NamedValueChecker` on `splunksql` connections and explicitly
-  prepared statements, and `driver.ColumnConverter` on those statements.
+- Preserve `driver.NamedValueChecker` on connections and explicitly prepared
+  statements, and `driver.ColumnConverter` on those statements in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This preserves the checker precedence and conversion fallbacks used by
+  `database/sql` without instrumentation.
+  ([#5018](https://github.com/signalfx/splunk-otel-go/pull/5018))
 
 ## [1.36.0] - 2026-10-07
 
