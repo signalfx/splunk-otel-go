@@ -37,7 +37,7 @@ func (c *otelConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newConn(conn, c.driver.config), nil
+	return wrapConn(conn, c.driver.config), nil
 }
 
 func (c *otelConnector) Driver() driver.Driver {

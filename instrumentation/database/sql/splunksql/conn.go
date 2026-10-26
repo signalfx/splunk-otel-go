@@ -48,6 +48,59 @@ func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 
+// tracedConn contains the instrumented connection methods except ResetSession.
+// SessionResetter and Validator must reflect the underlying connection: sql uses
+// their presence together to decide whether a canceled transaction is reusable.
+type tracedConn interface {
+	driver.Conn
+	driver.Pinger
+	driver.Execer //nolint:staticcheck // Ensure backwards support of deprecated interface.
+	driver.ExecerContext
+	driver.Queryer //nolint:staticcheck // Ensure backwards support of deprecated interface.
+	driver.QueryerContext
+	driver.ConnPrepareContext
+	driver.ConnBeginTx
+}
+
+func wrapConn(conn driver.Conn, conf config) driver.Conn {
+	c := newConn(conn, conf)
+	var traced tracedConn = struct{ tracedConn }{c}
+	// Preserve argument checking if the instrumented connection supports it,
+	// without exposing ResetSession through the concrete connection type.
+	checker, checksNamedValues := any(c).(driver.NamedValueChecker)
+	if checksNamedValues {
+		traced = struct {
+			tracedConn
+			driver.NamedValueChecker
+		}{traced, checker}
+	}
+	validator, validates := conn.(driver.Validator)
+	_, resets := conn.(driver.SessionResetter)
+	switch {
+	case validates && resets:
+		return struct {
+			*otelConn
+			driver.Validator
+		}{c, validator}
+	case validates:
+		if checksNamedValues {
+			return struct {
+				tracedConn
+				driver.Validator
+				driver.NamedValueChecker
+			}{traced, validator, checker}
+		}
+		return struct {
+			tracedConn
+			driver.Validator
+		}{traced, validator}
+	case resets:
+		return c
+	default:
+		return traced
+	}
+}
+
 // Ping traces a ping to the connected database.
 func (c *otelConn) Ping(ctx context.Context) error {
 	pinger, ok := c.Conn.(driver.Pinger)

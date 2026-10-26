@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Preserve connection validation in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  so `database/sql` discards invalid connections and only reuses connections after
+  a canceled transaction when the driver supports validation and session reset.
+
 ## [1.36.0] - 2026-10-07
 
 This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]
