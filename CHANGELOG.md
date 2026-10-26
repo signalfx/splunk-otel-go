@@ -10,8 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Allow named arguments to reach prepared statements in `splunksql` when the
-  underlying connection does not implement an execution or query fast path.
+- Allow named arguments to reach prepared statements when the underlying
+  connection does not implement an execution or query fast path in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  The `database/sql` package uses a prepared statement when a connection cannot
+  execute or query directly.
+  ([#5019](https://github.com/signalfx/splunk-otel-go/pull/5019))
 
 ## [1.36.0] - 2026-10-07
 
