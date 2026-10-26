@@ -10,10 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Preserve connection validation in
-  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
-  so `database/sql` discards invalid connections and only reuses connections after
-  a canceled transaction when the driver supports validation and session reset.
+- Preserve connection validation and session-reset capabilities in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches `database/sql` discarding invalid connections and retaining
+  connections after transaction cancellation only when the driver implements
+  both `driver.Validator` and `driver.SessionResetter`.
+  ([#5017](https://github.com/signalfx/splunk-otel-go/pull/5017))
 
 ## [1.36.0] - 2026-10-07
 
