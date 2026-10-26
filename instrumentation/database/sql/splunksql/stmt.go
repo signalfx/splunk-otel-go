@@ -39,8 +39,44 @@ var (
 	_ driver.StmtQueryContext = (*otelStmt)(nil)
 )
 
-func newStmt(stmt driver.Stmt, c config, query string) *otelStmt {
-	return &otelStmt{Stmt: stmt, config: c, query: query}
+// columnConverterStmt preserves the optional statement conversion interface.
+type columnConverterStmt struct {
+	*otelStmt
+	converter driver.ColumnConverter //nolint:staticcheck // Preserve backwards support of the deprecated interface.
+}
+
+func (s *columnConverterStmt) ColumnConverter(index int) driver.ValueConverter {
+	return s.converter.ColumnConverter(index)
+}
+
+type tracedStmt interface {
+	driver.Stmt
+	driver.StmtExecContext
+	driver.StmtQueryContext
+}
+
+func newStmt(stmt driver.Stmt, c config, query string) tracedStmt {
+	wrapped := &otelStmt{Stmt: stmt, config: c, query: query}
+	checker, hasChecker := stmt.(driver.NamedValueChecker)
+	converter, hasConverter := stmt.(driver.ColumnConverter) //nolint:staticcheck // Preserve backwards support of the deprecated interface.
+	// A statement checker takes precedence over the connection checker in
+	// database/sql. Only expose it when the wrapped statement implements it.
+	switch {
+	case hasChecker && hasConverter:
+		return struct {
+			*columnConverterStmt
+			driver.NamedValueChecker
+		}{&columnConverterStmt{otelStmt: wrapped, converter: converter}, checker}
+	case hasChecker:
+		return struct {
+			*otelStmt
+			driver.NamedValueChecker
+		}{wrapped, checker}
+	case hasConverter:
+		return &columnConverterStmt{otelStmt: wrapped, converter: converter}
+	default:
+		return wrapped
+	}
 }
 
 // ExecContext executes and traces a query that doesn't return rows, such as

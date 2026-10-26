@@ -42,10 +42,21 @@ var (
 	_ driver.ConnPrepareContext = (*otelConn)(nil)
 	_ driver.ConnBeginTx        = (*otelConn)(nil)
 	_ driver.SessionResetter    = (*otelConn)(nil)
+	_ driver.NamedValueChecker  = (*otelConn)(nil)
 )
 
 func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
+}
+
+// CheckNamedValue preserves the wrapped connection's argument conversion.
+// ErrSkip lets database/sql use the statement's ColumnConverter or its default
+// conversion when the connection does not implement NamedValueChecker.
+func (c *otelConn) CheckNamedValue(value *driver.NamedValue) error {
+	if checker, ok := c.Conn.(driver.NamedValueChecker); ok {
+		return checker.CheckNamedValue(value)
+	}
+	return driver.ErrSkip
 }
 
 // Ping traces a ping to the connected database.

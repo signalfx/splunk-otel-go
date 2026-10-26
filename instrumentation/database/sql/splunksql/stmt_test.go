@@ -82,7 +82,7 @@ type StmtSuite struct {
 
 func (s *StmtSuite) SetupTest() {
 	s.MockStmt = newMockStmt(nil)
-	s.OTelStmt = newStmt(s.MockStmt, newConfig(), "")
+	s.OTelStmt = newStmt(s.MockStmt, newConfig(), "").(*otelStmt)
 }
 
 func (s *StmtSuite) TestCloseCallsWrapped() {
@@ -121,7 +121,7 @@ func (s *StmtSuite) TestExecContextCallsWrapped() {
 }
 
 func (s *StmtSuite) TestExecContextFallsbackToExec() {
-	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newConfig(), "")
+	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newConfig(), "").(*otelStmt)
 
 	_, err := s.OTelStmt.ExecContext(context.Background(), nil)
 	s.NoError(err)
@@ -156,7 +156,7 @@ func (s *StmtSuite) TestQueryContextCallsWrapped() {
 }
 
 func (s *StmtSuite) TestQueryContextFallsbackToQuery() {
-	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newConfig(), "")
+	s.OTelStmt = newStmt(struct{ driver.Stmt }{s.MockStmt}, newConfig(), "").(*otelStmt)
 
 	_, err := s.OTelStmt.QueryContext(context.Background(), nil) //nolint: gocritic // there is no connection leak for this test structure.
 	s.NoError(err)
