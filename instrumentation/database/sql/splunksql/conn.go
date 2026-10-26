@@ -195,10 +195,14 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 }
 
 // ResetSession traces the call to the wrapped Connection ResetSession method.
+// If the wrapped connection does not implement driver.SessionResetter, nil is
+// returned without creating a span.
 func (c *otelConn) ResetSession(ctx context.Context) error {
 	resetter, ok := c.Conn.(driver.SessionResetter)
 	if !ok {
-		return driver.ErrSkip
+		// Match database/sql's no-op when the connection has no resetter.
+		// ResetSession has no driver.ErrSkip fallback.
+		return nil
 	}
 
 	return c.config.withSpan(ctx, moniker.Reset, resetter.ResetSession)

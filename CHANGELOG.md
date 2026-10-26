@@ -8,6 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
+  connection does not implement `driver.SessionResetter` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5014](https://github.com/signalfx/splunk-otel-go/pull/5014))
+
 ## [1.36.0] - 2026-10-07
 
 This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]

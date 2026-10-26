@@ -21,6 +21,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
 
 var errTest = errors.New("testing error")
@@ -350,10 +352,20 @@ func (s *ConnSuite) TestResetSessionReturnsWrappedError() {
 	s.Equal(1, s.MockConn.resetSessionN)
 }
 
-func (s *ConnSuite) TestResetSessionReturnsErrSkipIfNotImplemented() {
-	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig())
-	s.ErrorIs(s.OTelConn.ResetSession(context.Background()), driver.ErrSkip)
+func (s *ConnSuite) TestResetSessionReturnsErrBadConn() {
+	s.MockConn.err = driver.ErrBadConn
+	s.ErrorIs(s.OTelConn.ResetSession(context.Background()), driver.ErrBadConn)
+	s.Equal(1, s.MockConn.resetSessionN)
+}
+
+func (s *ConnSuite) TestResetSessionReturnsNilIfNotImplemented() {
+	recorder := tracetest.NewSpanRecorder()
+	provider := trace.NewTracerProvider(trace.WithSpanProcessor(recorder))
+	s.T().Cleanup(func() { s.NoError(provider.Shutdown(context.Background())) })
+	s.OTelConn = newConn(struct{ driver.Conn }{s.MockConn}, newConfig(WithTracerProvider(provider)))
+	s.NoError(s.OTelConn.ResetSession(context.Background()))
 	s.Equal(0, s.MockConn.resetSessionN)
+	s.Empty(recorder.Started())
 }
 
 func TestConnSuite(t *testing.T) {
