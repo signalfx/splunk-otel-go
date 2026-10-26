@@ -10,8 +10,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Stop recording `driver.ErrSkip` as an error in `splunksql` connection execution
-  and query spans when `database/sql` falls back to a prepared statement.
+- Stop recording `driver.ErrSkip` as an error in connection execution and query
+  spans in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  For connection execution and query fast paths, `database/sql` treats this
+  sentinel as a request to use a prepared statement, rather than as an operation
+  error.
+  ([#5020](https://github.com/signalfx/splunk-otel-go/pull/5020))
 
 ## [1.36.0] - 2026-10-07
 
