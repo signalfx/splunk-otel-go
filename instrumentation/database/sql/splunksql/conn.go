@@ -81,6 +81,9 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	} else {
 		// Fallback to explicitly wrapping Exec.
+		if _, ok := c.Conn.(driver.Execer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
@@ -120,6 +123,9 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	} else {
 		// Fallback to explicitly wrapping Query.
+		if _, ok := c.Conn.(driver.Queryer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
