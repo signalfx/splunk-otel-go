@@ -8,6 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Stop recording `driver.ErrSkip` as an error in connection execution and query
+  spans in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  For connection execution and query fast paths, `database/sql` treats this
+  sentinel as a request to use a prepared statement, rather than as an operation
+  error.
+  ([#5020](https://github.com/signalfx/splunk-otel-go/pull/5020))
+
 ## [1.36.0] - 2026-10-07
 
 This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]

@@ -92,7 +92,7 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	}
 
-	err := c.config.withSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withFastPathSpan(ctx, moniker.Exec, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	return res, err
 }
 
@@ -131,7 +131,7 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	}
 
-	err := c.config.withSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
+	err := c.config.withFastPathSpan(ctx, moniker.Query, f, trace.WithAttributes(semconv.DBStatementKey.String(query)))
 	if err != nil {
 		return nil, err
 	}

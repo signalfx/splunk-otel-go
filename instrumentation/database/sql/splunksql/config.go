@@ -16,6 +16,7 @@ package splunksql
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"net"
 	"net/url"
@@ -71,6 +72,23 @@ func newConfig(options ...Option) config {
 // withSpan wraps the function f with a span.
 func (c config) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
 	return c.WithSpan(ctx, c.spanName(m), f, opts...)
+}
+
+// withFastPathSpan preserves ErrSkip for database/sql without reporting its
+// expected fallback as an error. Only connection Exec and Query support it.
+func (c config) withFastPathSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+	var callErr error
+	err := c.withSpan(ctx, m, func(ctx context.Context) error {
+		callErr = f(ctx)
+		if callErr == driver.ErrSkip {
+			return nil
+		}
+		return callErr
+	}, opts...)
+	if err != nil {
+		return err
+	}
+	return callErr
 }
 
 // spanName returns the OpenTelemetry compliant span name.
