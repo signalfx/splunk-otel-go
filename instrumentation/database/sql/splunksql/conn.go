@@ -48,11 +48,17 @@ func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 
-// Ping traces a ping to the connected database.
+// Ping traces a ping to the connected database. If the wrapped connection
+// does not implement driver.Pinger, nil is returned without creating a span.
 func (c *otelConn) Ping(ctx context.Context) error {
 	pinger, ok := c.Conn.(driver.Pinger)
 	if !ok {
-		return driver.ErrSkip
+		// The database/sql package treats a connection that does not
+		// implement driver.Pinger as alive. Do the same so wrapping a driver
+		// does not make DB.Ping fail. Unlike Exec and Query, database/sql
+		// has no fallback for driver.ErrSkip here and would return it to
+		// the caller.
+		return nil
 	}
 	return c.config.withSpan(ctx, moniker.Ping, pinger.Ping)
 }

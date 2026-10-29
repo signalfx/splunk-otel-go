@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- `DB.Ping` and `DB.PingContext` no longer return `driver.ErrSkip` when the
+  wrapped driver connection does not implement `driver.Pinger` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5011](https://github.com/signalfx/splunk-otel-go/pull/5011))
 - Allow named arguments to reach prepared statements when the underlying
   connection does not implement an execution or query fast path in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
