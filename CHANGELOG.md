@@ -26,7 +26,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka`.
   Previously the span was never ended and a goroutine was left running until
   `Producer.Close`.
-  ([#XXXX](https://github.com/signalfx/splunk-otel-go/pull/XXXX))
+  ([#5035](https://github.com/signalfx/splunk-otel-go/pull/5035))
 
 ## [1.36.0] - 2026-10-07
 
