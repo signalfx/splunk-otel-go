@@ -21,6 +21,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   The `database/sql` package uses a prepared statement when a connection cannot
   execute or query directly.
   ([#5019](https://github.com/signalfx/splunk-otel-go/pull/5019))
+- End the span and record the error when `Producer.Produce` fails while a
+  delivery channel is provided in
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka`.
+  Previously the span was never ended and a goroutine was left running until
+  `Producer.Close`.
+  ([#5035](https://github.com/signalfx/splunk-otel-go/pull/5035))
 
 ## [1.36.0] - 2026-10-07
 

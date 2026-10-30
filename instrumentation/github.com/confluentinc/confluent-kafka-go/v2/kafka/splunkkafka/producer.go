@@ -129,15 +129,22 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 
 	// If the deliveryChan is provided, finish the span when a response is
 	// returned.
+	var produceErr chan error
 	if deliveryChan != nil {
 		p.waitGroup.Add(1)
 		orig := deliveryChan
 		deliveryChan = make(chan kafka.Event)
+		produceErr = make(chan error, 1)
 		go func() {
 			defer p.waitGroup.Done()
 			select {
 			case <-p.stop:
 				return
+			case err := <-produceErr:
+				// The message was not enqueued, so no delivery report will
+				// be sent.
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 			case evt := <-deliveryChan:
 				if respMsg, ok := evt.(*kafka.Message); ok {
 					// Delivery errors are returned via TopicPartition.Error.
@@ -153,6 +160,9 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 	}
 
 	err := p.Producer.Produce(msg, deliveryChan)
+	if err != nil && produceErr != nil {
+		produceErr <- err
+	}
 	// No delivery channel, finish immediately.
 	if deliveryChan == nil {
 		if err != nil {
