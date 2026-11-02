@@ -16,6 +16,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   This matches `database/sql` rejecting non-default isolation and read-only
   options before calling the legacy `Begin` method.
   ([#5015](https://github.com/signalfx/splunk-otel-go/pull/5015))
+- `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
+  connection does not implement `driver.SessionResetter` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5014](https://github.com/signalfx/splunk-otel-go/pull/5014))
+- `DB.Ping` and `DB.PingContext` no longer return `driver.ErrSkip` when the
+  wrapped driver connection does not implement `driver.Pinger` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5011](https://github.com/signalfx/splunk-otel-go/pull/5011))
+- Allow named arguments to reach prepared statements when the underlying
+  connection does not implement an execution or query fast path in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  The `database/sql` package uses a prepared statement when a connection cannot
+  execute or query directly.
+  ([#5019](https://github.com/signalfx/splunk-otel-go/pull/5019))
 
 ## [1.36.0] - 2026-10-07
 
