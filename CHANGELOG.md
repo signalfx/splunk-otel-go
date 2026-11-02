@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
+  connection does not implement `driver.SessionResetter` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5014](https://github.com/signalfx/splunk-otel-go/pull/5014))
 - `DB.Ping` and `DB.PingContext` no longer return `driver.ErrSkip` when the
   wrapped driver connection does not implement `driver.Pinger` in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
