@@ -48,11 +48,17 @@ func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 
-// Ping traces a ping to the connected database.
+// Ping traces a ping to the connected database. If the wrapped connection
+// does not implement driver.Pinger, nil is returned without creating a span.
 func (c *otelConn) Ping(ctx context.Context) error {
 	pinger, ok := c.Conn.(driver.Pinger)
 	if !ok {
-		return driver.ErrSkip
+		// The database/sql package treats a connection that does not
+		// implement driver.Pinger as alive. Do the same so wrapping a driver
+		// does not make DB.Ping fail. Unlike Exec and Query, database/sql
+		// has no fallback for driver.ErrSkip here and would return it to
+		// the caller.
+		return nil
 	}
 	return c.config.withSpan(ctx, moniker.Ping, pinger.Ping)
 }
@@ -81,6 +87,9 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	} else {
 		// Fallback to explicitly wrapping Exec.
+		if _, ok := c.Conn.(driver.Execer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
@@ -120,6 +129,9 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	} else {
 		// Fallback to explicitly wrapping Query.
+		if _, ok := c.Conn.(driver.Queryer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
@@ -180,6 +192,12 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 		}
 	} else {
 		// Fallback to explicitly wrapping Begin.
+		if opts.Isolation != 0 {
+			return nil, errors.New("sql: driver does not support non-default isolation level")
+		}
+		if opts.ReadOnly {
+			return nil, errors.New("sql: driver does not support read-only transactions")
+		}
 		f = func(context.Context) error {
 			var err error
 			tx, err = c.Conn.Begin() //nolint:staticcheck // Ensure backwards support of deprecated interface.
@@ -195,10 +213,14 @@ func (c *otelConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver.T
 }
 
 // ResetSession traces the call to the wrapped Connection ResetSession method.
+// If the wrapped connection does not implement driver.SessionResetter, nil is
+// returned without creating a span.
 func (c *otelConn) ResetSession(ctx context.Context) error {
 	resetter, ok := c.Conn.(driver.SessionResetter)
 	if !ok {
-		return driver.ErrSkip
+		// Match database/sql's no-op when the connection has no resetter.
+		// ResetSession has no driver.ErrSkip fallback.
+		return nil
 	}
 
 	return c.config.withSpan(ctx, moniker.Reset, resetter.ResetSession)
