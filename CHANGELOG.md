@@ -10,6 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Reject unsupported transaction options when the underlying connection does not
+  implement `driver.ConnBeginTx` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches `database/sql` rejecting non-default isolation and read-only
+  options before calling the legacy `Begin` method.
+  ([#5015](https://github.com/signalfx/splunk-otel-go/pull/5015))
 - `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
   connection does not implement `driver.SessionResetter` in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
