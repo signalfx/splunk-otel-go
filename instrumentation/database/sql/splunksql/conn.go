@@ -48,11 +48,17 @@ func newConn(conn driver.Conn, conf config) *otelConn {
 	return &otelConn{Conn: conn, config: conf}
 }
 
-// Ping traces a ping to the connected database.
+// Ping traces a ping to the connected database. If the wrapped connection
+// does not implement driver.Pinger, nil is returned without creating a span.
 func (c *otelConn) Ping(ctx context.Context) error {
 	pinger, ok := c.Conn.(driver.Pinger)
 	if !ok {
-		return driver.ErrSkip
+		// The database/sql package treats a connection that does not
+		// implement driver.Pinger as alive. Do the same so wrapping a driver
+		// does not make DB.Ping fail. Unlike Exec and Query, database/sql
+		// has no fallback for driver.ErrSkip here and would return it to
+		// the caller.
+		return nil
 	}
 	return c.config.withSpan(ctx, moniker.Ping, pinger.Ping)
 }
@@ -81,6 +87,9 @@ func (c *otelConn) ExecContext(ctx context.Context, query string, args []driver.
 		}
 	} else {
 		// Fallback to explicitly wrapping Exec.
+		if _, ok := c.Conn.(driver.Execer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
@@ -120,6 +129,9 @@ func (c *otelConn) QueryContext(ctx context.Context, query string, args []driver
 		}
 	} else {
 		// Fallback to explicitly wrapping Query.
+		if _, ok := c.Conn.(driver.Queryer); !ok { //nolint:staticcheck // Ensure backwards support of deprecated interface.
+			return nil, driver.ErrSkip
+		}
 		vArgs, err := namedValueToValue(args)
 		if err != nil {
 			return nil, err
