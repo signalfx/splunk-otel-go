@@ -115,22 +115,20 @@ func (s *SplunkSQLSuite) TearDownSuite() {
 }
 
 func (s *SplunkSQLSuite) TestDBPing() {
-	err := s.DB.Ping()
+	s.Require().NoError(s.DB.Ping())
 	if s.ConnImplementsPinger {
-		s.Require().NoError(err)
 		s.assertSpan(moniker.Ping)
 	} else {
-		s.ErrorIs(err, driver.ErrSkip)
+		s.assertSpans(moniker.Ping, 0, traceapi.NewSpanStartConfig())
 	}
 }
 
 func (s *SplunkSQLSuite) TestDBPingContext() {
-	err := s.DB.PingContext(context.Background())
+	s.Require().NoError(s.DB.PingContext(context.Background()))
 	if s.ConnImplementsPinger {
-		s.Require().NoError(err)
 		s.assertSpan(moniker.Ping)
 	} else {
-		s.ErrorIs(err, driver.ErrSkip)
+		s.assertSpans(moniker.Ping, 0, traceapi.NewSpanStartConfig())
 	}
 }
 

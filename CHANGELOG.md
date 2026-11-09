@@ -8,6 +8,68 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+> [!WARNING]
+> This release changes the default span collection count limits from unlimited
+> (or `1000` for span links) to the OpenTelemetry default of `128`. This reduces
+> the risk of resource exhaustion from unbounded telemetry collections.
+> Applications that exceed these limits will drop excess span attributes and
+> event or link attributes, and retain at most 128 events and links per span.
+>
+> Existing explicit environment variable overrides are preserved. If your
+> application needs higher counts, configure the corresponding count limits.
+> To restore the previous defaults, set the following environment variables;
+> `-1` disables the corresponding count limit in the Go SDK:
+>
+> ```text
+> OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=-1
+> OTEL_SPAN_EVENT_COUNT_LIMIT=-1
+> OTEL_SPAN_LINK_COUNT_LIMIT=1000
+> OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT=-1
+> OTEL_LINK_ATTRIBUTE_COUNT_LIMIT=-1
+> ```
+>
+> Restoring unlimited counts or raising limits increases memory usage and the
+> risk of resource exhaustion and denial of service, especially when telemetry
+> is influenced by untrusted input. Prefer finite limits appropriate for your
+> workload.
+
+### Changed
+
+- Align span collection count limits with OpenTelemetry defaults.
+  ([#4880](https://github.com/signalfx/splunk-otel-go/pull/4880))
+
+### Fixed
+
+- Stop recording `driver.ErrSkip` as an error in connection execution and query
+  spans in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  For connection execution and query fast paths, `database/sql` treats this
+  sentinel as a request to use a prepared statement, rather than as an operation
+  error.
+  ([#5020](https://github.com/signalfx/splunk-otel-go/pull/5020))
+- Reject unsupported transaction options when the underlying connection does not
+  implement `driver.ConnBeginTx` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches `database/sql` rejecting non-default isolation and read-only
+  options before calling the legacy `Begin` method.
+  ([#5015](https://github.com/signalfx/splunk-otel-go/pull/5015))
+- `ResetSession` no longer returns `driver.ErrSkip` when the wrapped driver
+  connection does not implement `driver.SessionResetter` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5014](https://github.com/signalfx/splunk-otel-go/pull/5014))
+- `DB.Ping` and `DB.PingContext` no longer return `driver.ErrSkip` when the
+  wrapped driver connection does not implement `driver.Pinger` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This matches the behavior of `database/sql` without instrumentation.
+  ([#5011](https://github.com/signalfx/splunk-otel-go/pull/5011))
+- Allow named arguments to reach prepared statements when the underlying
+  connection does not implement an execution or query fast path in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  The `database/sql` package uses a prepared statement when a connection cannot
+  execute or query directly.
+  ([#5019](https://github.com/signalfx/splunk-otel-go/pull/5019))
+
 ## [1.36.0] - 2026-10-07
 
 This release upgrades [OpenTelemetry Go to v1.47.0/v0.69.0/v0.23.0/v0.1.0][otel-v1.47.0]
