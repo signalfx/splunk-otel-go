@@ -34,7 +34,7 @@ jobs:
             run-script: ./goyek.sh ci -v
           - os: windows-2022
             run-script: .\goyek.ps1 ci -v -skip-docker
-          - os: macos-14
+          - os: macos-26
             run-script: ./goyek.sh ci -v -skip-docker
     runs-on: ${{ matrix.os }}
     steps:
@@ -57,7 +57,7 @@ jobs:
         go-version:
         - '1.26'
         - '1.27'
-        os: [ubuntu-24.04, windows-2022, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-26]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
