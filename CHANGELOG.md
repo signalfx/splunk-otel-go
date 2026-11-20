@@ -40,6 +40,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Use a plaintext connection to the default local collector when `SPLUNK_REALM`
+  is set to `none` or an empty value in
+  `github.com/signalfx/splunk-otel-go/distro`.
+  These values already mean that no realm is configured, but the OTLP traces
+  and metrics exporters still switched to TLS and failed to reach the collector.
+  ([#5075](https://github.com/signalfx/splunk-otel-go/pull/5075))
 - Stop recording `driver.ErrSkip` as an error in connection execution and query
   spans in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.

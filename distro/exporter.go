@@ -81,7 +81,7 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 	if c.accessToken != "" {
 		headers["X-Sf-Token"] = c.accessToken
 	}
-	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey, splunkRealmKey)
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey) && !realmSet()
 	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -249,7 +249,7 @@ func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, 
 	if c.accessToken != "" {
 		headers["X-Sf-Token"] = c.accessToken
 	}
-	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey, splunkRealmKey)
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey) && !realmSet()
 	protocol := otlpProtocol(l, otelMetricsExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -362,6 +362,13 @@ func noneEnvVarSet(envs ...string) bool {
 		}
 	}
 	return true
+}
+
+// realmSet reports whether SPLUNK_REALM names a realm. An empty value or none
+// means no realm, so the default local collector endpoint is used.
+func realmSet() bool {
+	realm, ok := os.LookupEnv(splunkRealmKey)
+	return ok && notNone(realm)
 }
 
 // notNone returns if s is not empty or set to none.

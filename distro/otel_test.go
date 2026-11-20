@@ -1161,3 +1161,29 @@ func (g *testIDGenerator) NewIDs(_ context.Context) (otelt.TraceID, otelt.SpanID
 	copy(sid[:], "testspan")
 	return tid, sid
 }
+
+func TestRunTracesExporterDefaultNoneRealm(t *testing.T) {
+	// A none realm means no realm, the local collector is still used.
+	coll := &collector{Endpoint: "localhost:4317"}
+	coll.Start(t)
+	t.Setenv("OTEL_TRACES_EXPORTER", "")
+	t.Setenv("SPLUNK_REALM", "none")
+
+	emitSpan(t)
+
+	got := coll.ExportedSpans()
+	assertHasSpan(t, got)
+}
+
+func TestRunMetricsExporterDefaultNoneRealm(t *testing.T) {
+	// A none realm means no realm, the local collector is still used.
+	coll := &collector{Endpoint: "localhost:4317"}
+	coll.Start(t)
+	t.Setenv("OTEL_METRICS_EXPORTER", "")
+	t.Setenv("SPLUNK_REALM", "none")
+
+	emitMetric(t)
+
+	got := coll.ExportedMetrics()
+	assertHasMetric(t, got, metricName)
+}
