@@ -125,6 +125,12 @@ func (p *Producer) Close() {
 
 // Produce calls the wrapped Producer.Produce and traces the request.
 func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error {
+	// The wrapped producer returns an error for these messages. There is
+	// nothing to describe in a span, so do not try to build one.
+	if msg == nil || msg.TopicPartition.Topic == nil {
+		return p.Producer.Produce(msg, deliveryChan)
+	}
+
 	span := p.startSpan(msg)
 
 	// If the deliveryChan is provided, finish the span when a response is
