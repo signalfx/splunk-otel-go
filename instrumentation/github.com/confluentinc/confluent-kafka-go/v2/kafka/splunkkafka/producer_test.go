@@ -180,3 +180,35 @@ func TestProduceSpan(t *testing.T) {
 		assert.Contains(t, attrs, semconv.MessagingKafkaDestinationPartitionKey.Int64(1))
 	}
 }
+
+func TestProduceInvalidMessage(t *testing.T) {
+	sr := make(spanRecorder)
+	tp := &fnTracerProvider{
+		tracer: func(string, ...trace.TracerOption) trace.Tracer {
+			return &fnTracer{start: sr.start}
+		},
+	}
+	p, err := NewProducer(&kafka.ConfigMap{}, WithTracerProvider(tp))
+	require.NoError(t, err)
+	t.Cleanup(p.Close)
+
+	tests := []struct {
+		name string
+		msg  *kafka.Message
+	}{
+		{name: "nil message", msg: nil},
+		{name: "nil topic", msg: &kafka.Message{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// The wrapped producer rejects these messages with an error, the
+			// instrumented one must do the same instead of panicking.
+			var err error
+			require.NotPanics(t, func() { err = p.Produce(tt.msg, nil) })
+			var kerr kafka.Error
+			require.ErrorAs(t, err, &kerr)
+			assert.Equal(t, kafka.ErrInvalidArg, kerr.Code())
+		})
+	}
+	assert.Empty(t, sr)
+}
