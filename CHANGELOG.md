@@ -40,6 +40,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Close the traced database handle when `gorm.Open` fails in
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm`.
+  gorm leaves a `*sql.DB` it was given open when the initial ping fails, and
+  the caller has no handle to close it.
+  ([#5077](https://github.com/signalfx/splunk-otel-go/pull/5077))
 - Stop recording `driver.ErrSkip` as an error in connection execution and query
   spans in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.

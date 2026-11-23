@@ -33,5 +33,12 @@ func Open(driverName, dataSourceName string, opts ...splunksql.Option) (*gorm.DB
 	if err != nil {
 		return nil, err
 	}
-	return gorm.Open(driverName, db)
+	gdb, err := gorm.Open(driverName, db)
+	if err != nil {
+		// gorm does not close a *sql.DB it was handed when its ping fails,
+		// and the caller has no handle to close it.
+		_ = db.Close()
+		return nil, err
+	}
+	return gdb, nil
 }

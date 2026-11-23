@@ -82,3 +82,39 @@ func TestOpenError(t *testing.T) {
 	_, got := Open("", "")
 	assert.ErrorIs(t, got, want)
 }
+
+type closeConnector struct {
+	driver.Connector
+
+	closed *bool
+}
+
+func (closeConnector) Connect(context.Context) (driver.Conn, error) {
+	return failPingConn{}, nil
+}
+
+func (c closeConnector) Close() error {
+	*c.closed = true
+	return nil
+}
+
+type failPingConn struct {
+	driver.Conn
+}
+
+func (failPingConn) Ping(context.Context) error { return errors.New("ping failed") }
+
+func (failPingConn) Close() error { return nil }
+
+func TestOpenClosesDBOnGormError(t *testing.T) {
+	var closed bool
+	origOpen := openFunc
+	openFunc = func(string, string, ...splunksql.Option) (*sql.DB, error) {
+		return sql.OpenDB(closeConnector{closed: &closed}), nil
+	}
+	defer func() { openFunc = origOpen }()
+
+	_, err := Open("testDB", "fake://localhost/DB")
+	assert.Error(t, err)
+	assert.True(t, closed, "database handle must be closed when gorm.Open fails")
+}
