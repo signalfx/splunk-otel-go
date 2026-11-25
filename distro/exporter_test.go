@@ -248,3 +248,60 @@ func TestJaegerEndpoint(t *testing.T) {
 		assert.Equal(t, "", jaegerEndpoint())
 	})
 }
+
+func TestOTLPTLSConfigured(t *testing.T) {
+	const (
+		cert     = "OTEL_EXPORTER_OTLP_CERTIFICATE"
+		key      = "OTEL_EXPORTER_OTLP_CLIENT_KEY"
+		ccrt     = "OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE"
+		insecKey = "OTEL_EXPORTER_OTLP_INSECURE"
+		caFile   = "ca.pem"
+		crtFile  = "c.pem"
+		trueVal  = "true"
+		falseVal = "false"
+	)
+
+	tests := []struct {
+		name string
+		envs map[string]string
+		want bool
+	}{
+		{"default", nil, false},
+		{"general certificate", map[string]string{cert: caFile}, true},
+		{"signal certificate", map[string]string{"OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE": caFile}, true},
+		{"other signal certificate", map[string]string{"OTEL_EXPORTER_OTLP_METRICS_CERTIFICATE": caFile}, false},
+		{"empty certificate", map[string]string{cert: " "}, false},
+		{"client certificate without key", map[string]string{ccrt: crtFile}, false},
+		{"client certificate and key", map[string]string{ccrt: crtFile, key: "k.pem"}, true},
+		{
+			"signal client certificate and key",
+			map[string]string{
+				"OTEL_EXPORTER_OTLP_TRACES_CLIENT_CERTIFICATE": crtFile,
+				"OTEL_EXPORTER_OTLP_TRACES_CLIENT_KEY":         "k.pem",
+			},
+			true,
+		},
+		{"insecure false", map[string]string{insecKey: falseVal}, true},
+		{"insecure true", map[string]string{insecKey: trueVal}, false},
+		{"insecure true with certificate", map[string]string{insecKey: trueVal, cert: caFile}, false},
+		{
+			"signal insecure false over general true",
+			map[string]string{insecKey: trueVal, "OTEL_EXPORTER_OTLP_TRACES_INSECURE": falseVal},
+			true,
+		},
+		{
+			"signal insecure true over general false",
+			map[string]string{insecKey: falseVal, "OTEL_EXPORTER_OTLP_TRACES_INSECURE": trueVal, cert: caFile},
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for k, v := range tt.envs {
+				t.Setenv(k, v)
+			}
+			assert.Equal(t, tt.want, otlpTLSConfigured("TRACES"))
+		})
+	}
+}
