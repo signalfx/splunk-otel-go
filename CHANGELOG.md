@@ -40,6 +40,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Return the error from the wrapped producer instead of panicking when
+  `Produce` is called with a nil message or a message without a topic in
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/v2/kafka/splunkkafka`.
+  ([#5076](https://github.com/signalfx/splunk-otel-go/pull/5076))
 - Stop recording `driver.ErrSkip` as an error in connection execution and query
   spans in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
