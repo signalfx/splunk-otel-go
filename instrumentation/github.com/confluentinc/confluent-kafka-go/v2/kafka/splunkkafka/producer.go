@@ -127,42 +127,53 @@ func (p *Producer) Close() {
 func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error {
 	span := p.startSpan(msg)
 
-	// If the deliveryChan is provided, finish the span when a response is
-	// returned.
-	if deliveryChan != nil {
+	orig := deliveryChan
+	if orig != nil {
+		// Reserve the slot before producing so Close cannot finish waiting
+		// while a delivery waiter is about to be started.
 		p.waitGroup.Add(1)
-		orig := deliveryChan
 		deliveryChan = make(chan kafka.Event)
-		go func() {
-			defer p.waitGroup.Done()
-			select {
-			case <-p.stop:
-				return
-			case evt := <-deliveryChan:
-				if respMsg, ok := evt.(*kafka.Message); ok {
-					// Delivery errors are returned via TopicPartition.Error.
-					if err := respMsg.TopicPartition.Error; err != nil {
-						span.RecordError(err)
-						span.SetStatus(codes.Error, err.Error())
-					}
-				}
-				orig <- evt
-			}
-			span.End()
-		}()
 	}
 
 	err := p.Producer.Produce(msg, deliveryChan)
-	// No delivery channel, finish immediately.
-	if deliveryChan == nil {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
+	if err != nil {
+		// The message was not enqueued, so no delivery report will be
+		// sent. Finish the span here so it is ended before Produce returns.
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		span.End()
+		if orig != nil {
+			p.waitGroup.Done()
+		}
+		return err
 	}
 
-	return err
+	// No delivery channel, finish immediately.
+	if orig == nil {
+		span.End()
+		return nil
+	}
+
+	// Finish the span when a response is returned.
+	go func() {
+		defer p.waitGroup.Done()
+		select {
+		case <-p.stop:
+			return
+		case evt := <-deliveryChan:
+			if respMsg, ok := evt.(*kafka.Message); ok {
+				// Delivery errors are returned via TopicPartition.Error.
+				if err := respMsg.TopicPartition.Error; err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, err.Error())
+				}
+			}
+			orig <- evt
+		}
+		span.End()
+	}()
+
+	return nil
 }
 
 // ProduceChannel returns the traced producer channel.

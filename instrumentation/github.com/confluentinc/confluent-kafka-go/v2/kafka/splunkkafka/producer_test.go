@@ -25,7 +25,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -179,4 +182,31 @@ func TestProduceSpan(t *testing.T) {
 		assert.Contains(t, attrs, semconv.MessagingKafkaMessageKeyKey.String(keys[i]))
 		assert.Contains(t, attrs, semconv.MessagingKafkaDestinationPartitionKey.Int64(1))
 	}
+}
+
+func TestProduceErrorWithDeliveryChannel(t *testing.T) {
+	sr := tracetest.NewSpanRecorder()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(sr))
+	p, err := NewProducer(&kafka.ConfigMap{"message.max.bytes": 1000}, WithTracerProvider(tp))
+	require.NoError(t, err)
+	t.Cleanup(p.Close)
+
+	// The message is larger than message.max.bytes, so Produce fails
+	// right away and nothing is ever sent on the delivery channel.
+	msg := &kafka.Message{
+		TopicPartition: kafka.TopicPartition{
+			Topic:     &testTopic,
+			Partition: kafka.PartitionAny,
+		},
+		Value: make([]byte, 2000),
+	}
+	err = p.Produce(msg, make(chan kafka.Event, 1))
+	require.Error(t, err)
+
+	// The span is ended before Produce returns, no waiting needed.
+	ended := sr.Ended()
+	require.Len(t, ended, 1)
+	span := ended[0]
+	assert.Equal(t, codes.Error, span.Status().Code)
+	assert.Equal(t, err.Error(), span.Status().Description)
 }
