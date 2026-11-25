@@ -17,14 +17,22 @@ package distro_test
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
@@ -981,6 +989,9 @@ type (
 	collector struct {
 		Endpoint string
 		TLS      bool
+		// TLSConfig is used instead of the default server TLS
+		// configuration when TLS is true and it is not nil.
+		TLSConfig *tls.Config
 
 		traceService   *collectorTraceServiceServer
 		metricsService *collectorMetricsServiceServer
@@ -1044,7 +1055,11 @@ func (coll *collector) Start(t *testing.T) {
 
 	var opts []grpc.ServerOption
 	if coll.TLS {
-		creds := credentials.NewTLS(serverTLSConfig(t))
+		tlsConf := coll.TLSConfig
+		if tlsConf == nil {
+			tlsConf = serverTLSConfig(t)
+		}
+		creds := credentials.NewTLS(tlsConf)
 		opts = append(opts, grpc.Creds(creds))
 	}
 
@@ -1186,4 +1201,133 @@ func TestRunMetricsExporterDefaultNoneRealm(t *testing.T) {
 
 	got := coll.ExportedMetrics()
 	assertHasMetric(t, got, metricName)
+}
+
+// localhostCA returns a TLS configuration for a server named localhost and the
+// path of a PEM file holding the self-signed certificate clients need to trust
+// it.
+func localhostCA(t *testing.T) (serverConf *tls.Config, caPath string) {
+	t.Helper()
+
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+	tmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "localhost"},
+		NotBefore:             time.Now().Add(-time.Hour),
+		NotAfter:              time.Now().Add(time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+		DNSNames:              []string{"localhost"},
+		IPAddresses:           []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
+	}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+	require.NoError(t, err)
+
+	caPath = filepath.Join(t.TempDir(), "ca.pem")
+	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+	require.NoError(t, os.WriteFile(caPath, pemBytes, 0o600))
+
+	serverConf = &tls.Config{
+		Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key}},
+		MinVersion:   tls.VersionTLS13,
+	}
+	return serverConf, caPath
+}
+
+// startDefaultHTTPCollector starts a TLS server at the default OTLP/HTTP
+// endpoint and returns a channel of the requests it receives.
+func startDefaultHTTPCollector(t *testing.T, tlsConf *tls.Config) <-chan *http.Request {
+	t.Helper()
+
+	reqCh, hFunc := reqHander()
+	srv := httptest.NewUnstartedServer(hFunc)
+	t.Cleanup(srv.Close)
+	ln, err := net.Listen("tcp", "localhost:4318")
+	require.NoError(t, err)
+	srv.Listener = ln
+	srv.TLS = tlsConf
+	srv.StartTLS()
+
+	return reqCh
+}
+
+// tlsCollectorEnvs are the environment variables, each paired with the signal
+// that reads them, used to configure the CA for the default collector.
+var tlsCollectorEnvs = []struct {
+	desc string
+	key  string
+}{
+	{"general certificate", "OTEL_EXPORTER_OTLP_CERTIFICATE"},
+	{"traces certificate", "OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE"},
+	{"metrics certificate", "OTEL_EXPORTER_OTLP_METRICS_CERTIFICATE"},
+}
+
+const signalTraces = "traces"
+
+func TestRunDefaultCollectorTLS(t *testing.T) {
+	realms := []struct {
+		desc string
+		set  func(*testing.T)
+	}{
+		{"unset SPLUNK_REALM", func(*testing.T) {}},
+		{"none SPLUNK_REALM", func(t *testing.T) { t.Setenv("SPLUNK_REALM", "none") }},
+		{"empty SPLUNK_REALM", func(t *testing.T) { t.Setenv("SPLUNK_REALM", "") }},
+	}
+
+	for _, protocol := range []string{"grpc", "http/protobuf"} {
+		for _, realm := range realms {
+			for _, sig := range []string{signalTraces, "metrics"} {
+				for _, env := range tlsCollectorEnvs {
+					// Skip the certificate variable of the other signal.
+					if (sig == signalTraces && env.key == "OTEL_EXPORTER_OTLP_METRICS_CERTIFICATE") ||
+						(sig == "metrics" && env.key == "OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE") {
+						continue
+					}
+
+					name := protocol + "/" + realm.desc + "/" + sig + "/" + env.desc
+					t.Run(name, func(t *testing.T) {
+						serverConf, caPath := localhostCA(t)
+						realm.set(t)
+						t.Setenv(env.key, caPath)
+						t.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", protocol)
+						if sig == signalTraces {
+							t.Setenv("OTEL_TRACES_EXPORTER", "")
+						} else {
+							t.Setenv("OTEL_METRICS_EXPORTER", "")
+						}
+
+						if protocol == "grpc" {
+							coll := &collector{Endpoint: "localhost:4317", TLS: true, TLSConfig: serverConf}
+							coll.Start(t)
+							if sig == signalTraces {
+								emitSpan(t)
+								assertHasSpan(t, coll.ExportedSpans())
+							} else {
+								emitMetric(t)
+								assertHasMetric(t, coll.ExportedMetrics(), metricName)
+							}
+							return
+						}
+
+						reqCh := startDefaultHTTPCollector(t, serverConf)
+						if sig == signalTraces {
+							emitSpan(t)
+						} else {
+							emitMetric(t)
+						}
+						select {
+						case got := <-reqCh:
+							assert.Equal(t, "application/x-protobuf", got.Header.Get("Content-Type"))
+							assert.True(t, got.TLS.HandshakeComplete, "did not perform TLS exchange")
+						case <-time.After(5 * time.Second):
+							t.Fatal("collector did not receive an export request")
+						}
+					})
+				}
+			}
+		}
+	}
 }

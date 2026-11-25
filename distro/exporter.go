@@ -81,7 +81,8 @@ func newOTLPTracesExporter(l logr.Logger, c *exporterConfig) (trace.SpanExporter
 	if c.accessToken != "" {
 		headers["X-Sf-Token"] = c.accessToken
 	}
-	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey) && !realmSet()
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPTracesEndpointKey) &&
+		!realmSet() && !otlpTLSConfigured("TRACES")
 	protocol := otlpProtocol(l, otelTracesExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -249,7 +250,8 @@ func newOTLPMetricsExporter(l logr.Logger, c *exporterConfig) (metric.Exporter, 
 	if c.accessToken != "" {
 		headers["X-Sf-Token"] = c.accessToken
 	}
-	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey) && !realmSet()
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPMetricsEndpointKey) &&
+		!realmSet() && !otlpTLSConfigured("METRICS")
 	protocol := otlpProtocol(l, otelMetricsExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -317,7 +319,7 @@ func newOTLPLogExporter(l logr.Logger, c *exporterConfig) (log.Exporter, error) 
 	if c.accessToken != "" {
 		headers["X-Sf-Token"] = c.accessToken
 	}
-	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey)
+	isLocalCollector := noneEnvVarSet(otelExporterOTLPEndpointKey, otelExporterOTLPLogsEndpointKey) && !otlpTLSConfigured("LOGS")
 	protocol := otlpProtocol(l, otelLogsExporterOTLPProtocolKey)
 
 	if protocol == otlpProtocolHTTPProtobuf {
@@ -362,6 +364,36 @@ func noneEnvVarSet(envs ...string) bool {
 		}
 	}
 	return true
+}
+
+// otlpTLSConfigured reports whether the environment configures TLS for the
+// OTLP exporter of the signal (TRACES, METRICS or LOGS). Settings for the
+// signal take precedence over the general ones. An explicit insecure setting
+// decides on its own, otherwise a CA certificate or a client certificate and
+// key pair means TLS is expected.
+func otlpTLSConfigured(signal string) bool {
+	const prefix = "OTEL_EXPORTER_OTLP_"
+	get := func(name string) string {
+		return strings.TrimSpace(os.Getenv(name))
+	}
+
+	insecureVal := get(prefix + signal + "_INSECURE")
+	if insecureVal == "" {
+		insecureVal = get(prefix + "INSECURE")
+	}
+	if insecureVal != "" {
+		return !strings.EqualFold(insecureVal, "true")
+	}
+
+	if get(prefix+"CERTIFICATE") != "" || get(prefix+signal+"_CERTIFICATE") != "" {
+		return true
+	}
+	for _, p := range []string{prefix, prefix + signal + "_"} {
+		if get(p+"CLIENT_CERTIFICATE") != "" && get(p+"CLIENT_KEY") != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // realmSet reports whether SPLUNK_REALM names a realm. An empty value or none
