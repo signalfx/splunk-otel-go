@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/stretchr/testify/assert"
@@ -204,10 +203,10 @@ func TestProduceErrorWithDeliveryChannel(t *testing.T) {
 	err = p.Produce(msg, make(chan kafka.Event, 1))
 	require.Error(t, err)
 
-	require.Eventually(t, func() bool {
-		return len(sr.Ended()) == 1
-	}, time.Second, 10*time.Millisecond, "span not ended")
-	span := sr.Ended()[0]
+	// The span is ended before Produce returns, no waiting needed.
+	ended := sr.Ended()
+	require.Len(t, ended, 1)
+	span := ended[0]
 	assert.Equal(t, codes.Error, span.Status().Code)
 	assert.Equal(t, err.Error(), span.Status().Description)
 }
