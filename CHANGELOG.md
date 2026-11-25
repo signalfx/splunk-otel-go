@@ -40,6 +40,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Close the traced database pool and return `nil` with the original error
+  when the initial ping fails in
+  `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jinzhu/gorm/splunkgorm`.
+  Call `splunkgorm.Open` again to retry.
+  ([#5077](https://github.com/signalfx/splunk-otel-go/pull/5077))
 - Stop recording `driver.ErrSkip` as an error in connection execution and query
   spans in
   `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
